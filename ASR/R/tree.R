@@ -25,6 +25,9 @@
 plot_tree <- function(asrStructure, tree_file=NULL) {
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     newickTree = asrStructure$loadedFiles$tree
     if (is.null(newickTree)) {
       stop("asrStructure does not contain required tree file information")
@@ -33,7 +36,7 @@ plot_tree <- function(asrStructure, tree_file=NULL) {
     if(is.null(tree_file)) {
       stop("You have not provided an asrStructure or specified tree_file")
     } else if (!file.exists(tree_file)) {
-      stop("tree_file does not exist")
+      stop(paste(tree_file, " does not exist"))
     } else {
       newickTree = as.data.frame(read.table(tree_file, header = FALSE, sep = "\n"))
       ##CHECK THIS IS VALID##
@@ -77,6 +80,9 @@ plot_tree <- function(asrStructure, tree_file=NULL) {
 save_tree <- function(asrStructure, tree_file=NULL, format = "pdf", name = NULL) {
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     newickTree = asrStructure$loadedFiles$tree
     if (is.null(newickTree)) {
       stop("asrStructure does not contain required tree file information")
@@ -85,7 +91,7 @@ save_tree <- function(asrStructure, tree_file=NULL, format = "pdf", name = NULL)
     if(is.null(tree_file)) {
       stop("You have not provided an asrStructure or specified tree_file")
     } else if (!file.exists(tree_file)) {
-      stop("tree_file does not exist")
+      stop(paste(tree_file, " does not exist"))
     } else {
       newickTree = as.data.frame(read.table(tree_file, header = FALSE, sep = "\n"))
       ##CHECK THIS IS VALID##

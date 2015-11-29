@@ -13,7 +13,7 @@
 #' fastaDF$Newick - newick string with current node/sequence as root. NULL if extant\cr
 #' fastaDF$Sequence - a single string representing the sequence\cr
 #' #Example\cr
-#' fastaDF[1,] = "N4_", "(extant_3:0.05,extant_4:0.05)N4_:0.05;", "G-PPGPKT"\cr
+#' fastaDF[1,] = "N4", "(extant_3:0.05,extant_4:0.05)N4:0.05;", "G-PPGPKT"\cr
 #' 
 #' @examples
 #'data(asrStructure)
@@ -33,6 +33,9 @@
 read_fasta <- function(asrStructure, aln_file=NULL ) {
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     fastaFile = asrStructure$loadedFiles$alignment
     if(is.null(fastaFile)) {
       stop("asrStructure does not contain required fasta file/alignment information. 
@@ -43,7 +46,7 @@ read_fasta <- function(asrStructure, aln_file=NULL ) {
     if(is.null(aln_file)) {
       stop("You have not provided an asrStructure or specified aln_file")
     } else if (!file.exists(aln_file)) {
-      stop("aln_file does not exist")
+      stop(paste(aln_file, " does not exist"))
     } else {
       fastaFile <- read.table(aln_file, header = F, sep = "\n")
       ##How do you check if this is the right file?##

@@ -40,6 +40,9 @@ logo_height <- function(asrStructure, distribDF = NULL, alphabet = "AA") {
   }
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     distribDF <- asrStructure$distribProb
     if (is.null(distribDF)) {
       stop("asrStructure does not contain required distribution information")
@@ -48,9 +51,13 @@ logo_height <- function(asrStructure, distribDF = NULL, alphabet = "AA") {
     if(is.null(distribDF)) {
       stop("You have not provided an asrStructure or specified distribDF")
     } else {
-      cols <- colnames(distribDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-        stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+      if (is.data.frame(distribDF)) {
+        cols <- colnames(distribDF)
+        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+        }
+      } else {
+        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
       }
     }
   }
@@ -135,6 +142,9 @@ plot_logo <- function(asrStructure, heightDF = NULL, colour = "taylor", columns=
   AA <- NULL; rm(AA);
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     heightDF <- asrStructure$distribHeight
     if (is.null(heightDF)) {
       stop("asrStructure does not contain required height information
@@ -145,9 +155,13 @@ plot_logo <- function(asrStructure, heightDF = NULL, colour = "taylor", columns=
     if(is.null(heightDF)) {
       stop("You have not provided an asrStructure or specified heightDF")
     } else {
-      cols <- colnames(heightDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Height" %in% cols)) {
-        stop("The dataframe provided as heightDF is not correctly formatted. See logo_height()")
+      if (is.data.frame(heightDF)) {
+        cols <- colnames(heightDF)
+        if (!("Column" %in% cols && "AA" %in% cols && "Height" %in% cols)) {
+          stop("The dataframe provided as heightDF is not correctly formatted. See logo_height()")
+        }
+      } else {
+        stop(paste("The input for heightDF is not a dataframe and therefore not a valid input. Input: ", heightDF, sep = ""))
       }
     }
   }
@@ -228,6 +242,9 @@ save_logo <- function(asrStructure, heightDF = NULL, colour = "taylor", columns=
   AA <- NULL; rm(AA);
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     heightDF <- asrStructure$distribHeight
     if (is.null(heightDF)) {
       stop("asrStructure does not contain required height information
@@ -238,9 +255,13 @@ save_logo <- function(asrStructure, heightDF = NULL, colour = "taylor", columns=
     if(is.null(heightDF)) {
       stop("You have not provided an asrStructure or specified heightDF")
     } else {
-      cols <- colnames(heightDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Height" %in% cols)) {
-        stop("The dataframe provided as heightDF is not correctly formatted. See logo_height()")
+      if (is.data.frame(heightDF)) {
+        cols <- colnames(heightDF)
+        if (!("Column" %in% cols && "AA" %in% cols && "Height" %in% cols)) {
+          stop("The dataframe provided as heightDF is not correctly formatted. See logo_height()")
+        }
+      } else {
+        stop(paste("The input for heightDF is not a dataframe and therefore not a valid input. Input: ", heightDF, sep = ""))
       }
     }
   }

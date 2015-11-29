@@ -19,7 +19,7 @@ fastaDF$Label - label/id of sequence\cr
 fastaDF$Newick - newick string with current node/sequence as root. NULL if extant\cr
 fastaDF$Sequence - a single string representing the sequence\cr
 #Example\cr
-fastaDF[1,] = "N4_", "(extant_3:0.05,extant_4:0.05)N4_:0.05;", "G-PPGPKT"\cr
+fastaDF[1,] = "N4", "(extant_3:0.05,extant_4:0.05)N4:0.05;", "G-PPGPKT"\cr
 }
 \description{
 Takes a fasta alignment file generate by ASR.jar and formats it into 

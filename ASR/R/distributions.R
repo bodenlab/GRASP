@@ -29,6 +29,9 @@
 read_distrib <- function(asrStructure, distrib_file = NULL) {
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     distrib = asrStructure$loadedFiles$distribution
     if (is.null(distrib)) {
       stop("asrStructure does not contain required distribution file.
@@ -39,7 +42,7 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
     if(is.null(distrib_file)) {
       stop("You have not provided an asrStructure or specified distrib_file")
     } else if (!file.exists(distrib_file)) {
-      stop("distrib_file does not exist")
+      stop(paste(distrib_file, " does not exist"))
     } else {
       distrib <- read.table(distrib_file, header = T, row.names = 1, sep = "\t")
       ##How do you check if this is the right file?##
@@ -124,6 +127,9 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
   }
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     distribDF = asrStructure$distribProb
     if (is.null(distribDF)) {
       stop("asrStructure does not contain required distribution dataframe.
@@ -134,9 +140,13 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
     if(is.null(distribDF)) {
       stop("You have not provided an asrStructure or specified distribDF")
     } else {
-      cols <- colnames(distribDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-        stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+      if (is.data.frame(distribDF)) {
+        cols <- colnames(distribDF)
+        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+        }
+      } else {
+        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
       }
     }
   }
@@ -232,6 +242,9 @@ save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", co
   }
   
   if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
     distribDF = asrStructure$distribProb
     if (is.null(distribDF)) {
       stop("asrStructure does not contain required distribution dataframe. 
@@ -242,9 +255,13 @@ save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", co
     if(is.null(distribDF)) {
       stop("You have not provided an asrStructure or specified distribDF")
     } else {
-      cols <- colnames(distribDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-        stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+      if (is.data.frame(distribDF)) {
+        cols <- colnames(distribDF)
+        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+        }
+      } else {
+        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
       }
     }
   }

@@ -1,0 +1,8 @@
+CLUSTAL W (1.8) multiple sequence alignment
+
+extant_1 G-PPGPKT
+extant_2 G-PPGPKT
+extant_3 G-PPGPKT
+extant_4 G-PPGPKT
+extant_5 GAPPGP-T
+extant_6 GAPPGP-T

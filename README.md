@@ -40,7 +40,7 @@ Package dependencies (ape and ggplot2) are not installed
 ----------------------------------------
 Load package
 
-        library(ASR)
+    library(ASR)
 
 Load existing data
 

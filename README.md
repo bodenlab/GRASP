@@ -28,8 +28,10 @@ Session -> Set working directory -> Select location of ASR_x.x.x.tar.gz
     install.packages("ASR_x.x.x.tar.gz", repos = NULL, type = "source")
 
 Common errors:
-    Wrong version of R - requires 3.2.2
-    Package dependencies (ape and ggplot2) are not installed
+
+Wrong version of R - requires 3.2.2
+
+Package dependencies (ape and ggplot2) are not installed
 
 ----------------------------------------
 Load existing data

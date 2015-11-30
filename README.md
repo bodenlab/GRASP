@@ -38,6 +38,10 @@ Wrong version of R - requires 3.2.2
 Package dependencies (ape and ggplot2) are not installed
 
 ----------------------------------------
+Load package
+
+        library(ASR)
+
 Load existing data
 
     data(asrStructure)

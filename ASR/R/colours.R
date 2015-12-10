@@ -5,7 +5,7 @@
 #' @param alphabet a vector of amino acids which specify the order in which the colour palette will
 #' be specified
 #' 
-#' @export
+# ' @export
 
 colours_clustal <- function(alphabet){
   red <- c("A", "V", "F", "P", "M", "I", "L", "W")
@@ -37,7 +37,7 @@ colours_clustal <- function(alphabet){
 #' @param alphabet a vector of amino acids which specify the order in which the colour palette will
 #' be specified
 #' 
-#' @export
+# ' @export
 
 colours_zappo <- function(alphabet) {
   
@@ -80,7 +80,7 @@ colours_zappo <- function(alphabet) {
 #' @param alphabet a vector of amino acids which specify the order in which the colour palette will
 #' be specified
 #' 
-#' @export
+# ' @export
 colours_taylor <- function(alphabet) {
   
   colour <- rep(0, length(alphabet))
@@ -126,6 +126,38 @@ colours_taylor <- function(alphabet) {
       colour[a] = "#CCFF00"
     } else if (letter == "M") {
       colour[a] = "#00FF00"
+    } else if (letter == "-") {
+      colour[a] = "grey"
+    }
+  }
+  colour
+}
+
+#' Nucleotide colour scheme
+#' 
+#' Colour scheme described in \url{http://www.jalview.org/help/html/colourSchemes/nucleotide.html}
+#' 
+#' @param alphabet a vector of nucleotides which specify the order in which the colour palette will
+#' be specified
+#' 
+# ' @export
+colours_nt <- function(alphabet) {
+  
+  if (length(alphabet) > 5) {
+    stop(paste("The alphabet used to select colours: ", alphabet, ", contains more letters than available in this colour scheme", sep = ""))
+  }
+  
+  colour <- rep(0, length(alphabet))
+  for (a in seq(1, length(alphabet), 1)) {
+    letter = alphabet[a]
+    if (letter == "A") {
+      colour[a] = "green"
+    } else if (letter == "C") {
+      colour[a] = "orange"
+    } else if (letter == "G") {
+      colour[a] = "red"
+    } else if (letter == "T" || letter == "U") {
+      colour[a] = "blue"
     } else if (letter == "-") {
       colour[a] = "grey"
     }

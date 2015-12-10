@@ -122,7 +122,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
   AA <- NULL; rm(AA);
   
   if (type == "logo") {
-    pl <- plot_logo(asrStructure, columns = columns)
+    pl <- plot_logo_distrib(asrStructure, columns = columns)
     return(pl)
   }
   

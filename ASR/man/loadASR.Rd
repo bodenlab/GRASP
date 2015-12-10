@@ -35,8 +35,9 @@ $loadedFiles - loaded/read in files from FileNames \cr
  $loadedFiles$distribution - loaded distribution file \cr
 $fastaDF - processed fasta file (see \code{\link{read_fasta}})\cr
 $seqDF - reformatted output from \code{\link{read_fasta}} (see \code{\link{get_seq_df}})\cr
+$seqHeights - processed probability distribution (see \code{\link{logo_height_aln}})\cr
 $distribProb - processed distribution file (see \code{\link{read_distrib}})\cr
-$distribHeight - processed probability distribution (see \code{\link{logo_height}})\cr
+$distribHeights - processed probability distribution (see \code{\link{logo_height_distrib}})\cr
 }
 \description{
 A wrapper to initialise required data structure to process and visualise data. Run this code if you have previously

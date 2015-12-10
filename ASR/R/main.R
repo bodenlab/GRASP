@@ -28,8 +28,9 @@
 #'  $loadedFiles$distribution - loaded distribution file \cr
 #' $fastaDF - processed fasta file (see \code{\link{read_fasta}})\cr
 #' $seqDF - reformatted output from \code{\link{read_fasta}} (see \code{\link{get_seq_df}})\cr
+#' $seqHeights - processed probability distribution (see \code{\link{logo_height_aln}})\cr
 #' $distribProb - processed distribution file (see \code{\link{read_distrib}})\cr
-#' $distribHeight - processed probability distribution (see \code{\link{logo_height}})\cr
+#' $distribHeights - processed probability distribution (see \code{\link{logo_height_distrib}})\cr
 #' 
 #' @examples
 #'#retrieve example file stored in the package
@@ -82,6 +83,8 @@ runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR
     dataStructure[["fastaDF"]] = fasta
     seqDF <- get_seq_df(NULL, fastaDF = fasta)
     dataStructure[["seqDF"]] = seqDF
+    logoSeq <- logo_height_aln(NULL,seqDF = seqDF)
+    dataStructure[["seqHeights"]] <- logoSeq
     if (plot) {
       save_tree(NULL, tree_file = fileNames$Tree)
       save_aln(NULL, seqDF = seqDF) 
@@ -100,7 +103,7 @@ runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR
     
     mDistrib <- read_distrib(NULL, distrib_file = fileNames$Distrib)
     dataStructure[["distribProbs"]] <- mDistrib
-    lDistrib <- logo_height(NULL,distribDF = mDistrib)
+    lDistrib <- logo_height_distrib(NULL,distribDF = mDistrib)
     dataStructure[["distribHeights"]] <- lDistrib
 
     if (plot) {
@@ -138,8 +141,9 @@ runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR
 #'  $loadedFiles$distribution - loaded distribution file \cr
 #' $fastaDF - processed fasta file (see \code{\link{read_fasta}})\cr
 #' $seqDF - reformatted output from \code{\link{read_fasta}} (see \code{\link{get_seq_df}})\cr
+#' $seqHeights - processed probability distribution (see \code{\link{logo_height_aln}})\cr
 #' $distribProb - processed distribution file (see \code{\link{read_distrib}})\cr
-#' $distribHeight - processed probability distribution (see \code{\link{logo_height}})\cr
+#' $distribHeights - processed probability distribution (see \code{\link{logo_height_distrib}})\cr
 #' 
 #' @examples
 #' loadASR("test_joint") # if you have run runASR with id = "test_joint" and want to reload the output
@@ -201,6 +205,8 @@ loadASR <- function(id, tree_file = NULL, aln_file = NULL, distrib_file = NULL, 
     dataStructure[["fastaDF"]] <- fasta
     seqDF <- get_seq_df(NULL, fastaDF = fasta)
     dataStructure[["seqDF"]] <- seqDF
+    logoSeq <- logo_height_aln(NULL,seqDF = seqDF)
+    dataStructure[["seqHeights"]] <- logoSeq
     if (plot) {
       save_aln(NULL, seqDF = seqDF) 
     }
@@ -215,7 +221,7 @@ loadASR <- function(id, tree_file = NULL, aln_file = NULL, distrib_file = NULL, 
     loadedFiles[["distribution"]] = read.table(fileNames$Distrib, header = T, row.names = 1, sep = "\t")
     mDistrib <- read_distrib(NULL, distrib_file = fileNames$Distrib)
     dataStructure[["distribProbs"]] <- mDistrib
-    lDistrib <- logo_height(NULL, distribDF = mDistrib)
+    lDistrib <- logo_height_distrib(NULL, distribDF = mDistrib)
     dataStructure[["distribHeights"]] <- lDistrib
     if (plot) {
       save_distrib(NULL, distribDF = mDistrib)

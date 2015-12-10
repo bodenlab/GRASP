@@ -61,7 +61,7 @@ plot_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
   Label <- NULL; rm(Label);
   Column <- NULL; rm(Column);
   AA <- NULL; rm(AA);
-
+  
   if (type == "logo") {
     if (is.null(asrStructure)) {
       stop(paste("Cannot access heights for logo without asrStructure. Providing seqDF alone is not adequate."))
@@ -78,23 +78,23 @@ plot_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
     seqDF = asrStructure$seqDF
     if (is.null(seqDF)) {
       stop("asrStructure does not contain required fasta dataframe.
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Joint inference.")
+           To generate the required files and structures to use this function 
+           you will need to run runASR() using Joint inference.")
     }
-  } else {
-    if(is.null(seqDF)) {
-      stop("You have not provided an asrStructure or specified seqDF")
     } else {
-      if (is.data.frame(seqDF)) {
-        cols <- colnames(seqDF)
-        if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
-          stop("The dataframe provided as seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
-        }
+      if(is.null(seqDF)) {
+        stop("You have not provided an asrStructure or specified seqDF")
       } else {
-        stop(paste("The input for seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
+        if (is.data.frame(seqDF)) {
+          cols <- colnames(seqDF)
+          if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
+            stop("The dataframe provided as seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
+          }
+        } else {
+          stop(paste("The input for seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
+        }
       }
     }
-  }
   
   if (!is.null(columns)) {
     seqDF <- seqDF[seqDF$Column %in% columns, ]
@@ -144,7 +144,7 @@ plot_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
   } else {
     stop("Invalid type for plot_aln")
   }
-}
+  }
 
 #'Alignment plotting and saving function
 #'
@@ -213,23 +213,23 @@ save_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
     seqDF = asrStructure$seqDF
     if (is.null(seqDF)) {
       stop("asrStructure does not contain required fasta dataframe. 
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Joint inference.")
+           To generate the required files and structures to use this function 
+           you will need to run runASR() using Joint inference.")
     }
-  } else {
-    if(is.null(seqDF)) {
-      stop("You have not provided an asrStructure or specified seqDF")
     } else {
-      if (is.data.frame(seqDF)) {
-        cols <- colnames(seqDF)
-        if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
-          stop("The dataframe provided as seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
-        }
+      if(is.null(seqDF)) {
+        stop("You have not provided an asrStructure or specified seqDF")
       } else {
-        stop(paste("The input for seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
+        if (is.data.frame(seqDF)) {
+          cols <- colnames(seqDF)
+          if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
+            stop("The dataframe provided as seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
+          }
+        } else {
+          stop(paste("The input for seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
+        }
       }
     }
-  }
   
   if (!is.null(columns)) {
     seqDF <- seqDF[seqDF$Column %in% columns, ]
@@ -306,7 +306,7 @@ save_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
   } else {
     stop("Invalid format for save_aln")
   }
-}
+  }
 
 #' Format sequence from fasta
 #' 
@@ -351,23 +351,23 @@ get_seq_df <- function(asrStructure, fastaDF=NULL) {
     fastaDF = asrStructure$fastaDF
     if (is.null(fastaDF)) {
       stop("asrStructure does not contain required fasta sequence data frame. 
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Joint inference.")
+           To generate the required files and structures to use this function 
+           you will need to run runASR() using Joint inference.")
     }
-  } else {
-    if(is.null(fastaDF)) {
-      stop("You have not provided an asrStructure or specified fastaDF")
     } else {
-      if (is.data.frame(fastaDF)) {
-        cols <- colnames(fastaDF)
-        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
-        }
+      if(is.null(fastaDF)) {
+        stop("You have not provided an asrStructure or specified fastaDF")
       } else {
-        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
+        if (is.data.frame(fastaDF)) {
+          cols <- colnames(fastaDF)
+          if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
+            stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
+          }
+        } else {
+          stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
+        }
       }
     }
-  }
   
   names <- fastaDF$Label
   seqs <- fastaDF$Sequence
@@ -387,6 +387,4 @@ get_seq_df <- function(asrStructure, fastaDF=NULL) {
   df <- as.data.frame(mat)
   colnames(df) <- c("Label", "Column", "AA")
   df
-}
-
-
+  }

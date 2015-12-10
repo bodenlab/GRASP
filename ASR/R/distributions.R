@@ -35,20 +35,20 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
     distrib = asrStructure$loadedFiles$distribution
     if (is.null(distrib)) {
       stop("asrStructure does not contain required distribution file.
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Marginal inference.")
+           To generate the required files and structures to use this function 
+           you will need to run runASR() using Marginal inference.")
     }
-  } else {
-    if(is.null(distrib_file)) {
-      stop("You have not provided an asrStructure or specified distrib_file")
-    } else if (!file.exists(distrib_file)) {
-      stop(paste(distrib_file, " does not exist"))
     } else {
-      distrib <- read.table(distrib_file, header = T, row.names = 1, sep = "\t")
-      ##How do you check if this is the right file?##
+      if(is.null(distrib_file)) {
+        stop("You have not provided an asrStructure or specified distrib_file")
+      } else if (!file.exists(distrib_file)) {
+        stop(paste(distrib_file, " does not exist"))
+      } else {
+        distrib <- read.table(distrib_file, header = T, row.names = 1, sep = "\t")
+        ##How do you check if this is the right file?##
+      }
     }
-  }
-
+  
   colnames(distrib) <- seq(1, dim(distrib)[2], 1)
   mat <- matrix(rep(0, 3*(dim(distrib)[1] * dim(distrib)[2])), ncol = 3, nrow = (dim(distrib)[1] * dim(distrib)[2]))
   rows <- rownames(distrib)
@@ -65,7 +65,7 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
   df <- data.frame(mat[,1], mat[,2],as.numeric(as.character(mat[,3])))
   colnames(df) <- c("AA", "Column", "Probability")
   df
-}
+  }
 
 #'Plot marginal distrib
 #'
@@ -133,23 +133,23 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
     distribDF = asrStructure$distribProb
     if (is.null(distribDF)) {
       stop("asrStructure does not contain required distribution dataframe.
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Marginal inference.")
+           To generate the required files and structures to use this function 
+           you will need to run runASR() using Marginal inference.")
     }
-  } else {
-    if(is.null(distribDF)) {
-      stop("You have not provided an asrStructure or specified distribDF")
     } else {
-      if (is.data.frame(distribDF)) {
-        cols <- colnames(distribDF)
-        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
-        }
+      if(is.null(distribDF)) {
+        stop("You have not provided an asrStructure or specified distribDF")
       } else {
-        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
+        if (is.data.frame(distribDF)) {
+          cols <- colnames(distribDF)
+          if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+            stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+          }
+        } else {
+          stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
+        }
       }
     }
-  }
   
   if (!is.null(columns)) {
     distribDF <- distribDF[distribDF$Column %in% columns, ]
@@ -185,7 +185,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
   } else {
     stop("Invalid type for plot_distrib")
   }
-}
+  }
 
 #'Save marginal distrib plot
 #'
@@ -248,23 +248,23 @@ save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", co
     distribDF = asrStructure$distribProb
     if (is.null(distribDF)) {
       stop("asrStructure does not contain required distribution dataframe. 
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Marginal inference.")
+           To generate the required files and structures to use this function 
+           you will need to run runASR() using Marginal inference.")
     }
-  } else {
-    if(is.null(distribDF)) {
-      stop("You have not provided an asrStructure or specified distribDF")
     } else {
-      if (is.data.frame(distribDF)) {
-        cols <- colnames(distribDF)
-        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
-        }
+      if(is.null(distribDF)) {
+        stop("You have not provided an asrStructure or specified distribDF")
       } else {
-        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
+        if (is.data.frame(distribDF)) {
+          cols <- colnames(distribDF)
+          if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+            stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
+          }
+        } else {
+          stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
+        }
       }
     }
-  }
   
   if (!is.null(columns)) {
     distribDF <- distribDF[distribDF$Column %in% columns, ]

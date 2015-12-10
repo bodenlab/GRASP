@@ -192,7 +192,76 @@ plot_modified_tree <- function(asrStructure, tree_file=NULL) {
   plot.phylo(tree, edge.col=selColors)
 }
 
+#'Tree plotting function
+#'
+#'Creates a plot of a tree stored as a Newick string
+#'
+#'@param asrStructure the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
+#'to specify other variables
+#'@param tree_file output file from ASR.jar containing a Newick string
+#'
+#'@return 
+#'
+#'@examples
+#'
+#'@export
 
+plot_tree_seq_label <- function(asrStructure, column, colour="clustal") {
+ 
+  if (!is.null(asrStructure)) {
+    if (typeof(asrStructure) != "list") {
+      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
+    }
+    newickTree = asrStructure$loadedFiles$tree
+    if (is.null(newickTree)) {
+      stop("asrStructure does not contain required tree file information")
+    }
+    seqDF = asrStructure$seqDF
+    if (is.null(seqDF)) {
+      stop("asrStructure does not contain required sequence information")
+    }
+  }
+  
+  newickTree = asrStructure$loadedFiles$tree
+  tree = ape::read.tree(file = NULL, text = as.character(newickTree[1,]))
+  
+  tip_labels <- rep(0, length(tree$tip))
+  for (i in seq(1, length(tree$tip), 1)){
+    sequence = seqDF[seqDF$Label == tree$tip[i], ]
+    colSpec = sequence[sequence$Column == column, ]$AA
+    tip_labels[i] = as.character(colSpec)    
+  }
+  node_labels <- rep(0, length(tree$node))
+  for (i in seq(1, length(tree$node), 1)){
+    sequence = seqDF[seqDF$Label == tree$node[i], ]
+    colSpec = sequence[sequence$Column == column, ]$AA
+    node_labels[i] = as.character(colSpec)    
+  }
+  node_order <- c(tree$tip, tree$node)[tree$edge[,2]]
+  new_node <- rep(0, length(node_order))
+  for (i in seq(1, length(node_order), 1)){
+    sequence = seqDF[seqDF$Label == node_order[i], ]
+    colSpec = sequence[sequence$Column == column, ]$AA
+    new_node[i] = as.character(colSpec)    
+  }
+  if (colour == "clustal") {
+    tipColour = colours_clustal(tip_labels)
+    nodeColour = colours_clustal(node_labels)
+  } else if (colour == "zappo") {
+    tipColour = colours_zappo(tip_labels)
+    nodeColour = colours_zappo(node_labels)
+  } else if (colour == "taylor") {
+    tipColour = colours_taylor(tip_labels)
+    nodeColour = colours_taylor(node_labels)
+  } else {
+    stop("Invalid colour choice for plot_aln()")
+  }
+  
+  plot.phylo(tree, show.tip.label=F)
+  nodelabels(node_labels, frame="none",col=nodeColour,adj=c(-0.8))
+  tiplabels(tip_labels, frame="none",col=tipColour,adj=c(-0.8))
+  
+}
 
 
 

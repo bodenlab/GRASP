@@ -5,7 +5,7 @@
 #' @param alphabet a vector of amino acids which specify the order in which the colour palette will
 #' be specified
 #' 
-# ' @export
+#' @export
 
 colours_clustal <- function(alphabet){
   red <- c("A", "V", "F", "P", "M", "I", "L", "W")
@@ -37,7 +37,7 @@ colours_clustal <- function(alphabet){
 #' @param alphabet a vector of amino acids which specify the order in which the colour palette will
 #' be specified
 #' 
-# ' @export
+#' @export
 
 colours_zappo <- function(alphabet) {
   
@@ -80,7 +80,7 @@ colours_zappo <- function(alphabet) {
 #' @param alphabet a vector of amino acids which specify the order in which the colour palette will
 #' be specified
 #' 
-# ' @export
+#' @export
 colours_taylor <- function(alphabet) {
   
   colour <- rep(0, length(alphabet))
@@ -140,7 +140,7 @@ colours_taylor <- function(alphabet) {
 #' @param alphabet a vector of nucleotides which specify the order in which the colour palette will
 #' be specified
 #' 
-# ' @export
+#' @export
 colours_nt <- function(alphabet) {
   
   if (length(alphabet) > 5) {

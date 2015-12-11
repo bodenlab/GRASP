@@ -38,13 +38,25 @@ plot_subtree <- function(asrStructure, node, fastaDF = NULL){
             To generate the required files and structures to use this function 
             you will need to run runASR() using Joint inference.")
     }
+    if (is.data.frame(fastaDF)) {
+      cols <- colnames(fastaDF)
+      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
+        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
+      }
+    } else {
+      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
+    }
   } else {
     if(is.null(fastaDF)) {
       stop("You have not provided an asrStructure or specified fastaDF. See read_fasta()")
     } else {
-      cols <- colnames(fastaDF)
-      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-        stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
+      if (is.data.frame(fastaDF)) {
+        cols <- colnames(fastaDF)
+        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
+          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
+        }
+      } else {
+        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
       }
     }
   }
@@ -104,13 +116,25 @@ save_subtree <- function(asrStructure, node, fastaDF = NULL, format = "pdf", nam
             To generate the required files and structures to use this function 
             you will need to run runASR() using Joint inference.")
     }
+    if (is.data.frame(fastaDF)) {
+      cols <- colnames(fastaDF)
+      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
+        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
+      }
+    } else {
+      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
+    }
   } else {
     if(is.null(fastaDF)) {
       stop("You have not provided an asrStructure or specified fastaDF. See read_fasta()")
     } else {
-      cols <- colnames(fastaDF)
-      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-        stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
+      if (is.data.frame(fastaDF)) {
+        cols <- colnames(fastaDF)
+        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
+          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
+        }
+      } else {
+        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
       }
     }
   }
@@ -184,6 +208,14 @@ get_subtree_sequences <- function(asrStructure, node, fastaDF = NULL){
       stop("asrStructure does not contain required fasta dataframe. 
             To generate the required files and structures to use this function 
             you will need to run runASR() using Joint inference.")
+    }
+    if (is.data.frame(fastaDF)) {
+      cols <- colnames(fastaDF)
+      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
+        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
+      }
+    } else {
+      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
     }
   } else {
     if(is.null(fastaDF)) {

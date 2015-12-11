@@ -5,7 +5,7 @@
 \title{Plot marginal distrib}
 \usage{
 plot_distrib(asrStructure, distribDF = NULL, type = "colouredText",
-  columns = NULL, aas = NULL)
+  colour = NULL, columns = NULL, aas = NULL)
 }
 \arguments{
 \item{asrStructure}{the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
@@ -13,9 +13,11 @@ to specify other variables}
 
 \item{distribDF}{a dataframe created by \code{\link{read_distrib}}}
 
-\item{type}{how the distribution should be displayed, default plain text.
+\item{type}{how the distribution should be displayed, default plain text.}
+
+\item{colour}{only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor"
 options: "colour", "text", "logo", "colouredText"
-NOTE: "logo" uses \code{\link{logo_height}} and \code{\link{plot_logo}}}
+NOTE: "logo" uses \code{\link{plot_logo_distrib}}}
 
 \item{columns}{a vector containing the column numbers of interest. By default = NULL and all columns are displayed}
 

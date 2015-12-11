@@ -38,16 +38,16 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
            To generate the required files and structures to use this function 
            you will need to run runASR() using Marginal inference.")
     }
+  } else {
+    if(is.null(distrib_file)) {
+      stop("You have not provided an asrStructure or specified distrib_file")
+    } else if (!file.exists(distrib_file)) {
+      stop(paste(distrib_file, " does not exist"))
     } else {
-      if(is.null(distrib_file)) {
-        stop("You have not provided an asrStructure or specified distrib_file")
-      } else if (!file.exists(distrib_file)) {
-        stop(paste(distrib_file, " does not exist"))
-      } else {
-        distrib <- read.table(distrib_file, header = T, row.names = 1, sep = "\t")
-        ##How do you check if this is the right file?##
-      }
+      distrib <- read.table(distrib_file, header = T, row.names = 1, sep = "\t")
+      ##How do you check if this is the right file?##
     }
+  }
   
   colnames(distrib) <- seq(1, dim(distrib)[2], 1)
   mat <- matrix(rep(0, 3*(dim(distrib)[1] * dim(distrib)[2])), ncol = 3, nrow = (dim(distrib)[1] * dim(distrib)[2]))
@@ -77,8 +77,9 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
 #'@param columns a vector containing the column numbers of interest. By default = NULL and all columns are displayed
 #'@param aas a vector containing the amino acids of interest. By default = NULL and all amino acids are displayed
 #'@param type how the distribution should be displayed, default plain text.
+#'@param colour only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor"
 #'options: "colour", "text", "logo", "colouredText"
-#'NOTE: "logo" uses \code{\link{logo_height}} and \code{\link{plot_logo}}
+#'NOTE: "logo" uses \code{\link{plot_logo_distrib}}
 #'
 #'@return plots a matrix of amino acid probability at given columns in alignment
 #'
@@ -115,15 +116,19 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
 #'
 #'@export
 
-plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", columns=NULL, aas = NULL) {
+plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colour=NULL, columns=NULL, aas = NULL) {
   
   Probability <- NULL; rm(Probability);
   Column <- NULL; rm(Column);
   AA <- NULL; rm(AA);
   
   if (type == "logo") {
-    pl <- plot_logo_distrib(asrStructure, columns = columns)
+    pl <- plot_logo_distrib(asrStructure, colour=colour, columns = columns)
     return(pl)
+  } else {
+    if (!is.null(colour)) {
+      print("Your colour choice has been ignored as colour is an argument only available when type='logo' for plot_distrib()")
+    }
   }
   
   if (!is.null(asrStructure)) {
@@ -136,20 +141,28 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
            To generate the required files and structures to use this function 
            you will need to run runASR() using Marginal inference.")
     }
+    if (is.data.frame(distribDF)) {
+      cols <- colnames(distribDF)
+      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+        stop("The dataframe provided as asrStructure$distribDF is not correctly formatted. See read_distrib()")
+      }
     } else {
-      if(is.null(distribDF)) {
-        stop("You have not provided an asrStructure or specified distribDF")
-      } else {
-        if (is.data.frame(distribDF)) {
-          cols <- colnames(distribDF)
-          if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-            stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
-          }
-        } else {
-          stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
+      stop(paste("The input for asrStructure$distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
+    }
+  } else {
+    if(is.null(distribDF)) {
+      stop("You have not provided an asrStructure or specified distribDF")
+    } else {
+      if (is.data.frame(distribDF)) {
+        cols <- colnames(distribDF)
+        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
         }
+      } else {
+        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
       }
     }
+  }
   
   if (!is.null(columns)) {
     distribDF <- distribDF[distribDF$Column %in% columns, ]
@@ -185,7 +198,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
   } else {
     stop("Invalid type for plot_distrib")
   }
-  }
+}
 
 #'Save marginal distrib plot
 #'
@@ -196,7 +209,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
 #'@param distribDF a dataframe created by \code{\link{read_distrib}}
 #'@param type how the distribution should be displayed, default plain text.
 #'options: "colour", "text", "logo", "colouredText"
-#'NOTE: "logo" uses \code{\link{logo_height}} and \code{\link{save_logo}}
+#'@param colour only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor"
 #'@param columns a vector containing the column numbers of interest. By default = NULL and all columns are displayed
 #'@param aas a vector containing the amino acids of interest. By default = NULL and all amino acids are displayed
 #'@param format specifies what format the figure should be saved in. Options: "pdf" or "png"
@@ -230,16 +243,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colu
 #'
 #'@export
 
-save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", columns=NULL, aas = NULL, format = "pdf", name = NULL) {
-  
-  Probability <- NULL; rm(Probability);
-  Column <- NULL; rm(Column);
-  AA <- NULL; rm(AA);
-  
-  if (type == "logo") {
-    save_logo(asrStructure, columns = columns, format = format, name = name)
-    return()
-  }
+save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", colour=NULL,columns=NULL, aas = NULL, format = "pdf", name = NULL) {
   
   if (!is.null(asrStructure)) {
     if (typeof(asrStructure) != "list") {
@@ -251,53 +255,26 @@ save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", co
            To generate the required files and structures to use this function 
            you will need to run runASR() using Marginal inference.")
     }
-    } else {
-      if(is.null(distribDF)) {
-        stop("You have not provided an asrStructure or specified distribDF")
-      } else {
-        if (is.data.frame(distribDF)) {
-          cols <- colnames(distribDF)
-          if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-            stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
-          }
-        } else {
-          stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
-        }
+    if (is.data.frame(distribDF)) {
+      cols <- colnames(distribDF)
+      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
+        stop("The dataframe provided as asrStructure$distribDF is not correctly formatted. See read_distrib()")
       }
+    } else {
+      stop(paste("The input for asrStructure$distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
     }
-  
-  if (!is.null(columns)) {
-    distribDF <- distribDF[distribDF$Column %in% columns, ]
-    distribDF$Column <- factor(distribDF$Column)
-  }
-  if (!is.null(aas)) {
-    distribDF <- distribDF[distribDF$AA %in% aas, ]
-    distribDF$AA <- factor(distribDF$AA)
   }
   
-  distribDF$Column <- factor(distribDF$Column, levels = as.character(sort(as.numeric(levels(distribDF$Column)))))
-  
-  if (type == "text") {
-    gg<-ggplot2::ggplot(distribDF, ggplot2::aes(x=Column, y=AA, label=format(Probability, scientific=TRUE, nsmall=2, digits = 3))) + 
-      ggplot2::geom_text(size = 2) + 
-      ggplot2::geom_vline(xintercept=seq(1.5, length(levels(distribDF$Column))-0.5, 1), colour='black', size = 0.1) + 
-      ggplot2::theme_bw()+ggplot2::theme(panel.grid.major = ggplot2::element_blank())+
-      ggplot2::theme(text = ggplot2::element_text(size=12),axis.text.x=ggplot2::element_text(angle = 45, hjust=1))
-  } else if (type == "colour") {
-    gg<-ggplot2::ggplot(distribDF, ggplot2::aes(x=Column, y=AA)) + 
-      ggplot2::geom_tile(ggplot2::aes(fill = Probability), colour = "white") + 
-      ggplot2::scale_fill_gradient(low="Red", high="Green") + 
-      ggplot2::theme_bw()+
-      ggplot2::theme(text = ggplot2::element_text(size=24),axis.text.x=ggplot2::element_text(angle = 45, hjust=1))
-  } else if (type == "colouredText") {
-    gg<-ggplot2::ggplot(distribDF, ggplot2::aes(x=Column, y=AA, label=format(Probability, scientific=TRUE, nsmall=2, digits = 3), colour = Probability)) + 
-      ggplot2::geom_text(size = 2) + 
-      ggplot2::scale_colour_gradient(low="Red", high="Green") + 
-      ggplot2::geom_vline(xintercept=seq(1.5, length(levels(distribDF$Column))-0.5, 1), colour='black', size = 0.1) + 
-      ggplot2::theme_bw()+ggplot2::theme(panel.grid.major = ggplot2::element_blank())+
-      ggplot2::theme(text = ggplot2::element_text(size=12),axis.text.x=ggplot2::element_text(angle = 45, hjust=1))
+  if (type =="logo") {
+    if (is.null(asrStructure)) {
+      stop(paste("Cannot access heights for logo without asrStructure. Providing seqDF alone is not adequate."))
+    } else {
+      gg <- plot_logo_distrib(asrStructure, colour = colour, columns = columns)
+    }
+  } else if (type =="colour" || type == "colouredText" || type == "text") {
+     gg <- plot_distrib(NULL,distribDF=distribDF,type = type,colour=colour,columns = columns)
   } else {
-    stop("Invalid type for plot_distrib")
+    stop("Invalid type for plot_aln")
   }
   
   if(is.null(name)) {

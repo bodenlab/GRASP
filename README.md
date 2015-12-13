@@ -50,8 +50,16 @@ Load package
 Load existing data
 
     data(asrStructure)
+    
+Perform ASR on new data
 
-Use loaded data
+    asr <- runASR("tree.nwk", "aln.aln", id="runASR")
+
+Reload data from runASR
+
+    asr <- loadASR("runASR")
+
+Use loaded data (from run or load ASR)
 
     plot_aln(asrStructure)
 

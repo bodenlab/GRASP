@@ -131,38 +131,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colo
     }
   }
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    distribDF = asrStructure$distribProb
-    if (is.null(distribDF)) {
-      stop("asrStructure does not contain required distribution dataframe.
-           To generate the required files and structures to use this function 
-           you will need to run runASR() using Marginal inference.")
-    }
-    if (is.data.frame(distribDF)) {
-      cols <- colnames(distribDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-        stop("The dataframe provided as asrStructure$distribDF is not correctly formatted. See read_distrib()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
-    }
-  } else {
-    if(is.null(distribDF)) {
-      stop("You have not provided an asrStructure or specified distribDF")
-    } else {
-      if (is.data.frame(distribDF)) {
-        cols <- colnames(distribDF)
-        if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-          stop("The dataframe provided as distribDF is not correctly formatted. See read_distrib()")
-        }
-      } else {
-        stop(paste("The input for distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
-      }
-    }
-  }
+  distribDF <- dfError(asrStructure, "distribProbs", distribDF, c("Column", "Probability", "AA"), "Marginal")
   
   if (!is.null(columns)) {
     distribDF <- distribDF[distribDF$Column %in% columns, ]
@@ -245,25 +214,7 @@ plot_distrib <- function(asrStructure, distribDF=NULL, type="colouredText", colo
 
 save_distrib <- function(asrStructure, distribDF=NULL, type = "colouredText", colour=NULL,columns=NULL, aas = NULL, format = "pdf", name = NULL) {
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    distribDF = asrStructure$distribProb
-    if (is.null(distribDF)) {
-      stop("asrStructure does not contain required distribution dataframe. 
-           To generate the required files and structures to use this function 
-           you will need to run runASR() using Marginal inference.")
-    }
-    if (is.data.frame(distribDF)) {
-      cols <- colnames(distribDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Probability" %in% cols)) {
-        stop("The dataframe provided as asrStructure$distribDF is not correctly formatted. See read_distrib()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$distribDF is not a dataframe and therefore not a valid input. Input: ", distribDF, sep = ""))
-    }
-  }
+  distribDF <- dfError(asrStructure, "distribProbs", distribDF, c("Column", "Probability", "AA"), "Marginal")
   
   if (type =="logo") {
     if (is.null(asrStructure)) {

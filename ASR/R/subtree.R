@@ -27,39 +27,7 @@
 #'@export
 
 plot_subtree <- function(asrStructure, node, fastaDF = NULL){
-  
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    fastaDF = asrStructure$fastaDF
-    if (is.null(fastaDF)) {
-      stop("asrStructure does not contain required distribution dataframe. 
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Joint inference.")
-    }
-    if (is.data.frame(fastaDF)) {
-      cols <- colnames(fastaDF)
-      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-    }
-  } else {
-    if(is.null(fastaDF)) {
-      stop("You have not provided an asrStructure or specified fastaDF. See read_fasta()")
-    } else {
-      if (is.data.frame(fastaDF)) {
-        cols <- colnames(fastaDF)
-        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
-        }
-      } else {
-        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-      }
-    }
-  }
+  fastaDF <- dfError(asrStructure, "fastaDF", fastaDF, c("Newick", "Label", "Sequence"), "Joint")
   
   nodeSeq <- fastaDF[fastaDF$Label == node, ]
   if (dim(nodeSeq)[1] == 0) {
@@ -106,38 +74,7 @@ from which the Newick strings of subtrees are collected"))
 
 save_subtree <- function(asrStructure, node, fastaDF = NULL, format = "pdf", name = NULL){
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    fastaDF = asrStructure$fastaDF
-    if (is.null(fastaDF)) {
-      stop("asrStructure does not contain required distribution dataframe. 
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Joint inference.")
-    }
-    if (is.data.frame(fastaDF)) {
-      cols <- colnames(fastaDF)
-      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-    }
-  } else {
-    if(is.null(fastaDF)) {
-      stop("You have not provided an asrStructure or specified fastaDF. See read_fasta()")
-    } else {
-      if (is.data.frame(fastaDF)) {
-        cols <- colnames(fastaDF)
-        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
-        }
-      } else {
-        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-      }
-    }
-  }
+  fastaDF <- dfError(asrStructure, "fastaDF", fastaDF, c("Newick", "Label", "Sequence"), "Joint")
   
   nodeSeq <- fastaDF[fastaDF$Label == node, ]
   if (dim(nodeSeq)[1] == 0) {
@@ -199,38 +136,7 @@ from which the Newick strings of subtrees are collected"))
 
 get_subtree_sequences <- function(asrStructure, node, fastaDF = NULL){
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    fastaDF = asrStructure$fastaDF
-    if (is.null(fastaDF)) {
-      stop("asrStructure does not contain required fasta dataframe. 
-            To generate the required files and structures to use this function 
-            you will need to run runASR() using Joint inference.")
-    }
-    if (is.data.frame(fastaDF)) {
-      cols <- colnames(fastaDF)
-      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-    }
-  } else {
-    if(is.null(fastaDF)) {
-      stop("You have not provided an asrStructure or specified fastaDF. See read_fasta()")
-    } else {
-      if (is.data.frame(fastaDF)) {
-        cols <- colnames(fastaDF)
-        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
-        }
-      } else {
-        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-      }
-    }
-  }
+  fastaDF <- dfError(asrStructure, "fastaDF", fastaDF, c("Newick", "Label", "Sequence"), "Joint")
 
   nodeSeq <- fastaDF[fastaDF$Label == node, ]
   if (dim(nodeSeq)[1] == 0) {

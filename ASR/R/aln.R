@@ -74,38 +74,7 @@ plot_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
     return(pl)
   }
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    seqDF = asrStructure$seqDF
-    if (is.null(seqDF)) {
-      stop("asrStructure does not contain required fasta dataframe.
-           To generate the required files and structures to use this function 
-           you will need to run runASR() using Joint inference.")
-    }
-    if (is.data.frame(seqDF)) {
-      cols <- colnames(seqDF)
-      if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
-        stop("The dataframe provided as asrStructure$seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
-    }
-  } else {
-    if(is.null(seqDF)) {
-      stop("You have not provided an asrStructure or specified seqDF")
-    } else {
-      if (is.data.frame(seqDF)) {
-        cols <- colnames(seqDF)
-        if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
-          stop("The dataframe provided as seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
-        }
-      } else {
-        stop(paste("The input for seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
-      }
-    }
-  }
+  seqDF <- dfError(asrStructure, "seqDF", seqDF, c("Column", "Label", "AA"), "Joint")
   
   if (!is.null(columns)) {
     seqDF <- seqDF[seqDF$Column %in% columns, ]
@@ -215,25 +184,7 @@ plot_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
 
 save_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clustal", columns = NULL, sequences = NULL, format = "pdf", name = NULL) {
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    seqDF = asrStructure$seqDF
-    if (is.null(seqDF)) {
-      stop("asrStructure does not contain required fasta dataframe. 
-           To generate the required files and structures to use this function 
-           you will need to run runASR() using Joint inference.")
-    }
-    if (is.data.frame(seqDF)) {
-      cols <- colnames(seqDF)
-      if (!("Column" %in% cols && "Label" %in% cols && "AA" %in% cols)) {
-        stop("The dataframe provided as asrStructure$seqDF is not correctly formatted. See read_fasta() and get_seq_df()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
-    }
-  } 
+  seqDF <- dfError(asrStructure, "seqDF", seqDF, c("Column", "Label", "AA"), "Joint")
 
   if (type =="logo") {
     if (is.null(asrStructure)) {
@@ -312,38 +263,7 @@ save_aln <- function(asrStructure, seqDF=NULL, type="colouredText", colour="clus
 #' 
 get_seq_df <- function(asrStructure, fastaDF=NULL) {
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    fastaDF = asrStructure$fastaDF
-    if (is.null(fastaDF)) {
-      stop("asrStructure does not contain required fasta sequence data frame. 
-           To generate the required files and structures to use this function 
-           you will need to run runASR() using Joint inference.")
-    }
-    if (is.data.frame(fastaDF)) {
-      cols <- colnames(fastaDF)
-      if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-        stop("The dataframe provided as asrStructure$fastaDF is not correctly formatted. See read_fasta()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-    }
-  } else {
-    if(is.null(fastaDF)) {
-      stop("You have not provided an asrStructure or specified fastaDF")
-    } else {
-      if (is.data.frame(fastaDF)) {
-        cols <- colnames(fastaDF)
-        if (!("Newick" %in% cols && "Label" %in% cols && "Sequence" %in% cols)) {
-          stop("The dataframe provided as fastaDF is not correctly formatted. See read_fasta()")
-        }
-      } else {
-        stop(paste("The input for fastaDF is not a dataframe and therefore not a valid input. Input: ", fastaDF, sep = ""))
-      }
-    }
-  }
+  fastaDF <- dfError(asrStructure, "fastaDF", fastaDF, c("Newick", "Label", "Sequence"), "Joint")
   
   names <- fastaDF$Label
   seqs <- fastaDF$Sequence

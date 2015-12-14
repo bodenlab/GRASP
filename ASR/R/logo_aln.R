@@ -43,36 +43,7 @@ logo_height_aln <- function(asrStructure, seqDF = NULL, alphabet = "AA", sequenc
     x
   }
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    seqDF <- asrStructure$seqDF
-    if (is.null(seqDF)) {
-      stop("asrStructure does not contain required sequence information")
-    }
-    if (is.data.frame(seqDF)) {
-      cols <- colnames(seqDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Label" %in% cols)) {
-        stop("The dataframe provided as asrStructure$seqDF is not correctly formatted. See get_seq_df()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
-    }
-  } else {
-    if(is.null(seqDF)) {
-      stop("You have not provided an asrStructure or specified seqDF")
-    } else {
-      if (is.data.frame(seqDF)) {
-        cols <- colnames(seqDF)
-        if (!("Column" %in% cols && "AA" %in% cols && "Label" %in% cols)) {
-          stop("The dataframe provided as seqDF is not correctly formatted. See get_seq_df()")
-        }
-      } else {
-        stop(paste("The input for seqDF is not a dataframe and therefore not a valid input. Input: ", seqDF, sep = ""))
-      }
-    }
-  }
+  seqDF <- dfError(asrStructure, "seqDF", seqDF, c("Column", "AA", "Label"), "Joint")
   
   if (!is.null(sequences)) {
     seqDF <- seqDF[seqDF$Labels %in% sequences, ]
@@ -192,38 +163,7 @@ plot_logo_aln <- function(asrStructure, heightDF = NULL, colour = "taylor", colu
   Column <- NULL; rm(Column);
   AA <- NULL; rm(AA);
   
-  if (!is.null(asrStructure)) {
-    if (typeof(asrStructure) != "list") {
-      stop(paste("The input for asrStructure: ", asrStructure, ", is not a list therefore not a valid input", sep = ""))
-    }
-    heightDF <- asrStructure$seqHeights
-    if (is.null(heightDF)) {
-      stop("asrStructure does not contain required height information
-           To generate the required files and structures to use this function 
-           you will need to run runASR() using Marginal inference.")
-    }
-    if (is.data.frame(heightDF)) {
-      cols <- colnames(heightDF)
-      if (!("Column" %in% cols && "AA" %in% cols && "Height" %in% cols)) {
-        stop("The dataframe provided as asrStructure$seqHeights is not correctly formatted. See logo_height()")
-      }
-    } else {
-      stop(paste("The input for asrStructure$seqHeights is not a dataframe and therefore not a valid input. Input: ", heightDF, sep = ""))
-    }
-  } else {
-    if(is.null(heightDF)) {
-      stop("You have not provided an asrStructure or specified heightDF")
-    } else {
-      if (is.data.frame(heightDF)) {
-        cols <- colnames(heightDF)
-        if (!("Column" %in% cols && "AA" %in% cols && "Height" %in% cols)) {
-          stop("The dataframe provided as heightDF is not correctly formatted. See logo_height()")
-        }
-      } else {
-        stop(paste("The input for heightDF is not a dataframe and therefore not a valid input. Input: ", heightDF, sep = ""))
-      }
-    }
-  }
+  heightDF <- dfError(asrStructure, "seqHeights", heightDF, c("Column", "AA", "Height"), "Joint")
   
   if (!is.null(sequences)) {
     #have to recalculate heights

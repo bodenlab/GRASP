@@ -7,7 +7,7 @@
 dfError(asrStructure, dataframeName, dataframe, colnames, inference)
 }
 \arguments{
-\item{asrStructure}{the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}}
+\item{asrStructure}{the named list returned by \code{\link{runASR}}, \code{\link{loadASR}} or \code{\link{reduce_alphabet}}.}
 
 \item{dataframeName}{the name of the dataframe of interest for the parent function}
 

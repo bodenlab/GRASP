@@ -71,7 +71,7 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
 #'
 #'Displays a heatmap showing the probabilities of each amino acid across all columns in the alignment
 #'
-#'@param asrStructure the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
+#'@param asrStructure the named list returned by \code{\link{runASR}}, \code{\link{loadASR}} or \code{\link{reduce_alphabet}}. Set this to NULL
 #'to specify other variables
 #'@param distribDF a dataframe created by \code{\link{read_distrib}}
 #'@param columns a vector containing the column numbers of interest. By default = NULL and all columns are displayed

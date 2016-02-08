@@ -83,7 +83,7 @@ runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR
     dataStructure[["fastaDF"]] = fasta
     seqDF <- get_seq_df(NULL, fastaDF = fasta)
     dataStructure[["seqDF"]] = seqDF
-    logoSeq <- logo_height_aln(NULL,seqDF = seqDF)
+    logoSeq <- logo_height_aln(NULL,seqDF = seqDF, alphabetType="AA")
     dataStructure[["seqHeights"]] <- logoSeq
     if (plot) {
       save_tree(NULL, tree_file = fileNames$Tree)
@@ -103,7 +103,7 @@ runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR
     
     mDistrib <- read_distrib(NULL, distrib_file = fileNames$Distrib)
     dataStructure[["distribProbs"]] <- mDistrib
-    lDistrib <- logo_height_distrib(NULL,distribDF = mDistrib)
+    lDistrib <- logo_height_distrib(NULL,distribDF = mDistrib, alphabetType="AA")
     dataStructure[["distribHeights"]] <- lDistrib
 
     if (plot) {
@@ -205,7 +205,7 @@ loadASR <- function(id, tree_file = NULL, aln_file = NULL, distrib_file = NULL, 
     dataStructure[["fastaDF"]] <- fasta
     seqDF <- get_seq_df(NULL, fastaDF = fasta)
     dataStructure[["seqDF"]] <- seqDF
-    logoSeq <- logo_height_aln(NULL,seqDF = seqDF)
+    logoSeq <- logo_height_aln(NULL,seqDF = seqDF, alphabetType="AA")
     dataStructure[["seqHeights"]] <- logoSeq
     if (plot) {
       save_aln(NULL, seqDF = seqDF) 
@@ -221,7 +221,7 @@ loadASR <- function(id, tree_file = NULL, aln_file = NULL, distrib_file = NULL, 
     loadedFiles[["distribution"]] = read.table(fileNames$Distrib, header = T, row.names = 1, sep = "\t")
     mDistrib <- read_distrib(NULL, distrib_file = fileNames$Distrib)
     dataStructure[["distribProbs"]] <- mDistrib
-    lDistrib <- logo_height_distrib(NULL, distribDF = mDistrib)
+    lDistrib <- logo_height_distrib(NULL, distribDF = mDistrib, alphabetType="AA")
     dataStructure[["distribHeights"]] <- lDistrib
     if (plot) {
       save_distrib(NULL, distribDF = mDistrib)

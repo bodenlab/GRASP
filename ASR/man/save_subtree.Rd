@@ -8,7 +8,7 @@ save_subtree(asrStructure, node, fastaDF = NULL, format = "pdf",
   name = NULL)
 }
 \arguments{
-\item{asrStructure}{the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
+\item{asrStructure}{the named list returned by \code{\link{runASR}}, \code{\link{loadASR}} or \code{\link{reduce_alphabet}}. Set this to NULL
 to specify other variables}
 
 \item{node}{label of node to form root of subtree}

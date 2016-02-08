@@ -3,7 +3,7 @@
 #'Takes the stored Newick string of the relabelled tree and extracts the extant sequences to be used
 #'in functions like \code{\link{plot_aln}}
 #'
-#'@param asrStructure the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
+#'@param asrStructure the named list returned by \code{\link{runASR}}, \code{\link{loadASR}} or \code{\link{reduce_alphabet}}. Set this to NULL
 #'to specify other variables
 #'
 #'@return 
@@ -21,7 +21,7 @@ get_extant_sequence <- function(asrStructure) {
 #'Takes the stored Newick string of the relabelled tree and extracts the internal sequences to be used
 #'in functions like \code{\link{plot_aln}}
 #'
-#'@param asrStructure the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
+#'@param asrStructure the named list returned by \code{\link{runASR}}, \code{\link{loadASR}} or \code{\link{reduce_alphabet}}. Set this to NULL
 #'to specify other variables
 #'
 #'@return 

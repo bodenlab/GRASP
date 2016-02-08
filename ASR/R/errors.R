@@ -19,7 +19,7 @@ dfError <- function(asrStructure, dataframeName, dataframe, colnames, inference)
     if (typeof(asrStructure) != "list") {
       stop(paste("The input for asrStructure: ", summary(asrStructure), ", is not a list therefore not a valid input", sep = ""))
     }
-    df = as.data.frame(asrStructure[[dataframeName]])
+    df = asrStructure[[dataframeName]]
     if (is.null(df)) {
       stop(paste("asrStructure does not contain required dataframe. 
               To generate the required files and structures to use this function 

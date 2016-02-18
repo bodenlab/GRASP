@@ -47,10 +47,11 @@ colours_zappo <- function(alphabet) {
 #' 
 #' @export
 colours_taylor <- function(alphabet) {
-  letters <- c("I", "L", "F", "Y", "W", "H", "R", "K", "N", "Q", "E", "D", "S", "T", "G", "P", "C", "A", "M", "-")
-  cols <- c("#99FF00", "#66FF00", "#33FF00", "#00FF66", "#00FFCC", "#00CCFF", "#0066FF", "#0000FF", 
-            "#6600FF", "#CC00FF", "#FF00CC", "#FF0066", "#FF0000", "#FF3300", "#FF6600", "#FF9900", 
-            "#FFCC00", "#FFFF00", "#CCFF00", "#00FF00", "grey")
+  letters <- c("V", "I", "L", "F", "Y", "W", "H", "R", "K", "N", "Q", "E", "D", "S", "T", "G", "P", "C", "A", "M", "-")
+  cols <- c("#99FF00", "#66FF00", "#33FF00", "#00FF66", "#00FFCC", 
+            "#00CCFF", "#0066FF", "#0000FF", "#6600FF", "#CC00FF", 
+            "#FF00CC", "#FF0066", "#FF0000", "#FF3300", "#FF6600", 
+            "#FF9900", "#FFCC00", "#FFFF00", "#CCFF00", "#00FF00", "grey")
   df <- data.frame(letters, cols)
   colours <- rep(0, length(alphabet))
   for (a in seq(1, length(alphabet), 1)) {
@@ -58,8 +59,6 @@ colours_taylor <- function(alphabet) {
   }
   colours
 }
-
-colours_user <- function(alphabet, )
 
 #' Nucleotide colour scheme
 #' 

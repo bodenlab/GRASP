@@ -8,24 +8,12 @@
 #' @export
 
 colours_clustal <- function(alphabet){
-  red <- c("A", "V", "F", "P", "M", "I", "L", "W")
-  blue <- c("D", "E")
-  magenta <- c("R", "K")
-  green <- c("S", "T", "Y", "H", "C", "N", "G", "Q")
+  letters <- c("A", "V", "F", "P", "M", "I", "L", "W", "D", "E", "R", "K", "S", "T", "Y", "H", "C", "N", "G", "Q", "-")
+  cols <- c(rep("Red", 8), rep("Blue", 2), rep("Magenta", 2), rep("Green", 8), "Grey")
+  df <- data.frame(letters, cols)
   colours <- rep(0, length(alphabet))
   for (a in seq(1, length(alphabet), 1)) {
-    letter = alphabet[a]
-    if (letter %in% red) {
-      colours[a] = "Red"
-    } else if (letter %in% blue) {
-      colours[a] = "Blue"
-    } else if (letter %in% magenta) {
-      colours[a] = "Magenta"
-    } else if (letter %in% green) {
-      colours[a] = "Green"
-    } else {
-      colours[a] = "Grey"
-    }
+    colours[a] <- as.character(df[df$letters == alphabet[a],]$cols)
   }
   colours
 }
@@ -40,35 +28,12 @@ colours_clustal <- function(alphabet){
 #' @export
 
 colours_zappo <- function(alphabet) {
-  
-  pink <- c("I", "L", "V", "A", "M")
-  orange <- c("F", "W", "Y") 
-  red <- c("K", "R", "H")
-  green <- c("D", "E")
-  blue <- c("S", "T", "N", "Q")
-  magenta <- c("P", "G")
-  yellow <- c("C")
-  
+  letters <- c("I", "L", "V", "A", "M", "F", "W", "Y", "K", "R", "H", "D", "E","S", "T", "N", "Q", "P", "G","C","-")
+  cols <- c(rep("salmon", 5), rep("orange", 3), rep("red", 3), rep("green", 2), rep("blue", 4), rep("magenta", 2), "yellow", "grey")
+  df <- data.frame(letters, cols)
   colours <- rep(0, length(alphabet))
   for (a in seq(1, length(alphabet), 1)) {
-    letter = alphabet[a]
-    if (letter %in% red) {
-      colours[a] = "Red"
-    } else if (letter %in% blue) {
-      colours[a] = "Blue"
-    } else if (letter %in% magenta) {
-      colours[a] = "Magenta"
-    } else if (letter %in% orange) {
-      colours[a] = "orange"
-    } else if (letter %in% green) {
-      colours[a] = "Green"
-    } else if (letter %in% pink) {
-      colours[a] = "salmon"
-    } else if (letter %in% yellow) {
-      colours[a] = "yellow"
-    } else {
-      colours[a] = "Grey"
-    }
+    colours[a] <- as.character(df[df$letters == alphabet[a],]$cols)
   }
   colours
 }
@@ -82,56 +47,19 @@ colours_zappo <- function(alphabet) {
 #' 
 #' @export
 colours_taylor <- function(alphabet) {
-  
-  colour <- rep(0, length(alphabet))
+  letters <- c("I", "L", "F", "Y", "W", "H", "R", "K", "N", "Q", "E", "D", "S", "T", "G", "P", "C", "A", "M", "-")
+  cols <- c("#99FF00", "#66FF00", "#33FF00", "#00FF66", "#00FFCC", "#00CCFF", "#0066FF", "#0000FF", 
+            "#6600FF", "#CC00FF", "#FF00CC", "#FF0066", "#FF0000", "#FF3300", "#FF6600", "#FF9900", 
+            "#FFCC00", "#FFFF00", "#CCFF00", "#00FF00", "grey")
+  df <- data.frame(letters, cols)
+  colours <- rep(0, length(alphabet))
   for (a in seq(1, length(alphabet), 1)) {
-    letter = alphabet[a]
-    if (letter == "V") {
-      colour[a] = "#99FF00"
-    } else if (letter == "I") {
-      colour[a] = "#66FF00"
-    } else if (letter == "L") {
-      colour[a] = "#33FF00"
-    } else if (letter == "F") {
-      colour[a] = "#00FF66"
-    } else if (letter == "Y") {
-      colour[a] = "#00FFCC"
-    } else if (letter == "W") {
-      colour[a] = "#00CCFF"
-    } else if (letter == "H") {
-      colour[a] = "#0066FF"
-    } else if (letter == "R") {
-      colour[a] = "#0000FF"
-    } else if (letter == "K") {
-      colour[a] = "#6600FF"
-    } else if (letter == "N") {
-      colour[a] = "#CC00FF"
-    } else if (letter == "Q") {
-      colour[a] = "#FF00CC"
-    } else if (letter == "E") {
-      colour[a] = "#FF0066"
-    } else if (letter == "D") {
-      colour[a] = "#FF0000"
-    } else if (letter == "S") {
-      colour[a] = "#FF3300"
-    } else if (letter == "T") {
-      colour[a] = "#FF6600"
-    } else if (letter == "G") {
-      colour[a] = "#FF9900"
-    } else if (letter == "P") {
-      colour[a] = "#FFCC00"
-    } else if (letter == "C") {
-      colour[a] = "#FFFF00"
-    } else if (letter == "A") {
-      colour[a] = "#CCFF00"
-    } else if (letter == "M") {
-      colour[a] = "#00FF00"
-    } else if (letter == "-") {
-      colour[a] = "grey"
-    }
+    colours[a] <- as.character(df[df$letters == alphabet[a],]$cols)
   }
-  colour
+  colours
 }
+
+colours_user <- function(alphabet, )
 
 #' Nucleotide colour scheme
 #' 

@@ -4,13 +4,16 @@
 \alias{plot_tree_seq}
 \title{Tree plotting function}
 \usage{
-plot_tree_seq(asrStructure, column, type = "text", colour = "black")
+plot_tree_seq(asrStructure, column, node = NULL, type = "text",
+  colour = "black")
 }
 \arguments{
 \item{asrStructure}{the named list returned by \code{\link{runASR}} or \code{\link{loadASR}}. Set this to NULL
 to specify other variables}
 
 \item{column}{the column that you wish to see sequences for}
+
+\item{node}{the node to be used as root for plotting trees - allows plotting of subtrees with AA annotation}
 
 \item{type}{the way the sequence should be displayed. Options: "text", "shape", "both"}
 
@@ -19,13 +22,15 @@ a user specified colour e.g. colour="red" or colour="#FF0000"}
 }
 \description{
 Creates a plot of a tree stored as a Newick string and labels extant and internal nodes according to their sequence in 
-a specified column. AAs can also be coloured using available schemes
+a specified column. AAs can also be coloured using available schemes. It is also possible to use the function to plot a 
+subtree by specifying the node variable.
 }
 \examples{
 plot_tree_seq(asrStructure, 3)
+plot_tree_seq(asrStructure, 3, node = "N1")
 plot_tree_seq(asrStructure, 3, type="both", colour="clustal")
 plot_tree_seq(asrStructure, 3, type="shape", colour="clustal")
-
+plot_tree_seq(asrStructure, 3, node = "N1", type="shape", colour="clustal")
 
 }
 

@@ -26,6 +26,10 @@ reduce_alphabet <- function(asrStructure, alphabet, alphabetType="AA") {
     stop('Provided alphabet must be a vector with letters mapped in this order: "A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"')
   }
   
+  if (length(alphabet) < 20) {
+    stop('Provided alphabet must be a vector with letters mapped in this order: "A", "C", "D", "E", "F", "G", "H", "I", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "V", "W", "Y"')
+  }
+  
   if (!is.null(asrStructure)) {
     if (typeof(asrStructure) != "list") {
       stop(paste("The input for asrStructure: ", summary(asrStructure), ", is not a list therefore not a valid input", sep = ""))

@@ -78,12 +78,13 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
   
 #   distribProbs <- asrStructure$distribProbs
   distribProbs <- distribProbs[!is.na(distribProbs$Probability), ] ##Remove NAs
-  alphLen <- length(levels(as.factor(distribProbs$AA)))
-  numPs <- length(levels(distribProbs$Column))
-  Ns = rep(1, numPs)
-  improv <- rep(0, numPs)
-  kl_div_scores <- rep(0, numPs)
-  # Initialise improvement values across all positions
+  alphLen <- length(levels(as.factor(distribProbs$AA))) #number of letters in alphabet
+  numPs <- length(levels(distribProbs$Column)) #number of columns in alignment
+  Ns = rep(1, numPs) # 'mode' of position (how many AAs should be explored)
+  improv <- rep(0, numPs) #record of improvement score for each column/position
+  kl_div_scores <- rep(0, numPs) # record of the KL divergence score for each column/position
+  # Initialise improvement values for Q = 1 compared to Q = 2
+  # Record KL divergence scores for Q=1 across all positions
   for (i in seq(1, numPs)) {
     P <- distribProbs[distribProbs$Column == i,]$Probability
     n = Ns[i]
@@ -101,16 +102,17 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
     return(tail(sorted, max))
   }
   
-  sorted = sort(improv, index.return=TRUE)[[2]]
-  best_idx = sorted[length(improv)]
+  #Identify where the next mutation locations occur
+  sorted = sort(improv, index.return=TRUE)[[2]] # sort the improvement scores (increasing)
+  best_idx = sorted[length(improv)] # Take the highest improvement score as the next position to have Q increased
   positions <- rep(0, max)
-  converge <- rep(FALSE, length(improv))
+  converge <- rep(FALSE, length(improv)) #if TRUE - the maximum improvement score has been reached
   j = 1
-  while ((j <= max) && (any(converge == FALSE))) {
+  while ((j <= max) && (any(converge == FALSE))) { #Stop when you have the requesite mutations or all positions have converged
     positions[j] <- best_idx
-    if (improv[best_idx] > 0) {
-      Ns[best_idx] <- Ns[best_idx] + 1
-      P <- distribProbs[distribProbs$Column == best_idx,]$Probability
+    if (improv[best_idx] > 0) { #Catch as some unusual negative scores were leading to incorrect results - mostly solved with pseudo count
+      Ns[best_idx] <- Ns[best_idx] + 1 #Update the list of modes
+      P <- distribProbs[distribProbs$Column == best_idx,]$Probability #Extract the probability scores for the position of interest
       n <- Ns[best_idx] # get current N
       #Test whether updating n to next mode will create improvement
       Q <- getQ(P, n)
@@ -118,8 +120,8 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
       Q <- getQ(P, n + 1)
       after <- kl_div(P, Q)
       if ((before - after) > 0) {#if we see FURTHER improvement
-        improv[best_idx] = before - after
-        kl_div_scores[best_idx] = after
+        improv[best_idx] = before - after #update the improvement score for this position
+        kl_div_scores[best_idx] = after #update the divergence score for this position
       } else { #reached max improvement in this position, need to look at next position
         kl_div_scores[best_idx] = before
         converge[best_idx] <- TRUE # we are finished with this position
@@ -127,7 +129,7 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
     } else {
       converge[best_idx] <- TRUE # we are finished with this position
     }
-    sorted <- sort(improv, index.return=TRUE)[[2]]
+    sorted <- sort(improv, index.return=TRUE)[[2]] #Sort the updated list of improvement scores
     #Order convergence by improv then identify the position with the highest improv that has not converged
     best_idx <- tail(sorted[!converge[sorted]], 1) # best_index is the next highest position that HAS NOT converged
 #     print(sum(kl_div_scores))
@@ -142,7 +144,7 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
     mode <- Ns[pos]
     dc <- distribProbs[distribProbs$Column==pos,]
     dp <- dc[order(dc$Probability),]
-    aas <- paste(head(dp$AA, mode), collapse=",")
+    aas <- paste(tail(dp$AA, mode), collapse=",")
     if (i == 1) {
       m <- matrix(c(pos, mode, aas), ncol=3, nrow=1)
     } else {

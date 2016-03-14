@@ -79,14 +79,16 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
 #   distribProbs <- asrStructure$distribProbs
   distribProbs <- distribProbs[!is.na(distribProbs$Probability), ] ##Remove NAs
   alphLen <- length(levels(as.factor(distribProbs$AA))) #number of letters in alphabet
+  distribProbs$Column <- factor(distribProbs$Column)
   numPs <- length(levels(distribProbs$Column)) #number of columns in alignment
+  cols <- levels(distribProbs$Column)
   Ns = rep(1, numPs) # 'mode' of position (how many AAs should be explored)
   improv <- rep(0, numPs) #record of improvement score for each column/position
   kl_div_scores <- rep(0, numPs) # record of the KL divergence score for each column/position
   # Initialise improvement values for Q = 1 compared to Q = 2
   # Record KL divergence scores for Q=1 across all positions
   for (i in seq(1, numPs)) {
-    P <- distribProbs[distribProbs$Column == i,]$Probability
+    P <- distribProbs[distribProbs$Column == cols[i],]$Probability
     n = Ns[i]
     Q <- getQ(P, n)
     before <- kl_div(P, Q)    
@@ -110,9 +112,11 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
   j = 1
   while ((j <= max) && (any(converge == FALSE))) { #Stop when you have the requesite mutations or all positions have converged
     positions[j] <- best_idx
+    print(best_idx)
+    print(cols[best_idx])
     if (improv[best_idx] > 0) { #Catch as some unusual negative scores were leading to incorrect results - mostly solved with pseudo count
       Ns[best_idx] <- Ns[best_idx] + 1 #Update the list of modes
-      P <- distribProbs[distribProbs$Column == best_idx,]$Probability #Extract the probability scores for the position of interest
+      P <- distribProbs[distribProbs$Column == cols[best_idx],]$Probability #Extract the probability scores for the position of interest
       n <- Ns[best_idx] # get current N
       #Test whether updating n to next mode will create improvement
       Q <- getQ(P, n)
@@ -142,13 +146,13 @@ find_positions <- function(asrStructure, max = 20, posFirst=FALSE, distribDF=NUL
   for (i in seq(1, length(positions), 1)) {
     pos <- positions[i]
     mode <- Ns[pos]
-    dc <- distribProbs[distribProbs$Column==pos,]
+    dc <- distribProbs[distribProbs$Column==cols[pos],]
     dp <- dc[order(dc$Probability),]
     aas <- paste(tail(dp$AA, mode), collapse=",")
     if (i == 1) {
-      m <- matrix(c(pos, mode, aas), ncol=3, nrow=1)
+      m <- matrix(c(cols[pos], mode, aas), ncol=3, nrow=1)
     } else {
-      n <- matrix(c(pos, mode, aas), ncol=3, nrow=1)
+      n <- matrix(c(cols[pos], mode, aas), ncol=3, nrow=1)
       m <- rbind(m, n)
     }
   }

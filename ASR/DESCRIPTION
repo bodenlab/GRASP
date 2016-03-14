@@ -1,6 +1,6 @@
 Package: ASR
 Title: Running and plotting bnkit reconstruction results
-Version: 1.0.3
+Version: 1.0.4
 Authors@R: person("Alex", "Essebier", email = "first.last@example.com", role = c("aut", "cre"))
 Author: Alex Essebier [aut, cre]
 Maintainer: Alex Essebier <first.last@example.com>

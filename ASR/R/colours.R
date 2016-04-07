@@ -114,9 +114,9 @@ colours_yos <- function(alphabet) {
                "K", "R", "D", "E", "C", "G", 
                "P", "Y","-")
   cols <- c("yellow", "wheat", "gold", "orange", "orange4", 
-            "violet", "purple", "green", "lightgreen", "olivedrab", 
-            "darkgreen", "blue", "cyan", "darkblue", "red", 
-            "pink", "brown", "grey", "black", "sienna1", "khaki")
+            "violet", "purple", "chartreuse", "darkolivegreen4", "limegreen", 
+            "seagreen", "turquoise3", "royalblue1", "skyblue", "red", 
+            "pink", "brown", "lightslategrey", "black", "cyan", "gray88")
   df <- data.frame(letters, cols)
   colours <- rep(0, length(alphabet))
   for (a in seq(1, length(alphabet), 1)) {

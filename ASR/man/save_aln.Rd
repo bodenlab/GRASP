@@ -17,7 +17,7 @@ to specify other variables}
 \item{type}{how the alignment should be displayed, default colouredText,
 options: "colour", "text", "both", "colouredText", "logo"}
 
-\item{colour}{the colour scheme selected, default clustal, options: "clustal", "zappo", "taylor"}
+\item{colour}{the colour scheme selected, default clustal, options: "clustal", "zappo", "taylor", "mixed"}
 
 \item{columns}{a vector containing the column numbers of interest. By default = NULL and all columns are displayed}
 

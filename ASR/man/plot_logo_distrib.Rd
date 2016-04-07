@@ -48,6 +48,7 @@ plot_logo_distrib(NULL, heightDF = heightDF, columns = columns)
 #to change the colouring of AAs
 plot_logo_distrib(asrStructure, colour = "clustal")
 plot_logo_distrib(asrStructure, colour = "zappo")
+plot_logo_distrib(asrStructure, colour = "mixed")
 
 }
 

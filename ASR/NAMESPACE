@@ -3,6 +3,7 @@
 export(colours_clustal)
 export(colours_nt)
 export(colours_taylor)
+export(colours_yos)
 export(colours_zappo)
 export(dfError)
 export(find_positions)

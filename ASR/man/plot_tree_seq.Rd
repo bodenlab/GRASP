@@ -17,7 +17,7 @@ to specify other variables}
 
 \item{type}{the way the sequence should be displayed. Options: "text", "shape", "both"}
 
-\item{colour}{the colour scheme selected, default "black", options: "clustal", "zappo", "taylor". Also an option to provide
+\item{colour}{the colour scheme selected, default "black", options: "clustal", "zappo", "taylor", "mixed". Also an option to provide
 a user specified colour e.g. colour="red" or colour="#FF0000"}
 }
 \description{

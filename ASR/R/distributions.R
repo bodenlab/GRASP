@@ -77,7 +77,7 @@ read_distrib <- function(asrStructure, distrib_file = NULL) {
 #'@param columns a vector containing the column numbers of interest. By default = NULL and all columns are displayed
 #'@param aas a vector containing the amino acids of interest. By default = NULL and all amino acids are displayed
 #'@param type how the distribution should be displayed, default plain text.
-#'@param colour only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor"
+#'@param colour only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor", "mixed"
 #'options: "colour", "text", "logo", "colouredText"
 #'NOTE: "logo" uses \code{\link{plot_logo_distrib}}
 #'

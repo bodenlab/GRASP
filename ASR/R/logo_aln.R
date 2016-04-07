@@ -206,6 +206,8 @@ plot_logo_aln <- function(asrStructure, heightDF = NULL, colour = "taylor", colu
     colourPalette = colours_zappo(levels(heightDF$AA))
   } else if (colour == "taylor") {
     colourPalette = colours_taylor(levels(heightDF$AA))
+  } else if (colour == "mixed") {
+    colourPalette = colours_yos(levels(heightDF$AA))
   } else {
     stop("Invalid colour choice for plot_aln()")
   }

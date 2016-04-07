@@ -15,7 +15,7 @@ to specify other variables}
 
 \item{type}{how the distribution should be displayed, default plain text.}
 
-\item{colour}{only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor"
+\item{colour}{only available in conjunction with type="logo" to specify the colour scheme for AAs. options: "clustal", "zappo", "taylor", "mixed"
 options: "colour", "text", "logo", "colouredText"
 NOTE: "logo" uses \code{\link{plot_logo_distrib}}}
 

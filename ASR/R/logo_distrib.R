@@ -146,6 +146,7 @@ logo_height_distrib <- function(asrStructure, distribDF = NULL, alphabet=NULL, a
 #'#to change the colouring of AAs
 #'plot_logo_distrib(asrStructure, colour = "clustal")
 #'plot_logo_distrib(asrStructure, colour = "zappo")
+#'plot_logo_distrib(asrStructure, colour = "mixed")
 #' 
 #'@export
 
@@ -173,6 +174,8 @@ plot_logo_distrib <- function(asrStructure, heightDF = NULL, colour = "taylor", 
     colourPalette = colours_zappo(levels(heightDF$AA))
   } else if (colour == "taylor") {
     colourPalette = colours_taylor(levels(heightDF$AA))
+  } else if (colour == "mixed") {
+    colourPalette = colours_yos(levels(heightDF$AA))
   } else {
     stop("Invalid colour choice for plot_aln()")
   }

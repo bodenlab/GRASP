@@ -135,7 +135,7 @@ save_tree <- function(asrStructure, tree_file=NULL, format = "pdf", name = NULL)
 #'@param column the column that you wish to see sequences for
 #'@param node the node to be used as root for plotting trees - allows plotting of subtrees with AA annotation
 #'@param type the way the sequence should be displayed. Options: "text", "shape", "both"
-#'@param colour the colour scheme selected, default "black", options: "clustal", "zappo", "taylor". Also an option to provide
+#'@param colour the colour scheme selected, default "black", options: "clustal", "zappo", "taylor", "mixed". Also an option to provide
 #'a user specified colour e.g. colour="red" or colour="#FF0000"
 #'
 #'@examples
@@ -216,6 +216,8 @@ from which the Newick strings of subtrees are collected"))
   } else if (colour == "taylor") {
     tipColour = colours_taylor(tip_labels)
     nodeColour = colours_taylor(node_labels)
+  } else if (colour == "mixed") {
+    colourPalette = colours_yos(levels(node_labels))
   } else if (colour == "black") {
     nodeColour = "black"
     tipColour = "black"

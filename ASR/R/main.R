@@ -48,7 +48,7 @@
 #' 
 #' @export
 
-runASR <- function(tree_file, aln_file, output_file, inf = "Joint", node = NULL, id = "RunASRPOG", plot = TRUE) {
+runASR <- function(tree_file, aln_file, output_file = ".", inf = "Joint", node = NULL, id = "RunASRPOG", plot = TRUE) {
   if (!(inf == "Joint" || inf == "Marginal")) {
     stop("Inference must be 'Joint' or 'Marginal'")
   }

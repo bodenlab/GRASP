@@ -48,19 +48,19 @@
 #' 
 #' @export
 
-runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR", plot = TRUE) {
+runASR <- function(tree_file, aln_file, output_file, inf = "Joint", node = NULL, id = "RunASRPOG", plot = TRUE) {
   if (!(inf == "Joint" || inf == "Marginal")) {
     stop("Inference must be 'Joint' or 'Marginal'")
   }
   
   ##Check if input files are in valid formats##
 
-  asrJar <- system.file("java", "ASR.jar", package="ASR")
+  asrJar <- system.file("java", "ASRPOG.jar", package="ASR")
   if (is.null(node)) {
-    command = paste("java -jar", asrJar, tree_file, aln_file, inf, id, sep = " ")
+    command = paste("java -jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, sep = " ")
     system(command)
   } else {
-    command = paste("java -jar", asrJar, tree_file, aln_file, inf, node, id, sep = " ")
+    command = paste("java -jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, node, sep = " ")
     system(command)
   }
   
@@ -69,9 +69,9 @@ runASR <- function(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR
   dataStructure <- list()
   
   if (inf == "Joint") {
-    fileNames[["FastaFile"]] = paste(id, "_aln_full.fa", sep = "")
+    fileNames[["FastaFile"]] = paste(output_file, "_aln_full.fa", sep = "")
     fileNames[["Distrib"]] = NULL
-    fileNames[["Tree"]] = paste(id, "_new_tree.txt", sep = "")
+    fileNames[["Tree"]] = paste(output_file, "_new_tree.txt", sep = "")
     
     loadedFiles[["tree"]]= as.data.frame(read.table(fileNames$Tree, header = FALSE))
     loadedFiles[["alignment"]]= read.table(fileNames$FastaFile, header = F, sep = "\n")

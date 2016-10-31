@@ -53,7 +53,10 @@ Load existing data
     
 Perform ASR on new data
 
+versions 1.0 to 1.0.4:
     asr <- runASR("tree.nwk", "aln.aln", id="runASR")
+version 1.0.5:
+    asr <- runASR("tree.nwk", "aln.aln")
 
 Reload data from runASR
 

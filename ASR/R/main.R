@@ -91,8 +91,8 @@ runASR <- function(tree_file, aln_file, output_file = ".", inf = "Joint", node =
     }
   } else if (inf == "Marginal") {
     fileNames[["FastaFile"]] = NULL
-    fileNames[["Distrib"]] = paste(id, "_distribution.txt", sep = "")
-    fileNames[["Tree"]] = paste(id, "_new_tree.txt", sep = "")
+    fileNames[["Distrib"]] = paste(output_file, "_distribution.txt", sep = "")
+    fileNames[["Tree"]] = paste(output_file, "_new_tree.txt", sep = "")
     
     loadedFiles[["tree"]]= as.data.frame(read.table(fileNames$Tree, header = FALSE, sep = "\n"))
     loadedFiles[["alignment"]]= NULL

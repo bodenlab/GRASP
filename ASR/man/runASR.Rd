@@ -4,8 +4,8 @@
 \alias{runASR}
 \title{Run ASR.jar}
 \usage{
-runASR(tree_file, aln_file, inf = "Joint", node = NULL, id = "runASR",
-  plot = TRUE)
+runASR(tree_file, aln_file, output_file = ".", inf = "Joint", node = NULL,
+  id = "RunASRPOG", plot = TRUE)
 }
 \arguments{
 \item{tree_file}{a newick string representation of the tree of interest}

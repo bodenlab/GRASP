@@ -1,11 +1,11 @@
 Package: ASR
 Title: Running and plotting bnkit reconstruction results
-Version: 1.0.4
+Version: 1.0.5
 Authors@R: person("Alex", "Essebier", email = "first.last@example.com", role = c("aut", "cre"))
 Author: Alex Essebier [aut, cre]
 Maintainer: Alex Essebier <first.last@example.com>
-Description: This package takes output from ASR.jar which performs an ancestral reconstruction 
-    given a multiple sequence alignment and corresponding phylogenetic tree. Output includes a 
+Description: This package takes output from ASRPOG.jar which performs an ancestral reconstruction 
+    given sequences or a multiple sequence alignment and corresponding phylogenetic tree. Output includes a 
     newly labelled phylogenetic tree and an alignment including reconstructed sequence (if joint 
     inference was performed) and a distribution file (if marginal inference was performed).
     All three files have associated functions to read and plot the output data.

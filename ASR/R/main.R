@@ -1,15 +1,15 @@
-#' Run ASR.jar
+#' Run ASRPOG.jar
 #' 
-#' A wrapper to launch ASR.jar generating all appropriate files according to input. \cr
+#' A wrapper to launch ASRPOG.jar generating all appropriate files according to input. \cr
 #' GENERATE SEQUENCE - requires use of Joint inference - returns a tree and alignment file \cr
 #' GENERATE DISTRIBUTION - requires use of Marginal inference - returns a tree and distribution file \cr 
 #' These two tasks MUST be run SEPARATELY \cr
 #' 
 #' @param tree_file a newick string representation of the tree of interest
 #' @param aln_file a clustal or fasta formatted multiple sequence alignment
+#' @param output_file name of the output files, default = "asr"
 #' @param inf the inference approach to be selected: "Joint" or "Marginal"
 #' @param node the node to be queried in inf = "Marginal
-#' @param id an identifier for the output files
 #' @param plot specifies whether or not to save the plots generated when calling this function
 #' 
 #' @return asrStructure - a named list containing all data structures and files required to run all other functions in package.\cr
@@ -34,21 +34,21 @@
 #' 
 #' @examples
 #'#retrieve example file stored in the package
-#'tree <- system.file("extdata", "test_tree.txt", package="ASR")
-#'aln <- system.file("extdata", "test_aln.txt", package="ASR")
+#'tree <- system.file("extdata", "test_tree.nwk", package="ASR")
+#'aln <- system.file("extdata", "test_aln.aln", package="ASR")
 #' #alternatively, specify the filename as a string
-#' #tree <- "tree.txt"
-#' #aln <- "aln.txt"
+#' #tree <- "tree.nwk"
+#' #aln <- "aln.aln"
 #' 
 #' runASR(tree, aln)
-#' runASR(tree, aln, id = "newID")
-#' runASR(tree, aln, inf = "Joint", id = "testJoint")
-#' runASR(tree, aln, inf = "Marginal", id = "testMarginal")
-#' runASR(tree, aln, inf = "Marginal", node = "N1", id = "testMarginal_N1")
+#' runASR(tree, aln, output_file = "newID")
+#' runASR(tree, aln, inf = "Joint")
+#' runASR(tree, aln, inf = "Marginal")
+#' runASR(tree, aln, inf = "Marginal", node = "N1")
 #' 
 #' @export
 
-runASR <- function(tree_file, aln_file, output_file = ".", inf = "Joint", node = NULL, id = "RunASRPOG", plot = TRUE) {
+runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node = NULL, id = "RunASRPOG", plot = TRUE) {
   if (!(inf == "Joint" || inf == "Marginal")) {
     stop("Inference must be 'Joint' or 'Marginal'")
   }
@@ -57,11 +57,13 @@ runASR <- function(tree_file, aln_file, output_file = ".", inf = "Joint", node =
 
   asrJar <- system.file("java", "ASRPOG.jar", package="ASR")
   if (is.null(node)) {
-    command = paste("java -jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, sep = " ")
-    system(command)
+    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, sep = " ")
   } else {
-    command = paste("java -jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, node, sep = " ")
-    system(command)
+    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, node, "-o", output_file, sep = " ")
+  }
+  sysout <- system2("java", args=jarArgs)
+  if (sysout == 1) {
+    stop("Error in reconstruction.")
   }
   
   fileNames <- list()

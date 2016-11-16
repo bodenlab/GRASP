@@ -2,21 +2,21 @@
 % Please edit documentation in R/main.R
 \name{runASR}
 \alias{runASR}
-\title{Run ASR.jar}
+\title{Run ASRPOG.jar}
 \usage{
-runASR(tree_file, aln_file, output_file = ".", inf = "Joint", node = NULL,
-  id = "RunASRPOG", plot = TRUE)
+runASR(tree_file, aln_file, output_file = "asr", inf = "Joint",
+  node = NULL, id = "RunASRPOG", plot = TRUE)
 }
 \arguments{
 \item{tree_file}{a newick string representation of the tree of interest}
 
 \item{aln_file}{a clustal or fasta formatted multiple sequence alignment}
 
+\item{output_file}{name of the output files, default = "asr"}
+
 \item{inf}{the inference approach to be selected: "Joint" or "Marginal"}
 
 \item{node}{the node to be queried in inf = "Marginal}
-
-\item{id}{an identifier for the output files}
 
 \item{plot}{specifies whether or not to save the plots generated when calling this function}
 }
@@ -42,24 +42,24 @@ $distribProb - processed distribution file (see \code{\link{read_distrib}})\cr
 $distribHeights - processed probability distribution (see \code{\link{logo_height_distrib}})\cr
 }
 \description{
-A wrapper to launch ASR.jar generating all appropriate files according to input. \cr
+A wrapper to launch ASRPOG.jar generating all appropriate files according to input. \cr
 GENERATE SEQUENCE - requires use of Joint inference - returns a tree and alignment file \cr
 GENERATE DISTRIBUTION - requires use of Marginal inference - returns a tree and distribution file \cr 
 These two tasks MUST be run SEPARATELY \cr
 }
 \examples{
 #retrieve example file stored in the package
-tree <- system.file("extdata", "test_tree.txt", package="ASR")
-aln <- system.file("extdata", "test_aln.txt", package="ASR")
+tree <- system.file("extdata", "test_tree.nwk", package="ASR")
+aln <- system.file("extdata", "test_aln.aln", package="ASR")
 #alternatively, specify the filename as a string
-#tree <- "tree.txt"
-#aln <- "aln.txt"
+#tree <- "tree.nwk"
+#aln <- "aln.aln"
 
 runASR(tree, aln)
-runASR(tree, aln, id = "newID")
-runASR(tree, aln, inf = "Joint", id = "testJoint")
-runASR(tree, aln, inf = "Marginal", id = "testMarginal")
-runASR(tree, aln, inf = "Marginal", node = "N1", id = "testMarginal_N1")
+runASR(tree, aln, output_file = "newID")
+runASR(tree, aln, inf = "Joint")
+runASR(tree, aln, inf = "Marginal")
+runASR(tree, aln, inf = "Marginal", node = "N1")
 
 }
 

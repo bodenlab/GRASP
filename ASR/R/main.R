@@ -11,6 +11,8 @@
 #' @param inf the inference approach to be selected: "Joint" or "Marginal"
 #' @param node the node to be queried in inf = "Marginal
 #' @param plot specifies whether or not to save the plots generated when calling this function
+#' @param gap_inf specifies whether to use maximum parsimony or maximum likelihood for gap inference
+#' @param align specified whether to perform an alignment before the reconstruction, otherwise expects an aligned input file of sequences
 #' 
 #' @return asrStructure - a named list containing all data structures and files required to run all other functions in package.\cr
 #' **output will vary depending on input (see description)**\cr
@@ -43,23 +45,35 @@
 #' runASR(tree, aln)
 #' runASR(tree, aln, output_file = "newID")
 #' runASR(tree, aln, inf = "Joint")
+#' runASR(tree, aln, inf = "Joint", align = TRUE)
+#' runASR(tree, aln, inf = "Joint", gap_inf_mp = FALSE)
 #' runASR(tree, aln, inf = "Marginal")
 #' runASR(tree, aln, inf = "Marginal", node = "N1")
 #' 
 #' @export
 
-runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node = NULL, id = "RunASRPOG", plot = TRUE) {
+runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node = NULL, gap_inf_mp = TRUE, id = "RunASRPOG", plot = TRUE, align = FALSE) {
   if (!(inf == "Joint" || inf == "Marginal")) {
     stop("Inference must be 'Joint' or 'Marginal'")
   }
+  
+  if (gap_inf_mp)
+    gap_inf = "-mp"
+  else
+    gap_inf = ""
+  
+  if (align)
+    al_flag = "-align"
+  else
+    al_flag = ""
   
   ##Check if input files are in valid formats##
 
   asrJar <- system.file("java", "ASRPOG.jar", package="ASR")
   if (is.null(node)) {
-    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, sep = " ")
+    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, gap_inf, al_flag, sep = " ")
   } else {
-    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, node, "-o", output_file, sep = " ")
+    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, node, "-o", output_file, gap_inf, al_flag, sep = " ")
   }
   sysout <- system2("java", args=jarArgs)
   if (sysout == 1) {

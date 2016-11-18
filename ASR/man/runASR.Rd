@@ -5,7 +5,8 @@
 \title{Run ASRPOG.jar}
 \usage{
 runASR(tree_file, aln_file, output_file = "asr", inf = "Joint",
-  node = NULL, id = "RunASRPOG", plot = TRUE)
+  node = NULL, gap_inf_mp = TRUE, id = "RunASRPOG", plot = TRUE,
+  align = FALSE)
 }
 \arguments{
 \item{tree_file}{a newick string representation of the tree of interest}
@@ -19,6 +20,10 @@ runASR(tree_file, aln_file, output_file = "asr", inf = "Joint",
 \item{node}{the node to be queried in inf = "Marginal}
 
 \item{plot}{specifies whether or not to save the plots generated when calling this function}
+
+\item{align}{specified whether to perform an alignment before the reconstruction, otherwise expects an aligned input file of sequences}
+
+\item{gap_inf}{specifies whether to use maximum parsimony or maximum likelihood for gap inference}
 }
 \value{
 asrStructure - a named list containing all data structures and files required to run all other functions in package.\cr
@@ -58,6 +63,8 @@ aln <- system.file("extdata", "test_aln.aln", package="ASR")
 runASR(tree, aln)
 runASR(tree, aln, output_file = "newID")
 runASR(tree, aln, inf = "Joint")
+runASR(tree, aln, inf = "Joint", align = TRUE)
+runASR(tree, aln, inf = "Joint", gap_inf_mp = FALSE)
 runASR(tree, aln, inf = "Marginal")
 runASR(tree, aln, inf = "Marginal", node = "N1")
 

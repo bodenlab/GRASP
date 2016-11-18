@@ -71,9 +71,9 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
 
   asrJar <- system.file("java", "ASRPOG.jar", package="ASR")
   if (is.null(node)) {
-    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, "-o", output_file, gap_inf, al_flag, sep = " ")
+    jarArgs = paste("-jar", asrJar, aln_file, tree_file, "-p", inf, "-o", output_file, gap_inf, al_flag, sep = " ")
   } else {
-    jarArgs = paste("-jar", asrJar, "-t", tree_file, "-s", aln_file, "-p", inf, node, "-o", output_file, gap_inf, al_flag, sep = " ")
+    jarArgs = paste("-jar", asrJar, aln_file, tree_file, "-p", inf, node, "-o", output_file, gap_inf, al_flag, sep = " ")
   }
   sysout <- system2("java", args=jarArgs)
   if (sysout == 1) {

@@ -10,10 +10,12 @@ Description: This package takes output from ASRPOG.jar which performs an ancestr
     inference was performed) and a distribution file (if marginal inference was performed).
     All three files have associated functions to read and plot the output data.
 Depends:
-    R (>= 3.2.2)
+    R (>= 3.2.2),
+    rJava
 Imports:
     ape,
     ggplot2
+SystemRequirements: Java
 License: GPL-2 | GPL-3
 LazyData: true
 RoxygenNote: 5.0.1

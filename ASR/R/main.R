@@ -57,27 +57,25 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
     stop("Inference must be 'Joint' or 'Marginal'")
   }
   
-  if (gap_inf_mp)
-    gap_inf = "-mp"
-  else
-    gap_inf = ""
-  
-  if (align)
-    al_flag = "-align"
-  else
-    al_flag = ""
-  
   ##Check if input files are in valid formats##
-
-  asrJar <- system.file("java", "ASRPOG.jar", package="ASR")
-  if (is.null(node)) {
-    jarArgs = paste("-jar", asrJar, aln_file, tree_file, "-p", inf, "-o", output_file, gap_inf, al_flag, sep = " ")
+  if (align == TRUE) {
+    #perform MSA
+    #msa <- rJava::.jnew("bn/reconstruction/MSA", aln_file)
+    #msaString <- rJava::.jcall(msa, returnSig = "S", "toString")
+    #asr <- rJava::.jnew("bn/reconstruction/ASRPOG", msaString, tree_file, aln_file, inf == "joint", gap_inf_mp)
+  } else if (is.null(node)) {
+    asr <- rJava::.jnew("bn/reconstruction/ASRPOG", aln_file, tree_file, inf == "Joint", gap_inf_mp)
   } else {
-    jarArgs = paste("-jar", asrJar, aln_file, tree_file, "-p", inf, node, "-o", output_file, gap_inf, al_flag, sep = " ")
+    asr <- rJava::.jnew("bn/reconstruction/ASRPOG", aln_file, tree_file, node, gap_inf_mp)
   }
-  sysout <- system2("java", args=jarArgs)
-  if (sysout == 1) {
-    stop("Error in reconstruction.")
+  
+  rJava::.jcall(asr, returnSig="V","saveSupportedAncestors", output_file)
+  rJava::.jcall(asr, returnSig="V", "saveGraph", output_file)
+  
+  if (inf == "Joint") {
+    rJava::.jcall(asr, returnSig="V", "save", output_file, TRUE, "fasta")
+  } else {
+    rJava::.jcall(asr, returnSig="V", "save", FALSE, "fasta")
   }
   
   fileNames <- list()

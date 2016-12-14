@@ -57,7 +57,7 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
     stop("Inference must be 'Joint' or 'Marginal'")
   }
   
-  ##Check if input files are in valid formats##
+  ##Check if input files are in valid formats## 
   if (align == TRUE) {
     #perform MSA
     #msa <- rJava::.jnew("bn/reconstruction/MSA", aln_file)
@@ -66,7 +66,7 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
   } else if (is.null(node)) {
     asr <- rJava::.jnew("bn/reconstruction/ASRPOG", aln_file, tree_file, inf == "Joint", gap_inf_mp)
   } else {
-    asr <- rJava::.jnew("bn/reconstruction/ASRPOG", aln_file, tree_file, node, gap_inf_mp)
+    asr <- rJava::.jnew("bn/reconstruction/ASRPOG", aln_file, tree_file, aln_file, node, gap_inf_mp)
   }
   
   rJava::.jcall(asr, returnSig="V","saveSupportedAncestors", output_file)
@@ -75,7 +75,7 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
   if (inf == "Joint") {
     rJava::.jcall(asr, returnSig="V", "save", output_file, TRUE, "fasta")
   } else {
-    rJava::.jcall(asr, returnSig="V", "save", FALSE, "fasta")
+    rJava::.jcall(asr, returnSig="V", "save", output_file, FALSE, "fasta")
   }
   
   fileNames <- list()
@@ -126,6 +126,7 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
     }
   }
   dataStructure
+  
 }
 
 #' Load existing \code{\link{runASR}} or ASR.jar output

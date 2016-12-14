@@ -1,5 +1,12 @@
+html {
+  min-width: 950px;
+  min-height: 400px;
+  overflow: scroll;
+}
+
 svg {
 padding: 40px;
+float: left;
 }
 .node circle {
   stroke: #333;
@@ -19,24 +26,16 @@ padding: 40px;
   min-width:200px;
   min-height:400px;
 	/*height: 200px;*/
-  background-color: red;
   display:inline-flex;
-
 }
 
 #graphContainer{
-	background-color: yellow;
-  overflow:visible;
   display:inline-flex;
 }
 
 #wrapper {
-  background-color: purple;
   width:100%;
-  height:400px;
+  min-height:60%;
   overflow:scroll;
   display:flex;
-
-
-
 }

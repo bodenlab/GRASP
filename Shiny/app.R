@@ -20,6 +20,7 @@ ui <- fluidPage(
     tags$script(src = "http://d3js.org/d3.v3.min.js"),
     tags$script(src = "http://cpettitt.github.io/project/graphlib-dot/latest/graphlib-dot.min.js"),
     tags$script(src = "http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js"),
+    tags$script(src = "https://cdn.rawgit.com/exupero/saveSvgAsPng/gh-pages/saveSvgAsPng.js"),
     tags$script(src = "tree.js"),
     tags$script(src = "index.js"),
     tags$script(src = "phylotree.js"),
@@ -45,27 +46,24 @@ ui <- fluidPage(
   mainPanel(
         "",
         downloadButton(outputId = "saveAln", label = "Download alignment"), 
-        actionButton(inputId = "saveAll", label = "Save all output"),
+        actionButton(inputId = "saveAll", label = "Download all output"),
+        HTML("<div><form><label>View extant sequences<input type = 'checkbox' id = 'extants' checked/></form></div>"),
         tags$body(
-          HTML(
-            '<div>
-            <form>
-            <label>Radial layout
-            <input type = "checkbox" id = "layout" unchecked/>
-            </form>
-            </div>'
-          ),
-          div(style = "width: 100%; min-height: 400px;",
-              div(style = "width: 30%; height: 100%; overflow: auto; float: left;", 
-                  HTML("<svg id = 'tree_display'; class = 'output'; />")),
-              div(style = "width: 70%; height: 100%; overflow: auto; float: left;",
-                  div(id = "seq_logo", style = "display: none; min-height: 400px;",
-                      selectInput(
-                        inputId = "letter_height", choices = c("Information content", "Score"),
-                        selected = "Information content", label = "Letter Height"
-                      ),
-                      div(id = "logo", class = "logo", "data-logo" = "")),
-                  HTML("<svg id = 'graphContainer'; class = 'output'; ></svg>"))),
+          div(style = "width: 100%; overflow: auto; padding-top: 1em;",
+            div(id = "alignmentdiv", style = "width: 100%; overflow: auto; border:1px solid #e3e3e3; margin-bottom: 1em; display:none; padding: 1em; ",
+              div(dataTableOutput('alntable'), style = "font-size: 75%; width: 100%")),
+            div(style = "clear: both;"),
+            div(id="treediv", style = "width: 30%; height: 100%; overflow: auto; float: left; margin: 0; padding: 1em; border:1px solid #e3e3e3; background-color: #f9f9f9; display:none;", 
+              HTML("<h5>Phylogenetic Tree</h5><svg id = 'tree_display'; class = 'output'; style = 'padding:0;margin:5px;'></svg><div><form><label>Radial layout<input type = 'checkbox' id = 'layout' unchecked/></form></div>")),
+            div(id="pogdiv", style = "width: 70%; height: 100%; overflow: auto; float: right; display: none; padding: 1em;",
+              HTML("<h5>Inferred Ancestral Sequence</h5>"),
+              downloadButton(outputId = "savePOG", label = "Download Graph"),
+              HTML("<div style = 'clear:both;' /><div id = 'graphsvg'><svg id = 'graphContainer'; class = 'output'; ></svg></div><div style = 'clear:both;' />"),
+              HTML("<h5>Extant Sequence Alignment</h5><svg id = 'msagraphContainer'; class = 'output'; ></svg>"),
+              div(id = "seq_logo", style = "display: none;",
+                  selectInput(inputId = "letter_height", choices = c("Information content", "Score"),
+                        selected = "Information content", label = "Letter Height"),
+                  div(id = "logo", class = "logo", "data-logo" = "")))),
           div(style = "clear: both;")
         ),
         width = 12)
@@ -75,41 +73,43 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   # Setup reactive values for asr output
   asrValues <- reactiveValues(defaultASR = NULL)
-  fname <- reactiveValues(tree = NULL, seqs = NULL, out = NULL, runId = NULL)
-
+  fname <- reactiveValues(session = NULL, tree = NULL, seqs = NULL, out = NULL, runId = NULL)
+  loaded <- reactiveValues(status = NULL)
+  sessiontmp <- NULL
+  
   # Perform joint reconstruction
-  observeEvent(input$submitBtn, {
-    req(fname$tree, fname$seqs, fname$out, fname$runId)
-    
-      print("submit")
-      withProgress(message = 'Reconstructing ancestors...', value = 0.1, {
-        for (i in 1:55) {
-          incProgress(1 / 55)
-          Sys.sleep(0.05)
-        }
-        asrValues$defaultASR <- runASR(fname$tree, fname$seqs, inf = "Joint", output_file = fname$out)
-      })
+  #observeEvent(input$submitBtn, {
+  #  req(fname$tree, fname$seqs, fname$out, fname$runId)
+  #  asrRun <- fname$runId
+  #  return(asrRun);
+  #})
+  #    print("submit")
+  #    withProgress(message = 'Reconstructing ancestors...', value = 0.1, {
+  #      for (i in 1:55) {
+  #        incProgress(1 / 55)
+  #        Sys.sleep(0.05)
+  #      }
+  #      asrValues$defaultASR <- runASR(fname$tree, fname$seqs, inf = "Joint", output_file = fname$out)
+  #    })
     
       # find the appropriate label for the root node
-      # (javascript sets the label to 'root', which doesn't match the PO Graph saved files, root node has N0 in the name)
-      root_node <- unlist(strsplit(unlist(strsplit(list.files("sessiontmp/", pattern = ".*(N0).*"), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
-      session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node))
-      output$ancestorText <- renderText({paste("The predicted sequence for the ancestor at the root node is", as.character(asrValues$defaultASR$fastaDF$Sequence[1]))})
-  })
+  #    # (javascript sets the label to 'root', which doesn't match the PO Graph saved files, root node has N0 in the name)
+  #    root_node <- unlist(strsplit(unlist(strsplit(list.files("sessiontmp/", pattern = ".*(N0).*"), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
+  #    session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node))
+  #    output$ancestorText <- renderText({paste("The predicted sequence for the ancestor at the root node is", as.character(asrValues$defaultASR$fastaDF$Sequence[1]))})
+  #})
   
   # load data to the temporary session folder
-  observe({
-    req(input$runId, input$tree, input$alignment)
-    
+  observeEvent(input$submitBtn,{
     # Upload tree and sequence file to server, so we can pass it through to the ASR library
-    fname$out <- paste("sessiontmp/", input$runId, sep="")
-    fname$tree <- paste("sessiontmp/", input$runId, input$tree[['name']], sep="")
-    fname$seqs <- paste("sessiontmp/", input$runId, input$alignment[['name']], sep="")
+    fname$session <- paste(input$runId, format(Sys.time(), "%d-%m-%H%M%S"), sep="")
+    sessiontmp <<- fname$session
+    fname$out <- paste(fname$session, input$runId, sep="/")
+    fname$tree <- paste(fname$out, input$tree[['name']], sep="")
+    fname$seqs <- paste(fname$out, input$alignment[['name']], sep="")
     fname$runId <- input$runId
-    
-    if (dir.exists("sessiontmp"))
-      unlink("sessiontmp", recursive = TRUE)
-    dir.create(file.path("sessiontmp"), showWarnings = FALSE)
+    print('Copying data to server...')
+    dir.create(file.path(fname$session), showWarnings = FALSE)
     str <- readChar(input$tree[['datapath']], file.info(input$tree[['datapath']])$size)
     fc <- file(fname$tree)
     writeLines(str, fc)
@@ -118,107 +118,76 @@ server <- function(input, output, session) {
     fc <- file(fname$seqs)
     writeLines(str, fc)
     close(fc)
-  })
+    loaded$status <- TRUE}, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # Load default data
   observeEvent(input$defaultBtn,{
-    print(input$default)
+    fname$session <- paste("default", format(Sys.time(), "%d-%m-%H%M%S"), sep="")
+    sessiontmp <<- fname$session
+    fname$tree <- "default.nwk"
+    fname$seqs <- "default.aln"
+    fname$out <- paste(fname$session, "default", sep="/")
+    fname$runId <- "default"
+    dir.create(file.path(fname$session), showWarnings = FALSE)
+    print("default")
+    loaded$status <- TRUE}, ignoreNULL = TRUE, ignoreInit = TRUE)
+  
+  observe({
+    req(fname$seqs)
+    output$alntable <- renderDataTable(read.table(fname$seqs, skip = 1, col.names = c("ID", "Sequence")), options = list(dom = 'ftp', pageLength=5, autoWidth = TRUE))#, columnDefs = list(list(width = '50%', targets = c(0, 1))), scrollX = TRUE))
+  })
+  
+  observe({
+    if (is.null(loaded$status)) return()
     
-      isolate({
-        print('loading default...')
-        fname$tree <- "default.nwk"
-        fname$seqs <- "default.aln"
-        fname$out <- "sessiontmp/default"
-        fname$runId <- "default"
-        
-        withProgress(message = 'Loading default data...', value = 0.1, {
-          if (dir.exists("sessiontmp"))
-            unlink("sessiontmp", recursive = TRUE)
-          dir.create(file.path("sessiontmp"), showWarnings = FALSE)
+    print(paste('Loading',fname$runId,'...',sep=" "))
+    
+        withProgress(message = 'Loading data...', value = 0.1, {
           for (i in 1:55) {
             incProgress(1 / 55)
             Sys.sleep(0.05)
           }
           asrValues$defaultASR <- runASR(fname$tree, fname$seqs, inf = "Joint", output_file = fname$out)
-        })
       
         # find the appropriate label for the root node
         # (javascript sets the label to 'root', which doesn't match the PO Graph saved files, root node has N0 in the name)
-        root_node <- unlist(strsplit(unlist(strsplit(list.files("sessiontmp/", pattern = ".*(N0).*"), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
-        session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node))
+        root_node <- unlist(strsplit(unlist(strsplit(list.files(paste(fname$session,"/", sep=""), pattern = ".*(N0).*"), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
+        session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node, session = fname$session))
       })
+    loaded$status <- NULL
   })
   
-  # Set up the default values for all of the plots
-  alnValues <-
-    reactiveValues(
-      type = "colouredText", colour = "clustal", cols = NULL, seqs = NULL
-    )
+  # Set up the default values
   treeValues <- reactiveValues(node = "N0")
-  distValues <-
-    reactiveValues(
-      type = "colouredText", colour = NULL, cols = NULL, aas = NULL
-    )
-  logoValues <-
-    reactiveValues(colour = "taylor", cols = NULL, seqs = NULL)
-  
-  # Update the alignment plot parameters based on user values
-  observeEvent(input$alnButton, {
-    alnValues$type <- input$alnType
-    alnValues$colour <- input$alnColour
-    alnValues$cols <- if (identical(input$alnCols, ""))
-      NULL
-    else {
-      input$alnCols
-    }
-    alnValues$seqs <- if (identical(input$alnSeqs, ""))
-      NULL
-    else {
-      input$alnSeqs
-    }
-  }, ignoreNULL = TRUE)
+  logoValues <- reactiveValues(colour = "taylor", cols = NULL, seqs = NULL)
   
   # Save the alignment
-  output$saveAln <- downloadHandler(
-    filename = "testname",
-    content = function(file) {
-      write(as.character(asrValues$defaultASR$loadedFiles$alignment$V1), file)
-    }
-  )
-  
-  # Change tree parameters for subtree based on user input
-  #observeEvent(input$makeSubTree, {
-  #  treeValues$node <- input$subTree
-  #})
-  
-  # Change tree parameters for subtree back to full tree
-  #observeEvent(input$showFullTree, {
-  #  treeValues$node <- "N0"
-  #})
+#  output$saveAln <- downloadHandler(
+#    filename = fname$out,
+#    content = function(file) {
+#      write(as.character(asrValues$defaultASR$loadedFiles$alignment$V1), file)
+#    }
+#  )
+ 
+  # Downloads all files
+  observeEvent(input$saveAll, {
+    filenames <- paste(fname$session, list.files(paste(fname$session, "/", sep="")), sep="/")
+    print(filenames)
+    zip(fname$out, filenames)
+    print(list.files(paste(fname$session, "/", sep="")))
+   # filename = fname$out,
+  #  content = function(file) {
+   #   write(as.character(asrValues$defaultASR$loadedFiles$alignment$V1), file)
+    #}
+  }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # Save the tree
   output$saveTree <- downloadHandler(
-    filename = "testname",
+    filename = fname$out,
     content = function(file) {
       write(as.character(asrValues$defaultASR$loadedFiles$tree$V1), file)
     }
   )
-  
-  # Update the marginal distribution plot parameters based on user values
-  observeEvent(input$distButton, {
-    distValues$type <- input$distType
-    distValues$colour <- input$distColour
-    distValues$cols <- if (identical(input$distCols, ""))
-      NULL
-    else {
-      input$distCols
-    }
-    distValues$aas <- if (identical(input$distAAs, ""))
-      NULL
-    else {
-      input$distSeqs
-    }
-  }, ignoreNULL = TRUE)
   
   # Update the logo plot parameters based on user input
   observeEvent(input$logoButton, {
@@ -235,22 +204,14 @@ server <- function(input, output, session) {
     }
   })
   
-  # Update alignment output
-  observe({
-    #if (!is.nan(input$defaultBtn) || input$defaultBtn > 0 || input$submitBtn > 0) {
-      output$alnPlot <- renderPlot(plot_aln(asrValues$defaultASR, NULL, alnValues$type,alnValues$colour, alnValues$cols, alnValues$seqs),
-          height = 4000, width = 4000)
-    #}
-  })
-  
   # Update tree output
-  observe({
+  #observe({
     #if (!is.nan(input$defaultBtn) || input$defaultBtn > 0 || input$submitBtn > 0) {
-      output$treePlot <- renderPlot(plot_subtree(asrValues$defaultASR, treeValues$node))
+  #    output$treePlot <- renderPlot(plot_subtree(asrValues$defaultASR, treeValues$node))
     #}
-  })
+  #})
   
-  observe({
+  observeEvent(input$marginalNode, ({
     req(input$marginalNode, fname$tree, fname$seqs, fname$out)
     print("marginal")
     treeValues$node <- input$marginalNode
@@ -266,17 +227,17 @@ server <- function(input, output, session) {
                 input$marginalNode
               }, output_file = fname$out)
     })
-  })
+  }))
   
   # update logo
-  observe({
-    req(asrValues$marginal)
+  observeEvent(asrValues$marginal, ({
+    req(asrValues$marginal, input$marginalNode)
     asrValues$json = createJSON(asrValues$marginal,input$letter_height, "Marginal")
     session$sendCustomMessage(type="updateJsonAttr", asrValues$json)
     session$sendCustomMessage(type="loadLogo", input$marginalNode)
-  })
+  }))
   
-  output$marginalDist <- renderPlot(plot_distrib(asrValues$marginal, input$marginalNode, distValues$type, distValues$colour, distValues$cols, distValues$aas))
+  #output$marginalDist <- renderPlot(plot_distrib(asrValues$marginal, input$marginalNode, distValues$type, distValues$colour, distValues$cols, distValues$aas))
   
   # Update marginal distribution output
   observe({
@@ -294,7 +255,10 @@ server <- function(input, output, session) {
   session$allowReconnect("force") # True
   
   # delete temporary files created for analysis
-  session$onSessionEnded(function() {unlink("sessiontmp", recursive = TRUE)})
+  session$onSessionEnded(function() {
+    print("unlinking tmp folder...")
+    print(sessiontmp)
+    unlink(sessiontmp, recursive = TRUE)})
   
 }
 

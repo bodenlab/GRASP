@@ -61,7 +61,7 @@ d3.layout.phylotree = function(container) {
             'attribute-list': [],
             'max-radius': 768,
             'annular-limit': 0.38196601125010515,
-            'compression': 0.2,
+            'compression': 0,
             'align-tips': false,
             'maximim-per-node-spacing': 100,
             'minimum-per-node-spacing': 2,

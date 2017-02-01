@@ -1,7 +1,9 @@
 CLUSTAL
 
 
-s1  P-TADR
-s2  P-TA-R
-s3  PMTM-R
-s4  PMTA--
+s1  P-NADR
+s2  P-NA-R
+s3  PM-M-R
+s4  PM-A--
+s5  G-NM-R
+s6  GMNAD-

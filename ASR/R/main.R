@@ -70,6 +70,7 @@ runASR <- function(tree_file, aln_file, output_file = "asr", inf = "Joint", node
   }
   
   rJava::.jcall(asr, returnSig="V","saveSupportedAncestors", output_file)
+  rJava::.jcall(asr, returnSig="V", "saveMSAGraph", output_file)
   rJava::.jcall(asr, returnSig="V", "saveGraph", output_file)
   
   if (inf == "Joint") {

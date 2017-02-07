@@ -1,10 +1,28 @@
 window.onload = function() {
-      
-    function readSingleFile(e, label) {
-      if (e.name === "root") {
-      	var node = rootNode;
+    
+    // list to keep track of which nodes marginal reconstruction has been performed on (so only require the computation once)
+    var marginalNodesPerformed = [];
+    
+    function showDivs(visible) {
+      if (visible === true) {
+        document.getElementById("treediv").style.display = "block";
+        document.getElementById("pogdiv").style.display = "block";
+        document.getElementById("alignmentdiv").style.display = "block";
+        document.getElementById("optionsdiv").style.display = "block";
       } else {
-      	var node = e.name;
+        document.getElementById("treediv").style.display = "none";
+        document.getElementById("pogdiv").style.display = "none";
+        document.getElementById("alignmentdiv").style.display = "none";
+        document.getElementById("optionsdiv").style.display = "none";
+      }
+    }
+    
+    function readSingleFile(nodeName, label) {
+      var node;
+      if (nodeName === "root") {
+      	node = rootNode;
+      } else {
+      	node = nodeName;
       }
       var filepath = sessionId + "/" + label + node + ".dot";
       jQuery.get(filepath, function(data) {
@@ -13,7 +31,6 @@ window.onload = function() {
     }
       
     function displayGraph(contents, node){
-      document.getElementById("seq_logo").style.display = "none";
       document.getElementById("graphContainer").style.display = "block";
       var g = graphlibDot.read(contents);
       // Render the graphlib object using d3.
@@ -30,11 +47,18 @@ window.onload = function() {
       var bbox = svg.getBBox();
       svg.style.height = "100%"; //bbox.height + 40.0 + "px";
       svg.style.width = bbox.width + 80.0 + "px";
-      
-      // save svg to png in the session folder
-      //saveSvgAsPng(document.getElementById("graphContainer"), "node.png");
     }
   
+    Shiny.addCustomMessageHandler("divvisibility",
+      function(message) {
+        if (message.show === true) {
+          showDivs(true);
+        } else {
+          showDivs(false);
+        }
+      }
+    );
+      
     Shiny.addCustomMessageHandler("message",
     	function(message) {
    			asrtree = message.a;
@@ -42,9 +66,8 @@ window.onload = function() {
       	rootNode = message.root;
         sessionId = message.session;
         
-        document.getElementById("treediv").style.display = "block";
-        document.getElementById("pogdiv").style.display = "block";
-        document.getElementById("alignmentdiv").style.display = "block";
+        showDivs(true);
+        document.getElementById("seq_logo").style.display = "none";
         
         // display MSA graph
         jQuery.get(sessionId + "/" + label + "MSA.dot", function(data) {
@@ -66,6 +89,7 @@ window.onload = function() {
         selectedNode = "root";
         console.log(selectedNode);
         console.log("rootenode: " + rootNode);
+      	Shiny.onInputChange("selectedNodeLabel", rootNode);
         jQuery.get(sessionId + "/" + label + rootNode + ".dot", function(data) {
       	  var g = graphlibDot.read(data);
       	  g.nodes().forEach(function(v) {
@@ -119,18 +143,6 @@ window.onload = function() {
       		d3_phylotree_trigger_refresh (tree);
       	}
       
-     	function my_menu_title (node) {
-      		return "Create marginal reconstruction";
-      	}
-      
-      	function my_menu_title2 (node) {
-      		return "Show partial order graph";
-      	}
-      
-      	function my_menu_title3 (node) {
-      		return "Show sequence logo";
-      	}
-      
       	// parse the Newick into a d3 hierarchy object with additional fields
       	// handle custom node styling
       	// layout and render the tree
@@ -139,59 +151,78 @@ window.onload = function() {
       	// add a custom menu for (in this case) terminal nodes
       	tree.get_nodes().forEach (function (tree_node) {
       		d3_add_custom_menu (tree_node, // add to this node
-      			my_menu_title, // display this text for the menu
+      			function(node) {return("Create marginal reconstruction");},
       			function () { 
       			  createMarginal(tree_node);
-      			  displayGraph(tree_node);
       			  displayLogo(tree_node);
+      			  displayPOGraph(tree_node);
       			}
      	 	  );
      	 	  d3_add_custom_menu (tree_node, // add to this node
-      			my_menu_title2, // display this text for the menu
-      			function () { displayGraph(tree_node);}
+      			function(node) {return("Show partial order graph");},
+      			function () { 
+      			  document.getElementById("seq_logo").style.display = "none";
+              displayPOGraph(tree_node);}
       		);
       		d3_add_custom_menu (tree_node, // add to this node
-      			my_menu_title3, // display this text for the menu
-      			function () { displayLogo(tree_node);}
+      			function(node) {return("Show sequence logo");},
+      			function () { 
+      			  displayLogo(tree_node);
+      			  displayPOGraph(tree_node);
+      			}
       		);
       	});
       
-      	function displayGraph(tree_node){
-      		readSingleFile(tree_node, label);
-      		selectedNode = tree_node.name;
-      		//d3_phylotree_trigger_refresh (tree);
-      		tree.update();
-      	};
+    function displayPOGraph(tree_node){
+      readSingleFile(tree_node.name, label);
+      selectedNode = tree_node.name;
+      Shiny.onInputChange("selectedNodeLabel", tree_node.name);
+      tree.update();
+    }
       
-      	function createMarginal(tree_node){
-      		Shiny.onInputChange("marginalNode", tree_node.name);
-      		selectedNode = tree_node.name;
-      		//d3_phylotree_trigger_refresh (tree);
-      		tree.update();
-      	};
+    function createMarginal(tree_node){
+      if (marginalNodesPerformed.indexOf(tree_node.name) == -1) {
+        // perform reconstruction
+        marginalNodesPerformed.push(tree_node.name);
+        Shiny.onInputChange("marginalNode", tree_node.name);
+      } else {
+        // already performed marginal
+        displayLogo(tree_node);
+      }
+    }
       
-      	function displayLogo(tree_node){
-      	  // TODO: can only be shown if the marginal reconstruction has been performed
-      		document.getElementById("seq_logo").style.display = "block";
-      		selectedNode = tree_node.name;
-      		$("#logo").empty();
-      		$("#logo").hmm_logo();
-      		//d3_phylotree_trigger_refresh (tree);
-          tree.update();
-      	};
-      
-      	Shiny.addCustomMessageHandler("updateJsonAttr",
-      		function(json){
-      			document.getElementById("logo").setAttribute("data-logo", JSON.stringify(json));
-      		}
-      	);
-      
-      	Shiny.addCustomMessageHandler("loadLogo",
-      		function(tree_node){
-      			displayLogo(tree_node);
-      		}
-      	);
-      
+    function displayLogo(tree_node){
+      if (marginalNodesPerformed.indexOf(tree_node.name) != -1) {
+        document.getElementById("seq_logo").style.display = "block";
+        selectedNode = tree_node.name;
+        Shiny.onInputChange("selectedNodeLabel", tree_node.name);
+      } else {
+        // perform reconstruction
+        createMarginal(tree_node);
+        displayLogo(tree_node);
+      }
+    }
+    
+    Shiny.addCustomMessageHandler("loadLogo",
+      function(tree_node){
+        displayLogo(tree_node);
+      }
+    );
+    
+    Shiny.addCustomMessageHandler("updateJsonAttr",
+      function(json){
+        document.getElementById("logo").setAttribute("data-logo", JSON.stringify(json));
+      }
+    );
+    
+    // update PO Graph view
+    Shiny.addCustomMessageHandler("loadPOGraph",
+      function(message) {
+        readSingleFile(message.node, message.label);
+        tree.update();
+      }
+    );
+    
       	$("#layout").on ("click", function (e) {
       		tree.radial ($(this).prop ("checked")).placenodes().update ();
       	});
@@ -204,4 +235,5 @@ window.onload = function() {
       		}
       	});
 	});
+	      	
 }

@@ -3,6 +3,7 @@ library(ASR)
 library(ape)
 library(ggplot2)
 source("json_map.R")
+source("plotLogo.R")
 
 setwd("./www")
 
@@ -20,7 +21,6 @@ ui <- fluidPage(
     tags$script(src = "http://d3js.org/d3.v3.min.js"),
     tags$script(src = "http://cpettitt.github.io/project/graphlib-dot/latest/graphlib-dot.min.js"),
     tags$script(src = "http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.js"),
-    tags$script(src = "https://cdn.rawgit.com/exupero/saveSvgAsPng/gh-pages/saveSvgAsPng.js"),
     tags$script(src = "tree.js"),
     tags$script(src = "index.js"),
     tags$script(src = "phylotree.js"),
@@ -45,26 +45,28 @@ ui <- fluidPage(
       width = 12),
   mainPanel(
         "",
-        downloadButton(outputId = "saveAln", label = "Download alignment"), 
-        actionButton(inputId = "saveAll", label = "Download all output"),
-        HTML("<div><form><label>View extant sequences<input type = 'checkbox' id = 'extants' checked/></form></div>"),
         tags$body(
+          div(id = "optionsdiv", style = "width: 100%; display: none;",
+            downloadButton(outputId = "saveAll", label = "Download all output"),
+            downloadButton(outputId = "saveAln", label = "Download alignment"),
+            HTML("<div><form><label>View extant sequences<input type = 'checkbox' id = 'extants' checked/></form></div>")),
           div(style = "width: 100%; overflow: auto; padding-top: 1em;",
             div(id = "alignmentdiv", style = "width: 100%; overflow: auto; border:1px solid #e3e3e3; margin-bottom: 1em; display:none; padding: 1em; ",
               div(dataTableOutput('alntable'), style = "font-size: 75%; width: 100%")),
             div(style = "clear: both;"),
             div(id="treediv", style = "width: 30%; height: 100%; overflow: auto; float: left; margin: 0; padding: 1em; border:1px solid #e3e3e3; background-color: #f9f9f9; display:none;", 
               HTML("<h5>Phylogenetic Tree</h5><svg id = 'tree_display'; class = 'output'; style = 'padding:0;margin:5px;'></svg><div><form><label>Radial layout<input type = 'checkbox' id = 'layout' unchecked/></form></div>")),
-            div(id="pogdiv", style = "width: 70%; height: 100%; overflow: auto; float: right; display: none; padding: 1em;",
+            div(style = "width:70%; height: 100%; float: right; padding: 1em;",
+            div(id="pogdiv", style = "width: 100%; height: 100%; overflow: auto; display: none;",
               HTML("<h5>Inferred Ancestral Sequence</h5>"),
               downloadButton(outputId = "savePOG", label = "Download Graph"),
-              HTML("<div style = 'clear:both;' /><div id = 'graphsvg'><svg id = 'graphContainer'; class = 'output'; ></svg></div><div style = 'clear:both;' />"),
-              HTML("<h5>Extant Sequence Alignment</h5><svg id = 'msagraphContainer'; class = 'output'; ></svg>"),
-              div(id = "seq_logo", style = "display: none;",
-                  selectInput(inputId = "letter_height", choices = c("Information content", "Score"),
-                        selected = "Information content", label = "Letter Height"),
-                  div(id = "logo", class = "logo", "data-logo" = "")))),
-          div(style = "clear: both;")
+              HTML("<div style = 'clear:both;'></div><div id = 'graphsvg'><svg id = 'graphContainer'; class = 'output'; ></svg></div><div style = 'clear:both;'></div>"),
+              HTML("<h5>Extant Sequence Alignment</h5><svg id = 'msagraphContainer'; class = 'output'; ></svg>")),
+            div(id = "seq_logo", style = "width: 100%; display: none;",
+              HTML("<h5>Logo of Inferred Ancestral Sequence</h5>"),
+              downloadButton(outputId = "saveLogo", label = "Download Sequence Logo"),
+              plotOutput(outputId = "logoPlot"))),
+          div(style = "clear: both;"))
         ),
         width = 12)
     )
@@ -77,39 +79,19 @@ server <- function(input, output, session) {
   loaded <- reactiveValues(status = NULL)
   sessiontmp <- NULL
   
-  # Perform joint reconstruction
-  #observeEvent(input$submitBtn, {
-  #  req(fname$tree, fname$seqs, fname$out, fname$runId)
-  #  asrRun <- fname$runId
-  #  return(asrRun);
-  #})
-  #    print("submit")
-  #    withProgress(message = 'Reconstructing ancestors...', value = 0.1, {
-  #      for (i in 1:55) {
-  #        incProgress(1 / 55)
-  #        Sys.sleep(0.05)
-  #      }
-  #      asrValues$defaultASR <- runASR(fname$tree, fname$seqs, inf = "Joint", output_file = fname$out)
-  #    })
-    
-      # find the appropriate label for the root node
-  #    # (javascript sets the label to 'root', which doesn't match the PO Graph saved files, root node has N0 in the name)
-  #    root_node <- unlist(strsplit(unlist(strsplit(list.files("sessiontmp/", pattern = ".*(N0).*"), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
-  #    session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node))
-  #    output$ancestorText <- renderText({paste("The predicted sequence for the ancestor at the root node is", as.character(asrValues$defaultASR$fastaDF$Sequence[1]))})
-  #})
-  
   # load data to the temporary session folder
   observeEvent(input$submitBtn,{
     # Upload tree and sequence file to server, so we can pass it through to the ASR library
-    fname$session <- paste(input$runId, format(Sys.time(), "%d-%m-%H%M%S"), sep="")
-    sessiontmp <<- fname$session
+    if (is.null(sessiontmp)) {
+      fname$session <- paste(format(Sys.time(), "%d%m%H%M%S%u"), sep="")
+      sessiontmp <<- fname$session
+      dir.create(file.path(fname$session), showWarnings = FALSE)
+    }
     fname$out <- paste(fname$session, input$runId, sep="/")
     fname$tree <- paste(fname$out, input$tree[['name']], sep="")
     fname$seqs <- paste(fname$out, input$alignment[['name']], sep="")
     fname$runId <- input$runId
     print('Copying data to server...')
-    dir.create(file.path(fname$session), showWarnings = FALSE)
     str <- readChar(input$tree[['datapath']], file.info(input$tree[['datapath']])$size)
     fc <- file(fname$tree)
     writeLines(str, fc)
@@ -122,13 +104,15 @@ server <- function(input, output, session) {
   
   # Load default data
   observeEvent(input$defaultBtn,{
-    fname$session <- paste("default", format(Sys.time(), "%d-%m-%H%M%S"), sep="")
-    sessiontmp <<- fname$session
+    if (is.null(sessiontmp)) {
+      fname$session <- paste(format(Sys.time(), "%d%m%H%M%S%u"), sep="")
+      sessiontmp <<- fname$session
+      dir.create(file.path(fname$session), showWarnings = FALSE)
+    }
     fname$tree <- "default.nwk"
     fname$seqs <- "default.aln"
     fname$out <- paste(fname$session, "default", sep="/")
     fname$runId <- "default"
-    dir.create(file.path(fname$session), showWarnings = FALSE)
     print("default")
     loaded$status <- TRUE}, ignoreNULL = TRUE, ignoreInit = TRUE)
   
@@ -139,6 +123,7 @@ server <- function(input, output, session) {
   
   observe({
     if (is.null(loaded$status)) return()
+    session$sendCustomMessage(type ='divvisibility',message = list(show = FALSE, session = fname$session))
     
     print(paste('Loading',fname$runId,'...',sep=" "))
     
@@ -151,65 +136,71 @@ server <- function(input, output, session) {
       
         # find the appropriate label for the root node
         # (javascript sets the label to 'root', which doesn't match the PO Graph saved files, root node has N0 in the name)
-        root_node <- unlist(strsplit(unlist(strsplit(list.files(paste(fname$session,"/", sep=""), pattern = ".*(N0).*"), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
+        root_node <- unlist(strsplit(unlist(strsplit(list.files(paste(fname$session,"/", sep=""), pattern = paste(fname$runId,".*(N0).*.(dot)", sep="")), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
         session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node, session = fname$session))
       })
+    
+    # save all dot files as png files
+    for (pog in list.files(paste(fname$session, "/", sep=""), patter = "*.dot")) {
+      system(paste("dot -Tpng", paste(paste(fname$session, "/", sep=""), pog, sep=""), "-o", paste(paste(fname$session, "/", sep=""), unlist(strsplit(pog, "[.]"))[1], ".png", sep=""), sep=" "), wait = FALSE)
+    }
+        
+    session$sendCustomMessage(type ='divvisibility',message = list(show = TRUE, session = fname$session))   
     loaded$status <- NULL
   })
   
   # Set up the default values
   treeValues <- reactiveValues(node = "N0")
-  logoValues <- reactiveValues(colour = "taylor", cols = NULL, seqs = NULL)
+  logoValues <- reactiveValues(colour = "clustal", cols = NULL, seqs = NULL)
   
-  # Save the alignment
-#  output$saveAln <- downloadHandler(
-#    filename = fname$out,
-#    content = function(file) {
-#      write(as.character(asrValues$defaultASR$loadedFiles$alignment$V1), file)
-#    }
-#  )
- 
   # Downloads all files
-  observeEvent(input$saveAll, {
-    filenames <- paste(fname$session, list.files(paste(fname$session, "/", sep="")), sep="/")
-    print(filenames)
-    zip(fname$out, filenames)
-    print(list.files(paste(fname$session, "/", sep="")))
-   # filename = fname$out,
-  #  content = function(file) {
-   #   write(as.character(asrValues$defaultASR$loadedFiles$alignment$V1), file)
-    #}
-  }, ignoreNULL = TRUE, ignoreInit = TRUE)
-  
-  # Save the tree
-  output$saveTree <- downloadHandler(
-    filename = fname$out,
+  output$saveAll <- downloadHandler(
+    filename = function() {
+      paste(fname$runId, "zip", sep=".")
+    },
     content = function(file) {
-      write(as.character(asrValues$defaultASR$loadedFiles$tree$V1), file)
-    }
+      tmp <- paste("ASR_", format(Sys.time(), "%d%m-%H%M-%u"), sep="")
+      dir.create(file.path(tmp), showWarnings = FALSE)
+      system(paste("cp -r", paste(fname$session, "/", sep=""), paste(tmp, "/", sep=""), sep=" "))
+      filenames <- paste(tmp, list.files(paste(tmp, "/", sep="")), sep="/")
+      zip(file, filenames)
+      unlink(tmp, recursive = TRUE)
+    },
+    contentType = "application/zip"
   )
   
-  # Update the logo plot parameters based on user input
-  observeEvent(input$logoButton, {
-    logoValues$colour <- input$logoColour
-    logoValues$cols <- if (identical(input$logoCols, ""))
-      NULL
-    else {
-      input$logoCols
-    }
-    logoValues$seqs <- if (identical(input$logoSeqs, ""))
-      NULL
-    else {
-      input$logoSeqs
-    }
-  })
+  # Save sequence logo
+  output$saveLogo <- downloadHandler(
+    filename = function() {
+      paste(fname$runId, input$marginalNode, "_logo.png", sep="")
+    },
+    content = function(file) {
+      file.copy(paste(paste(fname$session, "/", sep=""), fname$runId, input$marginalNode, "_logo.png", sep=""), file)
+    },
+    contentType = 'image/png'
+  )
   
-  # Update tree output
-  #observe({
-    #if (!is.nan(input$defaultBtn) || input$defaultBtn > 0 || input$submitBtn > 0) {
-  #    output$treePlot <- renderPlot(plot_subtree(asrValues$defaultASR, treeValues$node))
-    #}
-  #})
+  # Save ancestral partial order graph
+  output$savePOG <- downloadHandler(
+    filename = function() {
+      paste(fname$runId, input$selectedNodeLabel, ".png", sep="")
+    },
+    content = function(file) {
+      file.copy(paste(paste(fname$session, "/", sep=""), fname$runId, input$selectedNodeLabel, ".png", sep=""), file)
+    },
+    contentType = 'image/png'
+  )
+  
+  # Save alignment partial order graph
+  output$saveAln <- downloadHandler(
+    filename = function() {
+      paste(fname$runId, "MSA.png", sep="")
+    },
+    content = function(file) {
+      file.copy(paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.png", sep=""), file)
+    },
+    contentType = 'image/png'
+  )
   
   observeEvent(input$marginalNode, ({
     req(input$marginalNode, fname$tree, fname$seqs, fname$out)
@@ -220,35 +211,26 @@ server <- function(input, output, session) {
         incProgress(1 / 55)
         Sys.sleep(0.05)
       }
-      
       asrValues$marginal <- runASR(fname$tree, fname$seqs, inf = "Marginal", node = if (input$marginalNode == "root") {
                 NULL
               } else {
                 input$marginalNode
               }, output_file = fname$out)
     })
+    session$sendCustomMessage(type="loadPOGraph", message=list(node=input$marginalNode, label=fname$runId))
   }))
-  
-  # update logo
-  observeEvent(asrValues$marginal, ({
-    req(asrValues$marginal, input$marginalNode)
-    asrValues$json = createJSON(asrValues$marginal,input$letter_height, "Marginal")
-    session$sendCustomMessage(type="updateJsonAttr", asrValues$json)
-    session$sendCustomMessage(type="loadLogo", input$marginalNode)
-  }))
-  
-  #output$marginalDist <- renderPlot(plot_distrib(asrValues$marginal, input$marginalNode, distValues$type, distValues$colour, distValues$cols, distValues$aas))
-  
-  # Update marginal distribution output
-  observe({
-    req(asrValues$marginal)
-    output$marginalDist <- renderPlot(plot_distrib(asrValues$marginal, NULL, distValues$type, distValues$colour, distValues$cols, distValues$aas))
-  })
   
   # Update logo output
   observe({
     req(input$marginalNode, asrValues$defaultASR)
-    output$logoPlot <- renderPlot(plot_logo_aln(asrValues$defaultASR, NULL, logoValues$colour, logoValues$cols, logoValues$seqs))
+    withProgress(message = paste('Loading sequence logo for ',input$marginalNode,'...'), value = 0.1, {
+      for (i in 1:20) {
+        incProgress(1 / 20)
+        Sys.sleep(0.03)
+      }
+      output$logoPlot <- renderPlot(plotLogo(paste(sessiontmp, "/", fname$runId, "_distribution.txt", sep="")))
+      ggsave(paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""), plotLogo(paste(sessiontmp, "/", fname$runId, "_distribution.txt", sep="")))
+    })
   })
   
   # Allow the session to reconnect if disconnected (reloaded, etc. "force" for local changes, TRUE for server)
@@ -256,8 +238,6 @@ server <- function(input, output, session) {
   
   # delete temporary files created for analysis
   session$onSessionEnded(function() {
-    print("unlinking tmp folder...")
-    print(sessiontmp)
     unlink(sessiontmp, recursive = TRUE)})
   
 }

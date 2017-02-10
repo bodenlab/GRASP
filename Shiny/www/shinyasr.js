@@ -14,7 +14,27 @@ window.onload = function() {
         document.getElementById("pogdiv").style.display = "none";
         document.getElementById("alignmentdiv").style.display = "none";
         document.getElementById("optionsdiv").style.display = "none";
+        document.getElementById("seq_logo").style.display = "none";
       }
+    }
+    
+    function plotMSA(width){
+      // display MSA graph
+        jQuery.get(sessionId + "/" + label + "MSA.dot", function(data) {
+      	  var g = graphlibDot.read(data);
+      	  g.nodes().forEach(function(v) {
+      	    var node = g.node(v);
+      	    node.style= "fill:" + node.fillcolor;
+      	    node.fixedsize = true;
+      	    node.shape = "circle";
+          });
+          var renderer = dagreD3.render();
+          d3.select("svg#msagraphContainer").call(renderer, g);
+          var svg = document.querySelector("svg#msagraphContainer");
+          var bbox = svg.getBBox();
+          svg.style.height = bbox.height + 80.0 + "px";
+          svg.style.width = bbox.width + 80.0 + "px";
+        });
     }
     
     function readSingleFile(nodeName, label) {
@@ -45,8 +65,12 @@ window.onload = function() {
       // Optional - resize the SVG element based on the contents.
       var svg = document.querySelector("svg#graphContainer");
       var bbox = svg.getBBox();
-      svg.style.height = "100%"; //bbox.height + 40.0 + "px";
+      svg.style.height = bbox.height + 80.0 + "px";
       svg.style.width = bbox.width + 80.0 + "px";
+      document.getElementById("seq_logo").style.width = bbox.width + 140.0 + "px";
+      
+      // redraw MSA because of width
+      plotMSA(bbox.width + 80.0);
     }
   
     Shiny.addCustomMessageHandler("divvisibility",
@@ -68,22 +92,7 @@ window.onload = function() {
         
         showDivs(true);
         document.getElementById("seq_logo").style.display = "none";
-        
-        // display MSA graph
-        jQuery.get(sessionId + "/" + label + "MSA.dot", function(data) {
-      	  var g = graphlibDot.read(data);
-      	  g.nodes().forEach(function(v) {
-      	    var node = g.node(v);
-      	    node.style= "fill:" + node.fillcolor;
-      	    node.shape = "circle";
-          });
-          var renderer = dagreD3.render();
-          d3.select("svg#msagraphContainer").call(renderer, g);
-          var svg = document.querySelector("svg#msagraphContainer");
-          var bbox = svg.getBBox();
-          svg.style.height = "100%";
-          svg.style.width = bbox.width + 80.0 + "px";
-        });
+        $("#extants").prop("checked", true);
         
         // display root graph
         selectedNode = "root";
@@ -101,9 +110,11 @@ window.onload = function() {
           d3.select("svg#graphContainer").call(renderer, g);
           var svg = document.querySelector("svg#graphContainer");
           var bbox = svg.getBBox();
-          svg.style.height = "100%";
+          svg.style.height = bbox.height + 80.0 + "px";
           svg.style.width = bbox.width + 80.0 + "px";
+          plotMSA(bbox.width + 80.0);
         });
+        
         
           var nodeColorizer = function(element, node) {
             console.log(node.name);
@@ -154,21 +165,23 @@ window.onload = function() {
       			function(node) {return("Create marginal reconstruction");},
       			function () { 
       			  createMarginal(tree_node);
-      			  displayLogo(tree_node);
       			  displayPOGraph(tree_node);
+      			  displayLogo(tree_node);
       			}
      	 	  );
      	 	  d3_add_custom_menu (tree_node, // add to this node
       			function(node) {return("Show partial order graph");},
       			function () { 
+      	      Shiny.onInputChange("inferredSeq", "");
       			  document.getElementById("seq_logo").style.display = "none";
               displayPOGraph(tree_node);}
       		);
       		d3_add_custom_menu (tree_node, // add to this node
       			function(node) {return("Show sequence logo");},
       			function () { 
-      			  displayLogo(tree_node);
+        	    Shiny.onInputChange("inferredSeq", "");
       			  displayPOGraph(tree_node);
+      			  displayLogo(tree_node);
       			}
       		);
       	});
@@ -187,6 +200,7 @@ window.onload = function() {
         Shiny.onInputChange("marginalNode", tree_node.name);
       } else {
         // already performed marginal
+        displayPOGraph(tree_node);
         displayLogo(tree_node);
       }
     }
@@ -199,6 +213,7 @@ window.onload = function() {
       } else {
         // perform reconstruction
         createMarginal(tree_node);
+        displayPOGraph(tree_node);
         displayLogo(tree_node);
       }
     }
@@ -206,12 +221,6 @@ window.onload = function() {
     Shiny.addCustomMessageHandler("loadLogo",
       function(tree_node){
         displayLogo(tree_node);
-      }
-    );
-    
-    Shiny.addCustomMessageHandler("updateJsonAttr",
-      function(json){
-        document.getElementById("logo").setAttribute("data-logo", JSON.stringify(json));
       }
     );
     

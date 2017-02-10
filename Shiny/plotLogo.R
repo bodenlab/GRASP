@@ -26,10 +26,11 @@ plotLogo <- function(filepath, alphabet = "AA") {
   lmf <- melt(logodistdf, id.var='position', value.name="bits", variable.name="Character")
   
   colourPalette = getColors(cols)
-  p <- ggplot(data=lmf, aes(x=position, y=bits, fill=Character))  +
+  p <- ggplot(data=lmf, aes(x=position, y=bits, fill=Character, width=0.6))  +
   geom_bar(stat='identity', color="white", alpha=0.4) +
   scale_fill_manual(values = colourPalette) + 
-  geom_text(aes(label=Character, x=position, y=bits, hjust=0.5, size=bits), position='stack') +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
+  geom_text(aes(label=Character, x=position, y=bits, vjust=0.5, hjust=0.5, size=bits), position='stack') +
   theme_bw()
   
   return(p)

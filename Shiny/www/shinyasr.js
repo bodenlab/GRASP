@@ -82,6 +82,12 @@ window.onload = function() {
         }
       }
     );
+    
+    Shiny.addCustomMessageHandler("showphylo",
+      function(message) {
+        
+      }
+    );
       
     Shiny.addCustomMessageHandler("message",
     	function(message) {

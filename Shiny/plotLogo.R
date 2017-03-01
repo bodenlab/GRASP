@@ -8,6 +8,7 @@ plotLogo <- function(filepath, alphabet = "AA") {
   } else {
     cols <- c("A", "C", "G", "T")
   }
+  print("here")
 
   distdf <- t(read.table(filepath))
   rownames(distdf) <- 1:nrow(distdf)

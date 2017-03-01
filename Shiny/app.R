@@ -26,9 +26,8 @@ ui <- fluidPage(
     tags$script(src = "index.js"),
     tags$script(src = "phylotree.js"),
     # CSS / Javscript for sequence logos
-    tags$link(rel = "stylesheet", type = "text/css", href = "hmm_logo.min.css"),
-    tags$script(src = "https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"),
-    tags$script(src = "hmm_logo.js"), 
+    #tags$link(rel = "stylesheet", type = "text/css", href = "hmm_logo.min.css"),
+    #tags$script(src = "https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"),
     tags$script(src = "shinyasr.js")
   ),
   useShinyjs(),
@@ -44,7 +43,6 @@ ui <- fluidPage(
       div(style = "float:left; width: 325px; height: 60px;", fileInput(inputId = "alignment", label = "Select your alignment file:", width = "95%")),
       div(style = "float:left; width: 230px; height: 60px; margin-top: 25px;", actionButton(inputId = "submitBtn", label = "Reconstruct Ancestors", width = "100%")),
       tags$br(),tags$br(),
-      text("*large datasets may take time"), 
       bsModal("modalnew", "Help", "helpBtn", size = "large",
               HTML("<h3>Default data</h3>
                     <p>A joint reconstruction is performed on a toy dataset when the 'Load Default Data' button is pressed. The toy datasat has 6 
@@ -476,7 +474,7 @@ server <- function(input, output, session) {
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # Allow the session to reconnect if disconnected (reloaded, etc. "force" for local changes, TRUE for server)
-  session$allowReconnect("force") # True
+  session$allowReconnect(TRUE)
   
   # delete temporary files created for analysis
   session$onSessionEnded(function() {

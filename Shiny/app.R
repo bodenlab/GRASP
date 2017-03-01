@@ -225,20 +225,23 @@ server <- function(input, output, session) {
     err = checkSeqLen(datatable)
     if (!is.null(err)) {
       createAlert(session, "alert", "", title = "Error", content = err, append = FALSE)
+    } else {
+      return()
     }
-    validate(err)
     # pop up error if there is an invalid character
     err = checkChar(datatable)
     if (!is.null(err)) {
       createAlert(session, "alert", "", title = "Error", content = err, append = FALSE)
+    } else {
+      return()
     }
-    validate(err)
     # pop up error if the tree file and sequence file do not have the same identifiers
     err = checkLabels(datatable)
     if (!is.null(err)) {
       createAlert(session, "alert", "", title = "Error", content = err, append = FALSE)
+    } else {
+      return()
     }
-    validate(err)
     datatable
   })
   
@@ -277,6 +280,7 @@ server <- function(input, output, session) {
         loaded$status <- NULL
       }
     }
+    print(serr)
     serr
   }
   

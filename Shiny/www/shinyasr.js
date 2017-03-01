@@ -82,12 +82,6 @@ window.onload = function() {
         }
       }
     );
-    
-    Shiny.addCustomMessageHandler("showphylo",
-      function(message) {
-        
-      }
-    );
       
     Shiny.addCustomMessageHandler("message",
     	function(message) {
@@ -102,8 +96,6 @@ window.onload = function() {
         
         // display root graph
         selectedNode = "root";
-        console.log(selectedNode);
-        console.log("rootenode: " + rootNode);
       	Shiny.onInputChange("selectedNodeLabel", rootNode);
         jQuery.get(sessionId + "/" + label + rootNode + ".dot", function(data) {
       	  var g = graphlibDot.read(data);
@@ -123,8 +115,6 @@ window.onload = function() {
         
         
           var nodeColorizer = function(element, node) {
-            console.log(node.name);
-            console.log(selectedNode);
             if (node.name == selectedNode) {
               element.select("circle").style('fill', "hsl(352,90%,70%)");
             } else {

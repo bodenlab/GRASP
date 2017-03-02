@@ -168,14 +168,12 @@ window.onload = function() {
      	 	  d3_add_custom_menu (tree_node, // add to this node
       			function(node) {return("Show partial order graph");},
       			function () { 
-      	      Shiny.onInputChange("inferredSeq", "");
       			  document.getElementById("seq_logo").style.display = "none";
               displayPOGraph(tree_node);}
       		);
       		d3_add_custom_menu (tree_node, // add to this node
       			function(node) {return("Show sequence logo");},
-      			function () { 
-        	    Shiny.onInputChange("inferredSeq", "");
+      			function () {
       			  displayPOGraph(tree_node);
       			  displayLogo(tree_node);
       			}
@@ -185,11 +183,13 @@ window.onload = function() {
     function displayPOGraph(tree_node){
       readSingleFile(tree_node.name, label);
       selectedNode = tree_node.name;
+      Shiny.onInputChange("reconType", "joint");
       Shiny.onInputChange("selectedNodeLabel", tree_node.name);
       tree.update();
     }
       
     function createMarginal(tree_node){
+      Shiny.onInputChange("selectedNodeLabel", tree_node.name);
       if (marginalNodesPerformed.indexOf(tree_node.name) == -1) {
         // perform reconstruction
         marginalNodesPerformed.push(tree_node.name);
@@ -199,6 +199,7 @@ window.onload = function() {
         displayPOGraph(tree_node);
         displayLogo(tree_node);
       }
+      Shiny.onInputChange("reconType", "marginal");
     }
       
     function displayLogo(tree_node){
@@ -212,6 +213,7 @@ window.onload = function() {
         displayPOGraph(tree_node);
         displayLogo(tree_node);
       }
+      Shiny.onInputChange("reconType", "marginal");
     }
     
     Shiny.addCustomMessageHandler("loadLogo",

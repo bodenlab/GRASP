@@ -8,7 +8,6 @@ plotLogo <- function(filepath, alphabet = "AA") {
   } else {
     cols <- c("A", "C", "G", "T")
   }
-  print("here")
 
   distdf <- t(read.table(filepath))
   rownames(distdf) <- 1:nrow(distdf)
@@ -31,8 +30,11 @@ plotLogo <- function(filepath, alphabet = "AA") {
   geom_bar(stat='identity', color="white", alpha=0.4) +
   scale_fill_manual(values = colourPalette) + 
   scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
-  geom_text(aes(label=Character, x=position, y=bits, vjust=0.5, hjust=0.5, size=bits), position='stack') +
+  geom_text(aes(label=Character, x=position, y=bits, vjust=1, hjust=1, size=bits), position='stack') +
+  scale_size(range=c(0,21)) +
   theme_bw()
+  p = p + theme(text = element_text(size=30))
+  p = p + theme(panel.border=element_blank(), axis.line=element_line(), panel.grid.minor=element_blank(), panel.grid.major=element_blank(), panel.background=element_blank())
   
   return(p)
 }

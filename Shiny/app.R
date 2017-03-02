@@ -84,13 +84,15 @@ ui <- fluidPage(
               HTML("<h5>Inferred Ancestral Sequence</h5>"),
               downloadButton(outputId = "savePOG", label = "Download Graph"),
               HTML("<div style='padding:10px;'></div>"),
-              textOutput(outputId = "inferredSeq"),
+              div(id="inferredSeqDiv",
+              textOutput(outputId = "inferredSeqLabel"),
+              div(textOutput(outputId = "inferredSeq"), style = "font-family: 'Courier New'")),
               HTML("<div style = 'clear:both;'></div><div id = 'graphsvg'><svg id = 'graphContainer'; class = 'output'; ></svg></div><div style = 'clear:both;'></div>"),
               HTML("<h5>Extant Sequence Alignment</h5><svg id = 'msagraphContainer'; class = 'output'; ></svg><div style = 'clear:both;'></div>")),
             div(id = "seq_logo", style = "display: none;",
               HTML("<h5>Logo of Inferred Ancestral Sequence</h5>"),
               downloadButton(outputId = "saveLogo", label = "Download Sequence Logo"),
-              plotOutput(outputId = "logoPlot"))),
+              imageOutput(outputId = "logoPlot"))),
           div(style = "clear: both;"))
         ),
         width = 12)
@@ -101,8 +103,9 @@ server <- function(input, output, session) {
   # Setup reactive values for asr output
   asrValues <- reactiveValues(defaultASR = NULL)
   fname <- reactiveValues(session = NULL, tree = NULL, seqs = NULL, out = NULL, runId = NULL)
-  loaded <- reactiveValues(status = NULL)
+  loaded <- reactiveValues(status = NULL, asrdone = FALSE)
   node <- reactiveValues(selected = NULL)
+  recon <- reactiveValues(joint = TRUE)
   sessiontmp <- NULL
   
   # load data to the temporary session folder
@@ -137,6 +140,7 @@ server <- function(input, output, session) {
     fname$tree <- paste(fname$out, input$tree[['name']], sep="")
     fname$seqs <- paste(fname$out, input$alignment[['name']], sep="")
     fname$runId <- input$runId
+    recon$joint <- TRUE
     print('Copying data to server...')
     str <- readChar(input$tree[['datapath']], file.info(input$tree[['datapath']])$size)
     fc <- file(fname$tree)
@@ -159,6 +163,7 @@ server <- function(input, output, session) {
     fname$seqs <- "default.aln"
     fname$out <- paste(fname$session, "default", sep="/")
     fname$runId <- "default"
+    recon$joint <- TRUE
     loaded$status <- TRUE}, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # check that tree file is the correct type
@@ -277,7 +282,6 @@ server <- function(input, output, session) {
         loaded$status <- NULL
       }
     }
-    print(serr)
     serr
   }
   
@@ -339,6 +343,7 @@ server <- function(input, output, session) {
   # Perform joint reconstruction on the input sequences/tree
   observe({
     if (is.null(loaded$status)) return()
+    loaded$asrdone <- FALSE
     session$sendCustomMessage(type ='divvisibility',message = list(show = FALSE, session = fname$session))
     
     print(paste('Loading',fname$runId,'...',sep=" "))
@@ -355,11 +360,12 @@ server <- function(input, output, session) {
           # (javascript sets the label to 'root', which doesn't match the PO Graph saved files, root node has N0 in the name)
           root_node <- unlist(strsplit(unlist(strsplit(list.files(paste(fname$session,"/", sep=""), pattern = paste(fname$runId,".*(N0).*.(dot)", sep="")), fname$runId, fixed = TRUE)), ".dot", fixed = TRUE))
           session$sendCustomMessage(type = 'message',message = list(a = asrValues$defaultASR$loadedFiles$tree$V1, b = fname$runId,  alignment = asrValues$defaultASR$loadedFiles$alignment$v1, root = root_node, session = fname$session))
-          print(asrValues$defaultASR$loadedFiles$tree$V1)
     })
+    recon$joint <- TRUE
     
     session$sendCustomMessage(type ='divvisibility',message = list(show = TRUE, session = fname$session))   
     loaded$status <- NULL
+    loaded$asrdone <- TRUE
   })
   
   # Set up the default values
@@ -396,30 +402,39 @@ server <- function(input, output, session) {
   # Save ancestral partial order graph
   output$savePOG <- downloadHandler(
     filename = function() {
-      paste(fname$runId, input$selectedNodeLabel, ".png", sep="")
+      if (recon$joint == TRUE)
+        paste(fname$runId, input$selectedNodeLabel, ".dot", sep="")
+      else
+        paste(fname$runId, "_", input$marginalNode, "_marg", input$selectedNodeLabel, ".dot", sep="")
     },
     content = function(file) {
-      system(paste("dot -Tpng", paste(paste(fname$session, "/", sep=""), fname$runId, input$selectedNodeLabel, ".dot", sep=""), "-o", paste(paste(fname$session, "/", sep=""), fname$runId, input$selectedNodeLabel, ".png", sep=""), sep=" "))
-      file.copy(paste(paste(fname$session, "/", sep=""), fname$runId, input$selectedNodeLabel, ".png", sep=""), file)
+      #system(paste("dot -Tpng", paste(paste(fname$session, "/", sep=""), fpog, ".dot", sep=""), "-o", paste(paste(fname$session, "/", sep=""), fname$runId, input$selectedNodeLabel, ".png", sep=""), sep=" "))
+      if (recon$joint == TRUE)
+        fpog = paste(fname$runId, input$selectedNodeLabel, ".dot", sep="")
+      else
+        fpog = paste(fname$runId, "_", input$marginalNode, "_marg", input$selectedNodeLabel, ".dot", sep="")
+      file.copy(paste(paste(fname$session, "/", sep=""), fpog, sep=""), file)
     },
-    contentType = 'image/png'
+    contentType = 'dot'
   )
   
   # Save alignment partial order graph
   output$saveAln <- downloadHandler(
     filename = function() {
-      paste(fname$runId, "MSA.png", sep="")
+      paste(fname$runId, "MSA.dot", sep="")
     },
     content = function(file) {
-      system(paste("dot -Tpng", paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.dot", sep=""), "-o", paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.png", sep=""), sep=" "))
-      file.copy(paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.png", sep=""), file)
+      #system(paste("dot -Tpng", paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.dot", sep=""), "-o", paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.png", sep=""), sep=" "))
+      file.copy(paste(paste(fname$session, "/", sep=""), fname$runId, "MSA.dot", sep=""), file)
     },
-    contentType = 'image/png'
+    contentType = 'dot'
   )
   
   # perform marginal reconstruction of marginalNode (selected via the javascript tree)
   observeEvent(input$marginalNode, ({
     req(input$marginalNode, fname$tree, fname$seqs, fname$out)
+    loaded$asrdone <- FALSE
+    recon$joint <- FALSE
     treeValues$node <- input$marginalNode
     withProgress(message = paste('Performing marginal reconstruction at ',input$marginalNode,'...'), value = 0.1, {
       for (i in 1:55) {
@@ -430,12 +445,37 @@ server <- function(input, output, session) {
                 NULL
               } else {
                 input$marginalNode
-              }, output_file = fname$out)
-      
-      # load the inferred sequence
-      f <- file(paste(sessiontmp, "/", fname$runId, "_recon.fa", sep=""),"r")
+              }, output_file = paste(fname$out, input$marginalNode, "marg", sep="_"))
+    })
+    session$sendCustomMessage(type="loadPOGraph", message=list(node=input$marginalNode, label=fname$runId))
+    loaded$asrdone <- TRUE
+    showSeq()
+  }))
+  
+  observeEvent(input$reconType, {
+    if (input$reconType == "marginal")
+      recon$joint = FALSE
+    else
+      recon$joint = TRUE
+    showSeq()
+  })
+  
+  observeEvent(input$selectedNodeLabel, {
+    showSeq()
+  })
+  
+  # show sequence for marginal
+  showSeq <- function() {
+    isolate({
+    if (loaded$asrdone == FALSE)
+      return()
+    output$inferredSeq <- renderText("")
+    seq = ""
+    if (recon$joint == FALSE) {
+      if (!file.exists(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_recon.fa", sep="")))
+        return()
+      f <- file(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_recon.fa", sep=""),"r")
       readLines(f, n=1)
-      seq = ""
       while (TRUE) {
         line = readLines(f, n=1)
         if (length(line) == 0) {
@@ -444,33 +484,51 @@ server <- function(input, output, session) {
         seq = paste(seq, line, sep="")
       }
       close(f)
-      output$inferredSeq <- renderText(paste("Inferred consensus sequence for ", input$marginalNode, ": ", seq, sep=""))
+      output$inferredSeqLabel <- renderText(paste("Inferred consensus sequence for ", input$selectedNodeLabel, " using marginal reconstruction: \n", sep=""))
+    } else {
+      if (!file.exists(paste(sessiontmp, "/", fname$runId, "_recon.fa", sep="")))
+        return()
+      f <- file(paste(sessiontmp, "/", fname$runId, "_recon.fa", sep=""),"r")
+      while (TRUE) {
+        line = readLines(f, n=1)
+        if (length(line) == 0) {
+          break;
+        }
+        if (regexpr(">", line) != -1 && unlist(strsplit(line, ">"))[2] == input$selectedNodeLabel) {
+          seq = readLines(f, n=1)
+          print(input$selectedNodeLabel)
+          print(seq)
+          break;
+        }
+      }
+      close(f)
+      output$inferredSeqLabel <- renderText(paste("Inferred consensus sequence for ", input$selectedNodeLabel, " using joint reconstruction: \n", sep=""))
+    }
+    output$inferredSeq <- renderText(seq)
     })
-    session$sendCustomMessage(type="loadPOGraph", message=list(node=input$marginalNode, label=fname$runId))
-  }))
-  
-  observeEvent(input$inferredSeq, {
-    paste(input$inferredSeq)
-    output$inferredSeq <- renderText(input$inferredSeq)
-  })
+  }
   
   # Update logo output
   observeEvent(input$marginalNode, {
     req(asrValues$defaultASR)
+    recon$joint <- FALSE
     withProgress(message = paste('Loading sequence logo for ',input$marginalNode,'...'), value = 0.1, {
       for (i in 1:20) {
         incProgress(1 / 20)
         Sys.sleep(0.03)
       }
-      output$logoPlot <- renderPlot({plotLogo(paste(sessiontmp, "/", fname$runId, "_distribution.txt", sep=""))})
-      numnodes = length(list.files(paste(fname$session, "/", sep=""), pattern = "*.dot"))
-      # max of 50in
-      if (numnodes+0.2*numnodes > 40) {
-        numnodes = 40
-      } else {
-        numnodes = numnodes+0.2*numnodes
-      }
-      ggsave(paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""), plotLogo(paste(sessiontmp, "/", fname$runId, "_distribution.txt", sep="")), width=numnodes, height=6)
+      distdf <- t(read.table(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_distribution.txt", sep="")))
+      numnodes = nrow(distdf)
+      output$logoPlot <- renderImage({
+        ggsave(file = paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""), plot = plotLogo(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_distribution.txt", sep="")), width=4.2*numnodes, height=6, dpi = 72, limitsize = FALSE)
+        return(list(
+            src = paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""),
+            contentType = "image/png",
+            width = (numnodes)*108,
+            height = 200,
+            alt = paste(input$marginalNode,"Logo", sep=" ")
+          ))
+        }, deleteFile = FALSE)    
     })
   }, ignoreNULL = TRUE, ignoreInit = TRUE)
   

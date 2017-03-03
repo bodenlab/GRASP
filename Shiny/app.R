@@ -449,14 +449,17 @@ server <- function(input, output, session) {
     })
     session$sendCustomMessage(type="loadPOGraph", message=list(node=input$marginalNode, label=fname$runId))
     loaded$asrdone <- TRUE
+    showLogo()
     showSeq()
   }))
   
   observeEvent(input$reconType, {
-    if (input$reconType == "marginal")
+    if (input$reconType == "marginal") {
       recon$joint = FALSE
-    else
+      showLogo()
+    } else {
       recon$joint = TRUE
+    }
     showSeq()
   })
   
@@ -508,29 +511,57 @@ server <- function(input, output, session) {
     })
   }
   
-  # Update logo output
-  observeEvent(input$marginalNode, {
-    req(asrValues$defaultASR)
-    recon$joint <- FALSE
-    withProgress(message = paste('Loading sequence logo for ',input$marginalNode,'...'), value = 0.1, {
-      for (i in 1:20) {
-        incProgress(1 / 20)
-        Sys.sleep(0.03)
-      }
-      distdf <- t(read.table(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_distribution.txt", sep="")))
-      numnodes = nrow(distdf)
-      output$logoPlot <- renderImage({
-        ggsave(file = paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""), plot = plotLogo(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_distribution.txt", sep="")), width=4.2*numnodes, height=6, dpi = 72, limitsize = FALSE)
-        return(list(
-            src = paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""),
+  showLogo = function() {
+    isolate({
+      recon$joint <- FALSE
+      if (!file.exists(paste(sessiontmp, "/", fname$runId, "_", input$selectedNodeLabel, "_marg_distribution.txt", sep="")))
+        return()
+      withProgress(message = paste('Loading sequence logo for ',input$selectedNodeLabel,'...'), value = 0.1, {
+        for (i in 1:20) {
+          incProgress(1 / 20)
+          Sys.sleep(0.03)
+        }
+        distdf <- t(read.table(paste(sessiontmp, "/", fname$runId, "_", input$selectedNodeLabel, "_marg_distribution.txt", sep="")))
+        numnodes = nrow(distdf)
+        output$logoPlot <- renderImage({
+          # check if file already exists 
+          if (!file.exists(paste(sessiontmp, "/",fname$runId, input$selectedNodeLabel, "_logo.png", sep="")))
+            ggsave(file = paste(sessiontmp, "/",fname$runId, input$selectedNodeLabel, "_logo.png", sep=""), plot = plotLogo(paste(sessiontmp, "/", fname$runId, "_", input$selectedNodeLabel, "_marg_distribution.txt", sep="")), width=4.2*numnodes, height=6, dpi = 72, limitsize = FALSE)
+          return(list(
+            src = paste(sessiontmp, "/",fname$runId, input$selectedNodeLabel, "_logo.png", sep=""),
             contentType = "image/png",
             width = (numnodes)*108,
             height = 200,
-            alt = paste(input$marginalNode,"Logo", sep=" ")
+            alt = paste(input$selectedNodeLabel,"Logo", sep=" ")
           ))
         }, deleteFile = FALSE)    
+      })
     })
-  }, ignoreNULL = TRUE, ignoreInit = TRUE)
+  }
+  
+  # Update logo output
+ # observeEvent(input$marginalNode, {
+#    req(asrValues$defaultASR)
+#    recon$joint <- FALSE
+#    withProgress(message = paste('Loading sequence logo for ',input$marginalNode,'...'), value = 0.1, {
+#      for (i in 1:20) {
+#        incProgress(1 / 20)
+#        Sys.sleep(0.03)
+#      }
+#      distdf <- t(read.table(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_distribution.txt", sep="")))
+#      numnodes = nrow(distdf)
+#      output$logoPlot <- renderImage({
+#        ggsave(file = paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""), plot = plotLogo(paste(sessiontmp, "/", fname$runId, "_", input$marginalNode, "_marg_distribution.txt", sep="")), width=4.2*numnodes, height=6, dpi = 72, limitsize = FALSE)
+#        return(list(
+#            src = paste(sessiontmp, "/",fname$runId, input$marginalNode, "_logo.png", sep=""),
+#            contentType = "image/png",
+#            width = (numnodes)*108,
+#            height = 200,
+#            alt = paste(input$marginalNode,"Logo", sep=" ")
+#          ))
+#        }, deleteFile = FALSE)    
+#    })
+#  }, ignoreNULL = TRUE, ignoreInit = TRUE)
   
   # Allow the session to reconnect if disconnected (reloaded, etc. "force" for local changes, TRUE for server)
   session$allowReconnect(TRUE)

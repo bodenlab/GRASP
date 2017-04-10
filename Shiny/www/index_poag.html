@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!-- Style sheet for the graphs -->
+        <link href="css/biojs_alignment.css" rel="stylesheet" type="text/css" />
+
+        <!-- Required JS files for D3 and jqery -->
+        <script src="//d3js.org/d3.v3.min.js"></script>
+        <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>           
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+
+        <!-- Graph JavaScript files -->
+        <script src="js/lib/index.js"></script>
+        <script src="js/lib/draw.js"></script>
+        <script src="js/lib/general.js"></script>
+        <script src="js/lib/dot_parser.js"></script>
+        <script src="js/lib/graph_overlay.js"></script>
+        
+
+        <script src="js/examples/simple_med2.js"></script>
+      
+
+    </head>
+    <body>
+        <div id="simplemed">
+            <script>
+                var options = draw_poag("#" + "simplemed");
+                init(options);
+            </script>
+            
+        </div>
+    </body>
+</html>

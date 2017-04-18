@@ -49,7 +49,10 @@ class ASRController {
     }
 
     @RequestMapping(value="/performASR", method=RequestMethod.GET)
-    public String performASR(Model model) {
+    public String performASR(Model model, BindingResult bindingResult) {
+        if (bindingResult.hasErrors())
+            return showForm(model);
+
         return "results";
     }
 }

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="fragments/nav :: nav"></div>
+<section>
+    <form action="#" th:action="@{/asr/performASR}" th:object="${asr}" method="post">
+        <div>Label:
+            <input type="text" th:field="*{label}" />
+            <div th:if="${#fields.hasErrors('${asr.label}')}" th:errors="*{asr.label}">Label Error</div>
+        </div>
+        <div>Alignment Filepath:
+            <input type="text" th:field="*{alnFilepath}" />
+            <div th:if="${#fields.hasErrors('${asr.alnFilepath}')}" th:errors="*{asr.alnFilepath}">Alignment file Error</div>
+        </div>
+        <div>Tree Filepath:
+            <input type="text" th:field="*{treeFilepath}" />
+            <div th:if="${#fields.hasErrors('${asr.treeFilepath}')}" th:errors="*{asr.treeFilepath}">Tree file Error</div>
+        </div>
+        <div><input type="submit" value="Submit" /></div>
+    </form>
+</section>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:replace="fragments/nav :: nav"></div>
+<section>
+    <p th:text="'label: ' + ${label}" />
+    <p th:text="'aln: ' + ${alnFilepath}" />
+    <p th:text="'tree: ' + ${treeFilepath}" />
+    <a href="/asr">Submit another</a>
+</section>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+</html>

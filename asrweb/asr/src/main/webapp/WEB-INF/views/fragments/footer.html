@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="footer">
+        <footer>
+            <h5 th:text="${#dates.format(#dates.createNow(), 'dd MMM yyyy HH:mm')}"></h5>
+        </footer>
+    </div>
+</body>
+</html>

@@ -4,7 +4,6 @@ import com.ASR;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.spring4.view.ThymeleafViewResolver;
@@ -31,7 +30,6 @@ public class ASRConfiguration {
     public SpringTemplateEngine templateEngine() {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(templateResolver());
-        templateEngine.setTemplateEngineMessageSource(messageSource());
         return templateEngine;
     }
 
@@ -42,13 +40,6 @@ public class ASRConfiguration {
         viewResolver.setOrder(1);
         viewResolver.setViewNames(new String[] {".html", ".xhtml"});
         return viewResolver;
-    }
-
-    @Bean
-    public ResourceBundleMessageSource messageSource() {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("messages");
-        return messageSource;
     }
 
     @Bean

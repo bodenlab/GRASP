@@ -3,21 +3,28 @@
 <body>
 <div th:replace="fragments/nav :: nav"></div>
 <section>
-    <form action="#" th:action="@{/asr/performASR}" th:object="${asr}" method="post">
+    <form action="#" th:action="@{/asr/performASR}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
         <div>Label:
-            <input type="text" th:field="*{label}" />
-            <div th:if="${#fields.hasErrors('${asr.label}')}" th:errors="*{asr.label}">Label Error</div>
+            <input type="text" name="label" th:field="*{label}" />
+            <div class="has-errors" th:if="${#fields.hasErrors('label')}" th:errors="*{label}"></div>
         </div>
         <div>Alignment Filepath:
-            <input type="text" th:field="*{alnFilepath}" />
-            <div th:if="${#fields.hasErrors('${asr.alnFilepath}')}" th:errors="*{asr.alnFilepath}">Alignment file Error</div>
+            <input type="file" name="alnFilepath" th:field="*{alnFilepath}" />
+            <div class="has-errors" th:if="${#fields.hasErrors('alnFilepath')}" th:errors="*{alnFilepath}"></div>
         </div>
         <div>Tree Filepath:
-            <input type="text" th:field="*{treeFilepath}" />
-            <div th:if="${#fields.hasErrors('${asr.treeFilepath}')}" th:errors="*{asr.treeFilepath}">Tree file Error</div>
+            <input type="file" name="treeFilepath" th:field="*{treeFilepath}" />
+            <div class="has-errors" th:if="${#fields.hasErrors('treeFilepath')}" th:errors="*{treeFilepath}"></div>
+        </div>
+        <div>Initial reconstruction type:
+            <input id="joint" type="radio" checked="true" th:field="*{inferenceType}" th:value="joint" />
+            <label for="joint">Joint</label>
+            <input id="marginal" type="radio" th:field="*{inferenceType}" th:value="marginal" />
+            <label for="marginal">Marginal (root)</label>
         </div>
         <div><input type="submit" value="Submit" /></div>
     </form>
+    <div class="has-errors" th:if="${errorMessage != null}" th:text="${errorMessage}"></div>
 </section>
 <div th:replace="fragments/footer :: footer"></div>
 </body>

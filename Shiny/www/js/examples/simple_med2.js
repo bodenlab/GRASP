@@ -5,7 +5,9 @@
 
 // uncharged polar side chains, then Basic side chains, acidic, the hydrophobic
 
-var colours = {"C": "#33CCFF", "S": "#A55FEB", "T": "#FF68DD", "Y": "#9A03FE", "Q": "#F900F9", "N": "#A27AFE", "H": "#7979FF", "K": "#86BCFF", "R": "#8CEFFD", "D": "#03F3AB", "E": "#4AE371", "I": "#FF8A8A", "L": "#FF5353", "M": "#FF9331", "V": "#FFCC33", "G": "#FF6600", "P": "#FF9999", "F": "#FF4848", "W": "#FF5353", "A": "#FF0033"};
+
+
+
 
 /* Tip which is displayed when hovering over the nodes */
 var tip = d3.tip()
@@ -18,22 +20,30 @@ var tip = d3.tip()
             return temp;
         });
 
-var draw_poag = function (svg_id, json_str) {
-    
-    dataJSON = JSON.parse(json_str);
-    nodes = dataJSON.nodes;
-    reactions = dataJSON.edges;
+var setup_options = function (svg_id, json_str) {
+    var data = JSON.parse(json_str);
     //The main options for the graph
     var options = {
+        mini_radius: 10,
+        diff_colour: "orange",
+        diff_opacity: 0.2,
+        num_start_nodes : 5,
+        x_padding: 100,
         /******** Options for node and edge drawing ***************************/
         graphs_display: true, // Graphs will only display if the data contains
         // graph information -> note histogram information must be there for all
         // node
         seq_display: true, // This is if there is sequence data in the node
         depth: 3, // Indicates how many layers for the nodes
-        node: {stroke_width: 2,
+        lane_height: 50,
+        lane_padding: 50,
+        multi: {
+            main_height: 400,
+            mini_height: 50
+        },
+        node: {
+            stroke_width: 2,
             stroke: "#d3d3d3",
-            radius: 30,
             hover_radius: 10,
             text_size: "18px",
             font_family: "Gill Sans, sans-serif",
@@ -45,7 +55,9 @@ var draw_poag = function (svg_id, json_str) {
             x_start: 200, // where to put the first node
             y_start: 400
         },
-        edge: {stroke_width: 3,
+        edge: {
+            y_curve_amount: 30,
+            stroke_width: 5,
             stroke: "grey",
             stroke_opacity: 1,
             x_length: 160,
@@ -59,7 +71,7 @@ var draw_poag = function (svg_id, json_str) {
             label_position: 22, // Makes the label this distance in from the outer radius
             radius: 50,
             stroke_width: 3,
-            stroke: "grey",
+            stroke: "white",
             text_size: "12px",
             font_family: "Gill Sans, sans-serif"
         },
@@ -77,7 +89,7 @@ var draw_poag = function (svg_id, json_str) {
             graph_outer_circle_radius: 65,
             graphs: new Array(),
             size: 60,
-            colours: colours,
+            colours: random, // default to random colour scheme
             offset_graph_width: -29,
             offset_graph_height: -15,
             width: 60,
@@ -93,18 +105,16 @@ var draw_poag = function (svg_id, json_str) {
         legend_rect_size: 0,
         height: 1000,
         width: 2000,
-        margin: {top: 0, left: 0, bottom: 0, right: 0},
+        margin: {top: 50, left: 150, bottom: 0, right: 0},
         initial_padding: 0,
-        colours: colours,
+        colours: random,
         /*********** End of sizing options **********************************/
         background_colour: "white",
         background_stroke_colour: "black",
         background_stroke_width: "1px",
         stroke_width: "3px",
         /********** Data ***************************************************/
-        data: dataJSON,
-        nodes: nodes,
-        reactions: reactions,
+        data: data,
         target: svg_id,
         /********** Text options ******************************************/
         font_style: "Arial",

@@ -54,7 +54,13 @@ setup_svg = function (graph) {
           .append("path")
           .attr('d', "M 0 0 4 2 0 4 0 2");
 
-
+    svg.append('defs').append('clipPath')
+	.attr('id', 'clip')
+	.append('rect')
+		.attr('width',  options.width)
+		.attr('height', options.multi.main_height);
+        
+    options.svg = svg;
     graph.svg = svg;
     return graph;
 }; // setup_svg

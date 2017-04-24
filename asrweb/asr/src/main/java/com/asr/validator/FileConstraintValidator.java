@@ -29,6 +29,8 @@ public class FileConstraintValidator implements ConstraintValidator<File, Multip
             return fileField.getOriginalFilename().endsWith(".aln");
         if (expectedType.equalsIgnoreCase("nwk"))
             return fileField.getOriginalFilename().endsWith(".nwk");
+        if (expectedType.equalsIgnoreCase("seq"))
+            return fileField.getOriginalFilename().endsWith(".fa") || fileField.getOriginalFilename().endsWith(".fasta") || fileField.getOriginalFilename().endsWith(".aln");
 
         return true;
     }

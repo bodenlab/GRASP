@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+
+    <title>GRASP Ancestral Sequence Reconstruction</title>
+
+    <!-- Custom Fonts -->
+    <link href="/resources/css/font-awesome.min.css" rel="stylesheet" type="text/css"></link>
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"></link>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" href="/resources/css/bootstrap.css" th:href="@{/resources/css/bootstrap.css}"></link>
+    <link rel="stylesheet" href="/resources/css/asr.css" th:href="@{/resources/css/asr.css}"></link>
+    <link rel="stylesheet" href="/resources/css/biojs_alignment.css" th:href="@{/resources/css/biojs_alignment.css}"></link>
+    <link rel="stylesheet" href="/resources/css/phyd3.css" th:href="@{/resources/css/phylotree.css}"></link>
+    <link rel="stylesheet" href="/resources/css/bootstrap.mod.css" th:href="@{/resources/css/bootstrap.mod.css}"></link>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/resources/js/d3.tip.v0.6.3.js"></script>
+    <script type="text/javascript" src="/resources/js/index.js"></script>
+    <script type="text/javascript" src="/resources/js/draw.js"></script>
+    <script type="text/javascript" src="/resources/js/general.js"></script>
+    <script type="text/javascript" src="/resources/js/graph_overlay.js"></script>
+    <script type="text/javascript" src="/resources/js/phylotree.js"></script>
+    <script type="text/javascript" src="/resources/js/colour_defs.js"></script>
+    <script type="text/javascript" src="/resources/js/actions.js"></script>
+    <script type="text/javascript" src="/resources/js/graph_options.js"></script>
+</head>
+<body>
+<!-- Header -->
+<div th:replace="fragments/header :: header"></div>
+
+
+<!-- Page Content -->
+
+<!-- Reconstruction Form Section -->
+<a name="reconstruct"></a>
+<div th:replace="fragments/form :: form"></div>
+
+<!-- Reconstruction Results Section -->
+<div th:replace="fragments/results :: results"></div>
+
+<!-- Tutorial Section  -->
+<div th:replace="fragments/tutorial :: tutorial"></div>
+
+<!-- About Section -->
+
+
+<!-- Footer -->
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+
+</html>

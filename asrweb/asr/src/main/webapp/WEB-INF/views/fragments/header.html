@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="header">
+    <a name="about"></a>
+    <div class="intro-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="intro-message">
+                        <h1>GRASP</h1>
+                        <h3>Graph-based ancestral sequence reconstruction</h3>
+                        <hr class="intro-divider"></hr>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="fragments/nav :: nav"></div>
+    </div>
+</div>
+</body>
+</html>

@@ -24,23 +24,27 @@ var setup_options = function (svg_id, json_str) {
     var data = JSON.parse(json_str);
     //The main options for the graph
     var options = {
-        mini_radius: 10,
-        diff_colour: "orange",
-        diff_opacity: 0.2,
-        num_start_nodes : 5,
-        x_padding: 100,
+
         /******** Options for node and edge drawing ***************************/
         graphs_display: true, // Graphs will only display if the data contains
         // graph information -> note histogram information must be there for all
         // node
         seq_display: true, // This is if there is sequence data in the node
+
+        /**************** Options for the lanes (used when showing both an inferred and raw POAG)   **/
         depth: 3, // Indicates how many layers for the nodes
-        lane_height: 50,
+        lane_height: 50, // A "lane" is the region where a POAG is drawn this is
         lane_padding: 50,
+        mini_radius: 10,
+        diff_colour: "orange",
+        diff_opacity: 0.2,
+        num_start_nodes : 5,// How many nodes that it starts with
+        x_padding: 100, // the padding to the left of teh first node in relation to the y axis titles
         multi: {
             main_height: 400,
             mini_height: 50
         },
+         /**************** Options for changing the style of the nodes *************************/
         node: {
             stroke_width: 2,
             stroke: "#d3d3d3",
@@ -55,6 +59,7 @@ var setup_options = function (svg_id, json_str) {
             x_start: 200, // where to put the first node
             y_start: 400
         },
+        /**************** Options for style of the edges between nodes **********************/
         edge: {
             y_curve_amount: 30,
             stroke_width: 5,
@@ -67,6 +72,7 @@ var setup_options = function (svg_id, json_str) {
             text_stroke_width: 1,
             y_length: 70
         },
+        /********** Pie chart options ***************************************/
         pie: {
             label_position: 22, // Makes the label this distance in from the outer radius
             radius: 50,
@@ -75,6 +81,7 @@ var setup_options = function (svg_id, json_str) {
             text_size: "12px",
             font_family: "Gill Sans, sans-serif"
         },
+        /*********** Histogram options  ************************************/
         graph: {
             x_size: 150, // Multiplication factor for positions
             y_size: 100,

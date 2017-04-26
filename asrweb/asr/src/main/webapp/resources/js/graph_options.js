@@ -92,7 +92,7 @@ var setup_options = function (svg_id, json_str) {
             colours: random, // default to random colour scheme
             offset_graph_width: -29,
             offset_graph_height: -15,
-            width: 60,
+            width: 80,
             div_factor: 1,
             graph_height: 50,
             max_height: 10,
@@ -103,7 +103,7 @@ var setup_options = function (svg_id, json_str) {
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
-        height: 1000,
+        height: 500,
         width: 2000,
         margin: {top: 50, left: 150, bottom: 0, right: 0},
         initial_padding: 0,

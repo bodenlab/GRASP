@@ -2,6 +2,7 @@ package com;
 
 import api.PartialOrderGraph;
 import com.asr.validator.File;
+import json.JSONObject;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 import reconstruction.ASRPOG;
@@ -36,7 +37,7 @@ public class ASR {
     //@File(type="seq", message="File must be in fasta or clustal format (*.fa, *.fasta or *.aln)")
     private MultipartFile seqFile = null;
 
-    private String inferenceType;
+    private String inferenceType = "marginal";
 
     private boolean performAlignment = false;
 
@@ -50,7 +51,7 @@ public class ASR {
         return this.label;
     }
     public void setLabel(String label) {
-        this.label = label;
+        this.label = label.replace(" ", "").trim();
     }
     public MultipartFile getAlnFile() { return this.alnFile; }
     public void setAlnFile(MultipartFile alnFile) {
@@ -87,9 +88,8 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        asr = new ASRPOG(sessionDir + alnFilepath, sessionDir + treeFilepath,
-                inferenceType.equalsIgnoreCase("joint"), true);
-        asr.saveTree(sessionDir + label + "recon.nwk");
+        asr = new ASRPOG(alnFilepath, treeFilepath, inferenceType.equalsIgnoreCase("joint"), true);
+        asr.saveTree(sessionDir + label + "_recon.nwk");
     }
 
     /**
@@ -98,7 +98,7 @@ public class ASR {
      */
     public String getReconstructedNewickString() {
         try {
-            BufferedReader r = new BufferedReader(new FileReader(sessionDir + label + "recon.nwk"));
+            BufferedReader r = new BufferedReader(new FileReader(sessionDir + label + "_recon.nwk"));
             String tree = "";
             String line;
             while((line = r.readLine()) != null)
@@ -115,10 +115,10 @@ public class ASR {
      * Get the JSON representation of the sequence alignment graph
      * @return  graph JSON object
      */
-    public String getMSAGraphJSON() {
+    public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa = asr.getMSAGraph();
         System.out.println(msa.toString());
         POAGJson json = new POAGJson(msa);
-        return json.toJSON().toString();
+        return json.toJSON();
     }
 }

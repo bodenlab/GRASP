@@ -1,0 +1,46 @@
+
+// Keep track of which tree node is selected
+var selectedNode = "root";
+
+/*
+** Function to set the tree node colours; selected node is a different colour to other nodes
+*/
+var nodeColorizer = function(element, node) {
+    if (node.name == selectedNode) {
+        element.select("circle").style('fill', "hsl(352,90%,70%)");
+    } else {
+        element.select("circle").style('fill', "hsl(352,0%,70%)");
+    }
+};
+
+/*
+** Function to set up the phylogenetic tree structure (options and menu items)
+*/
+var setup_tree = function(tree_div, newick_string) {
+    var tree = d3.layout.phylotree()
+                    .svg (d3.select(tree_div))
+                    .options({
+                         'selectable': false,
+                         'collapsible': true })
+                    .radial(false)
+                    .node_circle_size(6)
+                    .style_nodes(nodeColorizer);
+    tree(d3_phylotree_newick_parser(newick_string)).layout();
+
+    // add a custom menu for (in this case) terminal nodes
+    tree.get_nodes().forEach (function (node) {
+        d3_add_custom_menu (node, // add to this node
+      	    function(node) {return("Create marginal reconstruction");},
+      		    //function () {
+      		        //createMarginal(tree_node);
+      		        //displayPOGraph(tree_node);
+      		    //}
+     	 	);
+     	d3_add_custom_menu (node, // add to this node
+      		function(node) {return("Show partial order graph");},
+      			 //function () {
+                 //    displayPOGraph(node);
+                 //}
+            );
+    });
+}

@@ -1,42 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="results">
+<div th:fragment="results" th:if="${results}">
     <div class="content-section-b">
-        <div class="container">
+        <div id="results">
             <div class="row">
-                <div class="col-lg-5 col-lg-offset-1 col-sm-push-6 col-sm-6">
-                    <!-- <hr class="section-heading-spacer"></hr>-->
-                    <div class="clearfix"></div>
-                    <div id="results" th:if="${results}">
-                        <!--<h2 class="section-heading">Results</h2>-->
-                        <div id="reconstructed-tree">
-                            <svg id="tree">
-                                <script type="text/javascript" th:inline="javascript">
-                                /*<![CDATA[*/
-                                    var recon = /*[[${tree}]]*/;
-                                    console.log(recon);
-                                    var tree = d3.layout.phylotree()
-                                                .svg (d3.select("#tree"));
-                                    tree(d3_phylotree_newick_parser(recon))
-                                        .layout();
-                                   /*]]>*/
-                                </script>
-                            </svg>
-                        </div>
-                        <div id="poag-div">
+                <!-- <hr class="section-heading-spacer"></hr>-->
+                <div id="reconstructed-tree" class="col-lg-3">
+                    <svg id="tree">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
-                                    var poag_div = document.getElementById("poag-div");
-                                    var json_str = /*[[${msagraph}]]*/;
+                                    var recon = /*[[${tree}]]*/;
+                                    setup_tree("#tree", recon);
+                                   /*]]>*/
+                            </script>
+                    </svg>
+                </div>
+                <div id="poag" class="col-lg-9">
+                    <script type="text/javascript" th:inline="javascript">
+                                /*<![CDATA[*/
+                                    var json_str = /*[[${graph}]]*/;
                                     console.log(json_str);
-                                    var options = setup_options("#" + "poag_div", json_str);
+                                    var options = setup_options("#poag", json_str);
                                     console.log(options);
                                     options = create_poags(options);
                                 /*]]>*/
-                            </script>
-                        </div>
-                    </div>
+                    </script>
                 </div>
             </div>
         </div>

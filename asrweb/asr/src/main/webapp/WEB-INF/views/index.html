@@ -31,12 +31,12 @@
     <script type="text/javascript" src="/resources/js/d3.tip.v0.6.3.js"></script>
     <script type="text/javascript" src="/resources/js/index.js"></script>
     <script type="text/javascript" src="/resources/js/draw.js"></script>
-    <script type="text/javascript" src="/resources/js/general.js"></script>
-    <script type="text/javascript" src="/resources/js/graph_overlay.js"></script>
-    <script type="text/javascript" src="/resources/js/phylotree.js"></script>
     <script type="text/javascript" src="/resources/js/colour_defs.js"></script>
     <script type="text/javascript" src="/resources/js/actions.js"></script>
+    <script type="text/javascript" src="/resources/js/graph_overlay.js"></script>
+    <script type="text/javascript" src="/resources/js/phylotree.js"></script>
     <script type="text/javascript" src="/resources/js/graph_options.js"></script>
+    <script type="text/javascript" src="/resources/js/tree_options.js"></script>
 </head>
 <body>
 <!-- Header -->
@@ -46,7 +46,6 @@
 <!-- Page Content -->
 
 <!-- Reconstruction Form Section -->
-<a name="reconstruct"></a>
 <div th:replace="fragments/form :: form"></div>
 
 <!-- Reconstruction Results Section -->
@@ -56,7 +55,7 @@
 <div th:replace="fragments/tutorial :: tutorial"></div>
 
 <!-- About Section -->
-
+<div th:replace="fragments/about :: about"></div>
 
 <!-- Footer -->
 <div th:replace="fragments/footer :: footer"></div>

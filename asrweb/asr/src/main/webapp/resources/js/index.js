@@ -129,8 +129,8 @@ setup_svg = function (graph) {
     var x = graph.scale.x;
     var y2 = graph.scale.y2;
     var max_depth = graph.max_depth;
-    var chart = d3.select('body')
-            .append('svg:svg')
+    var chart = d3.select(options.target)
+            .append("svg")
             .attr('width', width + margin.right + margin.left)
             .attr('height', height + margin.top + margin.bottom)
             .attr('class', 'chart');

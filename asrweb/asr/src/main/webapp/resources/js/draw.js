@@ -7,6 +7,7 @@ draw_mini_nodes = function (graph) {
     var y_scale = graph.scale.y2;
     var radius = options.mini_radius;
     var x_padding = options.x_padding / 2;
+    var y_padding = 20;
     for (var n in nodes) {
         var node = nodes[n];
 
@@ -20,7 +21,7 @@ draw_mini_nodes = function (graph) {
                 })
                 .attr('cy', function () {
                     var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
-                    return tmp;
+                    return tmp + y_padding;
                 })
                 .attr('r', radius)
                 .attr("stroke-width", node_opt.stroke_width)
@@ -36,11 +37,11 @@ draw_mini_nodes = function (graph) {
                         return tmp + x_padding;
                     })
                     .attr('y', function () {
-                        var tmp = y_scale(node.lane);
-                        return tmp;
+                        var tmp = y_scale(0); // Have it at the top
+                        return tmp ;
                     })
                     .attr('width', 4 * radius)
-                    .attr('height', y_scale(node.lane + 3))
+                    .attr('height', y_scale(graph.max_depth * 2))
                     .attr("stroke-width", node_opt.stroke_width)
                     .attr("stroke", node_opt.stroke)
                     .attr("opacity", options.diff_opacity)
@@ -57,7 +58,7 @@ draw_mini_nodes = function (graph) {
                 })
                 .attr('cy', function () {
                     var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
-                    return tmp;
+                    return tmp + y_padding;
                 })
                 .attr('r', 2 * radius)
                 .attr("opacity", options.diff_opacity)

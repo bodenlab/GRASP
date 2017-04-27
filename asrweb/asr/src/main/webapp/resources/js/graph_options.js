@@ -24,7 +24,7 @@ var setup_options = function (svg_id, json_str) {
     var data = JSON.parse(json_str);
     //The main options for the graph
     var options = {
-
+        number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
         /******** Options for node and edge drawing ***************************/
         graphs_display: true, // Graphs will only display if the data contains
         // graph information -> note histogram information must be there for all
@@ -33,16 +33,17 @@ var setup_options = function (svg_id, json_str) {
 
         /**************** Options for the lanes (used when showing both an inferred and raw POAG)   **/
         depth: 3, // Indicates how many layers for the nodes
-        lane_height: 50, // A "lane" is the region where a POAG is drawn this is
-        lane_padding: 50,
+        lane_height: 40, // A "lane" is the region where a POAG is drawn this is
+        lane_padding: 40,
         mini_radius: 10,
-        diff_colour: "orange",
+        interesting_many_edges_colour: "purple",
+        diff_colour: "red",
         diff_opacity: 0.2,
         num_start_nodes : 5,// How many nodes that it starts with
         x_padding: 100, // the padding to the left of teh first node in relation to the y axis titles
         multi: {
             main_height: 400,
-            mini_height: 50
+            mini_height: 20
         },
          /**************** Options for changing the style of the nodes *************************/
         node: {
@@ -110,7 +111,7 @@ var setup_options = function (svg_id, json_str) {
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
-        height: 500,
+        height: 800,
         width: 2000,
         margin: {top: 50, left: 150, bottom: 0, right: 0},
         initial_padding: 0,
@@ -122,7 +123,8 @@ var setup_options = function (svg_id, json_str) {
         stroke_width: "3px",
         /********** Data ***************************************************/
         data: data,
-        target: svg_id,
+        raw_svg_id: svg_id,
+        target: '#' + svg_id,
         /********** Text options ******************************************/
         font_style: "Arial",
         text_size: "12px",

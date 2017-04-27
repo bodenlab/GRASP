@@ -28,7 +28,7 @@ draw_mini_nodes = function (graph) {
                 .attr("opacity", node_opt.default_opacity)
                 .attr("fill", options.colours[node.label]);
 
-        if (graph.node_diff[node.id].length > 1) {
+        if (node.many_edges == true) {
             group.append("rect")
                     .attr("class", "mini_rect")
                     .attr('x', function () {
@@ -36,15 +36,32 @@ draw_mini_nodes = function (graph) {
                         return tmp + x_padding;
                     })
                     .attr('y', function () {
-                        var tmp = y_scale(node.lane - 1);
+                        var tmp = y_scale(node.lane);
                         return tmp;
                     })
                     .attr('width', 4 * radius)
-                    .attr('height', y_scale(node.lane + 1))
+                    .attr('height', y_scale(node.lane + 3))
                     .attr("stroke-width", node_opt.stroke_width)
                     .attr("stroke", node_opt.stroke)
                     .attr("opacity", options.diff_opacity)
                     .attr("fill", options.diff_colour);
+
+        }
+        if (node.deleted_during_inference == true) {
+            group.append("circle")
+                .attr("class", "mini_node")
+                .attr("id", "node_" + node.label + n)
+                .attr('cx', function () {
+                    var tmp = x_scale(node.start);
+                    return tmp + x_padding;
+                })
+                .attr('cy', function () {
+                    var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
+                    return tmp;
+                })
+                .attr('r', 2 * radius)
+                .attr("opacity", options.diff_opacity)
+                .attr("fill", options.interesting_many_edges_colour);
 
         }
     }
@@ -65,6 +82,10 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
     var x_scale = graph.scale.x1;
     var y_scale = graph.scale.y1;
     var radius = graph.max_radius;
+    var stroke_width =  node_opt.stroke_width;
+    if (radius < graph.min_radius) {
+          stroke_width = 0;
+    }
     // Sets up the graph environment for the overlayed graphs
 //    setup_graph_overlay(options.graph);
 
@@ -97,7 +118,10 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                     .attr("opacity", node_opt.default_opacity)
                     .attr("fill", options.colours[node.label]);
 
-            group.append("text")
+            // If the size of the graph is small we don't want to have labels
+            if (radius > graph.min_radius)  {
+
+                group.append("text")
                     .attr("class", "node_text")
                     .attr("id", "node_text_" + node.label + n)
                     .attr('x', function () {
@@ -114,15 +138,16 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                     .style("font-size", node_opt.text_size)
                     .attr("stroke", node_opt.font_colour)
                     .text(node.label);
+            }
         }
-//        if (options.graphs_display == true) {
-//            // Check if there is any bars to display first
-//            if (node.graph.bars.length > 1) {
-//                var graph_node = create_new_graph(node, options.graph);
-//                options.graph.graphs.push(graph_node);
-//            }
-//        }
-        if (options.seq_display == true) {
+        if (options.graphs_display == true && node.inferred != true) {
+            // Check if there is any bars to display first
+            if (node.graph.bars.length > 1) {
+                var graph_node = create_new_graph(node, options.graph, x_scale(node.start), (y_scale(node.lane) + y_scale(node.lane + 1)) / 2);
+                options.graph.graphs.push(graph_node);
+            }
+        }
+        if (options.seq_display == true && node.inferred != true) {
             // Check whether or not there is a range of sequences
             // i.e. there may have just been the one amino acid in this
             // case there is no point re drawing it
@@ -143,10 +168,13 @@ make_pie = function (node, graph, radius) {
     var group = graph.node_group;
     var x_scale = graph.scale.x1;
     var y_scale = graph.scale.y1;
-    var node_cx = x_scale(node.x);
+    var node_cx = x_scale(node.start);
     //var radius = graph.max_radius;
     var node_cy = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
-
+    var stroke_width = options.pie.stroke_width;
+    if (radius < graph.min_radius) {
+          stroke_width = 0;
+    }
     var pie_group = group.append("g")
             .attr("id", "pie" + node.name)
             .attr('transform', 'translate(' + node_cx + "," + node_cy + ")")
@@ -172,13 +200,15 @@ make_pie = function (node, graph, radius) {
     arc.append("path")
             .attr("class", "pie")
             .attr("d", path_pie)
-            .attr("stroke-width", options.pie.stoke_width)
+            .attr("stroke-width", stroke_width)
             .attr("stroke", options.pie.stroke)
             .attr("fill", function (d) {
                 return options.colours[(d.data.label)];
             });
 
-    arc.append("text")
+    // Don't want to append text if it is smaller than the min radius
+    if (radius > graph.min_radius) {
+        arc.append("text")
             .attr("class", "pie")
             .attr("transform", function (d) {
                 return "translate(" + label_pie.centroid(d) + ")";
@@ -187,6 +217,7 @@ make_pie = function (node, graph, radius) {
             .text(function (d) {
                 return d.data.label;
             });
+            }
 }
 
 
@@ -222,7 +253,7 @@ draw_node_edges = function (graph, x_min, x_max) {
 
     for (var e in edges) {
         edge = edges[e];
-        if (edge.x1 >= x_min & x_max >= edge.x2) {
+        if (edge.x1 >= x_min -1 & x_max  + 1>= edge.x2) {
             var line_points = new Array();
             x_start = x_scale(edge.x1);
             x_end = x_scale(edge.x2);
@@ -277,6 +308,7 @@ draw_node_edges = function (graph, x_min, x_max) {
                     .attr("opacity", opacity)
                     .attr("fill", "none")
                     .attr("marker-mid", "url(#triangle-end)");
+
 
             group.append("text")
                     .attr("class", "edge_text")

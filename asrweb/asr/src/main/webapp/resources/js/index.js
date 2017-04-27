@@ -131,7 +131,7 @@ make_scales = function (graph) {
                 d3.max(nodes, function (d) {
                     return d.end + (2 * radius);
                 })])
-            .range([0, width * options.mini_radius/2]);
+            .range([0, width]);
 
 
     var x1 = d3.scale.linear().range([0, width/1.8]);

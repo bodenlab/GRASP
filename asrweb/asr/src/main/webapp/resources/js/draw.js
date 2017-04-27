@@ -158,7 +158,8 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
         }
     }
 
-
+    // Update the y curve amount to be 2 * the radius
+    graph.y_curve_amount = radius;
     return graph;
 };
 
@@ -230,7 +231,6 @@ make_pie = function (node, graph, radius) {
  */
 draw_node_edges = function (graph, x_min, x_max) {
 
-
     var options = graph.options;
     var edge_opt = options.edge;
     var edges = graph.edges;
@@ -242,10 +242,10 @@ draw_node_edges = function (graph, x_min, x_max) {
 
     var y_mid = 0;
     var count = 0;
-    var y_len = 25;
+    var y_len = graph.y_curve_amount;//25;
 
     var opacity = 1;
-    var same_level_buffer = edge_opt.y_curve_amount;
+    var same_level_buffer = graph.y_curve_amount;//edge_opt.y_curve_amount;
     var label = null;
 
     var x_scale = graph.scale.x1;

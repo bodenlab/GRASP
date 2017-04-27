@@ -118,15 +118,7 @@ make_scales = function (graph) {
             , miniHeight = lanes.length * options.lane_height + options.lane_padding
             , mainHeight = options.height - miniHeight - options.lane_padding;
 
-    // Get the width of the DIV that we are appending the svg to so we can scale the height and width values
-    var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
-    // We don't want to get the height as we only want to develop the scale based on one element
-    var scale_width = actual_svg_width/width;
-    width = width * scale_width;
-    height = height * scale_width;
-    miniHeight = miniHeight * scale_width;
-    mainHeight = mainHeight * scale_width;
-    
+
     var x = d3.scale.linear()
             .domain([(d3.min(nodes, function (d) {
                     return d.start;
@@ -137,13 +129,13 @@ make_scales = function (graph) {
             .range([0, width * options.mini_radius/2]);
 
 
-    var x1 = d3.scale.linear().range([0, width/1.5]);
+    var x1 = d3.scale.linear().range([0, width/1.8]);
 
     var ext = d3.extent(lanes, function (d) {
         return d.id;
     });
     var y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
-    var y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight - 20]);
+    var y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([options.padding_between_views, miniHeight]);
 
     graph.scale = {};
     graph.scale.x1 = x1;
@@ -175,13 +167,20 @@ setup_svg = function (graph) {
 
     var max_depth = graph.max_depth;
 
+    // Get the width of the DIV that we are appending the svg to so we can scale the height and width values
+    var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
+    // We don't want to get the height as we only want to develop the scale based on one element
+    var scale_width = actual_svg_width/width;
 
-    var chart = d3.select(options.target)
+    var general_svg = d3.select(options.target)
             .append("svg")
             .attr('width', width + margin.right + margin.left)
             .attr('height', height + margin.top + margin.bottom)
-            .attr('class', 'chart');
+            .attr('class', 'chart')
 
+
+    var chart = general_svg.append('g')
+                    .attr("transform",  "translate(" + (options.svg_padding) + "," + (options.svg_padding) + ")" + " scale(" + scale_width + ")");
 
     chart.append('defs').append('clipPath')
             .attr('id', 'clip')
@@ -300,7 +299,7 @@ setup_brush = function (graph) {
     mini.append('rect')
             .attr('pointer-events', 'painted')
             .attr('width', width)
-            .attr('height', miniHeight)
+            .attr('height', miniHeight - options.padding_between_views)
             .attr('visibility', 'hidden')
             .on('mouseup', moveBrush);
 
@@ -315,7 +314,7 @@ setup_brush = function (graph) {
             .attr('class', 'x brush')
             .call(brush)
             .selectAll('rect')
-            .attr('y', 1)
+            .attr('y',  + options.padding_between_views)
             .attr('height', miniHeight - 1);
 
     mini.selectAll('rect.background').remove();

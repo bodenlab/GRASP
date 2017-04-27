@@ -113,9 +113,11 @@ var setup_options = function (svg_id, json_str) {
         legend_rect_size: 0,
         height: 800,
         width: 2000,
-        margin: {top: 50, left: 150, bottom: 0, right: 0},
+        margin: {top: 50, left: 150, bottom: 50, right: 50},
         initial_padding: 0,
         colours: random,
+        svg_padding: 20, // The padding of the svg within the div given
+        padding_between_views: 50,
         /*********** End of sizing options **********************************/
         background_colour: "white",
         background_stroke_colour: "black",

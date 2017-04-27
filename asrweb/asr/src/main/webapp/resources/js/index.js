@@ -3,17 +3,29 @@
  */
 var graph = {};
 
+
+
+
 setup_data = function (graph) {
     var lanes = [];
     var nodes = [];
     var node_dict = {};
+    var node_many_edge_dict = {}; // Keeps track of nodes with > 1 edge coming out
     var edges = [];
     var poags = graph.data.poags;
     var current_y_position = 0;
     var count = 0;
     var total_max_depth = 0;
-    for (var p in poags) {
-        var poag = poags[p];
+    console.log(poags);
+    for (var poag_count = 0; poag_count < 2; poag_count ++) {
+        if (poag_count == 0) {
+            var poag = poags['msa']; // MSA indicates that it is the non inferred and will thus be the same size
+            // if not larger than the inferred POAG
+            var poag_type = 'msa';
+        } else {
+            var poag = poags['inferred'];
+            var poag_type = 'inferred';
+        }
         var title = poag.metadata.title;
         var max_depth = poag.metadata.max_depth;
         if (max_depth > total_max_depth) {
@@ -29,24 +41,29 @@ setup_data = function (graph) {
         // Add each of the nodes to the items
         for (var n in poag.nodes) {
             var node = poag.nodes[n];
-            var node_arr = node_dict[node.id];
-            if (node_arr == undefined) {
-                node_arr = new Array()
-                 node_arr.push(node);
+            if (poag_count == 0) {
+                node.deleted_during_inference = true;
+                node.inferred = false;
+                node.many_edges = false;
+                node.graph = {};
+                node.graph.bars = node.seq.chars;
+                // Assume that every node has been deleted during the ineference process
+                node_dict[node.id] = node;
             } else {
-                for (var y_val in node_arr) {
-                    if (node.y != y_val) {
-                        node_arr.push(node);
-                    }
-                }
+                var node_inferred = node_dict[node.id];
+                // Update the x coords to match that of the MSA node (to account for deletions)
+                node.start = node_inferred.start;
+                node.x = node_inferred.start;
+                node.end = node_inferred.end;
+                node.inferred = true;
+                node.many_edges = false;
+                // Update to say that it hasn't been deleted since it appears in both
+                node.deleted_during_inference = false;
+                node_inferred.deleted_during_inference = false;
             }
-            // Update the y coord so that we have the node occuring at the
-            // correct y position
+
             node.y += current_y_position;
             node.lane += current_y_position;
-
-
-            node_dict[node.id] = node_arr;
             nodes.push(node);
         }
         // Add each of the reactions to the reaction items
@@ -55,9 +72,28 @@ setup_data = function (graph) {
             edge.y1 += current_y_position;
             edge.y2 += current_y_position;
             // Update the to and from ID's for the nodes to include the POAG
-            edge.from = p + "_" + edge.from;
-            edge.to = p + "_" + edge.to;
+            // if we are in the inferred version we need to get the updated x coods as above
+            var node_inferred_from = node_dict[edge.from];
+            var node_inferred_to = node_dict[edge.to];
+            edge.x1 =  node_inferred_from.start;
+            edge.x2 = node_inferred_to.start;
+            edge.from = edge.from;
+            edge.to = edge.to;
             edges.push(edge);
+            // Check if the node that the edge is coming from already has edges out of it (we are summing these
+            // and determining if it can be considered interesting)
+            if (poag_count == 0) {
+                var edges_from_node =  node_many_edge_dict[edge.from];
+                if ( edges_from_node == undefined) {
+                edges_from_node = new Array();
+                }
+                edges_from_node.push(edge);
+                node_many_edge_dict[edge.from] = edges_from_node;
+                if (edges_from_node.length >= options.number_of_edges_to_be_interesting) {
+                    // tag the from node to be interesting
+                    node_dict[edge.from].many_edges = true;
+                }
+            }
         }
         current_y_position += (max_depth + 1);
     }
@@ -83,6 +119,7 @@ make_scales = function (graph) {
             , miniHeight = lanes.length * options.lane_height + options.lane_padding
             , mainHeight = options.height - miniHeight - options.lane_padding;
 
+
     var x = d3.scale.linear()
             .domain([(d3.min(nodes, function (d) {
                     return d.start;
@@ -90,16 +127,16 @@ make_scales = function (graph) {
                 d3.max(nodes, function (d) {
                     return d.end + (2 * radius);
                 })])
-            .range([0, (Object.keys(nodes).length * width/options.num_start_nodes)]);
+            .range([0, width * options.mini_radius/2]);
 
 
-    var x1 = d3.scale.linear().range([x_padding, width - x_padding]);
+    var x1 = d3.scale.linear().range([0, width/1.8]);
 
     var ext = d3.extent(lanes, function (d) {
         return d.id;
     });
     var y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
-    var y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
+    var y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([options.padding_between_views, miniHeight]);
 
     graph.scale = {};
     graph.scale.x1 = x1;
@@ -128,12 +165,23 @@ setup_svg = function (graph) {
     var y1 = graph.scale.y1;
     var x = graph.scale.x;
     var y2 = graph.scale.y2;
+
     var max_depth = graph.max_depth;
-    var chart = d3.select(options.target)
+
+    // Get the width of the DIV that we are appending the svg to so we can scale the height and width values
+    var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
+    // We don't want to get the height as we only want to develop the scale based on one element
+    var scale_width = actual_svg_width/width;
+
+    var general_svg = d3.select(options.target)
             .append("svg")
             .attr('width', width + margin.right + margin.left)
             .attr('height', height + margin.top + margin.bottom)
-            .attr('class', 'chart');
+            .attr('class', 'chart')
+
+
+    var chart = general_svg.append('g')
+                    .attr("transform",  "translate(" + (options.svg_padding) + "," + (options.svg_padding) + ")" + " scale(" + scale_width + ")");
 
     chart.append('defs').append('clipPath')
             .attr('id', 'clip')
@@ -154,67 +202,68 @@ setup_svg = function (graph) {
             .attr('class', 'mini');
 
     // draw the lanes for the main chart
-    main.append('g').selectAll('.laneLines')
-            .data(lanes)
-            .enter().append('line')
-            .attr('x1', 0)
-            .attr('y1', function (d) {
-                return d3.round(y1(d.id)) + 0.5;
-            })
-            .attr('x2', width)
-            .attr('y2', function (d) {
-                return d3.round(y1(d.id)) + 0.5;
-            })
-            .attr('stroke', function (d) {
-                return d.label === '' ? 'white' : 'lightgray'
-            });
+//    main.append('g').selectAll('.laneLines')
+//            .data(lanes)
+//            .enter().append('line')
+//            .attr('x1', 0)
+//            .attr('y1', function (d) {
+//                return d3.round(y1(d.id)) + 0.5;
+//            })
+//            .attr('x2', width)
+//            .attr('y2', function (d) {
+//                return d3.round(y1(d.id)) + 0.5;
+//            })
+//            .attr('stroke', function (d) {
+//                return d.label === '' ? 'white' : 'lightgray'
+//            });
 
-    main.append('g').selectAll('.laneText')
-            .data(lanes)
-            .enter().append('text')
-            .text(function (d) {
-                return d.label;
-            })
-            .attr('x', -10)
-            .attr('y', function (d) {
-                var tmp = y1(d.id + .5);
-                return tmp;
-            })
-            .attr('dy', '0.5ex')
-            .attr('text-anchor', 'end')
-            .attr('class', 'laneText');
+//    main.append('g').selectAll('.laneText')
+//            .data(lanes)
+//            .enter().append('text')
+//            .text(function (d) {
+//                return d.label;
+//            })
+//            .attr('x', -10)
+//            .attr('y', function (d) {
+//                var tmp = y1(d.id + .5);
+//                return tmp;
+//            })
+//            .attr('dy', '0.5ex')
+//            .attr('text-anchor', 'end')
+//            .attr('class', 'laneText');
 
 // draw the lanes for the mini chart
-    mini.append('g').selectAll('.laneLines')
-            .data(lanes)
-            .enter().append('line')
-            .attr('x1', 0)
-            .attr('y1', function (d) {
-                return d3.round(y2(d.id)) + 0.5;
-            })
-            .attr('x2', width)
-            .attr('y2', function (d) {
-                return d3.round(y2(d.id)) + 0.5;
-            })
-            .attr('stroke', function (d) {
-                return d.label === '' ? 'white' : 'lightgray'
-            });
+//    mini.append('g').selectAll('.laneLines')
+//            .data(lanes)
+//            .enter().append('line')
+//            .attr('x1', 0)
+//            .attr('y1', function (d) {
+//                return d3.round(y2(d.id)) + 0.5;
+//            })
+//            .attr('x2', width)
+//            .attr('y2', function (d) {
+//                return d3.round(y2(d.id)) + 0.5;
+//            })
+//            .attr('stroke', function (d) {
+//                return d.label === '' ? 'white' : 'lightgray'
+//            });
 
-    mini.append('g').selectAll('.laneText')
-            .data(lanes)
-            .enter().append('text')
-            .text(function (d) {
-                return d.label;
-            })
-            .attr('x', -10)
-            .attr('y', function (d) {
-                return y2(d.id + .5);
-            })
-            .attr('dy', '0.5ex')
-            .attr('text-anchor', 'end')
-            .attr('class', 'laneText');
+//    mini.append('g').selectAll('.laneText')
+//            .data(lanes)
+//            .enter().append('text')
+//            .text(function (d) {
+//                return d.label;
+//            })
+//            .attr('x', -10)
+//            .attr('y', function (d) {
+//                return y2(d.id + .5);
+//            })
+//            .attr('dy', '0.5ex')
+//            .attr('text-anchor', 'end')
+//            .attr('class', 'laneText');
     graph.mini = mini;
     graph.main = main;
+    options.graph.svg_overlay = main;
     return graph;
 };
 
@@ -251,7 +300,7 @@ setup_brush = function (graph) {
     mini.append('rect')
             .attr('pointer-events', 'painted')
             .attr('width', width)
-            .attr('height', miniHeight)
+            .attr('height', miniHeight - options.padding_between_views)
             .attr('visibility', 'hidden')
             .on('mouseup', moveBrush);
 
@@ -266,7 +315,7 @@ setup_brush = function (graph) {
             .attr('class', 'x brush')
             .call(brush)
             .selectAll('rect')
-            .attr('y', 1)
+            .attr('y',  + options.padding_between_views)
             .attr('height', miniHeight - 1);
 
     mini.selectAll('rect.background').remove();
@@ -283,8 +332,9 @@ create_poags = function (options) {
     graph.data = data;
     graph = setup_data(graph);
     // Make the radius based on the graph height and the number of lanes
-
+    graph.options.graph.colours = options.colours;
     graph.max_radius = (options.height / graph.lanes.length) / 3;
+    graph.min_radius = graph.max_radius / 2;
     graph = make_scales(graph);
     graph = setup_svg(graph);
     graph = setup_items(graph);
@@ -320,6 +370,9 @@ function display() {
     // Delete all the old egdes
     graph.node_group.selectAll("path.edge").remove();
     graph.node_group.selectAll("path.pie").remove();
+    // Delete all graphs
+    graph.options.graph.svg_overlay.selectAll("g.graph").remove();
+
     // Delete all old nodes
     graph.node_group.selectAll("circle.main_node").remove();
     // Delete all the old text

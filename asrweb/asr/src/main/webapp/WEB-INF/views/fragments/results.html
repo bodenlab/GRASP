@@ -3,29 +3,47 @@
 <body>
 <div th:fragment="results" th:if="${results}">
     <div class="content-section-b">
+        <div id="heading">
+            <h2><span id="node-label">Root</span> <small><span th:text="${inferenceType}"/> reconstruction </small></h2>
+            <hr class="h-divider"></hr>
+        </div>
         <div id="results">
             <div class="row">
                 <!-- <hr class="section-heading-spacer"></hr>-->
                 <div id="reconstructed-tree" class="col-lg-3">
-                    <svg id="tree">
+                    <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
                                     var recon = /*[[${tree}]]*/;
-                                    setup_tree("#tree", recon);
+                                    setup_tree("#phylo", recon);
                                    /*]]>*/
                             </script>
                     </svg>
                 </div>
-                <div id="poag" class="col-lg-9">
+                <div class="col-lg-8">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Choose scheme <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a onclick="update_colour('random')">Ariane</a></li>
+                            <li><a onclick="update_colour('clustal')">Clustal</a></li>
+                            <li><a onclick="update_colour('lesk')">Lesk</a></li>
+                            <li><a onclick="update_colour('cinema')">Cinema</a></li>
+                            <li><a onclick="update_colour('ma')">MAEditor</a></li>
+                        </ul>
+                    </div>
+                    <div id="poag">
                     <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
                                     var json_str = /*[[${graph}]]*/;
                                     console.log(json_str);
-                                    var options = setup_options("#poag", json_str);
+                                    var options = setup_options("poag", json_str);
                                     console.log(options);
                                     options = create_poags(options);
                                 /*]]>*/
                     </script>
+                    </div>
                 </div>
             </div>
         </div>

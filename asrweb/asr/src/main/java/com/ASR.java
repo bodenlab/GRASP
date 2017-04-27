@@ -121,4 +121,17 @@ public class ASR {
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
+
+    /**
+     * Get tje JSON representation of the inferred graph at the given tree node
+     *
+     * @param nodeLabel label of tree node to get graph representation of
+     * @return  graph JSON object
+     */
+    public JSONObject getAncestralGraphJSON(String nodeLabel) {
+        PartialOrderGraph graph = asr.getGraph(nodeLabel);
+        System.out.println(graph.toString());
+        POAGJson json = new POAGJson(graph);
+        return json.toJSON();
+    }
 }

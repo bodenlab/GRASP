@@ -1,7 +1,38 @@
+body {
+    font-size: 12px;
+}
+
 #results {
     padding: 0em 2em 0em 2em;
 }
 
-#poag {
-    overflow: hidden;
+#reconstructed-tree {
+    height: 800px;
+    overflow: auto;
+}
+
+#phylo {
+    display: block;
+    margin: 0 auto;
+}
+
+#heading {
+    padding: 0em 2em 2em 2em;
+}
+
+.h-divider {
+    width: 30%;
+    margin: 0px;
+}
+
+.btn {
+    font-size: 12px;
+}
+
+.form-control {
+    font-size: 12px;
+}
+
+#tutorial-div {
+    display: none;
 }

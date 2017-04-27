@@ -27,7 +27,7 @@ setup_graph_overlay = function (options) {
 
 function create_outer_circle(node, options, graph_group) {
     var circle = graph_group.append("circle")
-            .attr("class", "outside" + node.name)
+            .attr("class", "outside")
             .attr("id", function () {
                 return "node-" + node;
             })
@@ -85,25 +85,30 @@ function create_bars(node, options, graph_group) {
     if (num_bars == 1) {
         padding_x = size/6.0;
     }
+    var bar_sum = 0;
+    for (var bar in node.graph.bars) {
+        bar_info = node.graph.bars[bar];
+        bar_sum += bar_info.value;
+    }
 
     for (var bar in node.graph.bars) {
         bar_info = node.graph.bars[bar];
         graph_group.append("rect")
                 .attr("class", function () {
-                    return "bar2";
+                    return "bar";
                 })
                 .attr("x", function () {
                     return outer_padding + padding_x + (bar * (size / num_bars)); /* where to place it */
                 }) //Need to determine algoritm for determineing this
                 .attr("width", (size / num_bars) - (3 * padding_x) - outer_padding/2)
                 .attr("y", function () {
-                    return y(bar_info.value/100.0);
+                    return y(bar_info.value/bar_sum);
                 })
                 .attr("height", function () {
                     // As the number is out of 100 need to modulate it
-                    return options.graph_height - y(bar_info.value/100.0);
+                    return options.graph_height - y(bar_info.value/bar_sum);
                 })
-                .attr("fill", options.colours[bar_info.x_label]);
+                .attr("fill", options.colours[bar_info.label]);
 
         graph_group.append("text")
                 .attr("class", "y axis")
@@ -111,7 +116,7 @@ function create_bars(node, options, graph_group) {
                     return (2 * padding_x) + bar * (options.size / num_bars);
                 }) //Need to determine algoritm for determineing this
                 .attr("y", options.graph_height + 10)
-                .text(bar_info.x_label);
+                .text(bar_info.label);
     }
 }
 
@@ -149,15 +154,16 @@ scale_y_graph = function (options, y) {
 /**
  * Creating the graphs
  */
-create_new_graph = function (node, options) {
-    var node_cx = scale_x_graph(options, node.x);
-    var node_cy = scale_y_graph(options, node.y) - options.graph_height / 2;
+create_new_graph = function (node, options, cx, cy) {
+    // NEED TO UPDATE THESE OFFSETS IN THE OPTIONS BAD TO HAVE HARD CODED
+    var node_cx = cx - 18;//scale_x_graph(options, node.x);
+    var node_cy = cy - 18;//scale_y_graph(options, node.y) - options.graph_height / 2;
     options.metabolite_count++;
     var num_bars = options.max_bar_count;
     var svg  = options.svg_overlay;
     var hover_on = options.hover;
     var graph_group = svg.append("g")
-            .attr("id", "graph" + node.name)
+            .attr("class", "graph")
             .attr('transform', 'translate(' + node_cx + "," + node_cy + ")")
             .attr("opacity", 0)
             .on("mouseover", function () {
@@ -170,7 +176,7 @@ create_new_graph = function (node, options) {
                     d3.select(this).attr("opacity", 0);
                 }
             });
-
+    setup_graph_overlay(options);
     create_outer_circle(node, options, graph_group);
     create_rect(node, options, graph_group);
     create_axis(node, options, graph_group);

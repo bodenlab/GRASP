@@ -16,6 +16,10 @@ body {
     margin: 0 auto;
 }
 
+#poag {
+    overflow: hidden;
+}
+
 #heading {
     padding: 0em 2em 2em 2em;
 }

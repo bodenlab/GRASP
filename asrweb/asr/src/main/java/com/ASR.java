@@ -117,6 +117,7 @@ public class ASR {
      */
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa = asr.getMSAGraph();
+        //PartialOrderGraph noninferred = asr.getGraph();
         System.out.println(msa.toString());
         POAGJson json = new POAGJson(msa);
         return json.toJSON();

@@ -16,7 +16,6 @@ setup_data = function (graph) {
     var current_y_position = 0;
     var count = 0;
     var total_max_depth = 0;
-    console.log(poags);
     for (var poag_count = 0; poag_count < 2; poag_count ++) {
         if (poag_count == 0) {
             var poag = poags['msa']; // MSA indicates that it is the non inferred and will thus be the same size

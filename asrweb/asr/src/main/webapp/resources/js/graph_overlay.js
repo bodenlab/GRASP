@@ -90,7 +90,6 @@ function create_bars(node, options, graph_group) {
         bar_info = node.graph.bars[bar];
         bar_sum += bar_info.value;
     }
-
     for (var bar in node.graph.bars) {
         bar_info = node.graph.bars[bar];
         graph_group.append("rect")
@@ -157,7 +156,7 @@ scale_y_graph = function (options, y) {
 create_new_graph = function (node, options, cx, cy) {
     // NEED TO UPDATE THESE OFFSETS IN THE OPTIONS BAD TO HAVE HARD CODED
     var node_cx = cx - 18;//scale_x_graph(options, node.x);
-    var node_cy = cy - 18;//scale_y_graph(options, node.y) - options.graph_height / 2;
+    var node_cy = cy - 25;//scale_y_graph(options, node.y) - options.graph_height / 2;
     options.metabolite_count++;
     var num_bars = options.max_bar_count;
     var svg  = options.svg_overlay;

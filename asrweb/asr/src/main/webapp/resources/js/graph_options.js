@@ -25,6 +25,7 @@ var setup_options = function (svg_id, json_str) {
     //The main options for the graph
     var options = {
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
+
         /******** Options for node and edge drawing ***************************/
         graphs_display: true, // Graphs will only display if the data contains
         // graph information -> note histogram information must be there for all
@@ -72,6 +73,7 @@ var setup_options = function (svg_id, json_str) {
             font_color: "grey",
             text_stroke_width: 1,
             y_length: 70
+
         },
         /********** Pie chart options ***************************************/
         pie: {
@@ -80,7 +82,9 @@ var setup_options = function (svg_id, json_str) {
             stroke_width: 3,
             stroke: "white",
             text_size: "12px",
-            font_family: "Gill Sans, sans-serif"
+            font_family: "Gill Sans, sans-serif",
+            max_seq_len: 6 // Number of sequences in a pie chart where we don't draw the divding lines between (stroke
+             // width gets set to 0;
         },
         /*********** Histogram options  ************************************/
         graph: {

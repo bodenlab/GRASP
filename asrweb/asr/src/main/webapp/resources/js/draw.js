@@ -84,11 +84,12 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
     var y_scale = graph.scale.y1;
     var radius = graph.max_radius;
     var stroke_width =  node_opt.stroke_width;
+
     if (radius < graph.min_radius) {
-          stroke_width = 0;
+         stroke_width = 0;
     }
     // Sets up the graph environment for the overlayed graphs
-//    setup_graph_overlay(options.graph);
+    //    setup_graph_overlay(options.graph);
 
     for (var n in nodes) {
         var node = nodes[n];

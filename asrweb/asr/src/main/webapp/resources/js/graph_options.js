@@ -25,6 +25,7 @@ var setup_options = function (svg_id, json_str) {
     //The main options for the graph
     var options = {
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
+
         /******** Options for node and edge drawing ***************************/
         graphs_display: true, // Graphs will only display if the data contains
         // graph information -> note histogram information must be there for all
@@ -72,6 +73,7 @@ var setup_options = function (svg_id, json_str) {
             font_color: "grey",
             text_stroke_width: 1,
             y_length: 70
+
         },
         /********** Pie chart options ***************************************/
         pie: {

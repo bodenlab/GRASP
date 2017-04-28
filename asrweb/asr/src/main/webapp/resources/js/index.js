@@ -3,9 +3,6 @@
  */
 var graph = {};
 
-
-
-
 setup_data = function (graph) {
     var lanes = [];
     var nodes = [];
@@ -23,6 +20,7 @@ setup_data = function (graph) {
             // if not larger than the inferred POAG
             var poag_type = 'msa';
         } else {
+
             var poag = poags['inferred'];
             var poag_type = 'inferred';
         }
@@ -52,7 +50,11 @@ setup_data = function (graph) {
                 node.graph.bars = node.seq.chars;
                 // Assume that every node has been deleted during the ineference process
                 node_dict[node.id] = node;
+
             } else {
+                if (n == 0) {
+                    node.first_node = true; // Used to make the line for the mini line
+                }
                 var node_inferred = node_dict[node.id];
                 // Update the x coords to match that of the MSA node (to account for deletions)
                 node.start = node_inferred.start;
@@ -129,12 +131,12 @@ make_scales = function (graph) {
                     return d.start;
                 })),
                 d3.max(nodes, function (d) {
-                    return d.end + (2 * radius);
+                    return d.end + 1;
                 })])
             .range([0, width]);
 
 
-    var x1 = d3.scale.linear().range([0, width/1.8]);
+    var x1 = d3.scale.linear().range([0, width]);
 
     var ext = d3.extent(lanes, function (d) {
         return d.id;
@@ -343,7 +345,7 @@ create_poags = function (options) {
     graph = setup_svg(graph);
     graph = setup_items(graph);
     graph = setup_brush(graph);
-    graph = draw_mini_nodes(graph);
+    graph = draw_mini_line(graph);//draw_mini_nodes(graph);
 
     display();
 
@@ -374,11 +376,13 @@ function display() {
     // Delete all the old egdes
     graph.node_group.selectAll("path.edge").remove();
     graph.node_group.selectAll("path.pie").remove();
+
     // Delete all graphs
     graph.options.graph.svg_overlay.selectAll("g.graph").remove();
 
     // Delete all old nodes
     graph.node_group.selectAll("circle.main_node").remove();
+
     // Delete all the old text
     graph.node_group.selectAll("text.edge_text").remove();
     graph.node_group.selectAll("text.node_text").remove();
@@ -401,9 +405,6 @@ function moveBrush() {
     display();
 
 }
-
-
-
 
 // generates a single path for each item class in the mini display
 // ugly - but draws mini 2x faster than append lines or line generator

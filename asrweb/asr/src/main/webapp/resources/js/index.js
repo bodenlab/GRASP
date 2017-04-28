@@ -16,6 +16,7 @@ setup_data = function (graph) {
     var current_y_position = 0;
     var count = 0;
     var total_max_depth = 0;
+    var max_seq_len = 0;
     for (var poag_count = 0; poag_count < 2; poag_count ++) {
         if (poag_count == 0) {
             var poag = poags['msa']; // MSA indicates that it is the non inferred and will thus be the same size
@@ -44,6 +45,9 @@ setup_data = function (graph) {
                 node.deleted_during_inference = true;
                 node.inferred = false;
                 node.many_edges = false;
+                if (node.seq.chars.length > max_seq_len) {
+                    max_seq_len = node.seq.chars.length;
+                }
                 node.graph = {};
                 node.graph.bars = node.seq.chars;
                 // Assume that every node has been deleted during the ineference process
@@ -102,6 +106,7 @@ setup_data = function (graph) {
     graph.edges = edges;
     graph.node_count = count;
     graph.node_diff = node_dict;
+    graph.max_seq_len = max_seq_len;
     return graph;
 };
 
@@ -126,7 +131,7 @@ make_scales = function (graph) {
                 d3.max(nodes, function (d) {
                     return d.end + (2 * radius);
                 })])
-            .range([0, width * options.mini_radius/2]);
+            .range([0, width]);
 
 
     var x1 = d3.scale.linear().range([0, width/1.8]);

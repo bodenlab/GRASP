@@ -35,11 +35,11 @@ var setup_options = function (svg_id, json_str) {
         depth: 3, // Indicates how many layers for the nodes
         lane_height: 20, // A "lane" is the region where a POAG is drawn this is
         lane_padding: 40,
-        mini_radius: 8,
-        interesting_many_edges_colour: "purple",
-        diff_colour: "red",
+        mini_radius: 7,
+        interesting_many_edges_colour: "MidnightBlue",
+        diff_colour: "CornflowerBlue",
         diff_opacity: 0.2,
-        num_start_nodes : 7,// How many nodes that it starts with
+        num_start_nodes : 6,// How many nodes that it starts with
         x_padding: 100, // the padding to the left of teh first node in relation to the y axis titles
         multi: {
             main_height: 400,
@@ -80,7 +80,9 @@ var setup_options = function (svg_id, json_str) {
             stroke_width: 3,
             stroke: "white",
             text_size: "12px",
-            font_family: "Gill Sans, sans-serif"
+            font_family: "Gill Sans, sans-serif",
+            max_seq_len: 6 // Number of sequences in a pie chart where we don't draw the divding lines between (stroke
+                           // width gets set to 0;
         },
         /*********** Histogram options  ************************************/
         graph: {

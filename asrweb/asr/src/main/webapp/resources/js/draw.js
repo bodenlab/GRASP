@@ -174,7 +174,7 @@ make_pie = function (node, graph, radius) {
     //var radius = graph.max_radius;
     var node_cy = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
     var stroke_width = options.pie.stroke_width;
-    if (radius < graph.min_radius) {
+    if (radius < graph.min_radius || graph.max_seq_len > options.pie.max_seq_len) {
           stroke_width = 0;
     }
     var pie_group = group.append("g")

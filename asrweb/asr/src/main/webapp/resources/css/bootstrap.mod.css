@@ -1,5 +1,5 @@
 body {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 #results {
@@ -30,13 +30,21 @@ body {
 }
 
 .btn {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .form-control {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 #tutorial-div {
     display: none;
+}
+
+a {
+    font-size: 14px;
+}
+
+.disable {
+    visibility: hidden;
 }

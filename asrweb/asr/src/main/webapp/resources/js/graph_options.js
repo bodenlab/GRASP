@@ -41,7 +41,7 @@ var setup_options = function (svg_id, json_str) {
         diff_colour: "CornflowerBlue",
         diff_opacity: 0.2,
         num_start_nodes : 6,// How many nodes that it starts with
-        x_padding: 100, // the padding to the left of teh first node in relation to the y axis titles
+        x_padding: 0, // the padding to the left of teh first node in relation to the y axis titles
         mini: {
             draw_mini_nodes: false,
             stroke: "grey",

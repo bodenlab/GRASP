@@ -51,6 +51,16 @@ var setup_options = function (svg_id, json_str) {
             main_height: 400,
             mini_height: 20
         },
+        position: {
+            text_padding: 20, // How high above the mini it will appear
+            level_1: 1, // Means that we will draw a position for every node
+            level_2: 5, // We will draw a position at every 5 nodes
+            level_3: 10, // Draw position at every 10
+            level_unlimited: 25,
+            level_1_node_limit: 10, // if < 10 nodes in the main element draw 10
+            level_2_node_limit: 50, // lvl 2 < 50 nodes
+            level_3_node_limit: 100 // If we have more than 50 nodes don't draw positions
+        },
          /**************** Options for changing the style of the nodes *************************/
         node: {
             stroke_width: 2,

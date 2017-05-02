@@ -1,3 +1,53 @@
+draw_positions = function (graph, nodes, x_min, x_max) {
+    var options = graph.options;
+    var position_opt = options.position;
+    var node_opt = options.node;
+    var group = graph.node_group;
+    var x_scale = graph.scale.x1;
+    var y_scale = graph.scale.y1;
+    var radius = graph.max_radius;
+    var stroke_width =  node_opt.stroke_width;
+    var width = options.width;
+    // Get the number of nodes which are in the larger display
+    var node_count = Object.keys(nodes).length / 2; // includes both POAGS (inferred and MSA)
+    var level = 0;
+    // Work out how many labels we want to draw
+    if (node_count + 1 < position_opt.level_1_node_limit) {
+        level = position_opt.level_1;
+
+    } else if (node_count + 1 < position_opt.level_2_node_limit) {
+        level = position_opt.level_2;
+
+    } else if (node_count + 1 < position_opt.level_3_node_limit) {
+        level = position_opt.level_3;
+
+    } else {
+        level = position_opt.level_unlimited;
+    }
+    for (var n in nodes) {
+        var node = nodes[n];
+        if (node.start % level == 0 && node.inferred == true) {
+                group.append("text")
+                    .attr("class", "position_text")
+                    .attr('x', function () {
+                        var tmp = x_scale(node.start) + 2;
+                        return tmp;
+                    })
+                    .attr('y', function () {
+                        var tmp = y_scale(0) - position_opt.text_padding; // Have it at the top
+                        return tmp ;
+                    })
+                    .attr("text-anchor", "middle")
+                    .attr("stroke-width", node_opt.stroke_width)
+                    .style("font-family", node_opt.font_family)
+                    .style("font-size", node_opt.text_size)
+                    .attr("stroke", node_opt.font_colour)
+                    .text(node.start);
+        }
+    }
+}
+
+
 draw_mini_nodes = function (graph) {
     var nodes = graph.nodes;
     var options = graph.options;

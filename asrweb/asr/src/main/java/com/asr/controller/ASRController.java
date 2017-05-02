@@ -21,6 +21,7 @@ import java.nio.file.StandardCopyOption;
 class ASRController {
 
     final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
+
     final String sessionPath = "/Users/marnie/Documents/WebSessions/";//"/home/ariane/Documents/bodenlab/data/WebSessions";
 
     /**
@@ -124,6 +125,7 @@ class ASRController {
 
             // add msa and inferred ancestral graph
             String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON("root"));
+
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {

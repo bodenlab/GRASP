@@ -387,9 +387,11 @@ function display() {
     graph.node_group.selectAll("text.edge_text").remove();
     graph.node_group.selectAll("text.node_text").remove();
     graph.node_group.selectAll("text.pie").remove();
+    graph.node_group.selectAll("text.position_text").remove();
 
     draw_nodes(graph, vis_nodes, minExtent, maxExtent);
     draw_node_edges(graph, minExtent, maxExtent);
+    draw_positions(graph, vis_nodes, minExtent, maxExtent);
 
 }
 

@@ -37,10 +37,10 @@ var setup_options = function (svg_id, json_str) {
         lane_height: 20, // A "lane" is the region where a POAG is drawn this is
         lane_padding: 40,
         mini_radius: 7,
-        interesting_many_edges_colour: "MidnightBlue",
-        diff_colour: "CornflowerBlue",
-        diff_opacity: 0.2,
-        num_start_nodes : 6,// How many nodes that it starts with
+        interesting_many_edges_colour: "Crimson",
+        diff_colour: "SlateGrey",
+        diff_opacity: 0.15,
+        num_start_nodes : 7,// How many nodes that it starts with
         x_padding: 0, // the padding to the left of teh first node in relation to the y axis titles
         mini: {
             draw_mini_nodes: false,
@@ -101,17 +101,17 @@ var setup_options = function (svg_id, json_str) {
             x: 0,
             y: 0,
             x_label_array: ['one', 'two'],
-            graph_outer_circle_colour: "blue",
+            graph_outer_circle_colour: "gray",
             graph_outer_circle_opacity: 0.5,
-            graph_outer_circle_radius: 65,
+            graph_outer_circle_radius: 85,
             graphs: new Array(),
-            size: 60,
+            size: 80,
             colours: random, // default to random colour scheme
-            offset_graph_width: -29,
-            offset_graph_height: -15,
+            offset_graph_width: -35,
+            offset_graph_height: -30,
             width: 80,
             div_factor: 1,
-            graph_height: 50,
+            graph_height: 70,
             max_height: 10,
             max_bar_count: 2,
             hover: true,
@@ -120,16 +120,16 @@ var setup_options = function (svg_id, json_str) {
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
-        height: 800,
-        width: 2000,
-        margin: {top: 50, left: 150, bottom: 50, right: 50},
+        height: 700,//$("#" + svg_id).parent("div").height()*2.7,//600,
+        width: 1400,//$("#" + svg_id).parent("div").width()*2.7,//1000,
+        margin: {top: 50, left: 60, bottom: 10, right: 10},
         initial_padding: 0,
         colours: random,
         svg_padding: 20, // The padding of the svg within the div given
         padding_between_views: 50,
         /*********** End of sizing options **********************************/
         background_colour: "white",
-        background_stroke_colour: "black",
+        background_stroke_colour: "grey",
         background_stroke_width: "1px",
         stroke_width: "3px",
         /********** Data ***************************************************/

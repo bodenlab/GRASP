@@ -3,13 +3,18 @@
 <body>
 <div th:fragment="results" th:if="${results}">
     <div class="content-section-b">
-        <div id="heading">
-            <h2><span id="node-label">Root</span> <small><span th:text="${inferenceType}"/> reconstruction </small></h2>
-            <hr class="h-divider"></hr>
+        <div class="row">
+            <div id="heading" class="col-lg-11">
+                <h2><span id="node-label">Root</span> <small><span th:text="${inferenceType}"/> reconstruction </small></h2>
+                <hr class="h-divider"></hr>
+            </div>
+            <div class="col-lg-offset-10 col-log-1">
+                <button type="button" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></button>
+            </div>
         </div>
-        <div id="results" class="container-fluid">
-            <div class="row">
-                <div id="reconstructed-tree" class="col-lg-3">
+        <div id="results" class="container-fluid" >
+            <div class="row col-lg-10 col-lg-offset-1">
+                <div id="reconstructed-tree" class="well col-lg-3">
                     <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
@@ -19,7 +24,7 @@
                             </script>
                     </svg>
                 </div>
-                <div class="col-lg-8">
+                <div class="col-lg-9">
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span id="selected-scheme">GRASP</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
@@ -55,7 +60,6 @@
                                     }
 
                                     var json_str = /*[[${graph}]]*/;
-                                    var json_str =  document.getElementById("seansData").innerHTML;
                                     var options = setup_options("poag", json_str);
                                     options = create_poags(options);
                                 /*]]>*/
@@ -63,7 +67,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row  col-lg-10 col-lg-offset-1">
                 <button id="download-toggle" class="btn btn-default col-lg-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
                 <div class="panel panel-default collapse" id="download-form">
                     <form>

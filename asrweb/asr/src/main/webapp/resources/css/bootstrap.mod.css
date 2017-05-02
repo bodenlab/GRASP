@@ -1,5 +1,5 @@
 body {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 #results {
@@ -7,7 +7,7 @@ body {
 }
 
 #reconstructed-tree {
-    height: 800px;
+    height: 600px;
     overflow: auto;
 }
 
@@ -17,6 +17,7 @@ body {
 }
 
 #poag {
+    height: 570px;
     overflow: hidden;
 }
 
@@ -30,11 +31,11 @@ body {
 }
 
 .btn {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .form-control {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 #tutorial-div {
@@ -42,7 +43,7 @@ body {
 }
 
 a {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .disable {

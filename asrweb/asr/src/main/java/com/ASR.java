@@ -142,9 +142,24 @@ public class ASR {
      * @return                  String of JSON
      */
     public String catGraphJSONBuilder(JSONObject graphMSA, JSONObject graphInferred) {
-        String catGraphs = "{\"poags\":";
-        catGraphs += graphInferred.toString() + ", " + graphMSA.toString() + "}";
-        System.out.println(catGraphs);
-        return catGraphs;
+        // Create metadata objects to add to the POAGS
+        JSONObject metadataInferred = new JSONObject();
+        JSONObject metadataMSA = new JSONObject();
+
+        // Add metadata information (for example titles, could be anything)
+        metadataInferred.put("title", "Inferred");
+        metadataMSA.put("title", "MSA");
+
+        // Add the metadata to their respective graphs
+        graphInferred.put("metadata", metadataInferred);
+        graphMSA.put("metadata", metadataMSA);
+
+        // Add the metadata to an array
+        JSONObject combinedPoags = new JSONObject();
+        combinedPoags.put("inferred", graphInferred);
+        combinedPoags.put("msa", graphMSA);
+
+        // Return a string representation of this
+        return combinedPoags.toString();
     }
 }

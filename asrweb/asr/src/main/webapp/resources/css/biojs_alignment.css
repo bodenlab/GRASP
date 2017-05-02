@@ -7,17 +7,10 @@
     padding-left: 50px;
     padding-top: 50px;
 }
-.radio {
-    font-size: 20px;
-    font-family: 'Varela Round', sans-serif;
-    color: #222;
-    padding: 20px;
-    padding-left: 50px;
-    float: left;
-}
-.chart {
+
+/*.chart {
     shape-rendering: crispEdges;
-}
+}*/
 .mini text {
     font: 9px sans-serif;	
 }
@@ -28,7 +21,7 @@
     text-anchor: start;
 }
 .todayLine {
-    stroke: blue;
+    stroke: SteelBlue;
     stroke-width: 1.5;
 }
 .axis line, .axis path {
@@ -46,9 +39,10 @@
     fill: lightgreen;
 }
 .brush .extent {
-    stroke: gray;
-    fill: blue;
-    fill-opacity: .165;
+    stroke: CornflowerBlue;
+    stroke-opacity: .2;
+    fill: CornflowerBlue;
+    fill-opacity: .12;
 }
 
 div.d3-tip, #generic_tooltip {
@@ -120,7 +114,7 @@ div.tooltip {
 .axis line {
     fill: none;
     stroke: #000;
-    shape-rendering: crispEdges;
+    /*shape-rendering: crispEdges;*/
 }
 
 /*    .x.axis path {

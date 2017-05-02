@@ -57,11 +57,15 @@ var setup_tree = function(tree_div, newick_string) {
 var perform_marginal = function(node) {
     selectedNode = node.name;
     console.log("Node: " + node.name);
-    /*$.ajax({
-        type:'POST',
-        url: "/asr",
-        data: node,
-        dataType: "string"
-    });*/
+    var request = {infer: "marginal", node: selectedNode};
+    console.log(request);
+    $.ajax({
+        url : "/asr",
+        type : 'GET',
+        dataType : 'json',
+        data : JSON.stringify(request),
+        contentType : 'application/json',
+        mimeType : 'application/json'
+    })
     refresh_elements();
 };

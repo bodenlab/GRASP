@@ -9,23 +9,23 @@ setup_data = function (graph) {
     var node_dict = {};
     var node_many_edge_dict = {}; // Keeps track of nodes with > 1 edge coming out
     var edges = [];
-    var poags = graph.data.poags;
+    var poags = graph.data;
     var current_y_position = 0;
     var count = 0;
     var total_max_depth = 0;
     var max_seq_len = 0;
     for (var poag_count = 0; poag_count < 2; poag_count ++) {
         if (poag_count == 0) {
-            var poag = poags['msa']; // MSA indicates that it is the non inferred and will thus be the same size
+            var poag = poags.msa; // MSA indicates that it is the non inferred and will thus be the same size
             // if not larger than the inferred POAG
             var poag_type = 'msa';
         } else {
 
-            var poag = poags['inferred'];
+            var poag = poags.inferred;
             var poag_type = 'inferred';
         }
         var title = poag.metadata.title;
-        var max_depth = poag.metadata.max_depth;
+        var max_depth = poag.max_depth;
         if (max_depth > total_max_depth) {
             total_max_depth = max_depth;
         }
@@ -80,7 +80,7 @@ setup_data = function (graph) {
             // if we are in the inferred version we need to get the updated x coods as above
             var node_inferred_from = node_dict[edge.from];
             var node_inferred_to = node_dict[edge.to];
-            edge.x1 =  node_inferred_from.start;
+            edge.x1 = node_inferred_from.start;
             edge.x2 = node_inferred_to.start;
             edge.from = edge.from;
             edge.to = edge.to;

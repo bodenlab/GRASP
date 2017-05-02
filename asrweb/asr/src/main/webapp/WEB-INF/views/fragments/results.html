@@ -7,7 +7,7 @@
             <h2><span id="node-label">Root</span> <small><span th:text="${inferenceType}"/> reconstruction </small></h2>
             <hr class="h-divider"></hr>
         </div>
-        <div id="results">
+        <div id="results" class="container-fluid">
             <div class="row">
                 <div id="reconstructed-tree" class="col-lg-3">
                     <svg id="phylo">
@@ -22,10 +22,10 @@
                 <div class="col-lg-8">
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span id="selected-scheme">Grasp</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
+                            <span id="selected-scheme">GRASP</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a id="random" onclick="update_scheme('random')">Grasp <span id="random-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="random" onclick="update_scheme('random')">GRASP <span id="random-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                             <li><a id="clustal" onclick="update_scheme('clustal')">Clustal <span id="clustal-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                             <li><a id="lesk" onclick="update_scheme('lesk')">Lesk <span id="lesk-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                             <li><a id="cinema" onclick="update_scheme('cinema')">Cinema <span id="cinema-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
@@ -61,6 +61,76 @@
                                 /*]]>*/
                     </script>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <button id="download-toggle" class="btn btn-default col-lg-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
+                <div class="panel panel-default collapse" id="download-form">
+                    <form>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="checkbox"></input>
+                                        </span>
+                                        <label class="form-control">Reconstructed tree</label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="checkbox"></input>
+                                        </span>
+                                        <label class="form-control">Inferred consensus sequences</label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="checkbox"></input>
+                                        </span>
+                                        <label class="form-control">Inferred consensus sequences</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="checkbox"></input>
+                                        </span>
+                                        <label class="form-control">Reconstructed tree</label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="checkbox"></input>
+                                        </span>
+                                        <label class="form-control">Inferred consensus sequences</label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <input type="checkbox"></input>
+                                        </span>
+                                        <label class="form-control">Inferred consensus sequences</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row"></div>
+                            <div class="row">
+                                <div class="col-lg-offset-10"><button type="submit" class="btn btn-primary col-lg-11" name="submit">Download Results</button></div>
+                            </div>
+                        </div>
+                        <script type="text/javascript">
+                                $('#download-toggle').click( function(){
+                                    $(this).find('span').toggleClass('glyphicon-menu-down').toggleClass('glyphicon-menu-up');
+                                });
+                        </script>
+                    </form>
                 </div>
             </div>
         </div>

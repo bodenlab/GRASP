@@ -71,6 +71,76 @@ draw_mini_nodes = function (graph) {
 }
 
 
+draw_mini_line = function (graph) {
+    var nodes = graph.nodes;
+    var options = graph.options;
+    var mini_opt = options.mini;
+    var group = graph.mini.append('g');
+    var x_scale = graph.scale.x;
+    var y_scale = graph.scale.y2;
+    var radius = options.mini_radius;
+    var x_padding = options.x_padding / 2;
+    var y_padding = 20;
+    var line_points = new Array();
+
+    for (var n in nodes) {
+        var node = nodes[n];
+        if (node.first_node == true) {
+
+            group.append("path")
+                      .attr("d", line_function(line_points))
+                      .attr("class", "edge")
+                      .attr("stroke-width", mini_opt.stroke_width)
+                      .attr("stroke", mini_opt.stroke)
+                      .attr("fill", "none")
+
+            line_points = new Array();
+        }
+        //var colour = options.colours[node.label];
+        var line_y = (y_scale(node.lane) + (y_scale(node.lane + 1)) / 2);
+        var line_x = x_scale(node.start) + x_padding;
+        line_points.push(combine_points(line_x, line_y));
+
+        if (node.many_edges == true) {
+            group.append("rect")
+                    .attr("class", "mini_rect")
+                    .attr('x', line_x)
+                    .attr('y', function () {
+                        var tmp = y_scale(0); // Have it at the top
+                        return tmp ;
+                    })
+                    .attr('width', 4 * radius)
+                    .attr('height', y_scale(graph.max_depth * 2))
+                    .attr("stroke-width", mini_opt.stroke_width)
+                    .attr("stroke", mini_opt.stroke)
+                    .attr("opacity", options.diff_opacity)
+                    .attr("fill", options.diff_colour);
+
+        }
+        if (node.deleted_during_inference == true) {
+            group.append("circle")
+                .attr("class", "mini_node")
+                .attr("id", "node_" + node.label + n)
+                .attr('cx', line_x)
+                .attr('cy', line_y)
+                .attr('r', 2 * radius)
+                .attr("opacity", options.diff_opacity)
+                .attr("fill", options.interesting_many_edges_colour);
+        }
+    }
+       group.append("path")
+                 .attr("d", line_function(line_points))
+                 .attr("class", "edge")
+                 .attr("stroke-width", mini_opt.stroke_width)
+                 .attr("stroke", mini_opt.stroke)
+                 .attr("fill", "none")
+
+
+    graph.mini_group = group;
+    return graph;
+}
+
+
 
 
 /**
@@ -159,7 +229,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
             }
         }
     }
-
+    graph.radius = radius;
     // Update the y curve amount to be 2 * the radius
     graph.y_curve_amount = radius;
     return graph;
@@ -244,10 +314,10 @@ draw_node_edges = function (graph, x_min, x_max) {
 
     var y_mid = 0;
     var count = 0;
-    var y_len = graph.y_curve_amount;//25;
+    var y_len = graph.y_curve_amount;
 
     var opacity = 1;
-    var same_level_buffer = graph.y_curve_amount;//edge_opt.y_curve_amount;
+    var same_level_buffer = graph.y_curve_amount;
     var label = null;
 
     var x_scale = graph.scale.x1;
@@ -311,19 +381,20 @@ draw_node_edges = function (graph, x_min, x_max) {
                     .attr("fill", "none")
                     .attr("marker-mid", "url(#triangle-end)");
 
-
-            group.append("text")
-                    .attr("class", "edge_text")
-                    .attr("id", "edge_text_" + edge.from + ":to:" + edge.to)
-                    .attr("x", x_text_pos)
-                    .attr("y", y_text_pos)
-                    .attr("text-anchor", "middle")
-                    .attr("stroke-width", edge_opt.text_stroke_width)
-                    .style("font-family", edge_opt.font_family)
-                    .style("font-size", edge_opt.text_size)
-                    .style("fill", edge_opt.font_color)
-                    .attr("opacity", opacity)
-                    .text(label);
+            if (graph.radius  > graph.min_radius) {
+                    group.append("text")
+                        .attr("class", "edge_text")
+                        .attr("id", "edge_text_" + edge.from + ":to:" + edge.to)
+                        .attr("x", x_text_pos)
+                        .attr("y", y_text_pos)
+                        .attr("text-anchor", "middle")
+                        .attr("stroke-width", edge_opt.text_stroke_width)
+                        .style("font-family", edge_opt.font_family)
+                        .style("font-size", edge_opt.text_size)
+                        .style("fill", edge_opt.font_color)
+                        .attr("opacity", opacity)
+                        .text(label);
+             }
 
             edge.moveToBack();
             count++;

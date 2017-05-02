@@ -53,6 +53,9 @@ setup_data = function (graph) {
                 // Assume that every node has been deleted during the ineference process
                 node_dict[node.id] = node;
             } else {
+                if (n == 0) {
+                    node.first_node = true; // Used to make the line for the mini line
+                }
                 var node_inferred = node_dict[node.id];
                 // Update the x coords to match that of the MSA node (to account for deletions)
                 node.start = node_inferred.start;
@@ -129,12 +132,12 @@ make_scales = function (graph) {
                     return d.start;
                 })),
                 d3.max(nodes, function (d) {
-                    return d.end + (2 * radius);
+                    return d.end + 1;
                 })])
             .range([0, width]);
 
 
-    var x1 = d3.scale.linear().range([0, width/1.8]);
+    var x1 = d3.scale.linear().range([0, width]);
 
     var ext = d3.extent(lanes, function (d) {
         return d.id;
@@ -343,7 +346,7 @@ create_poags = function (options) {
     graph = setup_svg(graph);
     graph = setup_items(graph);
     graph = setup_brush(graph);
-    graph = draw_mini_nodes(graph);
+    graph = draw_mini_line(graph);//draw_mini_nodes(graph);
 
     display();
 

@@ -1,6 +1,7 @@
 package com.asr.controller;
 
 import com.ASR;
+import json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -126,8 +127,9 @@ class ASRController {
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
             // add ancestral graph
-            // String msaGraph = asr.getMSAGraphJSON().toString());
-            // String inferredGraph = asr.getAncestralGraphJSON("root").toString();
+            JSONObject msaGraph = asr.getMSAGraphJSON();
+            JSONObject inferredGraph = asr.getAncestralGraphJSON("root");
+            String graphs = asr.catGraphJSONBuilder(msaGraph, inferredGraph);
             model.addAttribute("graph", graphExample);
 
         } catch (Exception e) {

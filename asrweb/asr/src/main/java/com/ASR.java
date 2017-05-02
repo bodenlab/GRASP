@@ -117,8 +117,6 @@ public class ASR {
      */
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa = asr.getMSAGraph();
-        //PartialOrderGraph noninferred = asr.getGraph();
-        System.out.println(msa.toString());
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -131,8 +129,22 @@ public class ASR {
      */
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
         PartialOrderGraph graph = asr.getGraph(nodeLabel);
-        System.out.println(graph.toString());
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
+    }
+
+    /**
+     * Formats the MSA and inferred objects into JSON representation of two graphs, used for javascript visualisation.
+     * This format is sent through to the website for visualisation.
+     *
+     * @param graphMSA          JSON object of MSA graph
+     * @param graphInferred     JSON object of inferred graph
+     * @return                  String of JSON
+     */
+    public String catGraphJSONBuilder(JSONObject graphMSA, JSONObject graphInferred) {
+        String catGraphs = "{\"poags\":";
+        catGraphs += graphInferred.toString() + ", " + graphMSA.toString() + "}";
+        System.out.println(catGraphs);
+        return catGraphs;
     }
 }

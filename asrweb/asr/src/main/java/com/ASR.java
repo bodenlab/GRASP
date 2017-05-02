@@ -118,6 +118,7 @@ public class ASR {
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa = asr.getMSAGraph();
         POAGJson json = new POAGJson(msa);
+        System.out.println("msa: " + json.toJSON());
         return json.toJSON();
     }
 
@@ -130,6 +131,7 @@ public class ASR {
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
         PartialOrderGraph graph = asr.getGraph(nodeLabel);
         POAGJson json = new POAGJson(graph);
+        System.out.println("root: " + json.toJSON());
         return json.toJSON();
     }
 

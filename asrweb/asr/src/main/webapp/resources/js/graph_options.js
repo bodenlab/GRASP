@@ -157,7 +157,7 @@ var setup_options = function (svg_id, json_str) {
         x_column: 'Sample_ID',
         x_middle_title: 500,
         y_column: 'Expression_Value',
-        y_label_text_size: "14px",
+        y_label_text_size: "12px",
         y_label_x_val: 40,
     };
 

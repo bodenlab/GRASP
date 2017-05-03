@@ -7,6 +7,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.io.File;
@@ -22,8 +23,14 @@ class ASRController {
 
     final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
+
     final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
                               // "/Users/marnie/Documents/WebSessions/";//
+
+    //final String sessionPath = "/Users/marnie/Documents/WebSessions/";//"/home/ariane/Documents/bodenlab/data/WebSessions";
+
+    private ASR asr;
+
     /**
      * Get form.html template
      *
@@ -38,19 +45,20 @@ class ASRController {
     /**
      * Submit the asr form (documenting input details, i.e. aln and tree file, etc)
      *
-     * @param asr               ASR object
+     * @param asrForm           ASR object
      * @param bindingResult     Form result, indicating any input errors
      * @param model             com model
      * @return                  index with results as attributes in the model
      */
     @RequestMapping(method=RequestMethod.POST, params="submit")
-    public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asr, BindingResult bindingResult, Model model){
-        System.out.println(bindingResult);
+    public String performReconstruction(@Valid @ModelAttribute ASR asrForm, BindingResult bindingResult, Model model){
         if (bindingResult.hasErrors()) {
             for (String err : bindingResult.getSuppressedFields())
                 System.out.println(err);
             return "index";
         }
+
+        this.asr = asrForm;
 
         // upload supplied files
         try {
@@ -76,6 +84,7 @@ class ASRController {
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
+            model.addAttribute("error", "results");
             model.addAttribute("errorMessage", e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return "index";
@@ -91,12 +100,14 @@ class ASRController {
     /**
      * Submit the asr form (documenting input details, i.e. aln and tree file, etc)
      *
-     * @param asr               ASR object
+     * @param asrForm           ASR object
      * @param model             com model
      * @return                  index with results as attributes in the model
      */
     @RequestMapping(method=RequestMethod.POST, params="test")
-    public String performReconstruction(@ModelAttribute("asrForm") ASR asr, Model model){
+    public String performReconstruction(@ModelAttribute ASR asrForm, Model model){
+
+        this.asr = asrForm;
 
         // upload supplied files
         try {
@@ -129,6 +140,47 @@ class ASRController {
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
+            model.addAttribute("error", "results");
+            model.addAttribute("errorMessage", e.getMessage());
+            System.out.println("Error: " + e.getMessage());
+            return "index";
+        }
+
+        // add attribute to specify to view results (i.e. to show the graph, tree, etc)
+        model.addAttribute("inferenceType", asr.getInferenceType());
+        model.addAttribute("results", true);
+
+        return "index";
+    }
+
+    /**
+     * Perform marginal reconstruction of specified tree node.
+     *
+     * @param infer inference type (Expects marginal)
+     * @param node  node label
+     * @param model com model
+     * @return      index view
+     */
+    @RequestMapping(method=RequestMethod.POST,params={"infer", "node"})
+    public String performReconstruction(@RequestParam String infer, @RequestParam String node,  Model model){
+
+        // TODO: push exceptions to error message on view...
+        try {
+            asr.setInferenceType(infer);
+            asr.setMarginalNodeLabel(node);
+
+            asr.runReconstruction();
+
+            // add reconstructed newick string to send to javascript
+            model.addAttribute("tree", asr.getReconstructedNewickString());
+
+            // add msa and inferred ancestral graph
+            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(node));
+
+            model.addAttribute("graph", graphs);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "results");
             model.addAttribute("errorMessage", e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return "index";

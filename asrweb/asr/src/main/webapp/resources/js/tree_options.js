@@ -61,11 +61,8 @@ var perform_marginal = function(node) {
     console.log(request);
     $.ajax({
         url : "/asr",
-        type : 'GET',
-        dataType : 'json',
-        data : JSON.stringify(request),
-        contentType : 'application/json',
-        mimeType : 'application/json'
+        type : 'POST',
+        data : {infer: "marginal", node: selectedNode},
     })
     refresh_elements();
 };

@@ -43,6 +43,8 @@ setup_data = function (graph) {
                 node.deleted_during_inference = true;
                 node.inferred = false;
                 node.many_edges = false;
+                node.start = node.x;
+                node.end = node.x;
                 if (node.seq.chars.length > max_seq_len) {
                     max_seq_len = node.seq.chars.length;
                 }
@@ -50,7 +52,6 @@ setup_data = function (graph) {
                 node.graph.bars = node.seq.chars;
                 // Assume that every node has been deleted during the ineference process
                 node_dict[node.id] = node;
-                console.log(node.id);
             } else {
                 if (n == 0) {
                     node.first_node = true; // Used to make the line for the mini line
@@ -72,7 +73,6 @@ setup_data = function (graph) {
             nodes.push(node);
         }
         // Add each of the reactions to the reaction items
-        console.log(node_dict);
         for (var e in poag.edges) {
             var edge = poag.edges[e];
             edge.y1 += current_y_position;

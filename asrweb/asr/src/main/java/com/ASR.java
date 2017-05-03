@@ -39,6 +39,8 @@ public class ASR {
 
     private String inferenceType = "marginal";
 
+    private String nodeLabel = null;
+
     private boolean performAlignment = false;
 
     public ASR() {}
@@ -79,6 +81,8 @@ public class ASR {
     public void setPerformAlignment(boolean performAlignment) { this.performAlignment = performAlignment; }
     public void setSessionDir(String dir) { this.sessionDir = dir; }
     public String getSessionDir() { return this.sessionDir; }
+    public void setMarginalNodeLabel(String node) { this.nodeLabel = node; }
+    public String getMarginalNodeLabel() { return this.nodeLabel; }
 
     /*******************************************************************************************************************
      ****** ASR functional methods
@@ -88,7 +92,13 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        asr = new ASRPOG(alnFilepath, treeFilepath, inferenceType.equalsIgnoreCase("joint"), true);
+        System.out.println(nodeLabel);
+        if (inferenceType.equalsIgnoreCase("joint"))
+            asr = new ASRPOG(alnFilepath, treeFilepath, true,true);
+        else if (nodeLabel != null)
+            asr = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, true);
+        else
+            asr = new ASRPOG(alnFilepath, treeFilepath, false, true);
         asr.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -117,8 +127,8 @@ public class ASR {
      */
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa = asr.getMSAGraph();
+        System.out.println(msa.toString());
         POAGJson json = new POAGJson(msa);
-        System.out.println("msa: " + json.toJSON());
         return json.toJSON();
     }
 
@@ -130,8 +140,8 @@ public class ASR {
      */
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
         PartialOrderGraph graph = asr.getGraph(nodeLabel);
+        System.out.println(graph.toString());
         POAGJson json = new POAGJson(graph);
-        System.out.println("root: " + json.toJSON());
         return json.toJSON();
     }
 

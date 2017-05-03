@@ -3,7 +3,8 @@
 <body>
 <div th:fragment="form">
     <a name="reconstruct"></a>
-    <div class="content-section-a" th:if="${results == null}">
+    <div class="content-section-a" th:if="${results == null and error == null}">
+        <div th:replace="fragments/help :: help"></div>
         <div class="container">
             <form class="col-lg-offset-2" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row">

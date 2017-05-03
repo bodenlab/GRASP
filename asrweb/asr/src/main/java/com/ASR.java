@@ -147,7 +147,7 @@ public class ASR {
         // Create metadata objects to add to the POAGS
         JSONObject metadataInferred = new JSONObject();
         JSONObject metadataMSA = new JSONObject();
-
+        System.out.printf(metadataInferred.toString(), metadataMSA.toString());
         // Add metadata information (for example titles, could be anything)
         metadataInferred.put("title", "Inferred");
         metadataMSA.put("title", "MSA");

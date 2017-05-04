@@ -5,6 +5,7 @@ console.log(value);
         var scheme = chosen_colour[c];
         if (scheme.checked == true) {*/
             graph.options.colours = colour_schemes[value];//scheme.value];
+            graph.options.graph.colours =  colour_schemes[value];
             if (value == "cinema") {
                 graph.options.pie.stroke = "grey";
             } else {

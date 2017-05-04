@@ -35,21 +35,23 @@ var setup_options = function (svg_id, json_str) {
         /**************** Options for the lanes (used when showing both an inferred and raw POAG)   **/
         depth: 3, // Indicates how many layers for the nodes
         lane_height: 20, // A "lane" is the region where a POAG is drawn this is
-        lane_padding: 40,
+        // lane height is the lane height of the mini graph
+        lane_padding: 10,
         mini_radius: 7,
         interesting_many_edges_colour: "Crimson",
         diff_colour: "SlateGrey",
         diff_opacity: 0.15,
         num_start_nodes : 7,// How many nodes that it starts with
-        x_padding: 0, // the padding to the left of teh first node in relation to the y axis titles
+        x_padding: 25, // the padding to the left of teh first node in relation to the y axis titles
+        // Used when drawingthe line for the mini nodes
         mini: {
             draw_mini_nodes: false,
             stroke: "grey",
             stroke_width: 3
         },
         multi: {
-            main_height: 400,
-            mini_height: 20
+            main_height: 300,
+            mini_height: 50
         },
         position: {
             text_padding: 20, // How high above the mini it will appear
@@ -78,7 +80,7 @@ var setup_options = function (svg_id, json_str) {
         },
         /**************** Options for style of the edges between nodes **********************/
         edge: {
-            y_curve_amount: 25,
+            y_curve_amount: 10,
             stroke_width: 3,
             stroke: "grey",
             stroke_opacity: 1,
@@ -86,8 +88,8 @@ var setup_options = function (svg_id, json_str) {
             text_size: "12px",
             font_family: "Gill Sans, sans-serif",
             font_color: "grey",
-            text_stroke_width: 1,
-            y_length: 70
+            text_stroke_width: 1
+            //y_length: 20
 
         },
         /********** Pie chart options ***************************************/
@@ -110,7 +112,6 @@ var setup_options = function (svg_id, json_str) {
             svg_overlay: null,
             x: 0,
             y: 0,
-            x_label_array: ['one', 'two'],
             graph_outer_circle_colour: "gray",
             graph_outer_circle_opacity: 0.5,
             graph_outer_circle_radius: 85,
@@ -125,18 +126,21 @@ var setup_options = function (svg_id, json_str) {
             max_height: 10,
             max_bar_count: 2,
             hover: true,
-            metabolite_count: 0
+            metabolite_count: 0,
+            display_label_text: false, // true means display the label text below the MSA graph
+            display_axis_text: false, // Text on the axis (as in the numbers on the y axis)
+            draw_axis: false // Whether or not to draw the y axis
         },
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
         height: 700,//$("#" + svg_id).parent("div").height()*2.7,//600,
-        width: 1400,//$("#" + svg_id).parent("div").width()*2.7,//1000,
-        margin: {top: 50, left: 60, bottom: 10, right: 10},
+        width: 1200,//$("#" + svg_id).parent("div").width()*2.7,//1000,
+        margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
         colours: random,
         svg_padding: 20, // The padding of the svg within the div given
-        padding_between_views: 50,
+        padding_between_views: 100,
         /*********** End of sizing options **********************************/
         background_colour: "white",
         background_stroke_colour: "grey",

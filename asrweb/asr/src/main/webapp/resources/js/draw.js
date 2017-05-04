@@ -129,8 +129,8 @@ draw_mini_line = function (graph) {
     var x_scale = graph.scale.x;
     var y_scale = graph.scale.y2;
     var radius = options.mini_radius;
-    var x_padding = options.x_padding / 2;
-    var y_padding = 20;
+    var x_padding = options.x_padding;
+    var y_padding = 0;
     var line_points = new Array();
 
     for (var n in nodes) {
@@ -160,7 +160,7 @@ draw_mini_line = function (graph) {
                         return tmp ;
                     })
                     .attr('width', 4 * radius)
-                    .attr('height', y_scale(graph.max_depth * 2))
+                    .attr('height', graph.page_options.miniHeight +  options.lane_height)
                     .attr("stroke-width", mini_opt.stroke_width)
                     .attr("stroke", mini_opt.stroke)
                     .attr("opacity", options.diff_opacity)
@@ -281,7 +281,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
     }
     graph.radius = radius;
     // Update the y curve amount to be 2 * the radius
-    graph.y_curve_amount = radius;
+    graph.y_curve_amount = radius/2;
     return graph;
 };
 

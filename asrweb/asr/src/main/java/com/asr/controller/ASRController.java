@@ -20,11 +20,9 @@ class ASRController {
 
     final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
+    //final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
 
-    final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
-                              // "/Users/marnie/Documents/WebSessions/";//
-
-    //final String sessionPath = "/Users/marnie/Documents/WebSessions/";//"/home/ariane/Documents/bodenlab/data/WebSessions";
+    final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 
     private ASR asr;
 

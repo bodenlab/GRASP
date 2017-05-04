@@ -43,6 +43,8 @@ setup_data = function (graph) {
                 node.deleted_during_inference = true;
                 node.inferred = false;
                 node.many_edges = false;
+                node.start = node.x;
+                node.end = node.x;
                 if (node.seq.chars.length > max_seq_len) {
                     max_seq_len = node.seq.chars.length;
                 }
@@ -93,7 +95,7 @@ setup_data = function (graph) {
                 }
                 edges_from_node.push(edge);
                 node_many_edge_dict[edge.from] = edges_from_node;
-                if (edges_from_node.length >= options.number_of_edges_to_be_interesting) {
+                if (edges_from_node.length >= graph.options.number_of_edges_to_be_interesting) {
                     // tag the from node to be interesting
                     node_dict[edge.from].many_edges = true;
                 }
@@ -174,11 +176,11 @@ setup_svg = function (graph) {
     var max_depth = graph.max_depth;
 
     // Get the width of the DIV that we are appending the svg to so we can scale the height and width values
-    var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
+    var actual_svg_width = document.getElementById(graph.options.raw_svg_id).offsetWidth;
     // We don't want to get the height as we only want to develop the scale based on one element
     var scale_width = actual_svg_width/width;
 
-    var general_svg = d3.select(options.target)
+    var general_svg = d3.select(graph.options.target)
             .append("svg")
             .attr('width', width + margin.right + margin.left)
             .attr('height', height + margin.top + margin.bottom)
@@ -186,7 +188,7 @@ setup_svg = function (graph) {
 
 
     var chart = general_svg.append('g')
-                    .attr("transform",  "translate(" + (options.svg_padding) + "," + (options.svg_padding) + ")" + " scale(" + scale_width + ")");
+                    .attr("transform",  "translate(" + (graph.options.svg_padding) + "," + (graph.options.svg_padding) + ")" + " scale(" + scale_width + ")");
 
     chart.append('defs').append('clipPath')
             .attr('id', 'clip')
@@ -268,7 +270,7 @@ setup_svg = function (graph) {
 //            .attr('class', 'laneText');
     graph.mini = mini;
     graph.main = main;
-    options.graph.svg_overlay = main;
+    graph.options.graph.svg_overlay = main;
     return graph;
 };
 
@@ -305,14 +307,14 @@ setup_brush = function (graph) {
     mini.append('rect')
             .attr('pointer-events', 'painted')
             .attr('width', width)
-            .attr('height', miniHeight - options.padding_between_views)
+            .attr('height', miniHeight - graph.options.padding_between_views)
             .attr('visibility', 'hidden')
             .on('mouseup', moveBrush);
 
     // draw the selection area
     var brush = d3.svg.brush()
             .x(x)
-            .extent([0, options.num_start_nodes])
+            .extent([0, graph.options.num_start_nodes])
             .on("brush", display);
 
 
@@ -320,7 +322,7 @@ setup_brush = function (graph) {
             .attr('class', 'x brush')
             .call(brush)
             .selectAll('rect')
-            .attr('y',  + options.padding_between_views)
+            .attr('y',  + graph.options.padding_between_views)
             .attr('height', miniHeight - 1);
 
     mini.selectAll('rect.background').remove();

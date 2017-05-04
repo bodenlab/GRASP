@@ -4,7 +4,10 @@ var tree; // global tree object for updating parameters, etc
 
 var refresh_elements = function() {
     console.log(selectedNode);
-    document.getElementById("node-label").textContent = selectedNode;
+    var nodeLabels = document.querySelectorAll(".node-label");
+    for (var i = 0; i < nodeLabels.length; i++) {
+        nodeLabels[i].textContent = selectedNode;
+    }
     d3_phylotree_trigger_refresh (tree);
 };
 
@@ -39,7 +42,6 @@ var setup_tree = function(tree_div, newick_string) {
       	        function(node) {return("Create marginal reconstruction")},
       		    function () {
       		        perform_marginal(node);
-      		        //displayPOGraph(tree_node);
       		    }
      	 	);
      	d3_add_custom_menu (node, // add to this node
@@ -57,12 +59,20 @@ var setup_tree = function(tree_div, newick_string) {
 var perform_marginal = function(node) {
     selectedNode = node.name;
     console.log("Node: " + node.name);
-    var request = {infer: "marginal", node: selectedNode};
-    console.log(request);
     $.ajax({
         url : "/asr",
         type : 'POST',
         data : {infer: "marginal", node: selectedNode},
-    })
-    refresh_elements();
+        success: function(data) {
+            refresh_elements();
+            refresh_graphs(data);
+        }
+    });
+};
+
+var refresh_graphs = function(graph_json) {
+    d3.select(".chart").remove();
+    var options = setup_options("poag", graph_json);
+    console.log(graph_json);
+    options = create_poags(options);
 };

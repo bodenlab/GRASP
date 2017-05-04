@@ -42,7 +42,7 @@
     stroke: CornflowerBlue;
     stroke-opacity: .2;
     fill: CornflowerBlue;
-    fill-opacity: .12;
+    fill-opacity: .2;
 }
 
 div.d3-tip, #generic_tooltip {

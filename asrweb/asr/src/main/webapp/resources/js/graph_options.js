@@ -39,8 +39,8 @@ var setup_options = function (svg_id, json_str) {
         mini_radius: 7,
         interesting_many_edges_colour: "Crimson",
         diff_colour: "SlateGrey",
-        diff_opacity: 0.15,
-        num_start_nodes : 7,// How many nodes that it starts with
+        diff_opacity: 0.2,
+        num_start_nodes : 10,// How many nodes that it starts with
         x_padding: 0, // the padding to the left of teh first node in relation to the y axis titles
         mini: {
             draw_mini_nodes: false,
@@ -135,8 +135,8 @@ var setup_options = function (svg_id, json_str) {
         margin: {top: 50, left: 60, bottom: 10, right: 10},
         initial_padding: 0,
         colours: random,
-        svg_padding: 20, // The padding of the svg within the div given
-        padding_between_views: 50,
+        svg_padding: 10, // The padding of the svg within the div given
+        padding_between_views: 20,
         /*********** End of sizing options **********************************/
         background_colour: "white",
         background_stroke_colour: "grey",

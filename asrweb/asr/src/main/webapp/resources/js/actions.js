@@ -1,5 +1,4 @@
 var update_colour = function(value) {
-console.log(value);
     /*var chosen_colour = document.getElementsByName("colour_options");
     for (var c in chosen_colour) {
         var scheme = chosen_colour[c];

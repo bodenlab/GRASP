@@ -18,6 +18,10 @@ import java.io.IOException;
  * Created by marnie on 11/4/17.
  */
 public class ASR {
+    // TODO:
+    private ASRPOG asrJoint;
+    private ASRPOG asrMarginal;
+
     private ASRPOG asr;
     private String sessionDir;
 
@@ -37,7 +41,7 @@ public class ASR {
     //@File(type="seq", message="File must be in fasta or clustal format (*.fa, *.fasta or *.aln)")
     private MultipartFile seqFile = null;
 
-    private String inferenceType = "marginal";
+    private String inferenceType = "joint";
 
     private String nodeLabel = null;
 

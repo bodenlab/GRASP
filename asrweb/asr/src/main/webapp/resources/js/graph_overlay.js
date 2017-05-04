@@ -66,12 +66,16 @@ function create_axis(node, options, graph_group) {
                 w = 0;
                 return "translate(" + w + ",0)";
             })
-            .call(options.yAxis)
-            .append("text")
-            .attr("y", -10)
-            .attr("x", options.offset_graph_width + 25)
-            .attr("dy", ".71em")
-            .text(node.name);
+            .call(options.yAxis);
+    // Conditionally displays the axis text (i.e. the tags on the axis)
+    if (options.display_axis_text == true) {
+         axisgroup.append("text")
+             .attr("y", -10)
+             .attr("x", options.offset_graph_width + 25)
+             .attr("dy", ".71em")
+             .text(node.name);
+    }
+
 }
 
 function create_bars(node, options, graph_group) {
@@ -109,6 +113,8 @@ function create_bars(node, options, graph_group) {
                 })
                 .attr("fill", options.colours[bar_info.label]);
 
+    // Conditionally displays the labels at the bottom as text
+    if (options.display_axis_text == true) {
         graph_group.append("text")
                 .attr("class", "y axis")
                 .attr("x", function () {
@@ -116,6 +122,7 @@ function create_bars(node, options, graph_group) {
                 }) //Need to determine algoritm for determineing this
                 .attr("y", options.graph_height + 10)
                 .text(bar_info.label);
+        }
     }
 }
 
@@ -178,7 +185,10 @@ create_new_graph = function (node, options, cx, cy) {
     setup_graph_overlay(options);
     create_outer_circle(node, options, graph_group);
     create_rect(node, options, graph_group);
-    create_axis(node, options, graph_group);
+    // Conditionally draw the axis
+    if (options.draw_axis == true) {
+        create_axis(node, options, graph_group);
+    }
     create_bars(node, options, graph_group);
     return graph_group;
 }

@@ -1,4 +1,10 @@
-
+// For resizing the svg on resizing the page
+.svg-content {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
 
 .header_colour {
     font-size: 30px;

@@ -166,7 +166,7 @@ public class ASR {
 
         // What type of reconstruction it is, if it is a marginal reconstruction
         // pie charts will be drawn if it is a joint reconstruction then only the inferred node will be drawn
-        metadataInferred.put("type", "marginal");
+        metadataInferred.put("type", "jointS");
         metadataMSA.put("type", "marginal");
 
         // Add the metadata to their respective graphs

@@ -46,6 +46,10 @@ fieldset {
     padding-bottom: 1em;
 }
 
+#label {
+    height: 100%;
+}
+
 #recon-radio {
     padding-right: 0;
 }

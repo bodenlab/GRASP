@@ -76,7 +76,7 @@ class ASRController {
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
             // add msa and inferred ancestral graph
-            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON("root"));
+            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
@@ -114,8 +114,7 @@ class ASRController {
             asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
 
             asr.setLabel("Test");
-            System.out.println(asr.getInferenceType());
-            asr.setInferenceType("marginal");
+
             // copy default data to user session folder
 
             File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource("default.aln").toURI());
@@ -132,7 +131,7 @@ class ASRController {
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
             // add msa and inferred ancestral graph
-            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON("root"));
+            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
 
             model.addAttribute("graph", graphs);
 
@@ -165,9 +164,11 @@ class ASRController {
         // TODO: push exceptions to error message on view...
         try {
             asr.setInferenceType(infer);
-            asr.setMarginalNodeLabel(node);
 
-            asr.runReconstruction();
+            if (infer.equalsIgnoreCase("marginal")) {
+                asr.setMarginalNodeLabel(node);
+                asr.runReconstruction();
+            }
 
             // add reconstructed newick string to send to javascript
             model.addAttribute("tree", asr.getReconstructedNewickString());
@@ -179,7 +180,7 @@ class ASRController {
             return "index";
         }
         // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(node));
+        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
 
         model.addAttribute("graph", graphs);
         model.addAttribute("inferenceType", asr.getInferenceType());
@@ -188,6 +189,5 @@ class ASRController {
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
         return graphs;
 
-        //return "index";
     }
 }

@@ -18,11 +18,13 @@ import java.io.IOException;
  * Created by marnie on 11/4/17.
  */
 public class ASR {
-    // TODO:
+    // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
+    // reconstruction with each node view query
     private ASRPOG asrJoint;
+    // ASR object to store marginal reconstruction of current node (if given)
     private ASRPOG asrMarginal;
 
-    private ASRPOG asr;
+    //private ASRPOG asr;
     private String sessionDir;
 
     @NotEmpty(message="Please specify a label for your reconstruction")
@@ -96,14 +98,31 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        System.out.println(nodeLabel);
         if (inferenceType.equalsIgnoreCase("joint"))
-            asr = new ASRPOG(alnFilepath, treeFilepath, true,true);
-        else if (nodeLabel != null)
-            asr = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, true);
+            runReconstructionJoint();
         else
-            asr = new ASRPOG(alnFilepath, treeFilepath, false, true);
-        asr.saveTree(sessionDir + label + "_recon.nwk");
+            runReconstructionMarginal();
+    }
+
+    /**
+     * Run joint reconstruction using uploaded files and specified options
+     */
+    private void runReconstructionJoint() throws Exception {
+        System.out.println(nodeLabel);
+        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true,true);
+        asrJoint.saveTree(sessionDir + label + "_recon.nwk");
+    }
+
+    /**
+     * Run marginal reconstruction using uploaded files and specified options
+     */
+    private void runReconstructionMarginal() throws Exception {
+        System.out.println(nodeLabel);
+        if (nodeLabel != null)
+            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, true);
+        else
+            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, true);
+        asrMarginal.saveTree(sessionDir + label + "_recon.nwk");
     }
 
     /**
@@ -118,7 +137,6 @@ public class ASR {
             while((line = r.readLine()) != null)
                 tree += line;
             r.close();
-            System.out.println(tree);
             return tree;
         } catch (IOException e) {
             return "";
@@ -130,7 +148,8 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getMSAGraphJSON() {
-        PartialOrderGraph msa = asr.getMSAGraph();
+        //PartialOrderGraph msa = asr.getMSAGraph();
+        PartialOrderGraph msa = asrJoint.getMSAGraph();
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -138,11 +157,16 @@ public class ASR {
     /**
      * Get tje JSON representation of the inferred graph at the given tree node
      *
+     * @param reconType reconstruction type to query ("joint" or "marginal")
      * @param nodeLabel label of tree node to get graph representation of
      * @return  graph JSON object
      */
-    public JSONObject getAncestralGraphJSON(String nodeLabel) {
-        PartialOrderGraph graph = asr.getGraph(nodeLabel);
+    public JSONObject getAncestralGraphJSON(String reconType, String nodeLabel) {
+        PartialOrderGraph graph;
+        if (reconType.equalsIgnoreCase("joint"))
+            graph = asrJoint.getGraph(nodeLabel);
+        else
+            graph = asrMarginal.getGraph(nodeLabel);
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }
@@ -159,7 +183,7 @@ public class ASR {
         // Create metadata objects to add to the POAGS
         JSONObject metadataInferred = new JSONObject();
         JSONObject metadataMSA = new JSONObject();
-        System.out.printf(metadataInferred.toString(), metadataMSA.toString());
+
         // Add metadata information (for example titles, could be anything)
         metadataInferred.put("title", "Inferred");
         metadataMSA.put("title", "MSA");

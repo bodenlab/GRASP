@@ -1,12 +1,17 @@
 
 var selectedNode = "root"; // Keep track of which tree node is selected
+var inferType = "joint";   // Keep track of which reconstruction is being displayed
 var tree; // global tree object for updating parameters, etc
 
 var refresh_elements = function() {
     console.log(selectedNode);
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i].textContent = selectedNode;
+             nodeLabels[i].textContent = selectedNode;
+         }
+    var reconLabels = document.querySelectorAll(".infer-label");
+    for (var i = 0; i < reconLabels.length; i++) {
+            reconLabels[i].textContent = inferType;
     }
     d3_phylotree_trigger_refresh (tree);
 };
@@ -45,10 +50,10 @@ var setup_tree = function(tree_div, newick_string) {
       		    }
      	 	);
      	d3_add_custom_menu (node, // add to this node
-      		function(node) {return("Show partial order graph");},
-      			 //function () {
-                 //    displayPOGraph(node);
-                 //}
+      		function(node) {return("View joint reconstruction results");},
+      			 function () {
+                     displayJointGraph(node);
+                 }
             );
     });
 };
@@ -58,11 +63,11 @@ var setup_tree = function(tree_div, newick_string) {
 */
 var perform_marginal = function(node) {
     selectedNode = node.name;
-    console.log("Node: " + node.name);
+    inferType = "marginal";
     $.ajax({
         url : "/asr",
         type : 'POST',
-        data : {infer: "marginal", node: selectedNode},
+        data : {infer: inferType, node: selectedNode},
         success: function(data) {
             refresh_elements();
             refresh_graphs(data);
@@ -70,6 +75,26 @@ var perform_marginal = function(node) {
     });
 };
 
+/*
+** Refresh the results view to show joint reconstruction results of the selected tree node
+*/
+var displayJointGraph = function(node) {
+    selectedNode = node.name;
+    inferType = "joint";
+    $.ajax({
+        url : "/asr",
+        type : 'POST',
+        data : {infer: inferType, node: selectedNode},
+        success: function(data) {
+            refresh_elements();
+            refresh_graphs(data);
+        }
+    });
+};
+
+/*
+** Refresh the graph to be the latest reconstructed
+*/
 var refresh_graphs = function(graph_json) {
     d3.select(".svg-content").remove();
     var options = setup_options("poag", graph_json);

@@ -186,7 +186,8 @@ create_new_graph = function (node, options, cx, cy) {
     create_outer_circle(node, options, graph_group);
     create_rect(node, options, graph_group);
     // Conditionally draw the axis
-    if (options.draw_axis = true) {
+    if (options.draw_axis == true) {
+
         create_axis(node, options, graph_group);
     }
     create_bars(node, options, graph_group);

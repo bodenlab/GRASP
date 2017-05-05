@@ -18,6 +18,10 @@ import java.io.IOException;
  * Created by marnie on 11/4/17.
  */
 public class ASR {
+    // TODO:
+    private ASRPOG asrJoint;
+    private ASRPOG asrMarginal;
+
     private ASRPOG asr;
     private String sessionDir;
 
@@ -37,7 +41,7 @@ public class ASR {
     //@File(type="seq", message="File must be in fasta or clustal format (*.fa, *.fasta or *.aln)")
     private MultipartFile seqFile = null;
 
-    private String inferenceType = "marginal";
+    private String inferenceType = "joint";
 
     private String nodeLabel = null;
 
@@ -127,7 +131,6 @@ public class ASR {
      */
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa = asr.getMSAGraph();
-        System.out.println(msa.toString());
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -140,7 +143,6 @@ public class ASR {
      */
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
         PartialOrderGraph graph = asr.getGraph(nodeLabel);
-        System.out.println(graph.toString());
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }
@@ -162,15 +164,20 @@ public class ASR {
         metadataInferred.put("title", "Inferred");
         metadataMSA.put("title", "MSA");
 
+        // What type of reconstruction it is, if it is a marginal reconstruction
+        // pie charts will be drawn if it is a joint reconstruction then only the inferred node will be drawn
+        metadataInferred.put("type", "marginal");
+        metadataMSA.put("type", "marginal");
+
         // Add the metadata to their respective graphs
         graphInferred.put("metadata", metadataInferred);
         graphMSA.put("metadata", metadataMSA);
 
         // Add the metadata to an array
         JSONObject combinedPoags = new JSONObject();
-        combinedPoags.put("inferred", graphInferred);
-        combinedPoags.put("msa", graphMSA);
-
+        // Where the graph is put in relation to eachother
+        combinedPoags.put("top", graphMSA);
+        combinedPoags.put("bottom", graphInferred);
         // Return a string representation of this
         return combinedPoags.toString();
     }

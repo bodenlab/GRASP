@@ -16,13 +16,15 @@ setup_data = function (graph) {
     var max_seq_len = 0;
     for (var poag_count = 0; poag_count < 2; poag_count ++) {
         if (poag_count == 0) {
-            var poag = poags.msa; // MSA indicates that it is the non inferred and will thus be the same size
+            var poag = poags.top; // MSA indicates that it is the non inferred and will thus be the same size
             // if not larger than the inferred POAG
-            var poag_type = 'msa';
+            // The poag type determines whether or not the pie charts a drawn
+            var poag_type = poag.metadata.type;
         } else {
-
-            var poag = poags.inferred;
-            var poag_type = 'inferred';
+            // Choose the poag which is to be on the bottom
+            var poag = poags.bottom;
+            // The poag type determines whether or not the pie charts a drawn
+            var poag_type = poag.metadata.type;
         }
         var title = poag.metadata.title;
         var max_depth = poag.max_depth;
@@ -40,8 +42,11 @@ setup_data = function (graph) {
         for (var n in poag.nodes) {
             var node = poag.nodes[n];
             if (poag_count == 0) {
+                // Add the type to the node so we know whether or not to draw the distributions
+                node.type = poag_type;
                 node.deleted_during_inference = true;
                 node.inferred = false;
+                node.msa = true;
                 node.many_edges = false;
                 node.start = node.x;
                 node.end = node.x;
@@ -59,6 +64,9 @@ setup_data = function (graph) {
                 var node_inferred = node_dict[node.id];
                 // Update the x coords to match that of the MSA node (to account for deletions)
                 node.start = node_inferred.start;
+                node.msa = false;
+                // Add the type to the node so we know whether or not to draw the distributions
+                node.type = poag_type;
                 node.x = node_inferred.start;
                 node.end = node_inferred.end;
                 node.inferred = true;
@@ -95,7 +103,7 @@ setup_data = function (graph) {
                 }
                 edges_from_node.push(edge);
                 node_many_edge_dict[edge.from] = edges_from_node;
-                if (edges_from_node.length >= options.number_of_edges_to_be_interesting) {
+                if (edges_from_node.length >= graph.options.number_of_edges_to_be_interesting) {
                     // tag the from node to be interesting
                     node_dict[edge.from].many_edges = true;
                 }
@@ -178,6 +186,7 @@ setup_svg = function (graph) {
     var y1 = graph.scale.y1;
     var x = graph.scale.x;
     var y2 = graph.scale.y2;
+    var options = graph.options;
 
     var max_depth = graph.max_depth;
 
@@ -186,7 +195,7 @@ setup_svg = function (graph) {
     var actual_svg_height =  document.getElementById(options.raw_svg_id).offsetHeight;
     // We don't want to get the height as we only want to develop the scale based on one element
     var scale_width = actual_svg_width/width - 0.1; // Want it to be 10% smaller than the space to add even padding
-    
+
     var width_scaled = scale_width * (width + margin.right + margin.left);
     var height_scaled = scale_width * (height + margin.top + margin.bottom);
     var padding = scale_width *(options.svg_padding);
@@ -317,6 +326,7 @@ setup_brush = function (graph) {
     var y_scale = graph.scale.y2;
     var mini = graph.mini;
     var main = graph.main;
+    var options = graph.options;
 
     // invisible hit area to move around the selection window
     mini.append('rect')
@@ -356,7 +366,8 @@ create_poags = function (options) {
     // Make the radius based on the graph height and the number of lanes
     graph.options.graph.colours = options.colours;
     graph.max_radius = (options.height / graph.lanes.length) / 3;
-    graph.min_radius = graph.max_radius / 2;
+    // Where the minimum size of the radius is set up to determine when to stop drawing labels
+    graph.min_radius = graph.max_radius / 3;
     graph = make_scales(graph);
     graph = setup_svg(graph);
     graph = setup_items(graph);
@@ -445,4 +456,3 @@ function getPaths(graph) {
 
     return result;
 }
-

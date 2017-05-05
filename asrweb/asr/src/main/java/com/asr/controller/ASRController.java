@@ -4,10 +4,7 @@ import com.ASR;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.File;
@@ -23,11 +20,9 @@ class ASRController {
 
     final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-
     final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
-                              // "/Users/marnie/Documents/WebSessions/";//
 
-    //final String sessionPath = "/Users/marnie/Documents/WebSessions/";//"/home/ariane/Documents/bodenlab/data/WebSessions";
+    //final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 
     private ASR asr;
 
@@ -52,6 +47,7 @@ class ASRController {
      */
     @RequestMapping(method=RequestMethod.POST, params="submit")
     public String performReconstruction(@Valid @ModelAttribute ASR asrForm, BindingResult bindingResult, Model model){
+        System.out.println("Workin");
         if (bindingResult.hasErrors()) {
             for (String err : bindingResult.getSuppressedFields())
                 System.out.println(err);
@@ -118,6 +114,7 @@ class ASRController {
             asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
 
             asr.setLabel("Test");
+            System.out.println(asr.getInferenceType());
             asr.setInferenceType("marginal");
             // copy default data to user session folder
 
@@ -162,7 +159,8 @@ class ASRController {
      * @return      index view
      */
     @RequestMapping(method=RequestMethod.POST,params={"infer", "node"})
-    public String performReconstruction(@RequestParam String infer, @RequestParam String node,  Model model){
+    @ResponseBody
+    public String performReconstruction(@RequestParam String infer, @RequestParam String node, Model model){
 
         // TODO: push exceptions to error message on view...
         try {
@@ -174,22 +172,22 @@ class ASRController {
             // add reconstructed newick string to send to javascript
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
-            // add msa and inferred ancestral graph
-            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(node));
-
-            model.addAttribute("graph", graphs);
-
         } catch (Exception e) {
             model.addAttribute("error", "results");
             model.addAttribute("errorMessage", e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return "index";
         }
+        // add msa and inferred ancestral graph
+        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(node));
 
-        // add attribute to specify to view results (i.e. to show the graph, tree, etc)
+        model.addAttribute("graph", graphs);
         model.addAttribute("inferenceType", asr.getInferenceType());
         model.addAttribute("results", true);
 
-        return "index";
+        // add attribute to specify to view results (i.e. to show the graph, tree, etc)
+        return graphs;
+
+        //return "index";
     }
 }

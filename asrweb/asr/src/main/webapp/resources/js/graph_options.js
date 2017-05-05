@@ -6,7 +6,8 @@
 // uncharged polar side chains, then Basic side chains, acidic, the hydrophobic
 
 
-
+var selected_colour = random;
+console.log(selected_colour);
 
 
 /* Tip which is displayed when hovering over the nodes */
@@ -42,6 +43,10 @@ var setup_options = function (svg_id, json_str) {
         diff_colour: "SlateGrey",
         diff_opacity: 0.15,
         num_start_nodes : 7,// How many nodes that it starts with
+//=======
+//        diff_opacity: 0.2,
+//        num_start_nodes : 10,// How many nodes that it starts with
+//>>>>>>> 10f9a1ba7de66b3e81d515ab8a2d58d1a521b644
         x_padding: 25, // the padding to the left of teh first node in relation to the y axis titles
         // Used when drawingthe line for the mini nodes
         mini: {
@@ -117,7 +122,7 @@ var setup_options = function (svg_id, json_str) {
             graph_outer_circle_radius: 85,
             graphs: new Array(),
             size: 80,
-            colours: random, // default to random colour scheme
+            colours: selected_colour, // default to random colour scheme
             offset_graph_width: -35,
             offset_graph_height: -30,
             width: 80,
@@ -138,7 +143,7 @@ var setup_options = function (svg_id, json_str) {
         width: 1200,//$("#" + svg_id).parent("div").width()*2.7,//1000,
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
-        colours: random,
+        colours: selected_colour,
         svg_padding: 20, // The padding of the svg within the div given
         padding_between_views: 100,
         /*********** End of sizing options **********************************/

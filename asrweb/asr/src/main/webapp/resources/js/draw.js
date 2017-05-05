@@ -241,7 +241,8 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                     .attr("fill", options.colours[node.label]);
 
             // If the size of the graph is small we don't want to have labels
-            if (radius > graph.min_radius)  {
+            // Also don't want to draw labels on the pie charts
+            if (radius > graph.min_radius && (node.seq.chars.length < 2 || node.type !=  'marginal'))  {
 
                 group.append("text")
                     .attr("class", "node_text")
@@ -262,14 +263,14 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                     .text(node.label);
             }
         }
-        if (options.graphs_display == true && node.inferred != true) {
+        if (options.graphs_display == true && node.type == 'marginal') {
             // Check if there is any bars to display first
             if (node.graph.bars.length > 1) {
                 var graph_node = create_new_graph(node, options.graph, x_scale(node.start), (y_scale(node.lane) + y_scale(node.lane + 1)) / 2);
                 options.graph.graphs.push(graph_node);
             }
         }
-        if (options.seq_display == true && node.inferred != true) {
+        if (options.seq_display == true && node.type == 'marginal') {
             // Check whether or not there is a range of sequences
             // i.e. there may have just been the one amino acid in this
             // case there is no point re drawing it
@@ -280,7 +281,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
         }
     }
     graph.radius = radius;
-    // Update the y curve amount to be 2 * the radius
+    // Update the y curve amount to be half the radius
     graph.y_curve_amount = radius/2;
     return graph;
 };

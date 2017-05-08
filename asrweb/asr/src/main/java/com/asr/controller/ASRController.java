@@ -47,7 +47,6 @@ class ASRController {
      */
     @RequestMapping(method=RequestMethod.POST, params="submit")
     public String performReconstruction(@Valid @ModelAttribute ASR asrForm, BindingResult bindingResult, Model model){
-        System.out.println("Workin");
         if (bindingResult.hasErrors()) {
             for (String err : bindingResult.getSuppressedFields())
                 System.out.println(err);

@@ -1,9 +1,14 @@
 
-var selectedNode = "root"; // Keep track of which tree node is selected
-var inferType = "joint";   // Keep track of which reconstruction is being displayed
+var selectedNode = "root";              // Keep track of which tree node is selected
+var inferType = $('#inferenceType').text();   // Keep track of which reconstruction is being displayed
 var tree; // global tree object for updating parameters, etc
 
 var refresh_elements = function() {
+    refresh_labels();
+    d3_phylotree_trigger_refresh (tree);
+};
+
+var refresh_labels = function() {
     console.log(selectedNode);
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
@@ -13,7 +18,6 @@ var refresh_elements = function() {
     for (var i = 0; i < reconLabels.length; i++) {
             reconLabels[i].textContent = inferType;
     }
-    d3_phylotree_trigger_refresh (tree);
 };
 
 /*

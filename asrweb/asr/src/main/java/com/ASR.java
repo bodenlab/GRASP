@@ -148,7 +148,12 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getMSAGraphJSON() {
-        PartialOrderGraph msa = asrJoint.getMSAGraph();
+        PartialOrderGraph msa;
+        if (inferenceType.equalsIgnoreCase("joint"))
+            msa = asrJoint.getMSAGraph();
+        else
+            msa = asrMarginal.getMSAGraph();
+        System.out.println(msa);
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -166,6 +171,7 @@ public class ASR {
             graph = asrJoint.getGraph(nodeLabel);
         else
             graph = asrMarginal.getGraph(nodeLabel);
+        System.out.println(graph);
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }
@@ -187,14 +193,20 @@ public class ASR {
         metadataInferred.put("title", "Inferred");
         metadataMSA.put("title", "MSA");
 
+        // What type of reconstruction it is, if it is a marginal reconstruction
+        // pie charts will be drawn if it is a joint reconstruction then only the inferred node will be drawn
+        metadataInferred.put("type", "joint");
+        metadataMSA.put("type", "marginal");
+
         // Add the metadata to their respective graphs
         graphInferred.put("metadata", metadataInferred);
         graphMSA.put("metadata", metadataMSA);
 
         // Add the metadata to an array
         JSONObject combinedPoags = new JSONObject();
-        combinedPoags.put("inferred", graphInferred);
-        combinedPoags.put("msa", graphMSA);
+        // Where the graph is put in relation to eachother
+        combinedPoags.put("top", graphMSA);
+        combinedPoags.put("bottom", graphInferred);
 
         // Return a string representation of this
         return combinedPoags.toString();

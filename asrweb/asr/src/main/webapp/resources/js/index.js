@@ -16,13 +16,17 @@ setup_data = function (graph) {
     var max_seq_len = 0;
     for (var poag_count = 0; poag_count < 2; poag_count ++) {
         if (poag_count == 0) {
-            var poag = poags.msa; // MSA indicates that it is the non inferred and will thus be the same size
-            // if not larger than the inferred POAG
-            var poag_type = 'msa';
+            // Choose the poag which is to be on the top
+            var poag = poags.top;
+            console.log(poag);
+            // The poag type determines whether or not the pie charts a drawn
+            var poag_type = poag.metadata.type;
         } else {
-
-            var poag = poags.inferred;
-            var poag_type = 'inferred';
+            // Choose the poag which is to be on the bottom
+            var poag = poags.bottom;
+            console.log(poag);
+            // The poag type determines whether or not the pie charts a drawn
+            var poag_type = poag.metadata.type;
         }
         var title = poag.metadata.title;
         var max_depth = poag.max_depth;
@@ -40,6 +44,8 @@ setup_data = function (graph) {
         for (var n in poag.nodes) {
             var node = poag.nodes[n];
             if (poag_count == 0) {
+                // Add the type to the node so we know whether or not to draw the distributions
+                node.type = poag_type;
                 node.deleted_during_inference = true;
                 node.inferred = false;
                 node.msa = true;
@@ -61,6 +67,8 @@ setup_data = function (graph) {
                 // Update the x coords to match that of the MSA node (to account for deletions)
                 node.start = node_inferred.start;
                 node.msa = false;
+                // Add the type to the node so we know whether or not to draw the distributions
+                node.type = poag_type;
                 node.x = node_inferred.start;
                 node.end = node_inferred.end;
                 node.inferred = true;

@@ -3,11 +3,11 @@
 <body>
 <div th:fragment="form">
     <a name="reconstruct"></a>
-    <div class="content-section-a" th:if="${results == null and error == null}">
+    <div class="content-section-a" th:if="${results == null}">
         <div th:replace="fragments/help :: help"></div>
         <div class="container-fluid">
             <form class="col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-md-10 col-lg-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
-                <div class="form-group row col-md-offset-1 col-lg-offset-1 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-sm-8 col-md-8 col-lg-8">
                     <div class="input-group">
                         <input type="text" class="form-control col-sm-6 col-md-6 col-lg-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
                         <span class="input-group-btn">
@@ -16,7 +16,7 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
-                <div class="form-group row col-md-offset-2 col-lg-offset-2 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-sm-8 col-md-8 col-lg-8">
                     <fieldset>
                         <legend>
                             Align extant sequences
@@ -55,7 +55,7 @@
                         <div class="form-group has-error" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
                     </fieldset>
                 </div>
-                <div class="form-group row col-md-offset-2 col-lg-offset-2 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-md-8 col-lg-8">
                     <div class="input-group ">
                         <span class="input-group-addon glyphicon glyphicon-align-justify" aria-hidden="true"></span>
                         <label id="lbl-filealn" class="btn btn-default col-md-9 col-sm-9 col-lg-9" for="filealn">
@@ -66,7 +66,7 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('alnFile')}"><label class="control-label" for="label" th:errors="*{alnFile}"></label></div>
                 </div>
-                <div class="form-group row col-md-offset-2 col-lg-offset-2 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-sm-8 col-md-8 col-lg-8">
                     <div class="input-group">
                         <span class="input-group-addon glyphicon glyphicon-tree-conifer" aria-hidden="true"></span>
                         <label class="btn btn-default col-sm-9 col-md-9 col-lg-9" for="filetree">
@@ -77,13 +77,13 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
                 </div>
-                <div class="form-group row col-md-offset-2 col-lg-offset-2 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-sm-8 col-md-8 col-lg-8">
                     <fieldset>
                         <legend>
-                            <div class="input-group pull-right col-md-5 col-lg-5">
-                                <div id="recon-radio" class="btn-group col-md-12 col-lg-12">
-                                    <a id="recon-joint" class="btn btn-primary btn-m active col-md-6 col-lg-6" data-title="joint">Joint</a>
-                                    <a id="recon-marg" class="btn btn-primary btn-m notActive col-md-6 col-lg-6" data-title="marginal">Marginal (root)</a>
+                            <div class="input-group pull-right col-sm-5 col-md-5 col-lg-5">
+                                <div id="recon-radio" class="btn-group col-sm-12 col-md-12 col-lg-12">
+                                    <a id="recon-joint" class="btn btn-primary btn-m active col-sm-6 col-md-6 col-lg-6" data-title="joint">Joint</a>
+                                    <a id="recon-marg" class="btn btn-primary btn-m notActive col-sm-6 col-md-6 col-lg-6" data-title="marginal">Marginal (root)</a>
                                     <script type="text/javascript">
                                     $('#recon-radio').click( function(){
                                         $(this).find('a').toggleClass('active').toggleClass('notActive');
@@ -97,10 +97,9 @@
                         </legend>
                     </fieldset>
                 </div>
-                <div class="form-group row col-md-11 col-lg-11"><button type="submit" class="btn btn-primary col-md-3 col-sm-3 col-lg-3 pull-right" name="submit">Perform Reconstruction</button></div>
+                <div class="form-group row col-sm-11 col-md-11 col-lg-11"><button type="submit" class="btn btn-primary col-md-3 col-sm-3 col-lg-3 pull-right" name="submit">Perform Reconstruction</button></div>
             </form>
         </div>
-        <div class="form-control-feedback" th:if="${errorMessage != null}" th:text="${errorMessage}"></div>
         </div>
     </div>
 </body>

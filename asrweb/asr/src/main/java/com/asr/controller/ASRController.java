@@ -46,14 +46,14 @@ class ASRController {
      * @return                  index with results as attributes in the model
      */
     @RequestMapping(method=RequestMethod.POST, params="submit")
-    public String performReconstruction(@Valid @ModelAttribute ASR asrForm, BindingResult bindingResult, Model model){
+    public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model){
+        this.asr = asrForm;
+
         if (bindingResult.hasErrors()) {
             for (String err : bindingResult.getSuppressedFields())
                 System.out.println(err);
             return "index";
         }
-
-        this.asr = asrForm;
 
         // upload supplied files
         try {
@@ -79,7 +79,7 @@ class ASRController {
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
-            model.addAttribute("error", "results");
+            model.addAttribute("error", true);
             model.addAttribute("errorMessage", e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return "index";
@@ -135,7 +135,7 @@ class ASRController {
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
-            model.addAttribute("error", "results");
+            model.addAttribute("error", true);
             model.addAttribute("errorMessage", e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return "index";
@@ -173,7 +173,7 @@ class ASRController {
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
         } catch (Exception e) {
-            model.addAttribute("error", "results");
+            model.addAttribute("error", true);
             model.addAttribute("errorMessage", e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return "index";

@@ -139,7 +139,7 @@ var setup_options = function (svg_id, json_str) {
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
-        height: 700,//$("#" + svg_id).parent("div").height()*2.7,//600,
+        height: 500,//$("#" + svg_id).parent("div").height()*2.7,//600,
         width: 1200,//$("#" + svg_id).parent("div").width()*2.7,//1000,
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,

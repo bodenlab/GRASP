@@ -131,7 +131,7 @@ class ASRController {
 
             // add msa and inferred ancestral graph
             String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
-
+            System.out.println(graphs);
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {

@@ -153,7 +153,6 @@ public class ASR {
             msa = asrJoint.getMSAGraph();
         else
             msa = asrMarginal.getMSAGraph();
-        System.out.println(msa);
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -171,7 +170,6 @@ public class ASR {
             graph = asrJoint.getGraph(nodeLabel);
         else
             graph = asrMarginal.getGraph(nodeLabel);
-        System.out.println(graph);
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }

@@ -18,13 +18,11 @@ setup_data = function (graph) {
         if (poag_count == 0) {
             // Choose the poag which is to be on the top
             var poag = poags.top;
-            console.log(poag);
             // The poag type determines whether or not the pie charts a drawn
             var poag_type = poag.metadata.type;
         } else {
             // Choose the poag which is to be on the bottom
             var poag = poags.bottom;
-            console.log(poag);
             // The poag type determines whether or not the pie charts a drawn
             var poag_type = poag.metadata.type;
         }

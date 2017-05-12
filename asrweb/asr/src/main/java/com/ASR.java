@@ -188,6 +188,28 @@ public class ASR {
     }
 
     /**
+     * Save consensus sequence of marginal node
+     *
+     * @param filepath
+     * @throws IOException
+     */
+    public void saveConsensusMarginal(String filepath) throws IOException {
+        if (asrMarginal != null)
+            asrMarginal.saveSupportedAncestors(filepath);
+    }
+
+    /**
+     * Save consensus sequence of marginal node
+     *
+     * @param filepath
+     * @throws IOException
+     */
+    public void saveConsensusJoint(String filepath) throws IOException {
+        if (asrJoint != null)
+            asrJoint.saveSupportedAncestors(filepath);
+    }
+
+    /**
      * Get the JSON representation of the sequence alignment graph
      * @return  graph JSON object
      */

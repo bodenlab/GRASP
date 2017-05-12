@@ -210,9 +210,15 @@ class ASRController {
 
     }
 
+    /**
+     * Download files from reconstruction
+     *
+     * @param request   HTTP request (form request specifying parameters)
+     * @param response  HTTP response to send data to client
+     * @throws IOException
+     */
     @RequestMapping(method = RequestMethod.GET, params = "download")
-    public void showForm(@RequestParam String download, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("download");
+    public void showForm(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         response.setHeader("Content-Type", "application/zip");
         response.setHeader("Content-Disposition", "attachment; filename=GRASP_" + asr.getLabel() + ".zip");
@@ -227,13 +233,6 @@ class ASRController {
         }
         sessionDir.mkdir();
 
-        System.out.println(request.getParameter("check-recon-tree"));
-        System.out.println(request.getParameter("check-pog-msa"));
-        System.out.println(request.getParameter("check-pog-joint"));
-        System.out.println(request.getParameter("check-pog-marg"));
-        System.out.println(request.getParameter("marg-node"));
-
-
         // copy output files to temporary folder, or generate output where needed and save in temporary folder
         if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
             Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName())).toPath(),
@@ -244,7 +243,13 @@ class ASRController {
             asr.saveAncestorGraph(request.getParameter("marg-node"), tempDir + "/marginal_");
         if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
             asr.saveAncestors(tempDir + "/joint_");
-
+        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
+            asr.saveConsensusMarginal(tempDir + "/marginal_" + request.getParameter("marg-node"));
+        if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
+            asr.saveConsensusJoint(tempDir + "/joint_");
+        // TODO: Distribution file/output
+        
+        // send output folder to client
         zipFolder(sessionDir, response.getOutputStream());
 
     }

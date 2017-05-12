@@ -25,7 +25,7 @@ class ASRController {
 
     final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-    //final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
+   // final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
 
     final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 
@@ -93,7 +93,8 @@ class ASRController {
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
             // add msa and inferred ancestral graph
-            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
+            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
+
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
@@ -149,6 +150,7 @@ class ASRController {
 
             // add msa and inferred ancestral graph
             String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
+
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {

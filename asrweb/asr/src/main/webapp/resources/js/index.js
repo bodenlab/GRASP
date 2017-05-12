@@ -194,10 +194,12 @@ setup_svg = function (graph) {
     var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
     var actual_svg_height =  document.getElementById(options.raw_svg_id).offsetHeight;
     // We don't want to get the height as we only want to develop the scale based on one element
-    var scale_width = actual_svg_width/width - 0.1; // Want it to be 10% smaller than the space to add even padding
-
+    var scale_width = actual_svg_width/width; // Want it to be 10% smaller than the space to add even padding
+    var scale_height = actual_svg_height/height;
     var width_scaled = scale_width * (width + margin.right + margin.left);
-    var height_scaled = scale_width * (height + margin.top + margin.bottom);
+    var height_scaled = scale_height * (height + margin.top + margin.bottom);
+
+    var width = width;
     var padding = scale_width *(options.svg_padding);
 
     var general_svg = d3.select(options.target)
@@ -205,9 +207,7 @@ setup_svg = function (graph) {
             .attr("preserveAspectRatio", "xMinYMin meet")
             .attr("viewBox", "0 0 " + actual_svg_width + " " + actual_svg_height)
             .classed("svg-content", true);
-            //.attr('width', width_scaled)// width + margin.right + margin.left)
-            //.attr('height', height_scaled)//height + margin.top + margin.bottom)
-            //.attr('class', 'chart')
+
 
 
     var chart = general_svg.append('g')

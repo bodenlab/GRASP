@@ -118,3 +118,29 @@ fieldset {
     background: inherit;
     left: 20px;
 }
+
+.no-js #loader { display: none;  }
+.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+.se-pre-con {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	z-index: 9999;
+	height: 100%;
+	opacity: 0.6;
+	background: url(../images/loading.gif) center no-repeat #fff;
+}
+
+.center-el {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.center-el h4 {
+    padding-top: 6em;
+    margin: 0;
+}

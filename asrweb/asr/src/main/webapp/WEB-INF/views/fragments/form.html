@@ -6,7 +6,7 @@
     <div class="content-section-a" th:if="${results == null}">
         <div th:replace="fragments/help :: help"></div>
         <div class="container-fluid">
-            <form class="col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-md-10 col-lg-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
+            <form id="asr-form" class="col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-md-10 col-lg-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-sm-8 col-md-8 col-lg-8">
                     <div class="input-group">
                         <input type="text" class="form-control col-sm-6 col-md-6 col-lg-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
@@ -84,22 +84,30 @@
                                 <div id="recon-radio" class="btn-group col-sm-12 col-md-12 col-lg-12">
                                     <a id="recon-joint" class="btn btn-primary btn-m active col-sm-6 col-md-6 col-lg-6" data-title="joint">Joint</a>
                                     <a id="recon-marg" class="btn btn-primary btn-m notActive col-sm-6 col-md-6 col-lg-6" data-title="marginal">Marginal (root)</a>
-                                    <script type="text/javascript">
+                                </div>
+                                <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
+                                <script type="text/javascript">
+                                    /*<![CDATA[*/
                                     $('#recon-radio').click( function(){
                                         $(this).find('a').toggleClass('active').toggleClass('notActive');
                                         $('#inferenceType').val($(this).find('a.active').data('title'));
                                     });
-                                    </script>
-                                </div>
-                                <input type="hidden" th:value="joint" th:field="*{inferenceType}" />
+                                    /*]]>*/
+                                </script>
                             </div>
                             Initial Reconstruction
                         </legend>
                     </fieldset>
                 </div>
-                <div class="form-group row col-sm-11 col-md-11 col-lg-11"><button type="submit" class="btn btn-primary col-md-3 col-sm-3 col-lg-3 pull-right" name="submit">Perform Reconstruction</button></div>
+                <div class="form-group row col-sm-11 col-md-11 col-lg-11"><button type="submit" name="submitAsr" class="btn btn-primary col-md-3 col-sm-3 col-lg-3 pull-right" id="submit-btn">Perform Reconstruction</button></div>
             </form>
         </div>
+        <script type="text/javascript">
+            $("#submit-btn").click(function() {
+                $("#progress").removeClass("disable");
+                setTimeout(function() { document.getElementById("asr-form").submit(); }, 2000);
+            });
+        </script>
         </div>
     </div>
 </body>

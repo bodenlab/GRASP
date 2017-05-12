@@ -2,11 +2,11 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="results" th:if="${results}">
-    <div class="content-section-a">
+    <div class="content-section-b">
         <div th:replace="fragments/help :: help"></div>
         <div class="row">
             <div id="heading">
-                <h2><span class="node-label">Root</span> <small><span class="infer-label">joint</span> reconstruction </small></h2>
+                <h2><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
                 <hr class="h-divider"></hr>
             </div>
         </div>
@@ -16,7 +16,6 @@
                     <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
-                                    refresh_labels();
                                     var recon = /*[[${tree}]]*/;
                                     setup_tree("#phylo", recon);
                                    /*]]>*/
@@ -52,10 +51,9 @@
                                         update_colour(scheme);
                                     }
 
-                                        var json_str = /*[[${graph}]]*/;
-                                        console.log(json_str);
-                                        var options = setup_options("poag", json_str);
-                                        options = create_poags(options);
+                                    var json_str = /*[[${graph}]]*/;
+                                    var options = setup_options("poag", json_str);
+                                    options = create_poags(options);
                                 /*]]>*/
                         </script>
                 </div>

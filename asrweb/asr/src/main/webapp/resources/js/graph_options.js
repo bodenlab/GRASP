@@ -42,11 +42,7 @@ var setup_options = function (svg_id, json_str) {
         interesting_many_edges_colour: "Crimson",
         diff_colour: "SlateGrey",
         diff_opacity: 0.15,
-        num_start_nodes : 7,// How many nodes that it starts with
-//=======
-//        diff_opacity: 0.2,
-//        num_start_nodes : 10,// How many nodes that it starts with
-//>>>>>>> 10f9a1ba7de66b3e81d515ab8a2d58d1a521b644
+        num_start_nodes : 10,// How many nodes that it starts with
         x_padding: 25, // the padding to the left of teh first node in relation to the y axis titles
         // Used when drawingthe line for the mini nodes
         mini: {
@@ -59,7 +55,7 @@ var setup_options = function (svg_id, json_str) {
             mini_height: 50
         },
         position: {
-            text_padding: 20, // How high above the mini it will appear
+            text_padding: 10, // How high above the mini it will appear
             level_1: 1, // Means that we will draw a position for every node
             level_2: 5, // We will draw a position at every 5 nodes
             level_3: 10, // Draw position at every 10
@@ -139,8 +135,8 @@ var setup_options = function (svg_id, json_str) {
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
-        height: 700,//$("#" + svg_id).parent("div").height()*2.7,//600,
-        width: 1200,//$("#" + svg_id).parent("div").width()*2.7,//1000,
+        height: 600,
+        width: 1200,
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
         colours: selected_colour,

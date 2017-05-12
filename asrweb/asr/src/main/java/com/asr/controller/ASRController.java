@@ -1,15 +1,20 @@
 package com.asr.controller;
 
 import com.ASR;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.File;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Created by marnie on 11/4/17.
@@ -27,12 +32,13 @@ class ASRController {
     private ASR asr;
 
     /**
-     * Get form.html template
+     * Initialise the initial form in the index
      *
-     * @return          form html template
+     * @return index html
      */
-    @RequestMapping(method=RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public String showForm(Model model) {
+        System.out.println("showForm");
         model.addAttribute("asrForm", new ASR());
         return "index";
     }
@@ -40,15 +46,16 @@ class ASRController {
     /**
      * Submit the asr form (documenting input details, i.e. aln and tree file, etc)
      *
-     * @param asrForm           ASR object
-     * @param bindingResult     Form result, indicating any input errors
-     * @param model             com model
-     * @return                  index with results as attributes in the model
+     * @param asrForm       ASR object
+     * @param bindingResult Form result, indicating any input errors
+     * @param model         com model
+     * @return index with results as attributes in the model
      */
-    @RequestMapping(method=RequestMethod.POST, params="submit")
-    public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model){
+    @RequestMapping(method = RequestMethod.POST, params = "submitAsr")
+    public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) {
         this.asr = asrForm;
 
+        System.out.println("submitASR");
         if (bindingResult.hasErrors()) {
             for (String err : bindingResult.getSuppressedFields())
                 System.out.println(err);
@@ -69,13 +76,24 @@ class ASRController {
             asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
 
             // TODO: push exceptions to error message on view...
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(os);
+            PrintStream old = System.err;
+            System.setErr(ps);
             asr.runReconstruction();
+            System.err.flush();
+            System.setErr(old);
+            if (!os.toString().isEmpty()) {
+                model.addAttribute("error", true);
+                model.addAttribute("errorMessage", os.toString());
+            }
+            System.out.println("err stream: " + os.toString());
 
             // add reconstructed newick string to send to javascript
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
             // add msa and inferred ancestral graph
-            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
+            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
@@ -95,13 +113,14 @@ class ASRController {
     /**
      * Submit the asr form (documenting input details, i.e. aln and tree file, etc)
      *
-     * @param asrForm           ASR object
-     * @param model             com model
-     * @return                  index with results as attributes in the model
+     * @param asrForm ASR object
+     * @param model   com model
+     * @return index with results as attributes in the model
      */
-    @RequestMapping(method=RequestMethod.POST, params="test")
-    public String performReconstruction(@ModelAttribute ASR asrForm, Model model){
+    @RequestMapping(method = RequestMethod.POST, params = "test")
+    public String performReconstruction(@ModelAttribute("asrForm") ASR asrForm, Model model) {
 
+        System.out.println("test");
         this.asr = asrForm;
 
         // upload supplied files
@@ -111,7 +130,6 @@ class ASRController {
                 sessionDir.mkdir();
 
             asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-
             asr.setLabel("Test");
 
             // copy default data to user session folder
@@ -130,8 +148,7 @@ class ASRController {
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
             // add msa and inferred ancestral graph
-            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
-            System.out.println(graphs);
+            String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
             model.addAttribute("graph", graphs);
 
         } catch (Exception e) {
@@ -154,12 +171,13 @@ class ASRController {
      * @param infer inference type (Expects marginal)
      * @param node  node label
      * @param model com model
-     * @return      index view
+     * @return index view
      */
-    @RequestMapping(method=RequestMethod.POST,params={"infer", "node"})
+    @RequestMapping(method = RequestMethod.POST, params = {"infer", "node"})
     @ResponseBody
-    public String performReconstruction(@RequestParam String infer, @RequestParam String node, Model model){
+    public String performReconstruction(@RequestParam String infer, @RequestParam String node, Model model) {
 
+        System.out.println("infer,node");
         // TODO: push exceptions to error message on view...
         try {
             asr.setInferenceType(infer);
@@ -188,5 +206,73 @@ class ASRController {
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
         return graphs;
 
+    }
+
+    @RequestMapping(method = RequestMethod.GET, params = "download")
+    public void showForm(@RequestParam String download, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        System.out.println("download");
+        
+        response.setHeader("Content-Type", "application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=GRASP_" + asr.getLabel() + ".zip");
+
+        // create temporary folder to send output as zipped files
+        String tempDir = asr.getSessionDir() + "/GRASP_" + asr.getLabel();
+        File sessionDir = new File(tempDir);
+        if (sessionDir.exists()) {
+            for (File file : sessionDir.listFiles())
+                file.delete();
+            sessionDir.delete();
+        }
+        sessionDir.mkdir();
+
+        System.out.println(request.getParameter("check-recon-tree"));
+        System.out.println(request.getParameter("check-pog-msa"));
+        System.out.println(request.getParameter("check-pog-joint"));
+        System.out.println(request.getParameter("check-pog-marg"));
+        System.out.println(request.getParameter("marg-node"));
+
+
+        // copy output files to temporary folder, or generate output where needed and save in temporary folder
+        if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
+            Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName())).toPath(),
+                    (new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa").equalsIgnoreCase("on"))
+            asr.saveMSA(tempDir + "/");
+        if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))
+            asr.saveAncestorGraph(request.getParameter("marg-node"), tempDir + "/marginal_");
+        if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
+            asr.saveAncestors(tempDir + "/joint_");
+
+        zipFolder(sessionDir, response.getOutputStream());
+
+    }
+
+    /**
+     * Helper functions to zip files/directories
+     **/
+
+    private  void zipFolder(final File folder, final File zipFile) throws IOException {
+        zipFolder(folder, new FileOutputStream(zipFile));
+    }
+
+    private  void zipFolder(final File folder, final OutputStream outputStream) throws IOException {
+        ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+        processFolder(folder, zipOutputStream, folder.getPath().length() + 1);
+    }
+
+    private  void processFolder(final File folder, final ZipOutputStream zos, final int prefixLength)
+            throws IOException {
+        for (final File file : folder.listFiles()) {
+            if (file.isFile()) {
+                final ZipEntry zipEntry = new ZipEntry(file.getPath().substring(prefixLength));
+                zos.putNextEntry(zipEntry);
+                FileInputStream fis = new FileInputStream(file);
+                IOUtils.copy(fis, zos);
+                zos.closeEntry();
+                fis.close();
+            } else if (file.isDirectory()) {
+                processFolder(file, zos, prefixLength);
+            }
+        }
     }
 }

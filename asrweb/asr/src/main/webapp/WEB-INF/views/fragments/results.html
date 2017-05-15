@@ -12,7 +12,7 @@
         </div>
         <div id="results" class="container-fluid" >
             <div class="row col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
-                <div id="reconstructed-tree" class="well col-sm-3 col-md-3 col-lg-3">
+                <div id="reconstructed-tree" class="well col-sm-3 col-md-3 col-lg-3" data-toggle="popover" data-placement="top" data-content="Annotated phylogenetic tree. Click on the internal nodes for ancestral reconstruction options: perform marginal inference or view joint reconstruction results.">
                     <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
@@ -23,7 +23,7 @@
                     </svg>
                 </div>
                 <div class="col-sm-9 col-md-9 col-lg-9">
-                    <div class="btn-group">
+                    <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
                         <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span id="selected-scheme">GRASP</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
                         </button>
@@ -36,6 +36,7 @@
                         </ul>
                     </div>
                     <div id="poag" class="col-sm-12 col-md-12 col-lg-12">
+                        <div id="poag-popover" data-toggle="popover" data-placement="top" data-content="The sequence alignment graph (top), the inferred ancestor graph (bottom) and a positional window. Note that the window can be dragged to change the section of the graphs in view and the size of the positional window can be altered. Note: In the position window, indels are represented by a dot and regions of ambiguity based on multiple extant paths are shown as shaded regions."></div>
                     </div>
                         <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
@@ -60,12 +61,22 @@
             </div>
             <div class="row col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
                 <button id="download-toggle" class="btn btn-default col-sm-12 col-md-12 col-lg-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
-                    <div th:replace="fragments/download_form :: download_form"></div>
-                    <script type="text/javascript">
-                                $('#download-toggle').click( function(){
-                                    $(this).find('span').toggleClass('glyphicon-menu-down').toggleClass('glyphicon-menu-up');
-                                });
-                    </script>
+                <div th:replace="fragments/download_form :: download_form"></div>
+                <script type="text/javascript">
+                    $('#download-toggle').click( function(){
+                        $(this).find('span').toggleClass('glyphicon-menu-down').toggleClass('glyphicon-menu-up');
+                        $(this).delay(500).queue(function() {
+                            if ($("#help-btn").attr("aria-pressed") === 'true') {
+                                if ($("#download-form").attr("aria-expanded") === 'true') {
+                                    $('#download-form [data-toggle="popover"]').popover('show');
+                                } else {
+                                    $('#download-form [data-toggle="popover"]').popover('hide');
+                                }
+                            }
+                            $(this).dequeue();
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>

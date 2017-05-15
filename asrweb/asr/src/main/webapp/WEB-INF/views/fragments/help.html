@@ -3,7 +3,38 @@
 <body>
     <div th:fragment="help">
         <div class="col-sm-offset-11 col-md-offset-11 col-lg-offset-11 col-xs-1 col-md-1 col-lg-1">
-            <button type="button" class="btn btn-default btn-lg"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></button>
+            <button type="button" id="help-btn" class="btn btn-default btn-lg" data-toggle="button" aria-pressed="false" autocomplete="false"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span></button>
+            <script type="text/javascript">
+                /*<![CDATA[*/
+                $(document).ready(function(){
+                    $('[data-toggle="popover"]').popover({
+                        selector: "[data-toggle='popover']",
+                        delay: 50,
+                        trigger: 'manual',
+                        container: "body"
+                    }).on("mouseenter", function() {
+                        if ($("#help-btn").attr("aria-pressed") === 'true') {
+                            $(this).popover('show');
+                        }
+                    });
+                });
+
+                $("#help-btn").click(function () {
+                    $(this).delay(100).queue(function() {
+                        if ($("#help-btn").attr("aria-pressed") === 'true') {
+                            $('[data-toggle="popover"]').popover('show');
+                            if ($("#download-form").attr("aria-expanded") !== 'true') {
+                                $('#download-form [data-toggle="popover"]').popover('hide');
+                            }
+                        } else {
+                            $('[data-toggle="popover"]').popover('hide');
+                        }
+                        $(this).dequeue();
+                    });
+                });
+
+                /*]]>*/
+            </script>
         </div>
     </div>
 </body>

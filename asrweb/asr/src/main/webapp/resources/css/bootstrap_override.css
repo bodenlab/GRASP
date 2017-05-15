@@ -1,3 +1,12 @@
+.popover-content {
+    font-size: 10px;
+    color: #333;
+}
+
+.popover-title {
+    font-size: 12px;
+    color: #333;
+}
 
 #results {
     padding: 0em 2em 0em 2em;

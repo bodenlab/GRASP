@@ -190,7 +190,7 @@ public class ASR {
     /**
      * Save consensus sequence of marginal node
      *
-     * @param filepath
+     * @param filepath  filepath of where to save consensus sequence
      * @throws IOException
      */
     public void saveConsensusMarginal(String filepath) throws IOException {
@@ -199,9 +199,20 @@ public class ASR {
     }
 
     /**
+     * Save marginal distribution matrix of marginal node
+     *
+     * @param filepath  filepath of where to save distribution
+     * @throws IOException
+     */
+    public void saveMarginalDistribution(String filepath) throws IOException {
+        if (asrMarginal != null)
+            asrMarginal.saveDistrib(filepath);
+    }
+
+    /**
      * Save consensus sequence of marginal node
      *
-     * @param filepath
+     * @param filepath  filepath of where to save consensus sequence
      * @throws IOException
      */
     public void saveConsensusJoint(String filepath) throws IOException {

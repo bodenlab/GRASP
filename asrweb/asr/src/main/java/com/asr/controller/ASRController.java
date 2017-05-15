@@ -241,14 +241,15 @@ class ASRController {
             asr.saveMSA(tempDir + "/");
         if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))
             asr.saveAncestorGraph(request.getParameter("marg-node"), tempDir + "/marginal_");
+        if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on"))
+            asr.saveMarginalDistribution(tempDir + "/" + request.getParameter("marg-node"));
         if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
             asr.saveAncestors(tempDir + "/joint_");
         if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
             asr.saveConsensusMarginal(tempDir + "/marginal_" + request.getParameter("marg-node"));
         if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
             asr.saveConsensusJoint(tempDir + "/joint_");
-        // TODO: Distribution file/output
-        
+
         // send output folder to client
         zipFolder(sessionDir, response.getOutputStream());
 

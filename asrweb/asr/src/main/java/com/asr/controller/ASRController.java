@@ -234,21 +234,43 @@ class ASRController {
         sessionDir.mkdir();
 
         // copy output files to temporary folder, or generate output where needed and save in temporary folder
+        String jointPath = tempDir + "/Joint_reconstruction";
+        String marginalPath = tempDir + "/Marginal_reconstruction";
         if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
             Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName())).toPath(),
                     (new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(), StandardCopyOption.REPLACE_EXISTING);
         if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa").equalsIgnoreCase("on"))
             asr.saveMSA(tempDir + "/");
-        if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))
-            asr.saveAncestorGraph(request.getParameter("marg-node"), tempDir + "/marginal_");
-        if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on"))
-            asr.saveMarginalDistribution(tempDir + "/" + request.getParameter("marg-node"));
-        if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
-            asr.saveAncestors(tempDir + "/joint_");
-        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
-            asr.saveConsensusMarginal(tempDir + "/marginal_" + request.getParameter("marg-node"));
-        if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
-            asr.saveConsensusJoint(tempDir + "/joint_");
+        if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on")) {
+            File marginalDir = new File(marginalPath);
+            if (!marginalDir.exists())
+                marginalDir.mkdir();
+            asr.saveAncestorGraph(request.getParameter("marg-node"), marginalPath + "/");
+        }
+        if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on")) {
+            File marginalDir = new File(marginalPath);
+            if (!marginalDir.exists())
+                marginalDir.mkdir();
+            asr.saveMarginalDistribution(marginalPath + "/" + request.getParameter("marg-node"));
+        }
+        if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on")) {
+            File jointDir = new File(jointPath);
+            if (!jointDir.exists())
+                jointDir.mkdir();
+            asr.saveAncestors(jointPath + "/");
+        }
+        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on")) {
+            File marginalDir = new File(marginalPath);
+            if (!marginalDir.exists())
+                marginalDir.mkdir();
+            asr.saveConsensusMarginal(marginalPath + "/" + request.getParameter("marg-node") + "_consensus");
+        }
+        if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on")) {
+            File jointDir = new File(jointPath);
+            if (!jointDir.exists())
+                jointDir.mkdir();
+            asr.saveConsensusJoint(jointPath + "/ancestors_consensus");
+        }
 
         // send output folder to client
         zipFolder(sessionDir, response.getOutputStream());

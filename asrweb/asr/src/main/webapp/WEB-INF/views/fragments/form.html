@@ -16,26 +16,24 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
+                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-7">
+                    <div class="pull-right">
+                        <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="200" data-handle-width="100"  data-off-text="No" data-on-text="Yes" data-toggle="popover" data-placement="right" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." />
+                    </div>
+                </div>
                 <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
-                    <fieldset>
-                        <legend>
-                            Align extant sequences
-                            <div class="material-switch pull-right" data-toggle="popover" data-placement="right" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION).">
-                                <input id="check-align" type="checkbox" />
-                                <label for="check-align" class="label-primary"></label>
-                            </div>
-                        </legend>
-                        <div class="input-group" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
-                            <span class="input-group-addon glyphicon glyphicon-align-left" aria-hidden="true"></span>
-                            <label id="lbl-fileseq" class="btn btn-default col-xs-11 col-sm-9" disabled="true" for="fileseq">
-                                Select sequence library file...
-                                <input type="file" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
-                            </label>&nbsp;
-                            <span class="label label-default upload-file-info" id="upload-seq-info"></span>
-                        </div>
-                        <script type="text/javascript">
-                            $('#check-align').click(function() {
-                                if ($(this).is(':checked')) {
+                    <div class="input-group" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
+                        <span class="input-group-addon glyphicon glyphicon-align-left" aria-hidden="true"></span>
+                        <label id="lbl-fileseq" class="btn btn-default col-xs-11 col-sm-9" disabled="true" for="fileseq">
+                            Select sequence library file...
+                            <input type="file" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
+                        </label>&nbsp;
+                        <span class="label label-default upload-file-info" id="upload-seq-info"></span>
+                    </div>
+                    <script type="text/javascript">
+                            $("[id='check-align']").bootstrapSwitch();
+                            $('input[id="check-align"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                                if (state === true) {
                                     // enable sequence library inputs
                                     $('#lbl-fileseq').removeAttr('disabled');
                                     $('#fileseq').removeAttr('disabled');
@@ -51,9 +49,8 @@
                                     $('#fileseq').attr('disabled', true);
                                 }
                             });
-                        </script>
-                        <div class="form-group has-error" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
-                    </fieldset>
+                    </script>
+                    <div class="form-group has-error" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
                 </div>
                 <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
                     <div class="input-group" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
@@ -77,27 +74,23 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
-                    <fieldset>
-                        <legend>
-                            <div class="input-group pull-right" data-toggle="popover" data-placement="right" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction.">
-                                <div id="recon-radio" class="btn-group">
-                                    <a id="recon-joint" class="btn btn-primary btn-m active" data-title="joint">Joint</a>
-                                    <a id="recon-marg" class="btn btn-primary btn-m notActive" data-title="marginal">Marginal (root)</a>
-                                </div>
-                                <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
-                                <script type="text/javascript">
+                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-7">
+                    <div class="pull-right">
+                        <input id="check-infer" type="checkbox" data-size="small" data-label-text="Initial reconstruction" data-label-width="200" data-handle-width="100" data-off-text="Joint" data-off-color="primary" data-on-text="Marginal (root)"  data-toggle="popover" data-placement="right" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction." />
+                    </div>
+                    <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
+                    <script type="text/javascript">
                                     /*<![CDATA[*/
-                                    $('#recon-radio').click( function(){
-                                        $(this).find('a').toggleClass('active').toggleClass('notActive');
-                                        $('#inferenceType').val($(this).find('a.active').data('title'));
+                                    $("[id='check-infer']").bootstrapSwitch();
+                                    $('input[id="check-infer"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                                        if (state == true) {
+                                            $('#inferenceType').val("marginal");
+                                        } else {
+                                            $('#inferenceType').val("marginal");
+                                        }
                                     });
                                     /*]]>*/
-                                </script>
-                            </div>
-                            Initial Reconstruction
-                        </legend>
-                    </fieldset>
+                    </script>
                 </div>
                 <div class="form-group row col-sm-11"><button type="submit" name="submitAsr" class="btn btn-primary pull-right" id="submit-btn">Perform Reconstruction</button></div>
             </form>

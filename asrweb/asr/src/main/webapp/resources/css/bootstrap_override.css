@@ -40,6 +40,16 @@
     display: none;
 }
 
+.bootstrap-switch {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+#text-mutant {
+    width: 40px;
+    border-radius: 0px 3px 3px 0px;
+}
+
 .disable {
     visibility: hidden;
 }

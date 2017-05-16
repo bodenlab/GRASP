@@ -6,17 +6,17 @@
     <div class="content-section-a" th:if="${results == null}">
         <div th:replace="fragments/help :: help"></div>
         <div class="container-fluid">
-            <form id="asr-form" class="col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-md-10 col-lg-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
-                <div class="form-group row col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-sm-8 col-md-8 col-lg-8">
+            <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
+                <div class="form-group row col-sm-offset-1 col-sm-8">
                     <div class="input-group" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
-                        <input type="text" class="form-control col-sm-6 col-md-6 col-lg-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
+                        <input type="text" class="form-control col-sm-6 col-sm-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
                         <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
                             <button type="submit" name="test" class="btn btn-default">Run Test Data</button>
                         </span>
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-sm-8 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
                     <fieldset>
                         <legend>
                             Align extant sequences
@@ -27,7 +27,7 @@
                         </legend>
                         <div class="input-group" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
                             <span class="input-group-addon glyphicon glyphicon-align-left" aria-hidden="true"></span>
-                            <label id="lbl-fileseq" class="btn btn-default col-md-9 col-sm-9 col-lg-9" disabled="true" for="fileseq">
+                            <label id="lbl-fileseq" class="btn btn-default col-xs-11 col-sm-9" disabled="true" for="fileseq">
                                 Select sequence library file...
                                 <input type="file" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
                             </label>&nbsp;
@@ -55,10 +55,10 @@
                         <div class="form-group has-error" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
                     </fieldset>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
                     <div class="input-group" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
                         <span class="input-group-addon glyphicon glyphicon-align-justify" aria-hidden="true"></span>
-                        <label id="lbl-filealn" class="btn btn-default col-md-9 col-sm-9 col-lg-9" for="filealn">
+                        <label id="lbl-filealn" class="btn btn-default col-xs-11 col-sm-9" for="filealn">
                             Select sequence alignment file...
                             <input type="file" name="alnFile" id="filealn" style="display:none;" onchange="$('#upload-aln-info').html(document.forms['asrForm']['alnFile'].files[0].name);" hidden="hidden" th:field="*{alnFile}"></input>
                         </label>&nbsp;
@@ -66,10 +66,10 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('alnFile')}"><label class="control-label" for="label" th:errors="*{alnFile}"></label></div>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-sm-8 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
                     <div class="input-group" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
                         <span class="input-group-addon glyphicon glyphicon-tree-conifer" aria-hidden="true"></span>
-                        <label class="btn btn-default col-sm-9 col-md-9 col-lg-9" for="filetree">
+                        <label class="btn btn-default col-xs-11 col-sm-9" for="filetree">
                             Select phylogenetic tree file...
                             <input type="file" name="filetree" id="filetree" style="display:none;" onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);" hidden="hidden" th:field="*{treeFile}"></input>
                         </label>&nbsp;
@@ -77,13 +77,13 @@
                     </div>
                     <div class="form-group has-error" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-md-offset-2 col-lg-offset-2 col-sm-8 col-md-8 col-lg-8">
+                <div class="form-group row col-sm-offset-2 col-xs-12 col-sm-8">
                     <fieldset>
                         <legend>
-                            <div class="input-group pull-right col-sm-5 col-md-5 col-lg-5" data-toggle="popover" data-placement="right" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction.">
-                                <div id="recon-radio" class="btn-group col-sm-12 col-md-12 col-lg-12">
-                                    <a id="recon-joint" class="btn btn-primary btn-m active col-sm-6 col-md-6 col-lg-6" data-title="joint">Joint</a>
-                                    <a id="recon-marg" class="btn btn-primary btn-m notActive col-sm-6 col-md-6 col-lg-6" data-title="marginal">Marginal (root)</a>
+                            <div class="input-group pull-right" data-toggle="popover" data-placement="right" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction.">
+                                <div id="recon-radio" class="btn-group">
+                                    <a id="recon-joint" class="btn btn-primary btn-m active" data-title="joint">Joint</a>
+                                    <a id="recon-marg" class="btn btn-primary btn-m notActive" data-title="marginal">Marginal (root)</a>
                                 </div>
                                 <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
                                 <script type="text/javascript">
@@ -99,7 +99,7 @@
                         </legend>
                     </fieldset>
                 </div>
-                <div class="form-group row col-sm-11 col-md-11 col-lg-11"><button type="submit" name="submitAsr" class="btn btn-primary col-md-3 col-sm-3 col-lg-3 pull-right" id="submit-btn">Perform Reconstruction</button></div>
+                <div class="form-group row col-sm-11"><button type="submit" name="submitAsr" class="btn btn-primary pull-right" id="submit-btn">Perform Reconstruction</button></div>
             </form>
         </div>
         <script type="text/javascript">

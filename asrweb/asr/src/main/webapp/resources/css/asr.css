@@ -1,19 +1,7 @@
-/*
- * Start Bootstrap - Landing Page (http://startbootstrap.com/)
- * Copyright 2013-2016 Start Bootstrap
- * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
- */
 
-/* The container we are keeping the POAG vis in this is used to resize etc
-.svg-container {
-    display: inline-block;
-    position: relative;
-    width: 40%;
-    padding-bottom: 100%;
-    vertical-align: top;
-    overflow: hidden;
+body.container-fluid {
+    padding: 0;
 }
-*/
 
 body,
 html {

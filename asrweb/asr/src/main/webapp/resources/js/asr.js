@@ -6,13 +6,11 @@ var refresh_elements = function() {
 };
 
 var refresh_labels = function() {
-    console.log(selectedNode);
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
         nodeLabels[i].textContent = selectedNode;
         nodeLabels[i].value = selectedNode;
     }
-    console.log(inferType);
     var reconLabels = document.querySelectorAll(".infer-label");
     for (var i = 0; i < reconLabels.length; i++) {
         reconLabels[i].textContent = inferType;
@@ -21,5 +19,19 @@ var refresh_labels = function() {
 
 var set_inf_type = function(type) {
     inferType = type;
-    console.log(inferType);
-}
+};
+
+// re-draw popups to re-position on window size change
+$(window).resize(function () {
+    $(this).delay(10).queue(function() {
+        if ($("#help-btn").attr("aria-pressed") === 'true') {
+            $('[data-toggle="popover"]').popover('show');
+            if ($("#download-form").attr("aria-expanded") !== 'true') {
+                $('#download-form [data-toggle="popover"]').popover('hide');
+            }
+        } else {
+            $('[data-toggle="popover"]').popover('hide');
+        }
+        $(this).dequeue();
+    });
+});

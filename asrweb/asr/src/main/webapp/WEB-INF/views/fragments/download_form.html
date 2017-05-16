@@ -3,10 +3,10 @@
 <body>
     <div th:fragment="download_form" class="panel panel-default collapse" aria-expanded="false" id="download-form">
             <div class="panel-body">
-                <div class="col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-sm-10 col-md-10 col-lg-10">
+                <div class="col-md-offset-1 col-md-10">
                 <form action="#" name="download-form" method="get">
                     <div class="row">
-                        <div class="col-md-4 col-lg-4">
+                        <div class="col-md-4">
                             <fieldset>
                                 <legend>
                                     Phylogenetic Tree
@@ -19,7 +19,7 @@
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-md-4 col-lg-4">
+                        <div class="col-md-4">
                             <fieldset>
                                 <legend>
                                     Ancestral Graphs
@@ -44,7 +44,7 @@
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-md-4 col-lg-4">
+                        <div class="col-md-4">
                             <fieldset>
                                 <legend>
                                     Sequence Information
@@ -52,7 +52,7 @@
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the inferred ancestral sequence graph.">
                                     <input id="check-marg-dist" name="check-marg-dist" type="checkbox"></input>
                                     <label for="check-marg-dist">
-                                        Distribution of characters in <span class="node-label">Root</span> marginal
+                                        Distribution of characters in <span class="node-label">Root</span> marginal (.tsv)
                                     </label>
                                 </div>
                                 <div class="checkbox" data-toggle="popover" data-placement="right" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
@@ -72,7 +72,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-sm-offset-10 col-md-offset-10 col-lg-offset-10"><button type="submit" name="download" class="btn btn-primary col-sm-11 col-md-11 col-lg-11" id="download-btn">Download Results</button></div>
+                        <div class="col-md-offset-10"><button type="submit" name="download" class="btn btn-primary" id="download-btn">Download Results</button></div>
                     </div>
                 </form>
             </div>

@@ -7,8 +7,6 @@
 
 
 var selected_colour = random;
-console.log(selected_colour);
-
 
 /* Tip which is displayed when hovering over the nodes */
 var tip = d3.tip()

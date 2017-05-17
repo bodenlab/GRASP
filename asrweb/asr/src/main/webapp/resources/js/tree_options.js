@@ -86,6 +86,5 @@ var displayJointGraph = function(node) {
 var refresh_graphs = function(graph_json) {
     d3.select(".svg-content").remove();
     var options = setup_options("poag", graph_json);
-    console.log(graph_json);
     options = create_poags(options);
 };

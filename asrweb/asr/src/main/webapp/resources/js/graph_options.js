@@ -127,8 +127,8 @@ var setup_options = function (svg_id, json_str) {
             hover: true,
             metabolite_count: 0,
             display_label_text: false, // true means display the label text below the MSA graph
-            display_axis_text: false, // Text on the axis (as in the numbers on the y axis)
-            draw_axis: false // Whether or not to draw the y axis
+            display_axis_text: true, // Text on the axis (as in the numbers on the y axis)
+            draw_axis: true // Whether or not to draw the y axis
         },
         /******** Options for Sizing *****************************************/
         legend_padding: 0,

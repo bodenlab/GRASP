@@ -24,7 +24,14 @@ var clustal_colours = {
 'I': "#6AFB92",
 'L': "#6AFB92",
 'M': "#6AFB92",
-'V': "#6AFB92"};
+'V': "#6AFB92",
+/*white (added by Mikael to cover all 20 AAs) */
+'A':"#FEFCFF",
+'C':"#FEFCFF",
+'Q':"#FEFCFF",
+'N':"#FEFCFF",
+'D':"#FEFCFF",
+'E':"#FEFCFF"};
 
 var lesk_colours = {
 /*orange*/
@@ -44,6 +51,7 @@ var lesk_colours = {
 'F': "#6AFB92",
 'M': "#6AFB92",
 'W': "#6AFB92",
+'Y': "#6AFB92", /* Lesk "Introduction to Bioinformatics" 4th ed p196 */
 /*magenta*/
 'N': "#F778A1",
 'Q': "#F778A1",
@@ -119,5 +127,88 @@ var ma_colours = {
 'T': "#F75D59"
 };
 
-var colour_schemes = {'random': random, 'clustal': clustal_colours,
-    'lesk': lesk_colours, 'cinema': cinema_colours, 'ma': ma_colours};
+var zappo_colours = { /* Picked the RGB from JalView's Help page 17/5/2017 */
+    /* aliphatic */
+    'I': "#FFAFAF",
+    'L': "#FFAFAF",
+    'V': "#FFAFAF",
+    'A': "#FFAFAF",
+    'M': "#FFAFAF",
+    /* aromatic */
+    'F': "#FFC803",
+    'W': "#FFC803",
+    'Y': "#FFC803",
+    /* positive */
+    'K': "#6564FF",
+    'R': "#6564FF",
+    'H': "#6564FF",
+    /* negative */
+    'D': "#FF0201",
+    'E': "#FF0201",
+    /* hydrophilic */
+    'S': "#00FF03",
+    'T': "#00FF03",
+    'N': "#00FF03",
+    'Q': "#00FF03",
+    /* conformationally special */
+    'P': "#FF00FF",
+    'G': "#FF00FF",
+    /* cysteine */
+    'C': "#FFFF04"};
+
+var taylor_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Protein Engineering, Vol 10 , 743-746 (1997) */
+    /* aliphatic */
+    'I': "#64FF03",
+    'L': "#2EFF03",
+    'V': "#98FF04",
+    'A': "#CBFF04",
+    'M': "#00FF03",
+    /* aromatic */
+    'F': "#00FF66",
+    'W': "#00CCFF",
+    'Y': "#00FFCC",
+    /* positive */
+    'K': "#6700FF",
+    'R': "#0700FF",
+    'H': "#0466FF",
+    /* negative */
+    'D': "#FF0201",
+    'E': "#FF0166",
+    /* hydrophilic */
+    'S': "#FF3401",
+    'T': "#FF6601",
+    'N': "#CD00FF",
+    'Q': "#FF00CC",
+    /* conformationally special */
+    'P': "#FFCC03",
+    'G': "#FF9902",
+    /* cysteine */
+    'C': "#FFFF04"};
+
+var hydrophobicity_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Kyte, J., and Doolittle, R.F., J. Mol. Biol. 1157, 105-132, 1982 */
+    'I': "#FF0201",
+    'V': "#F6020A",
+    'L': "#EA0215",
+    'F': "#CB0134",
+    'C': "#C2013D",
+    'M': "#B0004F",
+    'A': "#AD0052",
+    'G': "#6A0095",
+    'S': "#5E00A1",
+    'T': "#61009E",
+    'W': "#5B00A4",
+    'Y': "#5000B0",
+    'P': "#4700B9",
+    'H': "#1800EA",
+    'E': "#1100F3",
+    'Q': "#1100F3",
+    'D': "#1100F3",
+    'N': "#1100F3",
+    'K': "#0700FF",
+    'R': "#0700FF"
+};
+
+
+
+var colour_schemes = {'taylor': taylor_colours, 'zappo': zappo_colours, 'random': random, 'clustal': clustal_colours,
+		      'lesk': lesk_colours, 'cinema': cinema_colours, 'ma': ma_colours, 'hydrophob': hydrophobicity_colours};

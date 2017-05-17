@@ -67,6 +67,10 @@ legend {
     width: 80%;
 }
 
+rect.bar {
+    outline: #EFF3FB solid 1px;
+}
+
 fieldset {
     padding-bottom: 1em;
 }

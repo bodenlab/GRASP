@@ -341,7 +341,7 @@ make_pie = function (node, graph, radius) {
             .text(function (d) {
                 return d.data.label;
             });
-            }
+    }
 }
 
 

@@ -3,6 +3,12 @@ var inferType; // Keep track of which reconstruction is being displayed
 var refresh_elements = function() {
     refresh_labels();
     d3_phylotree_trigger_refresh (tree);
+    if (inferType === "marginal") {
+        $('input[id="check-mutant"]').bootstrapSwitch('disabled', false);
+    } else {
+        $('input[id="check-mutant"]').bootstrapSwitch('state', false);
+        $('input[id="check-mutant"]').bootstrapSwitch('disabled', true);
+    }
 };
 
 var refresh_labels = function() {
@@ -35,3 +41,4 @@ $(window).resize(function () {
         $(this).dequeue();
     });
 });
+

@@ -2,8 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
     <div th:fragment="download_form" class="panel panel-default collapse" aria-expanded="false" id="download-form">
-            <div class="panel-body">
-                <div class="col-md-offset-1 col-md-10">
+        <div class="panel-body">
+            <div class="col-md-offset-1 col-md-10">
                 <form action="#" name="download-form" method="get">
                     <div class="row">
                         <div class="col-md-4">
@@ -11,7 +11,7 @@
                                 <legend>
                                     Phylogenetic Tree
                                 </legend>
-                                <div class="checkbox" data-toggle="popover" data-placement="left" data-content="Phylogenetic tree annotated with ancestral labels.">
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Phylogenetic tree annotated with ancestral labels.">
                                     <input id="check-recon-tree" name="check-recon-tree" type="checkbox" checked="checked"></input>
                                     <label for="check-recon-tree">
                                         Reconstructed tree (.nwk)
@@ -24,13 +24,13 @@
                                 <legend>
                                     Ancestral Graphs
                                 </legend>
-                                <div class="checkbox " data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
                                     <input id="check-pog-msa" name="check-pog-msa" type="checkbox"></input>
                                     <label for="check-pog-msa">
                                         Sequence alignment (.dot)
                                     </label>
                                 </div>
-                                <div class="checkbox" data-toggle="popover" data-placement="left" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">
                                     <input id="check-pog-marg" name="check-pog-marg" type="checkbox"></input>
                                     <label for="check-pog-marg">
                                         Marginal reconstruction of <span class="node-label">Root</span> (.dot)
@@ -55,7 +55,7 @@
                                         Distribution of characters in <span class="node-label">Root</span> marginal (.tsv)
                                     </label>
                                 </div>
-                                <div class="checkbox" data-toggle="popover" data-placement="right" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
                                     <input id="check-seq-marg" name="check-seq-marg" type="checkbox"></input>
                                     <label for="check-seq-marg">
                                         Consensus sequence of <span class="node-label">Root</span> (.fasta)
@@ -71,12 +71,12 @@
                             </fieldset>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-offset-10"><button type="submit" name="download" class="btn btn-primary" id="download-btn">Download Results</button></div>
+                    <div class="row col-xs-12">
+                        <div class="col-xs-12"><button type="submit" name="download" class="btn btn-default col-xs-12" id="download-btn">Download</button></div>
                     </div>
                 </form>
             </div>
-            </div>
+        </div>
     </div>
 </body>
 </html>

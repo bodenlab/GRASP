@@ -66,7 +66,12 @@
                         </div>
                         <script type="text/javascript">
                             /*<![CDATA[*/
+                            // initialise switch settings
                             $("[id='check-mutant']").bootstrapSwitch();
+                            if ($('.infer-label').text() === "joint") {
+                                $('input[id="check-mutant"]').bootstrapSwitch('disabled', true);
+                            }
+
                             $('input[id="check-mutant"]').on('switchChange.bootstrapSwitch', function(event, state) {
                                 if (state === true) {
                                     $('#text-mutant').removeClass('disabled');

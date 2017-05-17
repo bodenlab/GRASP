@@ -70,7 +70,7 @@ var setup_options = function (svg_id, json_str) {
             text_size: "18px",
             font_family: "Gill Sans, sans-serif",
             text_padding: 5,
-            font_colour: "#233",
+            //font_colour: "#233",
             gradient: false,
             x_size: 150, // Multiplication factor for positions
             y_size: 100,

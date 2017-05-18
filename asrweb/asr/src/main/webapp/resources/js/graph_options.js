@@ -35,7 +35,7 @@ var setup_options = function (svg_id, json_str) {
 
         /**************** Options for the lanes (used when showing both an inferred and raw POAG)   **/
         depth: 3, // Indicates how many layers for the nodes
-        lane_height: 20, // A "lane" is the region where a POAG is drawn this is
+        lane_height: 5, // A "lane" is the region where a POAG is drawn this is
         // lane height is the lane height of the mini graph
         lane_padding: 10,
         mini_radius: 7,
@@ -56,7 +56,7 @@ var setup_options = function (svg_id, json_str) {
         },
         multi: {
             main_height: 300,
-            mini_height: 50
+            mini_height: 10
         },
         position: {
             text_padding: 20, // How high above the mini it will appear

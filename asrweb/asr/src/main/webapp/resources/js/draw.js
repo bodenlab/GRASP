@@ -152,7 +152,7 @@ draw_mini_line = function (graph) {
         line_points.push(combine_points(line_x, line_y));
 
         if (node.many_edges == true) {
-            group.append("rect")
+            var rect = group.append("rect")
                     .attr("class", "mini_rect")
                     .attr('x', line_x)
                     .attr('y', function () {
@@ -166,9 +166,11 @@ draw_mini_line = function (graph) {
                     .attr("opacity", options.diff_opacity)
                     .attr("fill", options.diff_colour);
 
+            rect.moveToBack();
+
         }
         if (node.deleted_during_inference == true) {
-            group.append("circle")
+            var circle = group.append("circle")
                 .attr("class", "mini_node")
                 .attr("id", "node_" + node.label + n)
                 .attr('cx', line_x)
@@ -176,14 +178,18 @@ draw_mini_line = function (graph) {
                 .attr('r', 2 * radius)
                 .attr("opacity", options.diff_opacity)
                 .attr("fill", options.interesting_many_edges_colour);
+
+            circle.moveToBack();
         }
     }
-       group.append("path")
+       var path = group.append("path")
                  .attr("d", line_function(line_points))
                  .attr("class", "edge")
                  .attr("stroke-width", mini_opt.stroke_width)
                  .attr("stroke", mini_opt.stroke)
-                 .attr("fill", "none")
+                 .attr("fill", "none");
+
+         path.moveToBack();
 
 
     graph.mini_group = group;

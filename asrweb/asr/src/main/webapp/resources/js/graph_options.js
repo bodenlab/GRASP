@@ -6,7 +6,7 @@
 // uncharged polar side chains, then Basic side chains, acidic, the hydrophobic
 
 
-var selected_colour = random;
+var selected_colour = taylor_colours;
 
 /* Tip which is displayed when hovering over the nodes */
 var tip = d3.tip()

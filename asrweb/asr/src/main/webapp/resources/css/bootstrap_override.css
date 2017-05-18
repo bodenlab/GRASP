@@ -89,7 +89,7 @@ fieldset {
 	width: 100%;
 	z-index: 9999;
 	height: 100%;
-	opacity: 0.6;
+	opacity: 0.8;
 	background: url(../images/loading.gif) center no-repeat #fff;
 }
 

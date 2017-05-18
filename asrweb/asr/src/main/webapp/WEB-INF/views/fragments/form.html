@@ -8,7 +8,7 @@
         <div class="container-fluid">
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom">
-                    <div class="input-group" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
+                    <div class="input-group col-sm-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
                         <input type="text" class="form-control col-sm-6 col-sm-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
                         <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
                             <button type="submit" name="test" class="btn btn-default">Run Test Data</button>
@@ -88,7 +88,7 @@
                                         if (state == true) {
                                             $('#inferenceType').val("marginal");
                                         } else {
-                                            $('#inferenceType').val("marginal");
+                                            $('#inferenceType').val("joint");
                                         }
                                     });
                                     /*]]>*/

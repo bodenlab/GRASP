@@ -25,9 +25,9 @@ class ASRController {
 
     final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-    final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
-
-    //final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+    //final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
+    final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+    //final String sessionPath = "/var/www/JavaApps/GRASP/Sessions/";
 
     private ASR asr;
 
@@ -182,6 +182,8 @@ class ASRController {
     public String performReconstruction(@RequestParam String infer, @RequestParam String node, Model model) {
 
         System.out.println("infer,node");
+        model.addAttribute("results", true);
+
         // TODO: push exceptions to error message on view...
         try {
             asr.setInferenceType(infer);
@@ -205,7 +207,6 @@ class ASRController {
 
         model.addAttribute("graph", graphs);
         model.addAttribute("inferenceType", asr.getInferenceType());
-        model.addAttribute("results", true);
 
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
         return graphs;
@@ -273,6 +274,8 @@ class ASRController {
                 jointDir.mkdir();
             asr.saveConsensusJoint(jointPath + "/ancestors_consensus");
         }
+
+        //asr.saveMSAImage(tempDir + "/MSA.png");
 
         // send output folder to client
         zipFolder(sessionDir, response.getOutputStream());

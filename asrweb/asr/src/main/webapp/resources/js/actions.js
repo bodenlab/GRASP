@@ -11,13 +11,6 @@ var update_colour = function(value) {
     } else {
         graph.options.pie.stroke = "white";
     }
-    /*if (value == "hydrophob") {
-        $('text.node_text').css('stroke', 'white');
-        $('text.pie').css('fill', 'white');
-    } else {
-        $('text.node_text').css('stroke', 'black');
-        $('text.pie').css('fill', 'black');
-    }*/
 
     // redraw the mini nodes in the correct coluors
     graph.mini_group.selectAll("circle.mini_node").remove();

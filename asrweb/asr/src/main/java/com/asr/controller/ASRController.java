@@ -76,18 +76,7 @@ class ASRController {
             asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
 
             // TODO: push exceptions to error message on view...
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(os);
-            PrintStream old = System.err;
-            System.setErr(ps);
             asr.runReconstruction();
-            System.err.flush();
-            System.setErr(old);
-            if (!os.toString().isEmpty()) {
-                model.addAttribute("error", true);
-                model.addAttribute("errorMessage", os.toString());
-            }
-            System.out.println("err stream: " + os.toString());
 
             // add reconstructed newick string to send to javascript
             model.addAttribute("tree", asr.getReconstructedNewickString());
@@ -132,6 +121,7 @@ class ASRController {
 
             asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
             asr.setLabel("Test");
+            asr.setInferenceType("joint");
 
             // copy default data to user session folder
 
@@ -148,10 +138,8 @@ class ASRController {
             // add reconstructed newick string to send to javascript
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
-
             // add msa and inferred ancestral graph
             String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
-
 
             model.addAttribute("graph", graphs);
 

@@ -70,7 +70,6 @@ var setup_options = function (svg_id, json_str) {
             text_size: "18px",
             font_family: "Gill Sans, sans-serif",
             text_padding: 5,
-            //font_colour: "#233",
             gradient: false,
             x_size: 150, // Multiplication factor for positions
             y_size: 100,
@@ -133,7 +132,7 @@ var setup_options = function (svg_id, json_str) {
         /******** Options for Sizing *****************************************/
         legend_padding: 0,
         legend_rect_size: 0,
-        height: 600,
+        height: 500,
         width: 1200,
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,

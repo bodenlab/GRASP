@@ -1,6 +1,7 @@
 package com;
 
 import api.PartialOrderGraph;
+import com.asr.DrawGraph;
 import com.asr.validator.File;
 import json.JSONObject;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -117,7 +118,8 @@ public class ASR {
      * Run marginal reconstruction using uploaded files and specified options
      */
     private void runReconstructionMarginal() throws Exception {
-        System.out.println(nodeLabel);
+        if (nodeLabel != null && nodeLabel.equalsIgnoreCase("root"))
+            nodeLabel = null;
         if (nodeLabel != null)
             asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, true);
         else
@@ -207,6 +209,15 @@ public class ASR {
     public void saveMarginalDistribution(String filepath) throws IOException {
         if (asrMarginal != null)
             asrMarginal.saveDistrib(filepath);
+    }
+
+    public void saveMSAImage(String filepath) throws IOException {
+        DrawGraph dg;
+        if (inferenceType.equalsIgnoreCase("joint"))
+            dg = new DrawGraph((new POAGJson(asrJoint.getMSAGraph())).toJSON());
+        else
+            dg = new DrawGraph((new POAGJson(asrMarginal.getMSAGraph())).toJSON());
+        dg.drawImage(filepath);
     }
 
     /**

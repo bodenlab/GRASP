@@ -392,9 +392,8 @@ create_poags = function (options) {
     graph = make_scales(graph);
     graph = setup_svg(graph);
     graph = setup_items(graph);
-    graph = setup_brush(graph);
     graph = draw_mini_line(graph);//draw_mini_nodes(graph);
-
+    graph = setup_brush(graph);
     display();
 
 };

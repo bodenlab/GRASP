@@ -24,13 +24,14 @@ draw_positions = function (graph, nodes, x_min, x_max) {
     } else {
         level = position_opt.level_unlimited;
     }
-    for (var n in nodes) {
-        var node = nodes[n];
-        if (node.start % level == 0 && node.inferred == true) {
+    // We want to draw every position not just if there is a node there (we want to draw it
+    // even if the node has been removed)
+    for (var n = 0; n < nodes.length/2; n ++) {
+        if (n % level == 0) {
                 group.append("text")
                     .attr("class", "position_text")
                     .attr('x', function () {
-                        var tmp = x_scale(node.start) + 2;
+                        var tmp = x_scale(n) + 2;
                         return tmp;
                     })
                     .attr('y', function () {
@@ -42,9 +43,9 @@ draw_positions = function (graph, nodes, x_min, x_max) {
                     .style("font-family", node_opt.font_family)
                     .style("font-size", node_opt.text_size)
                     .attr("stroke", function() {
-                        return getNodeTextColour(options.colours[(node.label)]);
+                        return "grey";//getNodeTextColour(options.colours[(node.label)]);
                     })
-                    .text(node.start);
+                    .text(n);
         }
     }
 }

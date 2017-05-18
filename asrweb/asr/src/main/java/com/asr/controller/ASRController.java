@@ -148,8 +148,10 @@ class ASRController {
             // add reconstructed newick string to send to javascript
             model.addAttribute("tree", asr.getReconstructedNewickString());
 
+
             // add msa and inferred ancestral graph
             String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
+
 
             model.addAttribute("graph", graphs);
 

@@ -19,6 +19,7 @@
     <![endif]-->
 
     <link rel="stylesheet" href="/resources/css/bootstrap.css" th:href="@{/resources/css/bootstrap.css}"></link>
+    <link rel="stylesheet" href="/resources/css/bootstrap.mod.css" th:href="@{/resources/css/bootstrap-switch.min.css}"></link>
     <link rel="stylesheet" href="/resources/css/asr.css" th:href="@{/resources/css/asr.css}"></link>
     <link rel="stylesheet" href="/resources/css/biojs_alignment.css" th:href="@{/resources/css/biojs_alignment.css}"></link>
     <link rel="stylesheet" href="/resources/css/phyd3.css" th:href="@{/resources/css/phylotree.css}"></link>
@@ -28,7 +29,9 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
     <!--<script src="//veg.github.io/phylotree.js/phylotree.js"></script>-->
+    <script type="text/javascript" src="/resources/js/bootstrap-switch.min.js"></script>
     <script type="text/javascript" src="/resources/js/d3.tip.v0.6.3.js"></script>
     <script type="text/javascript" src="/resources/js/index.js"></script>
     <script type="text/javascript" src="/resources/js/draw.js"></script>
@@ -38,9 +41,9 @@
     <script type="text/javascript" src="/resources/js/phylotree.js"></script>
     <script type="text/javascript" src="/resources/js/graph_options.js"></script>
     <script type="text/javascript" src="/resources/js/tree_options.js"></script>
-    <script type="text/javascript" src="/resources/js/dropdown.js"></script>
+    <script type="text/javascript" src="/resources/js/asr.js"></script>
 </head>
-<body>
+<body class="container-fluid">
     <!-- Header -->
     <div th:replace="fragments/header :: header"></div>
 
@@ -54,6 +57,9 @@
 
     <!-- Error Section -->
     <div th:replace="fragments/errors :: errors"></div>
+
+    <!-- Progress Modal -->
+    <div th:replace="fragments/progress :: progress"></div>
 
     <!-- Tutorial Section  -->
     <div th:replace="fragments/tutorial :: tutorial"></div>

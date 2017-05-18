@@ -1,3 +1,12 @@
+.popover-content {
+    font-size: 10px;
+    color: #333;
+}
+
+.popover-title {
+    font-size: 12px;
+    color: #333;
+}
 
 #results {
     padding: 0em 2em 0em 2em;
@@ -31,6 +40,22 @@
     display: none;
 }
 
+.bootstrap-switch {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+#text-mutant {
+    width: 40px;
+    border-radius: 0px 3px 3px 0px;
+}
+
+.pad-top-bottom {
+    padding: 20px 0 20px 0;
+}
+
 .disable {
     visibility: hidden;
 }
@@ -42,6 +67,10 @@ legend {
     width: 80%;
 }
 
+rect.bar {
+    outline: #EFF3FB solid 1px;
+}
+
 fieldset {
     padding-bottom: 1em;
 }
@@ -50,71 +79,29 @@ fieldset {
     height: 100%;
 }
 
-#recon-radio {
-    padding-right: 0;
+
+.no-js #loader { display: none;  }
+.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+.se-pre-con {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	z-index: 9999;
+	height: 100%;
+	opacity: 0.6;
+	background: url(../images/loading.gif) center no-repeat #fff;
 }
 
-#recon-radio .btn {
-    border-color: #ccc;
-    padding: 1px 12px;
-    margin-bottom: 6px;
+.center-el {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#recon-radio .notActive {
-    color: #333;
-    background-color: #fff;
-}
-
-#recon-joint {
-    border-radius: 10px 0px 0px 10px;
-}
-
-#recon-marg {
-    border-radius: 0px 10px 10px 0px;
-}
-
-/* CSS for switch checkbox (bootstrap samples) */
-.material-switch > input[type="checkbox"] {
-    display: none;
-}
-
-.material-switch > label {
-    cursor: pointer;
-    height: 0px;
-    position: relative;
-    width: 40px;
-}
-
-.material-switch > label::before {
-    background: rgb(0, 0, 0);
-    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
-    content: '';
-    height: 16px;
-    margin-top: -8px;
-    position:absolute;
-    opacity: 0.3;
-    transition: all 0.4s ease-in-out;
-    width: 40px;
-}
-.material-switch > label::after {
-    background: rgb(255, 255, 255);
-    border-radius: 16px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-    content: '';
-    height: 24px;
-    left: -4px;
-    margin-top: -8px;
-    position: absolute;
-    top: -4px;
-    transition: all 0.3s ease-in-out;
-    width: 24px;
-}
-.material-switch > input[type="checkbox"]:checked + label::before {
-    background: inherit;
-    opacity: 0.5;
-}
-.material-switch > input[type="checkbox"]:checked + label::after {
-    background: inherit;
-    left: 20px;
+.center-el h4 {
+    padding-top: 6em;
+    margin: 0;
 }

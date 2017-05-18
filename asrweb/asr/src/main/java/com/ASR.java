@@ -131,7 +131,7 @@ public class ASR {
      */
     public String getReconstructedNewickString() {
         try {
-            BufferedReader r = new BufferedReader(new FileReader(sessionDir + label + "_recon.nwk"));
+            BufferedReader r = new BufferedReader(new FileReader(sessionDir + getReconstructedTreeFileName()));
             String tree = "";
             String line;
             while((line = r.readLine()) != null)
@@ -141,6 +141,83 @@ public class ASR {
         } catch (IOException e) {
             return "";
         }
+    }
+
+    /**
+     * Get the filename of the reconstructed phylogenetic tree
+     *
+     * @return  filename
+     */
+    public String getReconstructedTreeFileName() {
+        return label + "_recon.nwk";
+    }
+
+    /**
+     * Save MSA graph
+     *
+     * @param filepath  filepath of where to save graph
+     */
+    public void saveMSA(String filepath) {
+        if (inferenceType.equalsIgnoreCase("joint"))
+            asrJoint.saveMSAGraph(filepath);
+        else
+            asrMarginal.saveMSAGraph(filepath);
+    }
+
+    /**
+     * Save ancestor graph
+     *
+     * @param label     label of ancestor
+     * @param filepath  filepath of where to save graph
+     */
+    public void saveAncestorGraph(String label, String filepath) {
+        if (inferenceType.equalsIgnoreCase("joint"))
+            asrJoint.saveGraph(filepath, label);
+        else
+            asrMarginal.saveGraph(filepath, label);
+    }
+
+    /**
+     * Save graphs of all ancestors (joint)
+     *
+     * @param filepath  filepath of where to save ancestor graphs
+     */
+    public void saveAncestors(String filepath) {
+        if (asrJoint != null)
+            asrJoint.saveGraph(filepath);
+    }
+
+    /**
+     * Save consensus sequence of marginal node
+     *
+     * @param filepath  filepath of where to save consensus sequence
+     * @throws IOException
+     */
+    public void saveConsensusMarginal(String filepath) throws IOException {
+        if (asrMarginal != null)
+            asrMarginal.saveSupportedAncestors(filepath);
+    }
+
+    /**
+     * Save marginal distribution matrix of marginal node
+     *
+     * @param filepath  filepath of where to save distribution
+     * @throws IOException
+     */
+    public void saveMarginalDistribution(String filepath) throws IOException {
+        if (asrMarginal != null)
+            asrMarginal.saveDistrib(filepath);
+    }
+
+    /**
+     * Save consensus sequence of marginal node
+     *
+     * @param filepath  filepath of where to save consensus sequence
+     * @throws IOException
+     */
+    public void saveConsensusJoint(String filepath) throws IOException {
+        if (asrJoint != null)
+            asrJoint.saveSupportedAncestors(filepath);
     }
 
     /**
@@ -193,7 +270,7 @@ public class ASR {
 
         // What type of reconstruction it is, if it is a marginal reconstruction
         // pie charts will be drawn if it is a joint reconstruction then only the inferred node will be drawn
-        metadataInferred.put("type", "joint");
+        metadataInferred.put("type", inferenceType);
         metadataMSA.put("type", "marginal");
 
         // Add the metadata to their respective graphs
@@ -202,7 +279,7 @@ public class ASR {
 
         // Add the metadata to an array
         JSONObject combinedPoags = new JSONObject();
-        // Where the graph is put in relation to eachother
+        // Where the graph is put in relation to each other
         combinedPoags.put("top", graphMSA);
         combinedPoags.put("bottom", graphInferred);
 

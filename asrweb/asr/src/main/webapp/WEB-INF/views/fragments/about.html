@@ -2,17 +2,20 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="about">
-    <a  name="about"></a>
     <div class="banner">
         <div class="container">
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-sm-6">
+                    <a id="about-nav"></a>
                     <h2>About the group</h2>
-                    <p>Some info about the group.... maybe... :)</p>
+                    <div class="pad-top-bottom">
+                        <p>Some info about the group.... maybe... :)</p>
+                        <p>Citation of paper..</p>
+                    </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-sm-6">
                     <ul class="list-inline banner-social-buttons">
-                        <li><a href="http://bioinf2.scmb.uq.edu.au/research/start" class="btn btn-default btn-lg"><i class="fa fa-link fa-fw"></i> <span class="network-name">Boden Wiki</span></a></li>
+                        <li><a href="http://bioinf.scmb.uq.edu.au/research/start" class="btn btn-default btn-lg"><i class="fa fa-link fa-fw"></i> <span class="network-name">Boden Wiki</span></a></li>
                     </ul>
                 </div>
             </div>

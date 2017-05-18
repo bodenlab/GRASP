@@ -2,43 +2,102 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="results" th:if="${results}">
-    <div class="content-section-a">
+    <a id="results-nav"></a>
+    <div class="content-section-b">
         <div th:replace="fragments/help :: help"></div>
         <div class="row">
             <div id="heading">
-                <h2><span class="node-label">Root</span> <small><span class="infer-label">joint</span> reconstruction </small></h2>
+                <h2><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
                 <hr class="h-divider"></hr>
             </div>
         </div>
         <div id="results" class="container-fluid" >
-            <div class="row col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
-                <div id="reconstructed-tree" class="well col-sm-3 col-md-3 col-lg-3">
+            <div class="row col-sm-10  col-sm-offset-1">
+                <div id="reconstructed-tree" class="well col-sm-3" data-toggle="popover" data-placement="top" data-content="Annotated phylogenetic tree. Click on the internal nodes for ancestral reconstruction options: perform marginal inference or view joint reconstruction results.">
                     <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
-                                    refresh_labels();
                                     var recon = /*[[${tree}]]*/;
                                     setup_tree("#phylo", recon);
-                                   /*]]>*/
+                                /*]]>*/
                             </script>
                     </svg>
                 </div>
-                <div class="col-sm-9 col-md-9 col-lg-9">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span id="selected-scheme">GRASP</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a id="random" onclick="update_scheme('random')">GRASP <span id="random-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                            <li><a id="clustal" onclick="update_scheme('clustal')">Clustal <span id="clustal-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                            <li><a id="lesk" onclick="update_scheme('lesk')">Lesk <span id="lesk-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                            <li><a id="cinema" onclick="update_scheme('cinema')">Cinema <span id="cinema-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                            <li><a id="ma" onclick="update_scheme('ma')">MAEditor <span id="ma-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                        </ul>
+                <div class="col-sm-9">
+                    <div class="input-group">
+                        <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
+                            <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span id="selected-scheme">GRASP</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a id="random" onclick="update_scheme('random')">GRASP <span id="random-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="clustal" onclick="update_scheme('clustal')">Clustal <span id="clustal-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="lesk" onclick="update_scheme('lesk')">Lesk <span id="lesk-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="cinema" onclick="update_scheme('cinema')">Cinema <span id="cinema-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="ma" onclick="update_scheme('ma')">MAEditor <span id="ma-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="taylor" onclick="update_scheme('taylor')">Taylor <span id="taylor-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="zappo" onclick="update_scheme('zappo')">Zappo <span id="zappo-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="hydrophob" onclick="update_scheme('hydrophob')">Hydrophobicity <span id="hydrophob-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+
+                            </ul>
+                        </div>
+                        <input id="check-mutant" type="checkbox" data-size="normal" data-label-text="View mutant library" data-label-width="200px" data-off-text="" data-on-text="10" data-inverse="true" />
+                        <div class="btn-group" data-toggle="popover" data-placement="top" data-content="View the mutant library for the marginal reconstruction. Likely mutants are calculated using the Kullback-Leibler divergence on the set of possible characters. Default: 5 mutants are shown for each character position in the reconstructed ancestor.">
+                            <button id="text-mutant" type="button" class="btn btn-default dropdown-toggle dropdown disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="caret"></span>
+                            </button>
+                            <ul id="num-mutants" class="dropdown-menu">
+                                <li><a>1</a></li>
+                                <li><a>2</a></li>
+                                <li><a>3</a></li>
+                                <li><a>4</a></li>
+                                <li><a>5</a></li>
+                                <li><a>6</a></li>
+                                <li><a>7</a></li>
+                                <li><a>8</a></li>
+                                <li><a>9</a></li>
+                                <li><a>10</a></li>
+                                <li><a>11</a></li>
+                                <li><a>12</a></li>
+                                <li><a>13</a></li>
+                                <li><a>14</a></li>
+                                <li><a>15</a></li>
+                                <li><a>16</a></li>
+                                <li><a>17</a></li>
+                                <li><a>18</a></li>
+                                <li><a>19</a></li>
+                                <li><a>20</a></li>
+                            </ul>
+                        </div>
+                        <script type="text/javascript">
+                            /*<![CDATA[*/
+                            // initialise switch settings
+                            $("[id='check-mutant']").bootstrapSwitch();
+                            if ($('.infer-label').text() === "joint") {
+                                $('input[id="check-mutant"]').bootstrapSwitch('disabled', true);
+                            }
+
+                            $('input[id="check-mutant"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                                if (state === true) {
+                                    $('#text-mutant').removeClass('disabled');
+                                } else {
+                                    $('#text-mutant').addClass('disabled');
+                                }
+                            });
+
+                            $('#num-mutants li a').on('click', function() {
+                                var num = $(this).text();
+                                $('input[id="check-mutant"]').bootstrapSwitch('onText', num);
+
+                                // TODO: generate mutant library with num mutants
+
+                            });
+                            /*]]>*/
+                        </script>
                     </div>
-                    <div id="poag" class="col-sm-12 col-md-12 col-lg-12">
+                    <div id="poag" class="col-sm-12" data-toggle="popover" data-placement="left" data-content="The sequence alignment graph (top), the inferred ancestor graph (bottom) and a positional window. Note that the window can be dragged to change the section of the graphs in view and the size of the positional window can be altered. Note: In the position window, indels are represented by a dot and regions of ambiguity based on multiple extant paths are shown as shaded regions.">
                     </div>
-                        <script type="text/javascript" th:inline="javascript">
+                    <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
                                     var update_scheme = function(scheme) {
                                         var glyphs = document.querySelectorAll(".glyph-selected");
@@ -52,22 +111,31 @@
                                         update_colour(scheme);
                                     }
 
-                                        var json_str = /*[[${graph}]]*/;
-                                        console.log(json_str);
-                                        var options = setup_options("poag", json_str);
-                                        options = create_poags(options);
+                                    var json_str = /*[[${graph}]]*/;
+                                    var options = setup_options("poag", json_str);
+                                    options = create_poags(options);
                                 /*]]>*/
-                        </script>
+                    </script>
                 </div>
             </div>
-            <div class="row col-sm-10 col-md-10 col-lg-10 col-sm-offset-1 col-md-offset-1 col-lg-offset-1">
-                <button id="download-toggle" class="btn btn-default col-sm-12 col-md-12 col-lg-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
-                    <div th:replace="fragments/download_form :: download_form"></div>
-                    <script type="text/javascript">
-                                $('#download-toggle').click( function(){
-                                    $(this).find('span').toggleClass('glyphicon-menu-down').toggleClass('glyphicon-menu-up');
-                                });
-                    </script>
+            <div class="row col-xs-10 col-xs-offset-1">
+                <button id="download-toggle" class="btn btn-default col-xs-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
+                <div th:replace="fragments/download_form :: download_form"></div>
+                <script type="text/javascript">
+                    $('#download-toggle').click( function(){
+                        $(this).find('span').toggleClass('glyphicon-menu-down').toggleClass('glyphicon-menu-up');
+                        $(this).delay(500).queue(function() {
+                            if ($("#help-btn").attr("aria-pressed") === 'true') {
+                                if ($("#download-form").attr("aria-expanded") === 'true') {
+                                    $('#download-form [data-toggle="popover"]').popover('show');
+                                } else {
+                                    $('#download-form [data-toggle="popover"]').popover('hide');
+                                }
+                            }
+                            $(this).dequeue();
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>

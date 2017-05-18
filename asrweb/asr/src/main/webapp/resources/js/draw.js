@@ -41,7 +41,9 @@ draw_positions = function (graph, nodes, x_min, x_max) {
                     .attr("stroke-width", node_opt.stroke_width)
                     .style("font-family", node_opt.font_family)
                     .style("font-size", node_opt.text_size)
-                    .attr("stroke", node_opt.font_colour)
+                    .attr("stroke", function() {
+                        return getNodeTextColour(options.colours[(node.label)]);
+                    })
                     .text(node.start);
         }
     }
@@ -220,7 +222,6 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
     for (var n in nodes) {
         var node = nodes[n];
         if (node.start >= x_min & x_max >= node.end) {
-            var colour = options.colours[node.label];
             group.append("circle")
                     .attr("class", "main_node")
                     .attr("id", "node_" + node.label + n)
@@ -250,7 +251,8 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
             // Also don't want to draw labels on the pie charts
             if (radius > graph.min_radius && (node.seq.chars.length < 2 || node.type !=  'marginal'))  {
 
-                group.append("text")
+                if (options.colours )
+                    group.append("text")
                     .attr("class", "node_text")
                     .attr("id", "node_text_" + node.label + n)
                     .attr('x', function () {
@@ -265,7 +267,9 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                     .attr("stroke-width", node_opt.stroke_width)
                     .style("font-family", node_opt.font_family)
                     .style("font-size", node_opt.text_size)
-                    .attr("stroke", node_opt.font_colour)
+                    .attr("stroke", function () {
+                        return getNodeTextColour(options.colours[(node.label)]);
+                    })
                     .text(node.label);
             }
         }
@@ -337,20 +341,30 @@ make_pie = function (node, graph, radius) {
             });
 
     // Don't want to append text if it is smaller than the min radius
+
     if (radius > graph.min_radius) {
         arc.append("text")
             .attr("class", "pie")
             .attr("transform", function (d) {
                 return "translate(" + label_pie.centroid(d) + ")";
             })
+            .style("fill", function(d) {
+                return getNodeTextColour(options.colours[(d.data.label)]);
+            })
             .attr("dy", "0.35em")
             .text(function (d) {
                 return d.data.label;
             });
-            }
+    }
 }
 
-
+var getNodeTextColour = function(colour) {
+    var hsl = hexToHsl(colour);
+    if (hsl[0] < 60 || hsl[2] > 50) {
+        return "black";
+    }
+    return "white";
+}
 
 
 
@@ -490,3 +504,43 @@ d3.selection.prototype.moveToBack = function () {
         }
     });
 };
+
+
+/**
+ * Convert hex to hsl
+ */
+var hexToHsl = function(hex){
+    var c;
+    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+        c= hex.substring(1).split('');
+        if(c.length== 3){
+            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+        c= '0x'+c.join('');
+        r = (c>>16)&255;
+        g = (c>>8)&255;
+        b = c&255;
+
+        r /= 255, g /= 255, b /= 255;
+        		var max = Math.max(r, g, b), min = Math.min(r, g, b);
+        		var h, s, l = (max + min) / 2;
+
+        		if (max == min) {
+        		h = s = 0;
+        		} else {
+        			var d = max - min;
+        			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        			switch (max){
+        				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        				case g: h = (b - r) / d + 2; break;
+        				case b: h = (r - g) / d + 4; break;
+        			}
+
+        			h /= 6;
+        		}
+
+        		return [(h*100+0.5)|0, ((s*100+0.5)|0), ((l*100+0.5)|0)];
+    }
+    return [(100+0.5)|0, ((100+0.5)|0), ((100+0.5)|0)];
+}

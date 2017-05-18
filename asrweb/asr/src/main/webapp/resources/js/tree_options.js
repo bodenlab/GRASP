@@ -1,33 +1,15 @@
 
 var selectedNode = "root";              // Keep track of which tree node is selected
-var inferType = $('#inferenceType').text();   // Keep track of which reconstruction is being displayed
 var tree; // global tree object for updating parameters, etc
-
-var refresh_elements = function() {
-    refresh_labels();
-    d3_phylotree_trigger_refresh (tree);
-};
-
-var refresh_labels = function() {
-    console.log(selectedNode);
-    var nodeLabels = document.querySelectorAll(".node-label");
-    for (var i = 0; i < nodeLabels.length; i++) {
-             nodeLabels[i].textContent = selectedNode;
-         }
-    var reconLabels = document.querySelectorAll(".infer-label");
-    for (var i = 0; i < reconLabels.length; i++) {
-            reconLabels[i].textContent = inferType;
-    }
-};
 
 /*
 ** Function to set the tree node colours; selected node is a different colour to other nodes
 */
 var node_colorizer = function(element, node) {
     if (node.name == selectedNode) {
-        element.select("circle").style('fill', "hsl(352,90%,70%)");
+        element.select("circle").style('fill', "hsl(211,75%,20%)");
     } else {
-        element.select("circle").style('fill', "hsl(352,0%,70%)");
+        element.select("circle").style('fill', "hsl(211,10%,80%)");
     }
 };
 
@@ -66,6 +48,7 @@ var setup_tree = function(tree_div, newick_string) {
 ** Perform marginal reconstruction of the selected tree node
 */
 var perform_marginal = function(node) {
+    $("#progress").removeClass("disable");
     selectedNode = node.name;
     inferType = "marginal";
     $.ajax({
@@ -75,6 +58,7 @@ var perform_marginal = function(node) {
         success: function(data) {
             refresh_elements();
             refresh_graphs(data);
+            $("#progress").addClass("disable");
         }
     });
 };
@@ -102,6 +86,5 @@ var displayJointGraph = function(node) {
 var refresh_graphs = function(graph_json) {
     d3.select(".svg-content").remove();
     var options = setup_options("poag", graph_json);
-    console.log(graph_json);
     options = create_poags(options);
 };

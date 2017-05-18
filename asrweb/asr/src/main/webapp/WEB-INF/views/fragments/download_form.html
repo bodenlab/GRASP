@@ -1,68 +1,69 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-    <div th:fragment="download_form" class="panel panel-default collapse" id="download-form">
-            <div class="panel-body">
-                <div class="col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-sm-10 col-md-10 col-lg-10">
-                <form>
+    <div th:fragment="download_form" class="panel panel-default collapse" aria-expanded="false" id="download-form">
+        <div class="panel-body">
+            <div class="col-md-offset-1 col-md-10">
+                <form action="#" name="download-form" method="get">
                     <div class="row">
-                        <div class="col-md-4 col-lg-4">
+                        <div class="col-md-4">
                             <fieldset>
                                 <legend>
                                     Phylogenetic Tree
                                 </legend>
-                                <div class="checkbox">
-                                    <input id="check-recon-tree" type="checkbox" checked="checked"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Phylogenetic tree annotated with ancestral labels.">
+                                    <input id="check-recon-tree" name="check-recon-tree" type="checkbox" checked="checked"></input>
                                     <label for="check-recon-tree">
-                                        Reconstructed tree
+                                        Reconstructed tree (.nwk)
                                     </label>
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-md-4 col-lg-4">
+                        <div class="col-md-4">
                             <fieldset>
                                 <legend>
                                     Ancestral Graphs
                                 </legend>
-                                <div class="checkbox">
-                                    <input id="check-pog-msa" type="checkbox"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
+                                    <input id="check-pog-msa" name="check-pog-msa" type="checkbox"></input>
                                     <label for="check-pog-msa">
                                         Sequence alignment (.dot)
                                     </label>
                                 </div>
-                                <div class="checkbox">
-                                    <input id="check-pog-marg" type="checkbox"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">
+                                    <input id="check-pog-marg" name="check-pog-marg" type="checkbox"></input>
                                     <label for="check-pog-marg">
                                         Marginal reconstruction of <span class="node-label">Root</span> (.dot)
                                     </label>
                                 </div>
-                                <div class="checkbox">
-                                    <input id="check-pog-joint" type="checkbox"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
+                                    <input id="check-pog-joint" class="styled" name="check-pog-joint" type="checkbox"></input>
                                     <label for="check-pog-joint">
                                         Joint reconstruction of all ancestors (*.dot)
                                     </label>
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-md-4 col-lg-4">
+                        <div class="col-md-4">
                             <fieldset>
                                 <legend>
                                     Sequence Information
                                 </legend>
-                                <div class="checkbox">
-                                    <input id="check-marg-dist" type="checkbox"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the inferred ancestral sequence graph.">
+                                    <input id="check-marg-dist" name="check-marg-dist" type="checkbox"></input>
                                     <label for="check-marg-dist">
-                                        Distribution of characters in <span class="node-label">Root</span> marginal
+                                        Distribution of characters in <span class="node-label">Root</span> marginal (.tsv)
                                     </label>
                                 </div>
-                                <div class="checkbox">
-                                    <input id="check-seq-marg" type="checkbox"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                    <input id="check-seq-marg" name="check-seq-marg" type="checkbox"></input>
                                     <label for="check-seq-marg">
                                         Consensus sequence of <span class="node-label">Root</span> (.fasta)
                                     </label>
+                                    <input type="hidden" name="marg-node" class="node-label" value="root" />
                                 </div>
-                                <div class="checkbox">
-                                    <input id="check-seq-joint" type="checkbox"></input>
+                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                    <input id="check-seq-joint" name="check-seq-joint" type="checkbox"></input>
                                     <label for="check-seq-joint">
                                         Consensus sequence of joint reconstruction (.fasta)
                                     </label>
@@ -70,12 +71,12 @@
                             </fieldset>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-offset-10 col-md-offset-10 col-lg-offset-10"><button type="submit" class="btn btn-primary col-sm-11 col-md-11 col-lg-11" name="submit">Download Results</button></div>
+                    <div class="row col-xs-12">
+                        <div class="col-xs-12"><button type="submit" name="download" class="btn btn-default col-xs-12" id="download-btn">Download</button></div>
                     </div>
                 </form>
             </div>
-            </div>
+        </div>
     </div>
 </body>
 </html>

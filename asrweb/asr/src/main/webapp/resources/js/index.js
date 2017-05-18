@@ -69,13 +69,21 @@ setup_data = function (graph) {
                 node.type = poag_type;
                 node.x = node_inferred.start;
                 node.end = node_inferred.end;
+                node.graph = {};
+                node.graph.bars = node.seq.chars;
                 node.inferred = true;
                 node.many_edges = false;
                 // Update to say that it hasn't been deleted since it appears in both
                 node.deleted_during_inference = false;
                 node_inferred.deleted_during_inference = false;
-            }
+                // Prints out if the sequences are equal
+                if (JSON.stringify(node.seq.chars) == JSON.stringify(node_inferred.seq.chars)) {
+                    console.log("sequences were equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
+                } else {
+                    //console.log("sequences were NOT equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
 
+                }
+            }
             node.y += current_y_position;
             node.lane += current_y_position;
             nodes.push(node);

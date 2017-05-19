@@ -359,16 +359,16 @@ make_pie = function (node, graph, radius) {
     }
 }
 
+/**
+ * Get the text colour for node labels based on hue and lightness (i.e. dark colours will have light text)
+ */
 var getNodeTextColour = function(colour) {
     var hsl = hexToHsl(colour);
     if (hsl[0] < 60 || hsl[2] > 50) {
-        return "black";
+        return "#383838";
     }
-    return "white";
+    return "#F7F7F7";
 }
-
-
-
 
 /**
  * Draws the lines between the nodes

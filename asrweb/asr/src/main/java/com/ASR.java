@@ -28,7 +28,7 @@ public class ASR {
     private String sessionDir;
 
     @NotEmpty(message="Please specify a label for your reconstruction")
-    private String label;
+    private String label = "Grasp";
 
     @File(type="aln", message="File must be an alignment (*.aln)")
     private MultipartFile alnFile;
@@ -117,7 +117,8 @@ public class ASR {
      * Run marginal reconstruction using uploaded files and specified options
      */
     private void runReconstructionMarginal() throws Exception {
-        System.out.println(nodeLabel);
+        if (nodeLabel != null && nodeLabel.equalsIgnoreCase("root"))
+            nodeLabel = null;
         if (nodeLabel != null)
             asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, true);
         else
@@ -208,6 +209,15 @@ public class ASR {
         if (asrMarginal != null)
             asrMarginal.saveDistrib(filepath);
     }
+/*
+    public void saveMSAImage(String filepath) throws IOException {
+        DrawGraph dg;
+        if (inferenceType.equalsIgnoreCase("joint"))
+            dg = new DrawGraph((new POAGJson(asrJoint.getMSAGraph())).toJSON());
+        else
+            dg = new DrawGraph((new POAGJson(asrMarginal.getMSAGraph())).toJSON());
+        dg.drawImage(filepath);
+    }*/
 
     /**
      * Save consensus sequence of marginal node
@@ -230,6 +240,12 @@ public class ASR {
             msa = asrJoint.getMSAGraph();
         else
             msa = asrMarginal.getMSAGraph();
+        System.out.println("MSA: ");
+        for (Integer nodId : msa.getNodeIDs()) {
+            System.out.println(nodId);
+            for (Character b : msa.getCharacterDistribution(nodId).keySet())
+                System.out.println(b + " : " + msa.getCharacterDistribution(nodId).get(b));
+        }
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -247,6 +263,12 @@ public class ASR {
             graph = asrJoint.getGraph(nodeLabel);
         else
             graph = asrMarginal.getGraph(nodeLabel);
+        System.out.println("Graph: ");
+        for (Integer nodId : graph.getNodeIDs()) {
+            System.out.println(nodId);
+            for (Character b : graph.getCharacterDistribution(nodId).keySet())
+                System.out.println(b + " : " + graph.getCharacterDistribution(nodId).get(b));
+        }
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }

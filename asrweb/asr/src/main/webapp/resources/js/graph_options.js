@@ -104,6 +104,7 @@ var setup_options = function (svg_id, json_str) {
         },
         /*********** Histogram options  ************************************/
         graph: {
+            draw_position_in_histogram: true, // Draws the position as a title above the node
             x_size: 150, // Multiplication factor for positions
             y_size: 100,
             y_start: 400,

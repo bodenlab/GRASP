@@ -31,7 +31,7 @@ draw_positions = function (graph, nodes, x_min, x_max) {
                 group.append("text")
                     .attr("class", "position_text")
                     .attr('x', function () {
-                        var tmp = x_scale(n) + 2;
+                        var tmp = x_scale(n);
                         return tmp;
                     })
                     .attr('y', function () {
@@ -257,7 +257,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                     .attr("class", "node_text")
                     .attr("id", "node_text_" + node.label + n)
                     .attr('x', function () {
-                        var tmp = x_scale(node.start) + 2;
+                        var tmp = x_scale(node.start);
                         return tmp;
                     })
                     .attr('y', function () {
@@ -343,7 +343,7 @@ make_pie = function (node, graph, radius) {
 
     // Don't want to append text if it is smaller than the min radius
 
-    if (radius > graph.min_radius) {
+    if (radius > graph.min_radius ) {
         arc.append("text")
             .attr("class", "pie")
             .attr("transform", function (d) {

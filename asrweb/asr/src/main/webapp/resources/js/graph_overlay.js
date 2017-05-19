@@ -59,6 +59,19 @@ function create_rect(node, options, graph_group) {
             });
 }
 
+/**
+ * Adds a title to the chart
+ */
+function create_node_title(node, options, graph_group) {
+    var title = graph_group.append("text")
+             .attr("y", -10)
+             .attr("x", options.width /2 - 10)
+             .style("font-size", "15px")
+             .style("font-weight", "700")
+             .style("text-anchor", "center")
+             .text(node.start);
+}
+
 function create_axis(node, options, graph_group) {
     var axisgroup = graph_group.append("g")
             .attr("class", "y axis")
@@ -75,7 +88,6 @@ function create_axis(node, options, graph_group) {
              .attr("dy", ".71em")
              .text(node.name);
     }
-
 }
 
 function create_bars(node, options, graph_group) {
@@ -182,14 +194,25 @@ create_new_graph = function (node, options, cx, cy) {
                     d3.select(this).attr("opacity", 0);
                 }
             });
+//            on("click", function () {
+//               var my_text = d3.select("#" + "id of the text you want to add");
+//                if (my_text.attr("opacity") == "0") {
+//                    my_text.attr("opacity", 1);
+//                } else {
+//                    my_text.attr("opacity", 0);
+//                }
+//            });
     setup_graph_overlay(options);
     create_outer_circle(node, options, graph_group);
     create_rect(node, options, graph_group);
     // Conditionally draw the axis
     if (options.draw_axis == true) {
-
         create_axis(node, options, graph_group);
     }
+    if (options.draw_position_in_histogram == true) {
+        create_node_title(node, options, graph_group);
+    }
+
     create_bars(node, options, graph_group);
     return graph_group;
 }

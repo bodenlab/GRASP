@@ -9,7 +9,7 @@
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/asr}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom">
                     <div class="input-group col-sm-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
-                        <input type="text" class="form-control col-sm-6 col-sm-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
+                        <input type="text" class="form-control col-xs-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
                         <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
                             <button type="submit" name="test" class="btn btn-default">Run Test Data</button>
                         </span>
@@ -21,15 +21,15 @@
                         <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="200" data-handle-width="100"  data-off-text="No" data-on-text="Yes" />
                     </div>
                 </div>
-                <div class="row col-xs-12 col-sm-offset-2 col-sm-7 pad-top-bottom">
+                <div class="row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom">
                     <div class="form-group row col-xs-12">
-                        <div class="input-group" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
-                            <span class="input-group-addon glyphicon glyphicon-align-left" aria-hidden="true"></span>
-                            <label id="lbl-fileseq" class="btn btn-default col-xs-11" disabled="true" for="fileseq">
+                        <div class="input-group col-xs-12" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
+                            <label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">
+                                <span class="glyphicon glyphicon-align-left col-xs-1"></span>
                                 Select sequence library file...
-                                <input type="file" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
+                                <input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
                             </label>&nbsp;
-                            <span class="label label-default upload-file-info col-xs-11" id="upload-seq-info"></span>
+                            <span class="label label-default upload-file-info col-xs-12" id="upload-seq-info"></span>
                         </div>
                         <script type="text/javascript">
                             $("[id='check-align']").bootstrapSwitch();
@@ -54,26 +54,26 @@
                         <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
                     </div>
                     <div class="form-group row col-xs-12">
-                        <div class="input-group" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
-                            <span class="input-group-addon glyphicon glyphicon-align-justify" aria-hidden="true"></span>
-                            <label id="lbl-filealn" class="btn btn-default col-xs-11" for="filealn">
+                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
+                            <label id="lbl-filealn" class="btn btn-default col-xs-12" for="filealn">
+                                <span class="glyphicon glyphicon-align-justify col-xs-1" aria-hidden="true"></span>
                                 Select sequence alignment file...
-                                <input type="file" name="alnFile" id="filealn" style="display:none;" onchange="$('#upload-aln-info').html(document.forms['asrForm']['alnFile'].files[0].name);" hidden="hidden" th:field="*{alnFile}"></input>
+                                <input type="file" class="col-xs-11" name="alnFile" id="filealn" style="display:none;" onchange="$('#upload-aln-info').html(document.forms['asrForm']['alnFile'].files[0].name);" hidden="hidden" th:field="*{alnFile}"></input>
                             </label>&nbsp;
-                            <span class="label label-default upload-file-info" id="upload-aln-info"></span>
+                            <span class="label label-default upload-file-info col-xs-12" id="upload-aln-info"></span>
                         </div>
-                        <div class="alert alert-danger col-xs-11" role="alert" th:if="${#fields.hasErrors('alnFile')}"><label class="control-label" for="label" th:errors="*{alnFile}"></label></div>
+                        <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('alnFile')}"><label class="control-label" for="label" th:errors="*{alnFile}"></label></div>
                     </div>
                     <div class="form-group row col-xs-12">
-                        <div class="input-group" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
-                            <span class="input-group-addon glyphicon glyphicon-tree-conifer" aria-hidden="true"></span>
-                            <label class="btn btn-default col-xs-11" for="filetree">
+                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
+                            <label class="btn btn-default col-xs-12" for="filetree">
+                                <span class="glyphicon glyphicon-tree-conifer col-xs-1" aria-hidden="true"></span>
                                 Select phylogenetic tree file...
-                                <input type="file" name="filetree" id="filetree" style="display:none;" onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);" hidden="hidden" th:field="*{treeFile}"></input>
+                                <input type="file" class="col-xs-11" name="filetree" id="filetree" style="display:none;" onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);" hidden="hidden" th:field="*{treeFile}"></input>
                             </label>&nbsp;
-                            <span class="label label-default upload-file-info" id="upload-tree-info"></span>
+                            <span class="label label-default upload-file-info col-xs-12" id="upload-tree-info"></span>
                         </div>
-                        <div class="alert alert-danger col-xs-11" role="alert" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
+                        <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
                     </div>
                 </div>
                 <div class="form-group row col-sm-offset-2 col-sm-7">

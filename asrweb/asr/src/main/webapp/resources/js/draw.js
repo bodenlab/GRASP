@@ -116,7 +116,6 @@ draw_mini_nodes = function (graph) {
                 .attr('r', 2 * radius)
                 .attr("opacity", options.diff_opacity)
                 .attr("fill", options.interesting_many_edges_colour);
-
         }
     }
     graph.mini_group = group;

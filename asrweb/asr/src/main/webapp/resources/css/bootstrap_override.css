@@ -60,6 +60,10 @@
     visibility: hidden;
 }
 
+#num-mutants.dropdown-menu {
+    min-width: 65px !important;
+}
+
 legend {
     font-size: 14px;
     color: #b3b3b3;
@@ -70,6 +74,7 @@ legend {
 rect.bar {
     outline: #EFF3FB solid 1px;
 }
+
 
 fieldset {
     padding-bottom: 1em;

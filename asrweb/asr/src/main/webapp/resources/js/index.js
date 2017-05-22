@@ -54,7 +54,11 @@ setup_data = function (graph) {
                     max_seq_len = node.seq.chars.length;
                 }
                 node.graph = {};
-                node.graph.bars = node.seq.chars;
+                if (mutants > 0) {
+                    node.graph.bars = node.mutants.chars;
+                } else {
+                    node.graph.bars = node.seq.chars;
+                }
                 // Assume that every node has been deleted during the ineference process
                 node_dict[node.id] = node;
             } else {
@@ -70,7 +74,11 @@ setup_data = function (graph) {
                 node.x = node_inferred.start;
                 node.end = node_inferred.end;
                 node.graph = {};
-                node.graph.bars = node.seq.chars;
+                if (mutants > 0) {
+                    node.graph.bars = node.mutants.chars;
+                } else {
+                    node.graph.bars = node.seq.chars;
+                }
                 node.inferred = true;
                 node.many_edges = false;
                 // Update to say that it hasn't been deleted since it appears in both
@@ -377,6 +385,7 @@ setup_brush = function (graph) {
     return graph;
 
 };
+
 create_poags = function (options) {
     // Stores everything for the graph
 
@@ -410,7 +419,6 @@ function display() {
 
     var options = graph.options;
 
-
     var  minExtent = (brush.extent()[0])
             , maxExtent = (brush.extent()[1])
             , vis_nodes = nodes_curr.filter(function (d) {
@@ -420,7 +428,8 @@ function display() {
     mini.select('.brush').call(brush.extent([minExtent, maxExtent]));
 
     x_scale.domain([minExtent, maxExtent]);
-    // Delete all the old egdes
+
+    // Delete all the old edges
     graph.node_group.selectAll("path.edge").remove();
     graph.node_group.selectAll("path.pie").remove();
 
@@ -442,6 +451,7 @@ function display() {
 
 }
 
+
 function moveBrush() {
     var brush = graph.brush;
     var origin = d3.mouse(this)
@@ -452,7 +462,6 @@ function moveBrush() {
 
     brush.extent([start, end]);
     display();
-
 }
 
 // generates a single path for each item class in the mini display
@@ -476,3 +485,11 @@ function getPaths(graph) {
 
     return result;
 }
+
+/*
+** Refresh the graph to be the latest reconstructed
+*/
+var refresh_graphs = function(options) {
+    d3.select(".svg-content").remove();
+    options = create_poags(options);
+};

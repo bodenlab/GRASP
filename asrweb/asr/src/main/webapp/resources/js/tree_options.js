@@ -57,7 +57,8 @@ var perform_marginal = function(node) {
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
             refresh_elements();
-            refresh_graphs(data);
+            json_str = data;
+            refresh_graphs(setup_options("poag",data));
             $("#progress").addClass("disable");
         }
     });
@@ -78,13 +79,4 @@ var displayJointGraph = function(node) {
             refresh_graphs(data);
         }
     });
-};
-
-/*
-** Refresh the graph to be the latest reconstructed
-*/
-var refresh_graphs = function(graph_json) {
-    d3.select(".svg-content").remove();
-    var options = setup_options("poag", graph_json);
-    options = create_poags(options);
 };

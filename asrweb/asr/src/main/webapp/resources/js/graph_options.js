@@ -20,9 +20,7 @@ var tip = d3.tip()
         });
 
 var setup_options = function (svg_id, json_str) {
-    console.log(json_str);
     var data = JSON.parse(json_str);
-    console.log(data);
     //The main options for the graph
     var options = {
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting

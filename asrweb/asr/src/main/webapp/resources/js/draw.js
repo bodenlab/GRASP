@@ -43,7 +43,7 @@ draw_positions = function (graph, nodes, x_min, x_max) {
                     .style("font-family", node_opt.font_family)
                     .style("font-size", node_opt.text_size)
                     .attr("stroke", function() {
-                        return "grey";//getNodeTextColour(options.colours[(node.label)]);
+                        return "grey";
                     })
                     .text(n);
         }
@@ -326,10 +326,17 @@ make_pie = function (node, graph, radius) {
             .outerRadius(radius - options.pie.label_position)
             .innerRadius(radius - options.pie.label_position);
 
-    var arc = pie_group.selectAll(".arc")
+    if (mutants > 0) {
+        var arc = pie_group.selectAll(".arc")
+            .data(pie(node.mutants.chars))
+            .enter().append("g")
+            .attr("class", "arc");
+    } else {
+        var arc = pie_group.selectAll(".arc")
             .data(pie(node.seq.chars))
             .enter().append("g")
             .attr("class", "arc");
+    }
 
     arc.append("path")
             .attr("class", "pie")

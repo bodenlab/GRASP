@@ -79,41 +79,42 @@
                             $('input[id="check-mutant"]').on('switchChange.bootstrapSwitch', function(event, state) {
                                 if (state === true) {
                                     $('#text-mutant').removeClass('disabled');
+                                    view_mutant_library($(this).bootstrapSwitch('onText'));
                                 } else {
                                     $('#text-mutant').addClass('disabled');
+                                    view_marginal();
                                 }
                             });
 
                             $('#num-mutants li a').on('click', function() {
                                 var num = $(this).text();
                                 $('input[id="check-mutant"]').bootstrapSwitch('onText', num);
-
-                                // TODO: generate mutant library with num mutants
-
+                                view_mutant_library(num);
                             });
+
                             /*]]>*/
                         </script>
                     </div>
                     <div id="poag" class="col-sm-12" data-toggle="popover" data-placement="left" data-content="The sequence alignment graph (top), the inferred ancestor graph (bottom) and a positional window. Note that the window can be dragged to change the section of the graphs in view and the size of the positional window can be altered. Note: In the position window, indels are represented by a dot and regions of ambiguity based on multiple extant paths are shown as shaded regions.">
                     </div>
                     <script type="text/javascript" th:inline="javascript">
-                                /*<![CDATA[*/
-                                    var update_scheme = function(scheme) {
-                                        var glyphs = document.querySelectorAll(".glyph-selected");
-                                        for (var i = 0; i < glyphs.length; i++) {
-                                            if (!glyphs[i].classList.contains('disable')) {
-                                                glyphs[i].classList.add('disable');
-                                            }
-                                        }
-                                        document.querySelector("#" + scheme + "-selected").classList.remove('disable');
-                                        document.getElementById("selected-scheme").textContent = document.getElementById(scheme).textContent;
-                                        update_colour(scheme);
-                                    }
+                            /*<![CDATA[*/
+                            var update_scheme = function(scheme) {
+                                 var glyphs = document.querySelectorAll(".glyph-selected");
+                                  for (var i = 0; i < glyphs.length; i++) {
+                                      if (!glyphs[i].classList.contains('disable')) {
+                                          glyphs[i].classList.add('disable');
+                                      }
+                                  }
+                                  document.querySelector("#" + scheme + "-selected").classList.remove('disable');
+                                  document.getElementById("selected-scheme").textContent = document.getElementById(scheme).textContent;
+                                  update_colour(scheme);
+                            }
 
-                                    var json_str = /*[[${graph}]]*/;
-                                    var options = setup_options("poag", json_str);
-                                    options = create_poags(options);
-                                /*]]>*/
+                            json_str = /*[[${graph}]]*/;
+                            var options = setup_options("poag", json_str);
+                            options = create_poags(options);
+                            /*]]>*/
                     </script>
                 </div>
             </div>

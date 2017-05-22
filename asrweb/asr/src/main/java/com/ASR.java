@@ -240,12 +240,6 @@ public class ASR {
             msa = asrJoint.getMSAGraph();
         else
             msa = asrMarginal.getMSAGraph();
-        System.out.println("MSA: ");
-        for (Integer nodId : msa.getNodeIDs()) {
-            System.out.println(nodId);
-            for (Character b : msa.getCharacterDistribution(nodId).keySet())
-                System.out.println(b + " : " + msa.getCharacterDistribution(nodId).get(b));
-        }
         POAGJson json = new POAGJson(msa);
         return json.toJSON();
     }
@@ -263,12 +257,6 @@ public class ASR {
             graph = asrJoint.getGraph(nodeLabel);
         else
             graph = asrMarginal.getGraph(nodeLabel);
-        System.out.println("Graph: ");
-        for (Integer nodId : graph.getNodeIDs()) {
-            System.out.println(nodId);
-            for (Character b : graph.getCharacterDistribution(nodId).keySet())
-                System.out.println(b + " : " + graph.getCharacterDistribution(nodId).get(b));
-        }
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }

@@ -20,7 +20,9 @@ var tip = d3.tip()
         });
 
 var setup_options = function (svg_id, json_str) {
+    console.log(json_str);
     var data = JSON.parse(json_str);
+    console.log(data);
     //The main options for the graph
     var options = {
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
@@ -98,7 +100,7 @@ var setup_options = function (svg_id, json_str) {
             stroke: "white",
             text_size: "12px",
             font_family: "Gill Sans, sans-serif",
-            max_seq_len: 6 // Number of sequences in a pie chart where we don't draw the divding lines between (stroke
+            max_seq_len: 6 // Number of sequences in a pie chart where we don't draw the dividing lines between (stroke
                            // width gets set to 0;
         },
         /*********** Histogram options  ************************************/
@@ -116,7 +118,7 @@ var setup_options = function (svg_id, json_str) {
             graph_outer_circle_radius: 85,
             graphs: new Array(),
             size: 80,
-            colours: selected_colour, // default to random colour scheme
+            colours: selected_colour,
             offset_graph_width: -35,
             offset_graph_height: -30,
             width: 80,

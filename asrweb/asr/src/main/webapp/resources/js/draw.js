@@ -417,7 +417,7 @@ draw_node_edges = function (graph, x_min, x_max) {
             var y_text_pos = y_mid;
             var y_jump_buffer = same_level_buffer * Math.abs(edge.x1 - edge.x2);
             // Means that the nodes are on the same level
-            if (y_end == y_start) {
+            if (y_end == y_start || y_scale(graph.nodes[edge.from + 1].lane) > y_start) {
                 if (Math.abs(edge.x1 - edge.x2) == 1) {
                     line_points.push(combine_points(x_mid, y_start - y_len));
                 } else {

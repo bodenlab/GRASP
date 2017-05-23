@@ -58,7 +58,15 @@ var perform_marginal = function(node) {
         success: function(data) {
             refresh_elements();
             json_str = data;
-            refresh_graphs(setup_options("poag",data));
+            // if mutant library is selected, display mutant library with the selected number of mutants, else just
+            // display the marginal distribution in the nodes
+            if ($('input[id="check-mutant"]').bootstrapSwitch('state') === true) {
+                $('#text-mutant').removeClass('disabled');
+                view_mutant_library($('input[id="check-mutant"]').bootstrapSwitch('onText'));
+            } else {
+                $('#text-mutant').addClass('disabled');
+                view_marginal();
+            }
             $("#progress").addClass("disable");
         }
     });

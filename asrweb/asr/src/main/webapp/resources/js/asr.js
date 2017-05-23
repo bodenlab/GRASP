@@ -42,7 +42,6 @@ var view_mutant_library = function(num) {
     // Get graph options to alter mutant library
     var options = setup_options("poag", json_str);
 
-    // TODO: generate mutant library with num mutants
     options.data.bottom = generate_mutants(options.data.bottom);
 
     // refresh options

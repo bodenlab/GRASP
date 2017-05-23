@@ -84,7 +84,8 @@ var displayJointGraph = function(node) {
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
             refresh_elements();
-            refresh_graphs(data);
+            json_str = data;
+            refresh_graphs(setup_options("poag", json_str));
         }
     });
 };

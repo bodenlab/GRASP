@@ -3,6 +3,11 @@
  */
 var graph = {};
 
+// keep track of window view
+var prevbrushStart = -1;
+var prevbrushEnd = -1;
+var retain_previous_position = false;
+
 setup_data = function (graph) {
     var lanes = [];
     var nodes = [];
@@ -404,7 +409,6 @@ create_poags = function (options) {
     graph = draw_mini_line(graph);//draw_mini_nodes(graph);
     graph = setup_brush(graph);
     display();
-
 };
 
 
@@ -419,15 +423,21 @@ function display() {
 
     var options = graph.options;
 
-    var  minExtent = (brush.extent()[0])
-            , maxExtent = (brush.extent()[1])
-            , vis_nodes = nodes_curr.filter(function (d) {
-                return d.start <= maxExtent && d.end >= minExtent;
-            });
+    var minExtent = (brush.extent()[0]);
+    var maxExtent = (brush.extent()[1]);
+    if (prevbrushStart == -1 || retain_previous_position == false) {
+         prevbrushStart = minExtent;
+         prevbrushEnd = maxExtent;
+    }
+    retain_previous_position = false;
 
-    mini.select('.brush').call(brush.extent([minExtent, maxExtent]));
+    var vis_nodes = nodes_curr.filter(function (d) {
+            return d.start <= prevbrushEnd && d.end >= prevbrushStart;
+        });
 
-    x_scale.domain([minExtent, maxExtent]);
+    mini.select('.brush').call(brush.extent([prevbrushStart, prevbrushEnd]));
+
+    x_scale.domain([prevbrushStart, prevbrushEnd]);
 
     // Delete all the old edges
     graph.node_group.selectAll("path.edge").remove();
@@ -445,9 +455,9 @@ function display() {
     graph.node_group.selectAll("text.pie").remove();
     graph.node_group.selectAll("text.position_text").remove();
 
-    draw_nodes(graph, vis_nodes, minExtent, maxExtent);
-    draw_node_edges(graph, minExtent, maxExtent);
-    draw_positions(graph, vis_nodes, minExtent, maxExtent);
+    draw_nodes(graph, vis_nodes, prevbrushStart, prevbrushEnd);
+    draw_node_edges(graph, prevbrushStart, prevbrushEnd);
+    draw_positions(graph, vis_nodes, prevbrushStart, prevbrushEnd);
 
 }
 
@@ -459,10 +469,13 @@ function moveBrush() {
             , halfExtent = (brush.extent()[1] - brush.extent()[0]) / 2
             , start = point - halfExtent
             , end = point + halfExtent;
-
-    brush.extent([start, end]);
+    graph.brush.extent([start, end]);
+    prevbrushStart = start;
+    prevbrushEnd = end;
+    retain_previous_position = true;
     display();
 }
+
 
 // generates a single path for each item class in the mini display
 // ugly - but draws mini 2x faster than append lines or line generator
@@ -491,5 +504,6 @@ function getPaths(graph) {
 */
 var refresh_graphs = function(options) {
     d3.select(".svg-content").remove();
+    retain_previous_position = true;
     options = create_poags(options);
 };

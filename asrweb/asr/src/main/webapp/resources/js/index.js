@@ -210,29 +210,27 @@ setup_svg = function (graph) {
     var options = graph.options;
 
     var max_depth = graph.max_depth;
-
     // Get the width of the DIV that we are appending the svg to so we can scale the height and width values
     var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
     var actual_svg_height =  document.getElementById(options.raw_svg_id).offsetHeight;
     // We don't want to get the height as we only want to develop the scale based on one element
-    var scale_width = actual_svg_width/width; // Want it to be 10% smaller than the space to add even padding
-    var scale_height = actual_svg_height/height;
-    var width_scaled = scale_width * (width + margin.right + margin.left);
-    var height_scaled = scale_height * (height + margin.top + margin.bottom);
+    var scale_width = 0.9;//actual_svg_width/width; // Want it to be 10% smaller than the space to add even padding
+    var scale_height = 0.9;//actual_svg_height/height;
+    //var width_scaled = scale_width * (width + margin.right + margin.left);
+    //var height_scaled = scale_height * (height + margin.top + margin.bottom);
 
     var width = width;
     var padding = scale_width *(options.svg_padding);
 
     var general_svg = d3.select(options.target)
             .append("svg")
-            .attr("preserveAspectRatio", "xMinYMin meet")
+            //.attr("preserveAspectRatio", "xMinYMin meet")
+            //.attr("preserveAspectRatio", "xMaxYMax meet")
             .attr("viewBox", "0 0 " + actual_svg_width + " " + actual_svg_height)
             .classed("svg-content", true);
 
-
-
     var chart = general_svg.append('g')
-                    .attr("transform",  "translate(" + 0 + "," + options.svg_padding + ")" + " scale(" + scale_width + ")");
+                    .attr("transform",  "translate(" + 0 + ",-" + options.svg_padding + ")" + " scale(1)");// + scale_width + ")");
 
     chart.append('defs').append('clipPath')
             .attr('id', 'clip')
@@ -413,7 +411,6 @@ create_poags = function (options) {
 
 
 function display() {
-
     var brush = graph.brush;
     var nodes_curr = graph.nodes;
 

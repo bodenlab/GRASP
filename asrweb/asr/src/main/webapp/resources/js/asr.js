@@ -214,7 +214,7 @@ var generate_mutants = function(graph) {
  * re-draw popups to re-position on window size change
  */
 $(window).resize(function () {
-    $(this).delay(10).queue(function() {
+    $(this).delay(100).queue(function() {
         if ($("#help-btn").attr("aria-pressed") === 'true') {
             $('[data-toggle="popover"]').popover('show');
             if ($("#download-form").attr("aria-expanded") !== 'true') {
@@ -225,5 +225,10 @@ $(window).resize(function () {
         }
         $(this).dequeue();
     });
+    clearTimeout(window.resizedFinished);
+    window.resizedFinished = setTimeout(function () {
+        // redraw graphs for sizing
+        refresh_graphs(setup_options("poag",json_str));
+    }, 100);
 });
 

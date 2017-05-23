@@ -134,11 +134,11 @@ var setup_options = function (svg_id, json_str) {
         legend_padding: 0,
         legend_rect_size: 0,
         height: 500,
-        width: 1200,
+        width: document.getElementById("poag").offsetWidth,//600,
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
         colours: selected_colour,
-        svg_padding: 20, // The padding of the svg within the div given
+        svg_padding: 40, // The padding of the svg within the div given
         padding_between_views: 100,
         /*********** End of sizing options **********************************/
         background_colour: "white",

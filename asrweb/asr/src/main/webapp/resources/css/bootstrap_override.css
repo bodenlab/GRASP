@@ -24,7 +24,7 @@
 
 #poag {
     height: 570px;
-    overflow: hidden;
+    overflow: auto;
 }
 
 #heading {

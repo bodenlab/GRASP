@@ -66,34 +66,148 @@ var view_marginal = function() {
     refresh_graphs(setup_options("poag", json_str));
 }
 
+/* Define the alphabet so we can convert to distributions to numeric arrays */
+var alphabet = ['I','V','L','F','C','M','A','G','S','T','W','Y','P','H','E','Q','D','N','K','R'];
+
+/*
+ Return the indices of the top/max N elements
+ */
+function getTopN(arr, N) {
+    var idx = [];
+    var visited = []
+    for (var i = 0; i < arr.length; i++) {
+        visited[i] = -1;
+    }
+    for (var j = 0; j < N; j ++) {
+        var best = -1;
+        for (var i = 0; i < arr.length; i++) {
+            if (visited[i] != -1) // if already included, ignore it
+                continue;
+            if (best == -1) { // if this is the first we look at, just take it
+                best = i;
+            } else if (arr[i] > arr[best]) {
+                best = i;
+            }
+        }
+        if (best != -1) {
+            idx[j] = best;
+            visited[best] = j;
+        }
+    }
+    return idx;
+}
+
+/*
+ Determine the Q for a given P and n. "
+ */
+function getQ(P, N) {
+    var Q = [];
+    for (var i = 0; i < P.length; i ++)
+        Q[i] = 0;
+    // Sort the distrib, pick n top, and set to 1/N in Q
+    var idx = getTopN(P, N);
+    for (var i in idx)
+        Q[idx[i]] = 1.0 / N;
+    return Q
+}
+
+/*
+ Calculate the KL divergence between the given distributions P and Q. "
+ */
+function KL_div(P, Q) {
+    var pseudo = 2E-16;
+    var sum = 0.0
+    for (var i = 0; i < P.length; i ++) {
+        if (P[i] != 0)
+            sum += P[i] * Math.log2((P[i]) / (Q[i] + pseudo))
+    }
+    return sum;
+}
+
+/**
+ * Convert the label/value data structure to a numeric, and normalised distribution
+ * @param arrLabelValue
+ * @returns {Array}
+ */
+function makeNumDistrib(arrLabelValue) {
+    var ret = [];
+    for (var i = 0; i < alphabet.length; i ++)
+        ret[i] = 0;
+    var sum = 0;
+    for (var d in arrLabelValue)
+        sum += arrLabelValue[d].value;
+    for (var d in arrLabelValue) {
+        for (var i = 0; i < alphabet.length; i++) {
+            if (alphabet[i] == arrLabelValue[d].label) {
+                ret[i] = arrLabelValue[d].value / sum;
+                break;
+            }
+        }
+    }
+    return ret;
+}
+
 /*
  * Generate mutant library for graph
  */
 var generate_mutants = function(graph) {
+
+    var nMutants = mutants;
     var nodes = graph.nodes;
+    var Ns = [];
+    var myPs = [];
+    var KLcur = [];
+    var KLnxt = [];
+    var KLgains = [];
 
-    // temp functionality: one mutant: keep base with max value
-    graph.nodes = [];
-    for (var n in nodes) {
-        var node = nodes[n];
+    // prepare arrays to hold info about the distributions in individual nodes
+    for (var i = 0; i < nodes.length; i ++) {
+        var node = nodes[i];
+        Ns[i] = 1;
+        myPs[i] = makeNumDistrib(node.mutants.chars);
+        var myQ1 = getQ(myPs[i], Ns[i]);
+        var myQ2 = getQ(myPs[i], Ns[i] + 1);
+        KLcur[i] = KL_div(myPs[i], myQ1);
+        KLnxt[i] = KL_div(myPs[i], myQ2);
+        KLgains[i] = Math.max(KLcur[i] - KLnxt[i], 0);
+    }
 
-        //**** find maximum character in distribution (mutants == 1) ***
-        var max_mutant = node.mutants.chars[0];
-        for (var m in node.mutants.chars) {
-            var cur_mutant = node.mutants.chars[m];
-            if (cur_mutant.value > max_mutant.value) {
-                max_mutant = cur_mutant;
-            }
+    // for each mutant...
+    for (var mutcnt = 1; mutcnt < nMutants; mutcnt ++) {
+        var best = -1;
+        for (var i = 0; i < nodes.length; i ++) {
+            if (KLgains[i] == 0)
+                continue;
+            if (best == -1)
+                best = i;
+            else if (KLgains[best] < KLgains[i])
+                best = i;
         }
+        if (best == -1)
+            break;
+        Ns[best] += 1;
+        KLcur[best] = KLnxt[best];
+        var myQ2 = getQ(myPs[best], Ns[best] + 1);
+        KLnxt[best] = KL_div(myPs[best], myQ2);
+        KLgains[best] = Math.max(KLcur[best] - KLnxt[best], 0);
+    }
 
+    graph.nodes = [];
+    // now back to the nodes...
+    for (var i = 0; i < nodes.length; i ++) {
+        var node = nodes[i];
         // update mutant distribution array
         node.mutants.chars = [];
-        node.mutants.chars.push(max_mutant);
-
+        var idx = getTopN(myPs[i], Ns[i]);
+        for (var j in idx) {
+            var myMutantLabel = alphabet[idx[j]];
+            var myMutantValue = 1.0 / Ns[i];
+            var myMutant = {value:myMutantValue,label:myMutantLabel};
+            node.mutants.chars.push(myMutant);
+        }
         // add node to node list
         graph.nodes.push(node);
     }
-
     return graph;
 }
 

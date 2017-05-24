@@ -12,8 +12,8 @@
             </div>
         </div>
         <div id="results" class="container-fluid" >
-            <div class="row col-sm-10  col-sm-offset-1">
-                <div id="reconstructed-tree" class="well col-sm-3" data-toggle="popover" data-placement="top" data-content="Annotated phylogenetic tree. Click on the internal nodes for ancestral reconstruction options: perform marginal inference or view joint reconstruction results.">
+            <div class="row col-xs-12">
+                <div id="reconstructed-tree" class="well col-sm-4" data-toggle="popover" data-placement="top" data-content="Annotated phylogenetic tree. Click on the internal nodes for ancestral reconstruction options: perform marginal inference or view joint reconstruction results.">
                     <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
@@ -23,7 +23,7 @@
                             </script>
                     </svg>
                 </div>
-                <div class="col-sm-9">
+                <div class="col-sm-8">
                     <div class="input-group">
                         <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
                             <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -118,7 +118,7 @@
                     </script>
                 </div>
             </div>
-            <div class="row col-xs-10 col-xs-offset-1">
+            <div class="row col-xs-12">
                 <button id="download-toggle" class="btn btn-default col-xs-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
                 <div th:replace="fragments/download_form :: download_form"></div>
                 <script type="text/javascript">

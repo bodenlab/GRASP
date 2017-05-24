@@ -51,6 +51,7 @@ setup_data = function (graph) {
                 node.type = poag_type;
                 node.deleted_during_inference = true;
                 node.inferred = false;
+                node.mutant = false;
                 node.msa = true;
                 node.many_edges = false;
                 node.start = node.x;
@@ -74,6 +75,10 @@ setup_data = function (graph) {
                 // Update the x coords to match that of the MSA node (to account for deletions)
                 node.start = node_inferred.start;
                 node.msa = false;
+                node.mutant = false;
+                if (node.inferred == true && node.mutants.chars.length > 0) {
+                    node.mutant = true;
+                }
                 // Add the type to the node so we know whether or not to draw the distributions
                 node.type = poag_type;
                 node.x = node_inferred.start;
@@ -91,10 +96,9 @@ setup_data = function (graph) {
                 node_inferred.deleted_during_inference = false;
                 // Prints out if the sequences are equal
                 if (JSON.stringify(node.seq.chars) == JSON.stringify(node_inferred.seq.chars)) {
-                    console.log("sequences were equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
+                   // console.log("sequences were equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
                 } else {
                     //console.log("sequences were NOT equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
-
                 }
             }
             node.y += current_y_position;
@@ -379,8 +383,8 @@ setup_brush = function (graph) {
             .attr('class', 'x brush')
             .call(brush)
             .selectAll('rect')
-            .attr('y',  y_scale(0))
-            .attr('height', miniHeight +  options.lane_height);
+            .attr('y',  y_scale(0) - 10)
+            .attr('height', miniHeight + options.lane_height + 20);
 
     mini.selectAll('rect.background').remove();
 

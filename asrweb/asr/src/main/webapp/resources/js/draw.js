@@ -117,6 +117,24 @@ draw_mini_nodes = function (graph) {
                 .attr("opacity", options.diff_opacity)
                 .attr("fill", options.interesting_many_edges_colour);
         }
+        /*if (node.mutant == true) {
+              group.append("rect")
+                      .attr("class", "mini_rect")
+                      .attr('x', function () {
+                                      var tmp = x_scale(node.start) - (2 * radius);
+                                      return tmp + x_padding;
+                      })
+                      .attr('y', function () {
+                                      var tmp = y_scale(0); // Have it at the top
+                                      return tmp ;
+                      })
+                      .attr('width', 4 * radius)
+                      .attr('height', y_scale(graph.max_depth * 2))
+                      .attr("stroke-width", node_opt.stroke_width)
+                      .attr("stroke", node_opt.stroke)
+                      .attr("opacity", options.diff_opacity)
+                      .attr("fill", "green");
+        }*/
     }
     graph.mini_group = group;
     return graph;
@@ -182,6 +200,16 @@ draw_mini_line = function (graph) {
                 .attr("fill", options.interesting_many_edges_colour);
 
             circle.moveToBack();
+        }
+        // indicate mutant locations
+        if (mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
+            var tri = group.append("path")
+                .attr('transform', 'translate(' + (line_x - x_padding) + ',' + (y_scale(0) - 10) + ')')
+                .attr("d", d3.svg.symbol().type("triangle-down"))
+                .attr("opacity", 0.5)
+                .attr("fill", "black");
+
+            tri.moveToBack();
         }
     }
        var path = group.append("path")
@@ -333,11 +361,10 @@ make_pie = function (node, graph, radius) {
             .attr("class", "arc");
     } else {
         var arc = pie_group.selectAll(".arc")
-            .data(pie(node.seq.chars))
-            .enter().append("g")
-            .attr("class", "arc");
+                .data(pie(node.seq.chars))
+                .enter().append("g")
+                .attr("class", "arc");
     }
-
     arc.append("path")
             .attr("class", "pie")
             .attr("d", path_pie)

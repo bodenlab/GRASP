@@ -1,14 +1,19 @@
 var inferType; // Keep track of which reconstruction is being displayed
 var mutants = 0; // flag for generating mutant distribution
+var drawMutants = false;    // flag for drawing mutants (only during marginal)
 
 var refresh_elements = function() {
     refresh_labels();
     d3_phylotree_trigger_refresh (tree);
     if (inferType === "marginal") {
-        $('input[id="check-mutant"]').bootstrapSwitch('disabled', false);
+        $('#mutant-btn').removeClass("disabled");
+        $('#mutant-btn').prop("disabled", false);
     } else {
-        $('input[id="check-mutant"]').bootstrapSwitch('state', false);
-        $('input[id="check-mutant"]').bootstrapSwitch('disabled', true);
+        drawMutants = false;
+        $('#mutant-input').fadeOut();
+        $('#mutant-btn').prop("disabled", true);
+        $('#mutant-btn').addClass("disabled");
+        $('#mutant-btn').removeClass("active");
     }
 };
 
@@ -30,6 +35,10 @@ var set_inf_type = function(type) {
 
 var set_mutant = function(numMutants) {
     mutants = numMutants;
+};
+
+var set_draw_mutants = function(flag) {
+    drawMutants = flag;
 };
 
 /*

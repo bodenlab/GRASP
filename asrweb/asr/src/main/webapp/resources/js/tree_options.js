@@ -60,11 +60,13 @@ var perform_marginal = function(node) {
             json_str = data;
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
-            if ($('input[id="check-mutant"]').bootstrapSwitch('state') === true) {
-                $('#text-mutant').removeClass('disabled');
-                view_mutant_library($('input[id="check-mutant"]').bootstrapSwitch('onText'));
+            if ($("#mutant-btn").attr("aria-pressed") === 'true') {
+                set_draw_mutants(true);
+                $('#mutant-input').fadeIn();
+                view_mutant_library($('#text-mutant').val());
             } else {
-                $('#text-mutant').addClass('disabled');
+                set_draw_mutants(false);
+                $('#mutant-input').fadeOut();
                 view_marginal();
             }
             $("#progress").addClass("disable");
@@ -84,6 +86,7 @@ var displayJointGraph = function(node) {
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
             refresh_elements();
+            drawMutants = false;
             json_str = data;
             refresh_graphs(setup_options("poag", json_str));
         }

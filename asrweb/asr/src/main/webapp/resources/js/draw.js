@@ -202,11 +202,11 @@ draw_mini_line = function (graph) {
             circle.moveToBack();
         }
         // indicate mutant locations
-        if (mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
+        if (drawMutants && mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
             var tri = group.append("path")
                 .attr('transform', 'translate(' + (line_x - x_padding) + ',' + (y_scale(0) - 10) + ')')
                 .attr("d", d3.svg.symbol().type("triangle-down"))
-                .attr("opacity", 0.5)
+                .attr("opacity", 0.7)
                 .attr("fill", "black");
 
             tri.moveToBack();

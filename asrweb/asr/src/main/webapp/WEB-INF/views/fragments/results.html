@@ -39,57 +39,64 @@
                                 <li><a id="taylor" onclick="update_scheme('taylor')">Taylor <span id="taylor-selected" class="glyph-selected glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                 <li><a id="zappo" onclick="update_scheme('zappo')">Zappo <span id="zappo-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                             </ul>
-                        </div>
-                        <input id="check-mutant" type="checkbox" data-size="normal" data-label-text="View mutant library" data-label-width="200px" data-off-text="" data-on-text="1" data-inverse="true" />
-                        <div class="btn-group" data-toggle="popover" data-placement="bottom" data-content="View the mutant library for the marginal reconstruction. Likely mutants are calculated using the Kullback-Leibler divergence on the set of possible characters. Default: 5 mutants are shown for each character position in the reconstructed ancestor.">
-                            <button id="text-mutant" type="button" class="btn btn-default dropdown-toggle dropdown disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="caret"></span>
-                            </button>
-                            <ul id="num-mutants" class="dropdown-menu">
-                                <li><a>1</a></li>
-                                <li><a>2</a></li>
-                                <li><a>3</a></li>
-                                <li><a>4</a></li>
-                                <li><a>5</a></li>
-                                <li><a>6</a></li>
-                                <li><a>7</a></li>
-                                <li><a>8</a></li>
-                                <li><a>9</a></li>
-                                <li><a>10</a></li>
-                                <li><a>11</a></li>
-                                <li><a>12</a></li>
-                                <li><a>13</a></li>
-                                <li><a>14</a></li>
-                                <li><a>15</a></li>
-                                <li><a>16</a></li>
-                                <li><a>17</a></li>
-                                <li><a>18</a></li>
-                                <li><a>19</a></li>
-                                <li><a>20</a></li>
-                            </ul>
+                            <div class="input-group">
+                                <button type="button" id="mutant-btn" class="btn btn-default disabled" data-toggle="button" aria-pressed="false" autocomplete="false" disabled="disabled">View mutants</button>
+                                <div class="btn-group" id="mutant-input" data-toggle="popover" data-placement="bottom"  data-content="View the mutant library for the marginal reconstruction. Likely mutants are calculated using the Kullback-Leibler divergence on the set of possible characters. Default: 5 mutants are shown for each character position in the reconstructed ancestor.">
+                                    <button class="btn btn-default" id="btn-mutant-down" type="button"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
+                                    <input class="form-control" id="text-mutant" type="text" placeholder="0" maxlength="3" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                                    <button class="btn btn-default" id="btn-mutant-up" type="button"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button>
+                                </div>
+                            </div>
                         </div>
                         <script type="text/javascript">
                             /*<![CDATA[*/
-                            // initialise switch settings
-                            $("[id='check-mutant']").bootstrapSwitch();
                             if ($('.infer-label').text() === "joint") {
-                                $('input[id="check-mutant"]').bootstrapSwitch('disabled', true);
+                                $('#mutant-btn').prop("disabled", true);
+                                $('#mutant-btn').addClass("disabled");
+                                $('#mutant-input').fadeOut();
+                            } else {
+                                $('#mutant-btn').prop("disabled", false);
+                                $('#mutant-btn').removeClass("disabled");
+                                $('#mutant-btn').removeClass("active");
                             }
 
-                            $('input[id="check-mutant"]').on('switchChange.bootstrapSwitch', function(event, state) {
-                                if (state === true) {
-                                    $('#text-mutant').removeClass('disabled');
-                                    view_mutant_library($(this).bootstrapSwitch('onText'));
+                            $("#mutant-btn").click(function () {
+                                $(this).delay(100).queue(function() {
+                                    if ($("#mutant-btn").attr("aria-pressed") === 'true') {
+                                        set_draw_mutants(true);
+                                        $('#mutant-input').fadeIn();
+                                        view_mutant_library($('#text-mutant').val());
+                                    } else {
+                                        set_draw_mutants(false);
+                                        $('#mutant-input').fadeOut();
+                                        view_marginal();
+                                    }
+                                    $(this).dequeue();
+                                });
+                            });
+
+                            $('#text-mutant').on('input', function() {
+                                view_mutant_library($(this).val());
+                            });
+
+                            $('#btn-mutant-up').on('click', function() {
+                                var old = parseInt($('#text-mutant').val());
+                                console.log(isNaN(old));
+                                if (isNaN(old)) {
+                                    $('#text-mutant').val(1);
+                                    view_mutant_library(1);
                                 } else {
-                                    $('#text-mutant').addClass('disabled');
-                                    view_marginal();
+                                    $('#text-mutant').val(old + 1);
+                                    view_mutant_library(old + 1);
                                 }
                             });
 
-                            $('#num-mutants li a').on('click', function() {
-                                var num = $(this).text();
-                                $('input[id="check-mutant"]').bootstrapSwitch('onText', num);
-                                view_mutant_library(num);
+                            $('#btn-mutant-down').on('click', function() {
+                                var old = parseInt($('#text-mutant').val());
+                                if (!isNaN(old) && old - 1 >= 0) {
+                                    $('#text-mutant').val(old - 1);
+                                    view_mutant_library(old - 1);
+                                }
                             });
 
                             /*]]>*/

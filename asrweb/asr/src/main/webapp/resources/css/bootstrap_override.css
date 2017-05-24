@@ -40,16 +40,32 @@
     display: none;
 }
 
+#btn-mutant-up {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+
+#btn-mutant-down {
+    border-radius: 0px;
+    margin-left: -2px;
+}
+
+#text-mutant {
+    border-radius: 0px;
+    width: 50px;
+}
+
+.bootstrap-switch-handle-on {
+    border-radius: 0px;
+    margin-right: -2px;
+}
+
 .bootstrap-switch {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
     font-size: 12px;
     font-weight: 500;
-}
-
-#text-mutant {
-    width: 40px;
-    border-radius: 0px 3px 3px 0px;
 }
 
 .pad-top-bottom {

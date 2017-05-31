@@ -218,10 +218,8 @@ setup_svg = function (graph) {
     var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
     var actual_svg_height =  document.getElementById(options.raw_svg_id).offsetHeight;
     // We don't want to get the height as we only want to develop the scale based on one element
-    var scale_width = 0.9;//actual_svg_width/width; // Want it to be 10% smaller than the space to add even padding
-    var scale_height = 0.9;//actual_svg_height/height;
-    //var width_scaled = scale_width * (width + margin.right + margin.left);
-    //var height_scaled = scale_height * (height + margin.top + margin.bottom);
+    var scale_width = 0.9;// Want it to be 10% smaller than the space to add even padding
+    var scale_height = 0.9;
 
     var width = width;
     var padding = scale_width *(options.svg_padding);
@@ -254,66 +252,6 @@ setup_svg = function (graph) {
             .attr('height', miniHeight - options.padding_between_views)
             .attr('class', 'mini');
 
-    // draw the lanes for the main chart
-//    main.append('g').selectAll('.laneLines')
-//            .data(lanes)
-//            .enter().append('line')
-//            .attr('x1', 0)
-//            .attr('y1', function (d) {
-//                return d3.round(y1(d.id)) + 0.5;
-//            })
-//            .attr('x2', width)
-//            .attr('y2', function (d) {
-//                return d3.round(y1(d.id)) + 0.5;
-//            })
-//            .attr('stroke', function (d) {
-//                return d.label === '' ? 'white' : 'lightgray'
-//            });
-
-//    main.append('g').selectAll('.laneText')
-//            .data(lanes)
-//            .enter().append('text')
-//            .text(function (d) {
-//                return d.label;
-//            })
-//            .attr('x', -10)
-//            .attr('y', function (d) {
-//                var tmp = y1(d.id + .5);
-//                return tmp;
-//            })
-//            .attr('dy', '0.5ex')
-//            .attr('text-anchor', 'end')
-//            .attr('class', 'laneText');
-
-// draw the lanes for the mini chart
-//    mini.append('g').selectAll('.laneLines')
-//            .data(lanes)
-//            .enter().append('line')
-//            .attr('x1', 0)
-//            .attr('y1', function (d) {
-//                return d3.round(y2(d.id)) + 0.5;
-//            })
-//            .attr('x2', width)
-//            .attr('y2', function (d) {
-//                return d3.round(y2(d.id)) + 0.5;
-//            })
-//            .attr('stroke', function (d) {
-//                return d.label === '' ? 'white' : 'lightgray'
-//            });
-
-//    mini.append('g').selectAll('.laneText')
-//            .data(lanes)
-//            .enter().append('text')
-//            .text(function (d) {
-//                return d.label;
-//            })
-//            .attr('x', -10)
-//            .attr('y', function (d) {
-//                return y2(d.id + .5);
-//            })
-//            .attr('dy', '0.5ex')
-//            .attr('text-anchor', 'end')
-//            .attr('class', 'laneText');
     graph.mini = mini;
     graph.main = main;
     options.graph.svg_overlay = main;
@@ -470,6 +408,7 @@ function moveBrush() {
             , halfExtent = (brush.extent()[1] - brush.extent()[0]) / 2
             , start = point - halfExtent
             , end = point + halfExtent;
+    console.log(brush);
     graph.brush.extent([start, end]);
     prevbrushStart = start;
     prevbrushEnd = end;

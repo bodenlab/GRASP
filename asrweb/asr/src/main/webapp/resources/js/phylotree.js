@@ -750,13 +750,13 @@ d3.layout.phylotree = function(container) {
 
                 menu_object.append("li").attr("class", "divider");
 
-                menu_object.append("li").append("a")
+              /*  menu_object.append("li").append("a")
                     .attr("tabindex", "-1")
                     .text("Hide this " + (d3_phylotree_is_leafnode(node) ? "node" : "subtree"))
                     .on("click", function(d) {
                         menu_object.style("display", "none");
                         phylotree.modify_selection([node], "notshown", true, true).update_has_hidden_nodes().update();
-                    });
+                    });*/
 
 
 

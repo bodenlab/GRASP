@@ -117,24 +117,6 @@ draw_mini_nodes = function (graph) {
                 .attr("opacity", options.diff_opacity)
                 .attr("fill", options.interesting_many_edges_colour);
         }
-        /*if (node.mutant == true) {
-              group.append("rect")
-                      .attr("class", "mini_rect")
-                      .attr('x', function () {
-                                      var tmp = x_scale(node.start) - (2 * radius);
-                                      return tmp + x_padding;
-                      })
-                      .attr('y', function () {
-                                      var tmp = y_scale(0); // Have it at the top
-                                      return tmp ;
-                      })
-                      .attr('width', 4 * radius)
-                      .attr('height', y_scale(graph.max_depth * 2))
-                      .attr("stroke-width", node_opt.stroke_width)
-                      .attr("stroke", node_opt.stroke)
-                      .attr("opacity", options.diff_opacity)
-                      .attr("fill", "green");
-        }*/
     }
     graph.mini_group = group;
     return graph;
@@ -168,7 +150,7 @@ draw_mini_line = function (graph) {
         }
         //var colour = options.colours[node.label];
         var line_y = (y_scale(node.lane) + (y_scale(node.lane + 1)) / 2);
-        var line_x = x_scale(node.start) + x_padding;
+        var line_x = x_scale(node.start);// + x_padding;
         line_points.push(combine_points(line_x, line_y));
 
         if (node.many_edges == true) {

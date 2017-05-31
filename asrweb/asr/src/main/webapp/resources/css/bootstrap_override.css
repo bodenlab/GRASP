@@ -110,7 +110,7 @@ fieldset {
 	width: 100%;
 	z-index: 9999;
 	height: 100%;
-	opacity: 0.8;
+	opacity: 0.7;
 	background: url(../images/loading.gif) center no-repeat #fff;
 }
 
@@ -123,6 +123,6 @@ fieldset {
 }
 
 .center-el h4 {
-    padding-top: 6em;
+    padding-top: 12em;
     margin: 0;
 }

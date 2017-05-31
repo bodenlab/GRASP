@@ -7,7 +7,7 @@ var tree; // global tree object for updating parameters, etc
 */
 var node_colorizer = function(element, node) {
     if (node.name == selectedNode) {
-        element.select("circle").style('fill', "hsl(211,75%,20%)");
+        element.select("circle").style('fill', "hsl(219,70%,80%)");
     } else {
         element.select("circle").style('fill', "hsl(211,10%,80%)");
     }

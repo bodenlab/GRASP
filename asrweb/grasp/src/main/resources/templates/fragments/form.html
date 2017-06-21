@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="form">
+    <a name="reconstruct"></a>
+    <div class="content-section-a" th:if="${results == null}">
+        <div th:replace="fragments/help :: help"></div>
+        <div class="container-fluid">
+            <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
+                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom">
+                    <div class="input-group col-sm-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
+                        <input type="text" class="form-control col-xs-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" />
+                        <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
+                            <button type="submit" name="test" class="btn btn-default">Run Test Data</button>
+                        </span>
+                    </div>
+                    <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
+                </div>
+                <div class="form-group row col-sm-offset-2 col-sm-7">
+                    <div class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." >
+                        <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="200" data-handle-width="100"  data-off-text="No" data-on-text="Yes" />
+                    </div>
+                </div>
+                <div class="row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom">
+                    <div class="form-group row col-xs-12">
+                        <div class="input-group col-xs-12" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
+                            <label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">
+                                <span class="glyphicon glyphicon-align-left col-xs-1"></span>
+                                Select sequence library file...
+                                <input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
+                            </label>
+                            <span class="label label-default upload-file-info col-xs-12" id="upload-seq-info"></span>
+                        </div>
+                        <script type="text/javascript">
+                            $("[id='check-align']").bootstrapSwitch();
+                            $('input[id="check-align"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                                if (state === true) {
+                                    // enable sequence library inputs
+                                    $('#lbl-fileseq').removeAttr('disabled');
+                                    $('#fileseq').removeAttr('disabled');
+                                    // disable sequence alignment inputs
+                                    $('#lbl-filealn').attr('disabled', true);
+                                    $('#filealn').attr('disabled', true);
+                                } else {
+                                    // enable sequence alignment inputs
+                                    $('#lbl-filealn').removeAttr('disabled');
+                                    $('#filealn').removeAttr('disabled');
+                                    // disable sequence library inputs
+                                    $('#lbl-fileseq').attr('disabled', true);
+                                    $('#fileseq').attr('disabled', true);
+                                }
+                            });
+                        </script>
+                        <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
+                    </div>
+                    <div class="form-group row col-xs-12">
+                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
+                            <label id="lbl-filealn" class="btn btn-default col-xs-12" for="filealn">
+                                <span class="glyphicon glyphicon-align-justify col-xs-1" aria-hidden="true"></span>
+                                Select sequence alignment file...
+                                <input type="file" class="col-xs-11" name="alnFile" id="filealn" style="display:none;" onchange="$('#upload-aln-info').html(document.forms['asrForm']['alnFile'].files[0].name);" hidden="hidden" th:field="*{alnFile}"></input>
+                            </label>
+                            <span class="label label-default upload-file-info col-xs-12" id="upload-aln-info"></span>
+                        </div>
+                        <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('alnFile')}"><label class="control-label" for="label" th:errors="*{alnFile}"></label></div>
+                    </div>
+                    <div class="form-group row col-xs-12">
+                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
+                            <label class="btn btn-default col-xs-12" for="filetree">
+                                <span class="glyphicon glyphicon-tree-conifer col-xs-1" aria-hidden="true"></span>
+                                Select phylogenetic tree file...
+                                <input type="file" class="col-xs-11" name="filetree" id="filetree" style="display:none;" onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);" hidden="hidden" th:field="*{treeFile}"></input>
+                            </label>
+                            <span class="label label-default upload-file-info col-xs-12" id="upload-tree-info"></span>
+                        </div>
+                        <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
+                    </div>
+                </div>
+                <div class="form-group row col-sm-offset-2 col-sm-7">
+                    <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction." >
+                        <input id="check-infer" type="checkbox" data-size="small" data-label-text="Initial reconstruction" data-label-width="200" data-handle-width="100" data-off-text="Joint" data-off-color="primary" data-on-text="Marginal (root)" />
+                    </div>
+                    <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
+                    <script type="text/javascript">
+                                    /*<![CDATA[*/
+                                    $("[id='check-infer']").bootstrapSwitch();
+                                    $('input[id="check-infer"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                                        if (state == true) {
+                                            $('#inferenceType').val("marginal");
+                                        } else {
+                                            $('#inferenceType').val("joint");
+                                        }
+                                    });
+                                    /*]]>*/
+                    </script>
+                </div>
+                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" id="submit-btn">Perform Reconstruction</button></div>
+            </form>
+        </div>
+        <script type="text/javascript">
+            $("#submit-btn").click(function() {
+                $("#progress").removeClass("disable");
+                setTimeout(function() { document.getElementById("asr-form").submit(); }, 3000);
+            });
+        </script>
+        </div>
+    </div>
+</body>
+</html>

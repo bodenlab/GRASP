@@ -35,8 +35,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
 	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
-	//final String sessionPath = "/Users/marnie/Documents/WebSessions/";
-	final String sessionPath = "/var/www/GRASP/";
+	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	//final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
 
@@ -64,6 +64,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = "submitAsr")
 	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) {
 		this.asr = asrForm;
+
+		model.addAttribute("label", asr.getLabel());
 
 		if (bindingResult.hasErrors()) {
 			for (String err : bindingResult.getSuppressedFields())
@@ -150,6 +152,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
 
 			model.addAttribute("graph", graphs);
+			model.addAttribute("label", asr.getLabel());
 
 		} catch (Exception e) {
 			model.addAttribute("error", true);
@@ -178,6 +181,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		System.out.println("infer,node: " + infer + " " + node);
 		model.addAttribute("results", true);
+		model.addAttribute("label", asr.getLabel());
 
 		// TODO: push exceptions to error message on view...
 		try {

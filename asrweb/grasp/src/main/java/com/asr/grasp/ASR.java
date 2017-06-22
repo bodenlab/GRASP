@@ -3,7 +3,6 @@ package com.asr.grasp;
 import api.PartialOrderGraph;
 import com.asr.grasp.validator.File;
 import json.JSONObject;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 import reconstruction.ASRPOG;
 import vis.POAGJson;
@@ -24,10 +23,8 @@ public class ASR {
     // ASR object to store marginal reconstruction of current node (if given)
     private ASRPOG asrMarginal;
 
-    //private ASRPOG asr;
     private String sessionDir;
 
-    @NotEmpty(message="Please specify a label for your reconstruction")
     private String label = "Grasp";
 
     @File(type="aln", message="File must be an alignment (*.aln)")

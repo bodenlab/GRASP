@@ -194,17 +194,21 @@ public class ASR {
     public void saveConsensusMarginal(String filepath) throws IOException {
         if (asrMarginal != null)
             asrMarginal.saveSupportedAncestors(filepath);
+
     }
 
     /**
      * Save marginal distribution matrix of marginal node
      *
      * @param filepath  filepath of where to save distribution
+     * @param node      node label or MSA for sequence alignment
      * @throws IOException
      */
-    public void saveMarginalDistribution(String filepath) throws IOException {
-        if (asrMarginal != null)
-            asrMarginal.saveDistrib(filepath);
+    public void saveMarginalDistribution(String filepath, String node) throws IOException {
+        if (asrMarginal != null && !node.equalsIgnoreCase("msa"))
+            asrMarginal.saveDistrib(filepath + "/" + node);
+        else if (node.equalsIgnoreCase("msa"))
+            asrJoint.saveMSADistrib(filepath + "/msa");
     }
 /*
     public void saveMSAImage(String filepath) throws IOException {

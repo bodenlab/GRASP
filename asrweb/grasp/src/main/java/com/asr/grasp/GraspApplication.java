@@ -253,7 +253,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			File marginalDir = new File(marginalPath);
 			if (!marginalDir.exists())
 				marginalDir.mkdir();
-			asr.saveMarginalDistribution(marginalPath + "/" + request.getParameter("marg-node"));
+			asr.saveMarginalDistribution(marginalPath, request.getParameter("marg-node"));
 		}
 		if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on")) {
 			File jointDir = new File(jointPath);
@@ -266,6 +266,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 			if (!marginalDir.exists())
 				marginalDir.mkdir();
 			asr.saveConsensusMarginal(marginalPath + "/" + request.getParameter("marg-node") + "_consensus");
+		}
+		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on")) {
+			File marginalDir = new File(marginalPath);
+			if (!marginalDir.exists())
+				marginalDir.mkdir();
+			asr.saveMarginalDistribution(marginalPath, "msa");
 		}
 		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on")) {
 			File jointDir = new File(jointPath);

@@ -139,6 +139,8 @@ setup_data = function (graph) {
     graph.max_depth = total_max_depth + 1;
     graph.lanes = lanes;
     graph.nodes = nodes;
+    // So we always have all the nodes available
+    graph.all_nodes = nodes;
     graph.edges = edges;
     graph.node_count = count;
     graph.node_diff = node_dict;
@@ -154,11 +156,6 @@ make_scales = function (graph) {
     var margin = options.margin;
     var x_padding = options.x_padding;
 
-    // How the heights and widths of the page are set up
-//    var width = options.width - margin.left - margin.right
-//            , height = options.height - margin.top - margin.bottom
-//            , miniHeight = options.height/3 - options.padding_between_views
-//            , mainHeight = options.height - miniHeight - options.padding_between_views/2;
     var width = options.width - margin.left - margin.right
             , height = options.height - margin.top - margin.bottom
             , miniHeight = lanes.length * options.lane_height + options.lane_padding
@@ -371,7 +368,7 @@ function display() {
     retain_previous_position = false;
 
     var vis_nodes = nodes_curr.filter(function (d) {
-            return d.start <= prevbrushEnd && d.end >= prevbrushStart;
+            return d.start < prevbrushEnd && d.end >= prevbrushStart - 1;
         });
 
     mini.select('.brush').call(brush.extent([prevbrushStart, prevbrushEnd]));

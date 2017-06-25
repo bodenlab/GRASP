@@ -94,12 +94,7 @@ setup_data = function (graph) {
                 // Update to say that it hasn't been deleted since it appears in both
                 node.deleted_during_inference = false;
                 node_inferred.deleted_during_inference = false;
-                // Prints out if the sequences are equal
-                if (JSON.stringify(node.seq.chars) == JSON.stringify(node_inferred.seq.chars)) {
-                   // console.log("sequences were equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
-                } else {
-                    //console.log("sequences were NOT equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
-                }
+
             }
             node.y += current_y_position;
             node.lane += current_y_position;
@@ -163,7 +158,7 @@ make_scales = function (graph) {
 
     var x = d3.scale.linear()
             .domain([(d3.min(nodes, function (d) {
-                    return d.start;
+                    return d.start - 1;
                 })),
                 d3.max(nodes, function (d) {
                     return d.end + 1;
@@ -244,7 +239,7 @@ setup_svg = function (graph) {
             .attr('class', 'main');
 
     var mini = chart.append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + (mainHeight + options.padding_between_views) + ')')
+            .attr('transform', 'translate(' + margin.left/2 + ',' + (mainHeight + options.padding_between_views) + ')')
             .attr('width', width)
             .attr('height', miniHeight - options.padding_between_views)
             .attr('class', 'mini');

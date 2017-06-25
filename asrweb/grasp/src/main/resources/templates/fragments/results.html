@@ -17,6 +17,8 @@
                     <svg id="phylo">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
+                                    var label = /*[[${label}]]*/;
+                                    set_recon_label(label);
                                     var recon = /*[[${tree}]]*/;
                                     setup_tree("#phylo", recon);
                                 /*]]>*/

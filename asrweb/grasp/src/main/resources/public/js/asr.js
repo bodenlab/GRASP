@@ -1,4 +1,4 @@
-var inferType; // Keep track of which reconstruction is being displayed
+var inferType = "joint"; // Keep track of which reconstruction is being displayed
 var mutants = 0; // flag for generating mutant distribution
 var drawMutants = false;    // flag for drawing mutants (only during marginal)
 
@@ -31,6 +31,10 @@ var refresh_labels = function() {
 
 var set_inf_type = function(type) {
     inferType = type;
+};
+
+var set_recon_label = function(label) {
+    document.querySelector("#recon-label").textContent = "  " + label;
 };
 
 var set_mutant = function(numMutants) {
@@ -240,4 +244,3 @@ $(window).resize(function () {
         refresh_graphs(setup_options("poag",json_str));
     }, 100);
 });
-

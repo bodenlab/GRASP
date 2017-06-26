@@ -73,7 +73,7 @@ draw_mini_nodes = function (graph) {
                     return tmp + x_padding;
                 })
                 .attr('cy', function () {
-                    var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
+                    var tmp = (y_scale(node.y) + y_scale(node.y + 1)) / 2;
                     return tmp + y_padding;
                 })
                 .attr('r', radius)
@@ -110,7 +110,7 @@ draw_mini_nodes = function (graph) {
                         return tmp + x_padding;
                     })
                     .attr('cy', function () {
-                        var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
+                        var tmp = (y_scale(node.y) + y_scale(node.y + 1)) / 2;
                         return tmp + y_padding;
                     })
                     .attr('r', 2 * radius)
@@ -149,7 +149,7 @@ draw_mini_line = function (graph) {
             line_points = new Array();
         }
         //var colour = options.colours[node.label];
-        var line_y = (y_scale(node.lane) + (y_scale(node.lane + 1)) / 2);
+        var line_y = (y_scale(node.y) + (y_scale(node.y + 1)) / 2);
         var line_x = x_scale(node.x);// + x_padding;
         line_points.push(combine_points(line_x, line_y));
 
@@ -240,7 +240,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                         return tmp;
                     })
                     .attr('cy', function () {
-                        var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
+                        var tmp = (y_scale(node.y) + y_scale(node.y + 1)) / 2;
                         return tmp;
                     })
                     .attr('r', function () {
@@ -270,7 +270,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                                 return tmp;
                             })
                             .attr('y', function () {
-                                var tmp = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2 + node_opt.text_padding;
+                                var tmp = (y_scale(node.y) + y_scale(node.y + 1)) / 2 + node_opt.text_padding;
                                 return tmp;
                             })
                             .attr("text-anchor", "middle")
@@ -286,7 +286,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
         if (options.graphs_display == true && node.type == 'marginal') {
             // Check if there is any bars to display first
             if (node.graph.bars.length > 1) {
-                var graph_node = create_new_graph(node, options.graph, x_scale(node.x), (y_scale(node.lane) + y_scale(node.lane + 1)) / 2);
+                var graph_node = create_new_graph(node, options.graph, x_scale(node.x), (y_scale(node.y) + y_scale(node.y + 1)) / 2);
                 options.graph.graphs.push(graph_node);
             }
         }
@@ -314,7 +314,7 @@ make_pie = function (node, graph, radius) {
     var y_scale = graph.scale.y1;
     var node_cx = x_scale(node.x);
     //var radius = graph.max_radius;
-    var node_cy = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
+    var node_cy = (y_scale(node.y) + y_scale(node.y + 1)) / 2;
     var stroke_width = options.pie.stroke_width;
     if (radius < graph.min_radius || graph.max_seq_len > options.pie.max_seq_len) {
         stroke_width = 0;

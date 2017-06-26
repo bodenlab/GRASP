@@ -10,10 +10,10 @@ var retain_previous_position = false;
 
 
 /**
- * Adds the inferred POAG initially, during this process the data for the
+ * Adds the MSA POAG initially, during this process the data for the
  * rest of the functions is set up etc
  */
-setup_inferred_poag = function (graph) {
+setup_main_poag = function (graph) {
     var nodes = [];
     var node_dict = {};
     var max_seq_len = 0;
@@ -27,7 +27,7 @@ setup_inferred_poag = function (graph) {
         var node = poag.nodes[n];
         // Add the type to the node so we know whether or not to draw the distributions
         node.type = poag.metadata.type;
-        node.deleted_during_inference = false;
+        node.deleted_during_inference = true;
         node.inferred = false;
         node.mutant = false;
         node.msa = true;
@@ -44,7 +44,6 @@ setup_inferred_poag = function (graph) {
         node_dict[node.id] = node;
     }
     // Add variables to the graph object
-    graph.max_depth = poag.max_depth + 1;
     graph.nodes = nodes;
     graph.all_nodes = nodes;
     graph.node_dict = node_dict;
@@ -62,7 +61,7 @@ update_lanes = function (graph) {
     // At each position we want to add a "lane" which is where that section
     // of the POAG is drawn
     var lanes = [];
-    for (var d in graph.max_depth) {
+    for (var d = 0; d < graph.max_depth; d ++) {
         var tmp = {};
         tmp.id = d;
         lanes.push(tmp);
@@ -75,9 +74,10 @@ update_lanes = function (graph) {
 /**
  * Adds the edges to the visualisation
  */
-add_edges = function (poag) {
+add_edges = function (graph, poag) {
     var current_y_position = graph.max_depth;
     var edges = graph.edges;
+    var node_dict = graph.node_dict;
     for (var e in poag.edges) {
         var edge = poag.edges[e];
         edge.y1 += current_y_position;
@@ -91,6 +91,7 @@ add_edges = function (poag) {
         edges.push(edge);
     }
     graph.edges = edges;
+    return graph;
 }
 
 /**
@@ -131,7 +132,6 @@ add_poag = function (graph, poag) {
         nodes.push(node);
     }
     graph.all_nodes = nodes;
-    graph.max_depth += poag.max_depth;
     graph.node_dict = node_dict;
     return graph;
 }
@@ -153,10 +153,10 @@ make_scales = function (graph) {
 
     var x = d3.scale.linear()
             .domain([(d3.min(nodes, function (d) {
-                    return d.start - 1;
+                    return d.x - 1;
                 })),
                 d3.max(nodes, function (d) {
-                    return d.end + 1;
+                    return d.x + 1;
                 })])
             .range([0, width]);
 
@@ -320,12 +320,21 @@ setup_brush = function (graph) {
 
 create_poags = function (options) {
     // Stores everything for the graph
-
+    // create an empty array to store the edges in 
+    graph.edges = [];
     graph.options = options;
     var data = options.data;
     graph.data = data;
-    graph = setup_inferred_poag(graph);
+    graph.max_depth = 0;
+    // Setup the MSA POAG and the edges
+    graph = setup_main_poag(graph);
+    graph = add_edges(graph, graph.data.top);
+    graph.max_depth += graph.data.top.max_depth + 1;
+    // Setup the secondary POAG (inferred)
     graph = add_poag(graph, graph.data.bottom);
+    graph = add_edges(graph, graph.data.bottom);
+    graph.max_depth += graph.data.bottom.max_depth + 1;
+    // Update the lanes for the graph so scaling is correct
     graph = update_lanes(graph);
     //setup_data(graph);
     // Make the radius based on the graph height and the number of lanes
@@ -361,7 +370,7 @@ function display() {
     retain_previous_position = false;
 
     var vis_nodes = nodes_curr.filter(function (d) {
-            return d.start < prevbrushEnd && d.end >= prevbrushStart - 1;
+            return d.x < prevbrushEnd && d.x >= prevbrushStart - 1;
         });
 
     mini.select('.brush').call(brush.extent([prevbrushStart, prevbrushEnd]));
@@ -419,7 +428,7 @@ function getPaths(graph) {
         d = items[i];
         if (!paths[d.class])
             paths[d.class] = '';
-        paths[d.class] += ['M', x(d.start), (y2(d.lane) + offset), 'H', x(d.end)].join(' ');
+        paths[d.class] += ['M', x(d.x), (y2(d.y) + offset), 'H', x(d.x)].join(' ');
     }
 
     for (var className in paths) {

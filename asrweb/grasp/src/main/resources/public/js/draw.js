@@ -69,7 +69,7 @@ draw_mini_nodes = function (graph) {
                 .attr("class", "mini_node")
                 .attr("id", "node_" + node.label + n)
                 .attr('cx', function () {
-                    var tmp = x_scale(node.start);
+                    var tmp = x_scale(node.x);
                     return tmp + x_padding;
                 })
                 .attr('cy', function () {
@@ -86,7 +86,7 @@ draw_mini_nodes = function (graph) {
             group.append("rect")
                     .attr("class", "mini_rect")
                     .attr('x', function () {
-                        var tmp = x_scale(node.start) - (2 * radius);
+                        var tmp = x_scale(node.x) - (2 * radius);
                         return tmp + x_padding;
                     })
                     .attr('y', function () {
@@ -106,7 +106,7 @@ draw_mini_nodes = function (graph) {
                     .attr("class", "mini_node")
                     .attr("id", "node_" + node.label + n)
                     .attr('cx', function () {
-                        var tmp = x_scale(node.start);
+                        var tmp = x_scale(node.x);
                         return tmp + x_padding;
                     })
                     .attr('cy', function () {
@@ -150,7 +150,7 @@ draw_mini_line = function (graph) {
         }
         //var colour = options.colours[node.label];
         var line_y = (y_scale(node.lane) + (y_scale(node.lane + 1)) / 2);
-        var line_x = x_scale(node.start);// + x_padding;
+        var line_x = x_scale(node.x);// + x_padding;
         line_points.push(combine_points(line_x, line_y));
 
         if (node.many_edges == true) {
@@ -231,12 +231,12 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
 
     for (var n in nodes) {
         var node = nodes[n];
-        if (node.start >= x_min - 1 & x_max >= node.end) {
+        if (node.x >= x_min - 1 & x_max >= node.x) {
             group.append("circle")
                     .attr("class", "main_node")
                     .attr("id", "node_" + node.label + n)
                     .attr('cx', function () {
-                        var tmp = x_scale(node.start);
+                        var tmp = x_scale(node.x);
                         return tmp;
                     })
                     .attr('cy', function () {
@@ -244,7 +244,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                         return tmp;
                     })
                     .attr('r', function () {
-                        var tmp = (x_scale(node.end + 1) - x_scale(node.start)) / 4;
+                        var tmp = (x_scale(node.x + 1) - x_scale(node.x)) / 4;
 
                         if (tmp > graph.max_radius) {
                             return graph.max_radius;
@@ -266,7 +266,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                             .attr("class", "node_text")
                             .attr("id", "node_text_" + node.label + n)
                             .attr('x', function () {
-                                var tmp = x_scale(node.start);
+                                var tmp = x_scale(node.x);
                                 return tmp;
                             })
                             .attr('y', function () {
@@ -286,7 +286,7 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
         if (options.graphs_display == true && node.type == 'marginal') {
             // Check if there is any bars to display first
             if (node.graph.bars.length > 1) {
-                var graph_node = create_new_graph(node, options.graph, x_scale(node.start), (y_scale(node.lane) + y_scale(node.lane + 1)) / 2);
+                var graph_node = create_new_graph(node, options.graph, x_scale(node.x), (y_scale(node.lane) + y_scale(node.lane + 1)) / 2);
                 options.graph.graphs.push(graph_node);
             }
         }
@@ -312,7 +312,7 @@ make_pie = function (node, graph, radius) {
     var group = graph.node_group;
     var x_scale = graph.scale.x1;
     var y_scale = graph.scale.y1;
-    var node_cx = x_scale(node.start);
+    var node_cx = x_scale(node.x);
     //var radius = graph.max_radius;
     var node_cy = (y_scale(node.lane) + y_scale(node.lane + 1)) / 2;
     var stroke_width = options.pie.stroke_width;

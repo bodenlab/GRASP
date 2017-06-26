@@ -27,11 +27,21 @@
                             <label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">
                                 <span class="glyphicon glyphicon-align-left col-xs-1"></span>
                                 Select sequence library file...
-                                <input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="$('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name);" hidden="hidden" th:field="*{seqFile}"></input>
+                                <input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="update_info($('#upload-seq-info'),document.forms['asrForm']['fileseq'].files[0]);" hidden="hidden" th:field="*{seqFile}"></input>
                             </label>
                             <span class="label label-default upload-file-info col-xs-12" id="upload-seq-info"></span>
                         </div>
                         <script type="text/javascript">
+                            // $('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name)
+                            var update_info = function(el, file) {
+                                el.html(file.name);
+                                if (file.size > 30000) {
+                                    $("#warning").removeClass("disable");
+                                } else {
+                                    $("#warning").addClass("disable");
+                                }
+                            };
+
                             $("[id='check-align']").bootstrapSwitch();
                             $('input[id="check-align"]').on('switchChange.bootstrapSwitch', function(event, state) {
                                 if (state === true) {
@@ -58,7 +68,7 @@
                             <label id="lbl-filealn" class="btn btn-default col-xs-12" for="filealn">
                                 <span class="glyphicon glyphicon-align-justify col-xs-1" aria-hidden="true"></span>
                                 Select sequence alignment file...
-                                <input type="file" class="col-xs-11" name="alnFile" id="filealn" style="display:none;" onchange="$('#upload-aln-info').html(document.forms['asrForm']['alnFile'].files[0].name);" hidden="hidden" th:field="*{alnFile}"></input>
+                                <input type="file" class="col-xs-11" name="alnFile" id="filealn" style="display:none;" onchange="update_info($('#upload-aln-info'),document.forms['asrForm']['alnFile'].files[0]);" hidden="hidden" th:field="*{alnFile}"></input>
                             </label>
                             <span class="label label-default upload-file-info col-xs-12" id="upload-aln-info"></span>
                         </div>
@@ -95,14 +105,9 @@
                     </script>
                 </div>
                 <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" id="submit-btn">Perform Reconstruction</button></div>
+                <div class="row col-sm-offset-1 col-sm-8 alert alert-warning disable" role="alert" id="warning"><label> This library may take some time to reconstruct... </label></div>
             </form>
         </div>
-        <script type="text/javascript">
-            $("#submit-btn").click(function() {
-                $("#progress").removeClass("disable");
-                setTimeout(function() { document.getElementById("asr-form").submit(); }, 5000);
-            });
-        </script>
         </div>
     </div>
 </body>

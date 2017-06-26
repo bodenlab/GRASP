@@ -34,9 +34,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-	final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
+	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
 	//final String sessionPath = "/Users/marnie/Documents/WebSessions/";
-	//final String sessionPath = "/var/www/GRASP/";
+	final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
 
@@ -202,6 +202,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return "index";
 		}
 		// add msa and inferred ancestral graph
+		System.out.println(asr.getAncestralGraphJSON(infer,node));
 		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
 
 		model.addAttribute("graph", graphs);
@@ -219,11 +220,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @param response  HTTP response to send data to client
 	 * @throws IOException
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET, params = "download")
+	@RequestMapping(value = "/", method = RequestMethod.GET, params = "download", produces = "application/zip")
 	public void showForm(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		response.setHeader("Content-Type", "application/zip");
-		response.setHeader("Content-Disposition", "attachment; filename=GRASP_" + asr.getLabel() + ".zip");
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
 
 		// create temporary folder to send output as zipped files
 		String tempDir = asr.getSessionDir() + "/GRASP_" + asr.getLabel();
@@ -236,83 +237,47 @@ public class GraspApplication extends SpringBootServletInitializer {
 		sessionDir.mkdir();
 
 		// copy output files to temporary folder, or generate output where needed and save in temporary folder
-		String jointPath = tempDir + "/Joint_reconstruction";
-		String marginalPath = tempDir + "/Marginal_reconstruction";
 		if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
 			Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName())).toPath(),
 					(new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(), StandardCopyOption.REPLACE_EXISTING);
 		if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa").equalsIgnoreCase("on"))
 			asr.saveMSA(tempDir + "/");
-		if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on")) {
-			File marginalDir = new File(marginalPath);
-			if (!marginalDir.exists())
-				marginalDir.mkdir();
-			asr.saveAncestorGraph(request.getParameter("marg-node"), marginalPath + "/");
-		}
-		if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on")) {
-			File marginalDir = new File(marginalPath);
-			if (!marginalDir.exists())
-				marginalDir.mkdir();
-			asr.saveMarginalDistribution(marginalPath, request.getParameter("marg-node"));
-		}
-		if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on")) {
-			File jointDir = new File(jointPath);
-			if (!jointDir.exists())
-				jointDir.mkdir();
-			asr.saveAncestors(jointPath + "/");
-		}
-		if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on")) {
-			File marginalDir = new File(marginalPath);
-			if (!marginalDir.exists())
-				marginalDir.mkdir();
-			asr.saveConsensusMarginal(marginalPath + "/" + request.getParameter("marg-node") + "_consensus");
-		}
-		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on")) {
-			File marginalDir = new File(marginalPath);
-			if (!marginalDir.exists())
-				marginalDir.mkdir();
-			asr.saveMarginalDistribution(marginalPath, "msa");
-		}
-		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on")) {
-			File jointDir = new File(jointPath);
-			if (!jointDir.exists())
-				jointDir.mkdir();
-			asr.saveConsensusJoint(jointPath + "/ancestors_consensus");
-		}
+		if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))
+			asr.saveAncestorGraph(request.getParameter("marg-node"), tempDir + "/");
+		if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on"))
+			asr.saveMarginalDistribution(tempDir, request.getParameter("marg-node"));
+		if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
+			asr.saveAncestors(tempDir + "/");
+		if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
+			asr.saveConsensusMarginal(tempDir + "/" + request.getParameter("marg-node") + "_consensus");
+		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
+			asr.saveMarginalDistribution(tempDir + "/", "msa");
+		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
+			asr.saveConsensusJoint(tempDir + "/ancestors_consensus");
+
 
 		//asr.saveMSAImage(tempDir + "/MSA.png");
 
 		// send output folder to client
-		zipFolder(sessionDir, response.getOutputStream());
+		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
+		zipFiles(sessionDir, zout);
+		zout.close();
 
 	}
 
 	/**
 	 * Helper functions to zip files/directories
 	 **/
-
-	private  void zipFolder(final File folder, final File zipFile) throws IOException {
-		zipFolder(folder, new FileOutputStream(zipFile));
-	}
-
-	private  void zipFolder(final File folder, final OutputStream outputStream) throws IOException {
-		ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
-		processFolder(folder, zipOutputStream, folder.getPath().length() + 1);
-	}
-
-	private  void processFolder(final File folder, final ZipOutputStream zos, final int prefixLength)
-			throws IOException {
-		for (final File file : folder.listFiles()) {
+	private void zipFiles(File folder, ZipOutputStream zout) throws IOException {
+		for (File file : folder.listFiles()) {
 			if (file.isFile()) {
-				final ZipEntry zipEntry = new ZipEntry(file.getPath().substring(prefixLength));
-				zos.putNextEntry(zipEntry);
+				zout.putNextEntry(new ZipEntry(file.getName()));
 				FileInputStream fis = new FileInputStream(file);
-				IOUtils.copy(fis, zos);
-				zos.closeEntry();
+				IOUtils.copy(fis, zout);
 				fis.close();
-			} else if (file.isDirectory()) {
-				processFolder(file, zos, prefixLength);
+				zout.closeEntry();
 			}
 		}
 	}
+
 }

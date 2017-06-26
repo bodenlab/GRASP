@@ -139,7 +139,7 @@ add_poag = function (graph, poag) {
 
 
 make_scales = function (graph) {
-    var nodes = graph.nodes;
+    var nodes = graph.all_nodes;
     var lanes = graph.lanes;
     var radius = graph.max_radius;
     var options = graph.options;
@@ -187,7 +187,7 @@ make_scales = function (graph) {
 }
 
 setup_svg = function (graph) {
-    var nodes = graph.nodes;
+    var nodes = graph.all_nodes;
     var lanes = graph.lanes;
     var margin = graph.page_options.margin;
     var width = graph.page_options.width;
@@ -353,7 +353,7 @@ create_poags = function (options) {
 
 function display() {
     var brush = graph.brush;
-    var nodes_curr = graph.nodes;
+    var nodes_curr = graph.all_nodes;
 
     var mini = graph.mini;
 
@@ -420,7 +420,7 @@ function moveBrush() {
 // ugly - but draws mini 2x faster than append lines or line generator
 // is there a better way to do a bunch of lines as a single path with d3?
 function getPaths(graph) {
-    var items = graph.nodes;
+    var items = graph.all_nodes;
     var x = graph.scale.x;
     var y2 = graph.scale.y2;
     var paths = {}, d, offset = .5 * y2(1) + 0.5, result = [];

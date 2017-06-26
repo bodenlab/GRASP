@@ -438,9 +438,20 @@ function getPaths(graph) {
     return result;
 }
 
-/*
-** Refresh the graph to be the latest reconstructed
-*/
+/**
+ * Adds a new POAG to the existing visualisation (can be marginal or joint)
+ */
+var add_new_poag = function (json_str) {
+    var data = JSON.parse(json_str);
+    graph = add_poag(graph, data.bottom);
+    graph = add_edges(graph, graph.data.bottom);
+    graph.max_depth += graph.data.bottom.max_depth + 1;
+}
+
+
+/**
+ * Refresh the graph to be the latest reconstructed
+ */
 var refresh_graphs = function(options) {
     d3.select(".svg-content").remove();
     retain_previous_position = true;

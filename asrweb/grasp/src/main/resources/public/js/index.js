@@ -8,157 +8,144 @@ var prevbrushStart = -1;
 var prevbrushEnd = -1;
 var retain_previous_position = false;
 
-setup_data = function (graph) {
-    var lanes = [];
+
+/**
+ * Adds the MSA POAG initially, during this process the data for the
+ * rest of the functions is set up etc
+ */
+setup_main_poag = function (graph) {
     var nodes = [];
     var node_dict = {};
-    var node_many_edge_dict = {}; // Keeps track of nodes with > 1 edge coming out
-    var edges = [];
-    var poags = graph.data;
-    var current_y_position = 0;
-    var count = 0;
-    var total_max_depth = 0;
     var max_seq_len = 0;
-    for (var poag_count = 0; poag_count < 2; poag_count ++) {
-        if (poag_count == 0) {
-            // Choose the poag which is to be on the top
-            var poag = poags.top;
-            // The poag type determines whether or not the pie charts a drawn
-            var poag_type = poag.metadata.type;
+    // Draw the main MSA POAG at the top of the page, this is defined in the JSON
+    // object which is passed to the JavaScript from the BN-kit application  
+    var poag = graph.data.top;
+    // Set up each node, this includes adding labels, identifying if the node is of interest
+    // Interest = many edges, whether it is inferred or the main MSA, an indel
+    // and also the additional features to be added later (mutant) etc.
+    for (var n in poag.nodes) {
+        var node = poag.nodes[n];
+        // Add the type to the node so we know whether or not to draw the distributions
+        node.type = poag.metadata.type;
+        node.deleted_during_inference = true;
+        node.inferred = false;
+        node.mutant = false;
+        node.msa = true;
+        if (node.seq.chars.length > max_seq_len) {
+            max_seq_len = node.seq.chars.length;
+        }
+        node.graph = {};
+        if (mutants > 0) {
+            node.graph.bars = node.mutants.chars;
         } else {
-            // Choose the poag which is to be on the bottom
-            var poag = poags.bottom;
-            // The poag type determines whether or not the pie charts a drawn
-            var poag_type = poag.metadata.type;
+            node.graph.bars = node.seq.chars;
         }
-        var title = poag.metadata.title;
-        var max_depth = poag.max_depth;
-        if (max_depth > total_max_depth) {
-            total_max_depth = max_depth;
-        }
-        for (var i = 0; i <= max_depth; i++) {
-            var temp = {};
-            temp.id = count;
-            temp.label = title + ", depth: " + i;
-            lanes.push(temp);
-            count++;
-        }
-        // Add each of the nodes to the items
-        for (var n in poag.nodes) {
-            var node = poag.nodes[n];
-            if (poag_count == 0) {
-                // Add the type to the node so we know whether or not to draw the distributions
-                node.type = poag_type;
-                node.deleted_during_inference = true;
-                node.inferred = false;
-                node.mutant = false;
-                node.msa = true;
-                node.many_edges = false;
-                node.start = node.x;
-                node.end = node.x;
-                if (node.seq.chars.length > max_seq_len) {
-                    max_seq_len = node.seq.chars.length;
-                }
-                node.graph = {};
-                if (mutants > 0) {
-                    node.graph.bars = node.mutants.chars;
-                } else {
-                    node.graph.bars = node.seq.chars;
-                }
-                // Assume that every node has been deleted during the ineference process
-                node_dict[node.id] = node;
-            } else {
-                if (n == 0) {
-                    node.first_node = true; // Used to make the line for the mini line
-                }
-                var node_inferred = node_dict[node.id];
-                // Update the x coords to match that of the MSA node (to account for deletions)
-                node.start = node_inferred.start;
-                node.msa = false;
-                node.mutant = false;
-                if (node.inferred == true && node.mutants.chars.length > 0) {
-                    node.mutant = true;
-                }
-                // Add the type to the node so we know whether or not to draw the distributions
-                node.type = poag_type;
-                node.x = node_inferred.start;
-                node.end = node_inferred.end;
-                node.graph = {};
-                if (mutants > 0) {
-                    node.graph.bars = node.mutants.chars;
-                } else {
-                    node.graph.bars = node.seq.chars;
-                }
-                node.inferred = true;
-                node.many_edges = false;
-                // Update to say that it hasn't been deleted since it appears in both
-                node.deleted_during_inference = false;
-                node_inferred.deleted_during_inference = false;
-                // Prints out if the sequences are equal
-                if (JSON.stringify(node.seq.chars) == JSON.stringify(node_inferred.seq.chars)) {
-                   // console.log("sequences were equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
-                } else {
-                    //console.log("sequences were NOT equal for node id: " + node.start + " " + JSON.stringify(node.seq.chars) + " inferred " + JSON.stringify(node_inferred.seq.chars));
-                }
-            }
-            node.y += current_y_position;
-            node.lane += current_y_position;
-            nodes.push(node);
-        }
-        // Add each of the reactions to the reaction items
-        for (var e in poag.edges) {
-            var edge = poag.edges[e];
-            edge.y1 += current_y_position;
-            edge.y2 += current_y_position;
-            // Update the to and from ID's for the nodes to include the POAG
-            // if we are in the inferred version we need to get the updated x coods as above
-            var node_inferred_from = node_dict[edge.from];
-            var node_inferred_to = node_dict[edge.to];
-            edge.x1 = node_inferred_from.start;
-            edge.x2 = node_inferred_to.start;
-            edge.from = edge.from;
-            edge.to = edge.to;
-            edges.push(edge);
-            // Check if the node that the edge is coming from already has edges out of it (we are summing these
-            // and determining if it can be considered interesting)
-            if (poag_count == 0) {
-                var edges_from_node =  node_many_edge_dict[edge.from];
-                if ( edges_from_node == undefined) {
-                edges_from_node = new Array();
-                }
-                edges_from_node.push(edge);
-                node_many_edge_dict[edge.from] = edges_from_node;
-                if (edges_from_node.length >= graph.options.number_of_edges_to_be_interesting) {
-                    // tag the from node to be interesting
-                    node_dict[edge.from].many_edges = true;
-                }
-            }
-        }
-        current_y_position += (max_depth + 1);
+        nodes.push(node);
+        node_dict[node.id] = node;
     }
-    graph.max_depth = total_max_depth + 1;
-    graph.lanes = lanes;
+    // Add variables to the graph object
     graph.nodes = nodes;
-    graph.edges = edges;
-    graph.node_count = count;
-    graph.node_diff = node_dict;
+    graph.all_nodes = nodes;
+    graph.node_dict = node_dict;
     graph.max_seq_len = max_seq_len;
     return graph;
-};
+}
+
+
+/**
+ * Each time we add a new POAG we need to update the lane scaling
+ * so that the size remains correct rather than just piling them on top of
+ * one another.
+ */
+update_lanes = function (graph) {
+    // At each position we want to add a "lane" which is where that section
+    // of the POAG is drawn
+    var lanes = [];
+    for (var d = 0; d < graph.max_depth; d ++) {
+        var tmp = {};
+        tmp.id = d;
+        lanes.push(tmp);
+    }
+    graph.lanes = lanes;
+    return graph;
+}
+
+
+/**
+ * Adds the edges to the visualisation
+ */
+add_edges = function (graph, poag) {
+    var current_y_position = graph.max_depth;
+    var edges = graph.edges;
+    var node_dict = graph.node_dict;
+    for (var e in poag.edges) {
+        var edge = poag.edges[e];
+        edge.y1 += current_y_position;
+        edge.y2 += current_y_position;
+        // Update the to and from ID's for the nodes to include the POAG
+        // if we are in the inferred version we need to get the updated x coods as above
+        var node_inferred_from = node_dict[edge.from];
+        var node_inferred_to = node_dict[edge.to];
+        edge.x1 = node_inferred_from.x;
+        edge.x2 = node_inferred_to.x;
+        edges.push(edge);
+    }
+    graph.edges = edges;
+    return graph;
+}
+
+/**
+ * Adds a new POAG under the initial MSA version. 
+ * Here we need to keep track of how many POAGS have been
+ * added and add the new nodes to our list of nodes.
+ */
+add_poag = function (graph, poag) {
+    var node_dict = graph.node_dict;
+    var nodes = graph.all_nodes;
+    for (var n in poag.nodes) {
+        var node = poag.nodes[n];
+        if (n == 0) {
+            node.first_node = true; // Used to make the line for the mini line
+        }
+        node.y += graph.max_depth;
+        var node_inferred = node_dict[node.id];
+        // Update the x coords to match that of the MSA node (to account for deletions)
+        node.x = node_inferred.x;
+        node.msa = false;
+        node.mutant = false;
+        if (node.inferred == true && node.mutants.chars.length > 0) {
+            node.mutant = true;
+        }
+        // Add the type to the node so we know whether or not to draw the distributions
+        node.type = poag.metadata.type;
+        node.graph = {};
+        if (mutants > 0) {
+            node.graph.bars = node.mutants.chars;
+        } else {
+            node.graph.bars = node.seq.chars;
+        }
+        node.inferred = true;
+        node.many_edges = false;
+        // Update to say that it hasn't been deleted since it appears in both
+        node.deleted_during_inference = false;
+        node_inferred.deleted_during_inference = false;
+        nodes.push(node);
+    }
+    graph.all_nodes = nodes;
+    graph.node_dict = node_dict;
+    return graph;
+}
+
+
 
 make_scales = function (graph) {
-    var nodes = graph.nodes;
+    var nodes = graph.all_nodes;
     var lanes = graph.lanes;
     var radius = graph.max_radius;
     var options = graph.options;
     var margin = options.margin;
     var x_padding = options.x_padding;
 
-    // How the heights and widths of the page are set up
-//    var width = options.width - margin.left - margin.right
-//            , height = options.height - margin.top - margin.bottom
-//            , miniHeight = options.height/3 - options.padding_between_views
-//            , mainHeight = options.height - miniHeight - options.padding_between_views/2;
     var width = options.width - margin.left - margin.right
             , height = options.height - margin.top - margin.bottom
             , miniHeight = lanes.length * options.lane_height + options.lane_padding
@@ -166,10 +153,10 @@ make_scales = function (graph) {
 
     var x = d3.scale.linear()
             .domain([(d3.min(nodes, function (d) {
-                    return d.start;
+                    return d.x - 1;
                 })),
                 d3.max(nodes, function (d) {
-                    return d.end + 1;
+                    return d.x + 1;
                 })])
             .range([0, width]);
 
@@ -200,7 +187,7 @@ make_scales = function (graph) {
 }
 
 setup_svg = function (graph) {
-    var nodes = graph.nodes;
+    var nodes = graph.all_nodes;
     var lanes = graph.lanes;
     var margin = graph.page_options.margin;
     var width = graph.page_options.width;
@@ -247,7 +234,7 @@ setup_svg = function (graph) {
             .attr('class', 'main');
 
     var mini = chart.append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + (mainHeight + options.padding_between_views) + ')')
+            .attr('transform', 'translate(' + margin.left/2 + ',' + (mainHeight + options.padding_between_views) + ')')
             .attr('width', width)
             .attr('height', miniHeight - options.padding_between_views)
             .attr('class', 'mini');
@@ -333,11 +320,23 @@ setup_brush = function (graph) {
 
 create_poags = function (options) {
     // Stores everything for the graph
-
+    // create an empty array to store the edges in 
+    graph.edges = [];
     graph.options = options;
     var data = options.data;
     graph.data = data;
-    graph = setup_data(graph);
+    graph.max_depth = 0;
+    // Setup the MSA POAG and the edges
+    graph = setup_main_poag(graph);
+    graph = add_edges(graph, graph.data.top);
+    graph.max_depth += graph.data.top.max_depth + 1;
+    // Setup the secondary POAG (inferred)
+    graph = add_poag(graph, graph.data.bottom);
+    graph = add_edges(graph, graph.data.bottom);
+    graph.max_depth += graph.data.bottom.max_depth + 1;
+    // Update the lanes for the graph so scaling is correct
+    graph = update_lanes(graph);
+    //setup_data(graph);
     // Make the radius based on the graph height and the number of lanes
     graph.options.graph.colours = options.colours;
     graph.max_radius = (options.height / graph.lanes.length) / 3;
@@ -354,7 +353,7 @@ create_poags = function (options) {
 
 function display() {
     var brush = graph.brush;
-    var nodes_curr = graph.nodes;
+    var nodes_curr = graph.all_nodes;
 
     var mini = graph.mini;
 
@@ -371,7 +370,7 @@ function display() {
     retain_previous_position = false;
 
     var vis_nodes = nodes_curr.filter(function (d) {
-            return d.start <= prevbrushEnd && d.end >= prevbrushStart;
+            return d.x < prevbrushEnd && d.x >= prevbrushStart - 1;
         });
 
     mini.select('.brush').call(brush.extent([prevbrushStart, prevbrushEnd]));
@@ -421,7 +420,7 @@ function moveBrush() {
 // ugly - but draws mini 2x faster than append lines or line generator
 // is there a better way to do a bunch of lines as a single path with d3?
 function getPaths(graph) {
-    var items = graph.nodes;
+    var items = graph.all_nodes;
     var x = graph.scale.x;
     var y2 = graph.scale.y2;
     var paths = {}, d, offset = .5 * y2(1) + 0.5, result = [];
@@ -429,7 +428,7 @@ function getPaths(graph) {
         d = items[i];
         if (!paths[d.class])
             paths[d.class] = '';
-        paths[d.class] += ['M', x(d.start), (y2(d.lane) + offset), 'H', x(d.end)].join(' ');
+        paths[d.class] += ['M', x(d.x), (y2(d.y) + offset), 'H', x(d.x)].join(' ');
     }
 
     for (var className in paths) {

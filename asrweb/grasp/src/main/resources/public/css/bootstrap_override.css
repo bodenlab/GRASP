@@ -1,11 +1,40 @@
+.topnav {
+    font-size: 12px;
+}
+
+label, .btn, .form-control, .bootstrap-switch, .bootstrap-switch-label, legend {
+    font-size: 12px;
+}
+
+
+
 .popover-content {
-    font-size: 10px;
+    font-size: 12px;
     color: #333;
 }
 
 .popover-title {
-    font-size: 12px;
+    font-size: 14px;
     color: #333;
+}
+
+.footer-nav {
+    text-align:center;
+    float:none;
+}
+
+.footer-nav li {
+     display:inline-block;
+     float:none;
+ }
+
+.footer-nav li a {
+    color: #777;
+}
+
+.copyright {
+    text-align:center;
+    color: #D3D3D3;
 }
 
 #results {
@@ -65,7 +94,6 @@
 .bootstrap-switch {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
-    font-size: 12px;
     font-weight: 500;
 }
 
@@ -82,7 +110,6 @@
 }
 
 legend {
-    font-size: 14px;
     color: #b3b3b3;
     padding: 1em 0em 0.5em 0em;
     width: 80%;

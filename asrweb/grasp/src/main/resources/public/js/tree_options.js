@@ -44,6 +44,10 @@ var setup_tree = function(tree_div, newick_string) {
     });
 };
 
+var get_num_nodes = function() {
+    return tree.get_nodes().length;
+};
+
 /*
 ** Perform marginal reconstruction of the selected tree node
 */
@@ -58,7 +62,6 @@ var perform_marginal = function(node) {
         success: function(data) {
             refresh_elements();
             json_str = data;
-            console.log(json_str);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
@@ -90,7 +93,6 @@ var displayJointGraph = function(node) {
             refresh_elements();
             drawMutants = false;
             json_str = data;
-            console.log(json_str);
             refresh_graphs(setup_options("poag", json_str));
             $("#progress").addClass("disable");
         }

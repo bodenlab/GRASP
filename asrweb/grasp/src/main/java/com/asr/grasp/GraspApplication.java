@@ -35,8 +35,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
 	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
-	//final String sessionPath = "/Users/marnie/Documents/WebSessions/";
-	final String sessionPath = "/var/www/GRASP/";
+	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	//final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
 
@@ -187,10 +187,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 		try {
 			asr.setInferenceType(infer);
 
-			if (infer.equalsIgnoreCase("marginal")) {
+			if (infer.equalsIgnoreCase("marginal"))
 				asr.setMarginalNodeLabel(node);
-				asr.runReconstruction();
-			}
+			asr.runReconstruction();
 
 			// add reconstructed newick string to send to javascript
 			model.addAttribute("tree", asr.getReconstructedNewickString());
@@ -202,7 +201,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return "index";
 		}
 		// add msa and inferred ancestral graph
-		System.out.println(asr.getAncestralGraphJSON(infer,node));
 		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
 
 		model.addAttribute("graph", graphs);

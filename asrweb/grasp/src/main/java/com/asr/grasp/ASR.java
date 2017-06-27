@@ -95,7 +95,7 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        if (inferenceType.equalsIgnoreCase("joint"))
+        if (inferenceType.equalsIgnoreCase("joint") && asrJoint == null)
             runReconstructionJoint();
         else
             runReconstructionMarginal();

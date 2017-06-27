@@ -79,6 +79,7 @@ var perform_marginal = function(node) {
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
 var displayJointGraph = function(node) {
+    $("#progress").removeClass("disable");
     selectedNode = node.name;
     inferType = "joint";
     $.ajax({
@@ -91,6 +92,7 @@ var displayJointGraph = function(node) {
             json_str = data;
             console.log(json_str);
             refresh_graphs(setup_options("poag", json_str));
+            $("#progress").addClass("disable");
         }
     });
 };

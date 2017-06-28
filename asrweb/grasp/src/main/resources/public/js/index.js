@@ -19,7 +19,7 @@ setup_main_poag = function (graph) {
     var max_seq_len = 0;
     // Draw the main MSA POAG at the top of the page, this is defined in the JSON
     // object which is passed to the JavaScript from the BN-kit application  
-    var poag = graph.data.top;
+    var poag = graph.options.stored_data.msa;
     // Set up each node, this includes adding labels, identifying if the node is of interest
     // Interest = many edges, whether it is inferred or the main MSA, an indel
     // and also the additional features to be added later (mutant) etc.
@@ -61,7 +61,7 @@ update_lanes = function (graph) {
     // At each position we want to add a "lane" which is where that section
     // of the POAG is drawn
     var lanes = [];
-    for (var d = 0; d < graph.max_depth; d ++) {
+    for (var d = 0; d < graph.max_depth * 1.5; d ++) {
         var tmp = {};
         tmp.id = d;
         lanes.push(tmp);
@@ -234,7 +234,7 @@ setup_svg = function (graph) {
             .attr('class', 'main');
 
     var mini = chart.append('g')
-            .attr('transform', 'translate(' + margin.left/2 + ',' + (mainHeight + options.padding_between_views) + ')')
+            .attr('transform', 'translate(' + margin.left/2 + ', 50 )')
             .attr('width', width)
             .attr('height', miniHeight - options.padding_between_views)
             .attr('class', 'mini');
@@ -308,7 +308,7 @@ setup_brush = function (graph) {
             .attr('class', 'x brush')
             .call(brush)
             .selectAll('rect')
-            .attr('y',  y_scale(0) - 10)
+            .attr('y',  -20)
             .attr('height', miniHeight + options.lane_height + 20);
 
     mini.selectAll('rect.background').remove();
@@ -318,25 +318,40 @@ setup_brush = function (graph) {
 
 };
 
+
+
+/**
+ * Sets the MSA graph at the top of the page
+ */
+var set_poag_data = function (options, json_str) {
+    var data = JSON.parse(json_str);
+    options.stored_data.msa = data.top;
+    options.stored_data.inferred.push(data.bottom);
+    return options;
+}
+
 create_poags = function (options) {
     // Stores everything for the graph
     // create an empty array to store the edges in 
     graph.edges = [];
     graph.options = options;
-    var data = options.data;
-    graph.data = data;
     graph.max_depth = 0;
     // Setup the MSA POAG and the edges
     graph = setup_main_poag(graph);
-    graph = add_edges(graph, graph.data.top);
-    graph.max_depth += graph.data.top.max_depth + 1;
+    graph = add_edges(graph, options.stored_data.msa);
+    graph.max_depth += options.stored_data.msa.max_depth + 1;
+
     // Setup the secondary POAG (inferred)
-    graph = add_poag(graph, graph.data.bottom);
-    graph = add_edges(graph, graph.data.bottom);
-    graph.max_depth += graph.data.bottom.max_depth + 1;
+    for (var p in options.stored_data.inferred) {
+        var poag = options.stored_data.inferred[p];
+        graph = add_poag(graph, poag);
+        graph = add_edges(graph, poag);
+        graph.max_depth += poag.max_depth + 1;
+        options.height += 250;
+    }
+
     // Update the lanes for the graph so scaling is correct
     graph = update_lanes(graph);
-    //setup_data(graph);
     // Make the radius based on the graph height and the number of lanes
     graph.options.graph.colours = options.colours;
     graph.max_radius = (options.height / graph.lanes.length) / 3;
@@ -444,8 +459,11 @@ function getPaths(graph) {
 var add_new_poag = function (json_str) {
     var data = JSON.parse(json_str);
     graph = add_poag(graph, data.bottom);
-    graph = add_edges(graph, graph.data.bottom);
-    graph.max_depth += graph.data.bottom.max_depth + 1;
+    graph = add_edges(graph, data.bottom);
+    graph.max_depth += data.bottom.max_depth + 1;
+    graph = update_lanes(graph);
+    graph = make_scales(graph); 
+    display();
 }
 
 

@@ -19,10 +19,13 @@ var tip = d3.tip()
             return temp;
         });
 
-var setup_options = function (svg_id, json_str) {
-    var data = JSON.parse(json_str);
+var setup_options = function (svg_id) {
     //The main options for the graph
     var options = {
+        stored_data: {
+            msa: null,
+            inferred: [],
+        },
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
 
         /******** Options for node and edge drawing ***************************/
@@ -146,7 +149,6 @@ var setup_options = function (svg_id, json_str) {
         background_stroke_width: "1px",
         stroke_width: "3px",
         /********** Data ***************************************************/
-        data: data,
         raw_svg_id: svg_id,
         target: '#' + svg_id,
         /********** Text options ******************************************/

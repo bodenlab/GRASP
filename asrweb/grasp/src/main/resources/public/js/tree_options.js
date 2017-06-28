@@ -49,16 +49,17 @@ var setup_tree = function(tree_div, newick_string) {
 */
 var perform_marginal = function(node) {
     $("#progress").removeClass("disable");
-    selectedNode = node.name;
-    inferType = "marginal";
+    var selectedNode = node.name;
+    var inferType = "marginal";
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-            refresh_elements();
-            json_str = data;
+            //refresh_elements();
+            var json_str = data;
             console.log(json_str);
+            add_new_poag(json_str);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
@@ -71,6 +72,7 @@ var perform_marginal = function(node) {
                 view_marginal();
             }
             $("#progress").addClass("disable");
+            
         }
     });
 };
@@ -79,18 +81,19 @@ var perform_marginal = function(node) {
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
 var displayJointGraph = function(node) {
-    selectedNode = node.name;
-    inferType = "joint";
+    var selectedNode = node.name;
+    var inferType = "joint";
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-            refresh_elements();
+            //refresh_elements();
             drawMutants = false;
-            json_str = data;
+            var json_str = data;
             console.log(json_str);
-            refresh_graphs(setup_options("poag", json_str));
+            add_new_poag(json_str);
+            //refresh_graphs(setup_options("poag", json_str));
         }
     });
 };

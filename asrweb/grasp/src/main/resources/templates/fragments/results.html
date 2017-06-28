@@ -121,7 +121,8 @@
                             }
 
                             json_str = /*[[${graph}]]*/;
-                            var options = setup_options("poag", json_str);
+                            var options = setup_options("poag");
+                            options = set_poag_data(options, json_str);
                             options = create_poags(options);
                             /*]]>*/
                     </script>

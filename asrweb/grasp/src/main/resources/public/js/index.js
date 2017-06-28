@@ -309,7 +309,7 @@ setup_brush = function (graph) {
             .call(brush)
             .selectAll('rect')
             .attr('y',  -20)
-            .attr('height', miniHeight + options.lane_height + 20);
+            .attr('height', miniHeight + options.lane_height);
 
     mini.selectAll('rect.background').remove();
 

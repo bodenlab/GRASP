@@ -137,61 +137,63 @@ draw_mini_line = function (graph) {
 
     for (var n in nodes) {
         var node = nodes[n];
-        if (node.first_node == true) {
+        if (node.msa) {
+            if (node.first_node == true) {
 
-            group.append("path")
-                    .attr("d", line_function(line_points))
-                    .attr("class", "edge")
-                    .attr("stroke-width", mini_opt.stroke_width)
-                    .attr("stroke", mini_opt.stroke)
-                    .attr("fill", "none")
+                group.append("path")
+                        .attr("d", line_function(line_points))
+                        .attr("class", "edge")
+                        .attr("stroke-width", mini_opt.stroke_width)
+                        .attr("stroke", mini_opt.stroke)
+                        .attr("fill", "none")
 
-            line_points = new Array();
-        }
-        //var colour = options.colours[node.label];
-        var line_y = (y_scale(node.y) + (y_scale(node.y + 1)) / 2);
-        var line_x = x_scale(node.x);// + x_padding;
-        line_points.push(combine_points(line_x, line_y));
+                line_points = new Array();
+            }
+            //var colour = options.colours[node.label];
+            var line_y = (y_scale(node.y) + (y_scale(node.y + 1)) / 2);
+            var line_x = x_scale(node.x);// + x_padding;
+            line_points.push(combine_points(line_x, line_y));
 
-        if (node.many_edges == true) {
-            var rect = group.append("rect")
-                    .attr("class", "mini_rect")
-                    .attr('x', line_x)
-                    .attr('y', function () {
-                        var tmp = y_scale(0); // Have it at the top
-                        return tmp;
-                    })
-                    .attr('width', 4 * radius)
-                    .attr('height', graph.page_options.miniHeight + options.lane_height)
-                    .attr("stroke-width", mini_opt.stroke_width)
-                    .attr("stroke", mini_opt.stroke)
-                    .attr("opacity", options.diff_opacity)
-                    .attr("fill", options.diff_colour);
+            if (node.many_edges == true) {
+                var rect = group.append("rect")
+                        .attr("class", "mini_rect")
+                        .attr('x', line_x)
+                        .attr('y', function () {
+                            var tmp = y_scale(0); // Have it at the top
+                            return tmp;
+                        })
+                        .attr('width', 4 * radius)
+                        .attr('height', graph.page_options.miniHeight + options.lane_height)
+                        .attr("stroke-width", mini_opt.stroke_width)
+                        .attr("stroke", mini_opt.stroke)
+                        .attr("opacity", options.diff_opacity)
+                        .attr("fill", options.diff_colour);
 
-            rect.moveToBack();
+                rect.moveToBack();
 
-        }
-        if (node.deleted_during_inference == true) {
-            var circle = group.append("circle")
-                    .attr("class", "mini_node")
-                    .attr("id", "node_" + node.label + n)
-                    .attr('cx', line_x)
-                    .attr('cy', line_y)
-                    .attr('r', 2 * radius)
-                    .attr("opacity", options.diff_opacity)
-                    .attr("fill", options.interesting_many_edges_colour);
+            }
+            if (node.deleted_during_inference == true) {
+                var circle = group.append("circle")
+                        .attr("class", "mini_node")
+                        .attr("id", "node_" + node.label + n)
+                        .attr('cx', line_x)
+                        .attr('cy', line_y)
+                        .attr('r', 2 * radius)
+                        .attr("opacity", options.diff_opacity)
+                        .attr("fill", options.interesting_many_edges_colour);
 
-            circle.moveToBack();
-        }
-        // indicate mutant locations
-        if (drawMutants && mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
-            var tri = group.append("path")
-                    .attr('transform', 'translate(' + (line_x - x_padding) + ',' + (y_scale(0) - 10) + ')')
-                    .attr("d", d3.svg.symbol().type("triangle-down"))
-                    .attr("opacity", 0.7)
-                    .attr("fill", "black");
+                circle.moveToBack();
+            }
+            // indicate mutant locations
+            if (drawMutants && mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
+                var tri = group.append("path")
+                        .attr('transform', 'translate(' + (line_x - x_padding) + ',' + (y_scale(0) - 10) + ')')
+                        .attr("d", d3.svg.symbol().type("triangle-down"))
+                        .attr("opacity", 0.7)
+                        .attr("fill", "black");
 
-            tri.moveToBack();
+                tri.moveToBack();
+            }
         }
     }
     var path = group.append("path")

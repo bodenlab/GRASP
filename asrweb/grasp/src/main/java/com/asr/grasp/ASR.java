@@ -95,7 +95,7 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        if (inferenceType.equalsIgnoreCase("joint"))
+        if (inferenceType.equalsIgnoreCase("joint") && asrJoint == null)
             runReconstructionJoint();
         else
             runReconstructionMarginal();
@@ -170,9 +170,9 @@ public class ASR {
      */
     public void saveAncestorGraph(String label, String filepath) {
         if (inferenceType.equalsIgnoreCase("joint"))
-            asrJoint.saveGraph(filepath, label);
+            asrJoint.saveGraph(filepath + "joint_", label);
         else
-            asrMarginal.saveGraph(filepath, label);
+            asrMarginal.saveGraph(filepath + "marginal_", label);
     }
 
     /**
@@ -182,7 +182,7 @@ public class ASR {
      */
     public void saveAncestors(String filepath) {
         if (asrJoint != null)
-            asrJoint.saveGraph(filepath);
+            asrJoint.saveGraph(filepath + "joint_");
     }
 
     /**

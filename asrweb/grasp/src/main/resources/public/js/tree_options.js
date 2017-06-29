@@ -60,11 +60,10 @@ var perform_marginal = function(node) {
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-
+            //refresh_elements();
             var json_str = data;
             console.log(json_str);
             add_new_poag(json_str);
-
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
@@ -77,7 +76,7 @@ var perform_marginal = function(node) {
                 view_marginal();
             }
             $("#progress").addClass("disable");
-            
+
         }
     });
 };
@@ -88,21 +87,15 @@ var perform_marginal = function(node) {
 var displayJointGraph = function(node) {
     var selectedNode = node.name;
     var inferType = "joint";
-
     $("#progress").removeClass("disable");
-    selectedNode = node.name;
-    inferType = "joint";
-
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-            //refresh_elements();
             drawMutants = false;
-            var json_str = data;
-            console.log(json_str);
-            add_new_poag(json_str);
+            json_str = data;
+            refresh_graphs(setup_options("poag", json_str));
             $("#progress").addClass("disable");
 
         }

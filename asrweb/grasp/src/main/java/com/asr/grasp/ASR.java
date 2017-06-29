@@ -208,7 +208,10 @@ public class ASR {
         if (asrMarginal != null && !node.equalsIgnoreCase("msa"))
             asrMarginal.saveDistrib(filepath + "/" + node);
         else if (node.equalsIgnoreCase("msa"))
-            asrJoint.saveMSADistrib(filepath + "/msa");
+            System.err.println("Ariane removed!");
+
+
+            //asrJoint.saveMSADistrib(filepath + "/msa");
     }
 /*
     public void saveMSAImage(String filepath) throws IOException {
@@ -258,6 +261,7 @@ public class ASR {
             graph = asrJoint.getGraph(nodeLabel);
         else
             graph = asrMarginal.getGraph(nodeLabel);
+        System.err.println(graph);
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }

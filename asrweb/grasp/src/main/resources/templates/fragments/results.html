@@ -11,6 +11,9 @@
                 <hr class="h-divider"></hr>
             </div>
         </div>
+        <div id="phylo-tree" class="col-sm-12">
+
+        </div>
         <div id="results" class="container-fluid" >
             <div class="row col-xs-12">
                 <div id="reconstructed-tree" class="well col-sm-4" data-toggle="popover" data-placement="top" data-content="Annotated phylogenetic tree. Click on the internal nodes for ancestral reconstruction options: perform marginal inference or view joint reconstruction results.">
@@ -21,6 +24,7 @@
                                     set_recon_label(label);
                                     var recon = /*[[${tree}]]*/;
                                     setup_tree("#phylo", recon);
+                                    setup_phylo_tree("#phylo-tree", recon);
                                 /*]]>*/
                             </script>
                     </svg>
@@ -128,6 +132,7 @@
                     </script>
                 </div>
             </div>
+
             <div class="row col-xs-12">
                 <button id="download-toggle" class="btn btn-default col-xs-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
                 <div th:replace="fragments/download_form :: download_form"></div>
@@ -150,5 +155,6 @@
         </div>
     </div>
 </div>
+
 </body>
 </html>

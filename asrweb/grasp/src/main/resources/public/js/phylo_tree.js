@@ -519,8 +519,9 @@ var make_depth_array = function(phylo_options) {
 
 var set_phylo_params = function (tree_div, tree_string) {
     phylo_options.svg_info.div_id = tree_div;
-    var tree_json = parse_newick(tree_string);
-    phylo_options.tree_json = tree_json;
+    phylo_options.tree_string = tree_string;
+    //var tree_json = parse_newick(tree_string);
+    //phylo_options.tree_json = tree_json;
     phylo_options = setup_phylo_svg(phylo_options);
 }
 
@@ -547,7 +548,7 @@ var run_phylo_tree = function () {
     phylo_options.tree.all_nodes = [];
     phylo_options.tree.all_branches = [];
 
-    var tree_json = phylo_options.tree_json;
+    var tree_json = parse_newick(phylo_options.tree_string);
     tree_json.distance_from_root = 0;
     tree_json.parent_node = {raw_x: 0, depth: 0, distance_from_root: 0};
     tree_json.root_node = true;

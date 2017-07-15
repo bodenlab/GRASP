@@ -11,24 +11,18 @@
                 <hr class="h-divider"></hr>
             </div>
         </div>
-        <div id="phylo-tree" class="col-sm-12">
 
-        </div>
         <div id="results" class="container-fluid" >
+            <button type="button" id="branch-text-toggle" class="btn btn-default" onclick="toggle_branch_text()">Branch text on</button>
+            <button type="button" id="additive-toggle" class="btn btn-default" onclick="toggle_additive()">Cladogram</button>
+            
+            <div id="phylo-tree" class="col-sm-12">
 
-                <div style="display: none;">
-                            <script type="text/javascript" th:inline="javascript">
-                                /*<![CDATA[*/
-                                    var label = /*[[${label}]]*/;
-                                    set_recon_label(label);
-                                    var recon = /*[[${tree}]]*/;
-                                    setup_phylo_tree("#phylo-tree", recon);
 
-                                /*]]>*/
-                            </script>
+            </div>
 
-                </div>
-                <div class="col-sm-8">
+
+                <div class="col-sm-12">
                     <div class="input-group">
                         <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
                             <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -107,8 +101,11 @@
                             /*]]>*/
                         </script>
                     </div>
-                    <div id="poag" class="col-sm-12" data-toggle="popover" data-placement="left" data-content="The sequence alignment graph (top), the inferred ancestor graph (bottom) and a positional window. Note that the window can be dragged to change the section of the graphs in view and the size of the positional window can be altered. Note: In the position window, indels are represented by a dot and regions of ambiguity based on multiple extant paths are shown as shaded regions.">
+
+                    <div id="poag" class="col-sm-12">
+
                     </div>
+                    
                     <script type="text/javascript" th:inline="javascript">
                             /*<![CDATA[*/
                             var update_scheme = function(scheme) {
@@ -129,7 +126,21 @@
                             options = create_poags(options);
                             /*]]>*/
                     </script>
+
                 </div>
+
+            <div style="display: none;">
+                <script type="text/javascript" th:inline="javascript">
+                                /*<![CDATA[*/
+                                    var label = /*[[${label}]]*/;
+                                    set_recon_label(label);
+                                    var recon = /*[[${tree}]]*/;
+                                    set_phylo_params("#phylo-tree", recon);
+                                    run_phylo_tree();
+                                /*]]>*/
+                </script>
+
+            </div>
 
             <div class="row col-xs-12">
                 <button id="download-toggle" class="btn btn-default col-xs-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>

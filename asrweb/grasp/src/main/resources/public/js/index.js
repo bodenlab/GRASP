@@ -271,6 +271,7 @@ setup_svg = function (graph) {
     graph.mini = mini;
     graph.main = main;
     options.graph.svg_overlay = main;
+
     return graph;
 };
 

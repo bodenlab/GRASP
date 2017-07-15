@@ -129,10 +129,17 @@
                             var options = setup_options("poag-all");
                             options = set_poag_data(options, json_str);
                             options = create_poags(options);
+
+                            /**
+                             * Adding in Brad's initially here to test that it works.
+                             * Once it is rendering will add to general code (easier to keep
+                             * modular until then.)
+                             */
                             var json_parsed = JSON.parse(json_str);
                             var graphs = [json_parsed, json_parsed];
                             var newGraph = fuse_multipleGraphs(graphs);
                             console.log(newGraph);
+
                             /*]]>*/
                     </script>
 

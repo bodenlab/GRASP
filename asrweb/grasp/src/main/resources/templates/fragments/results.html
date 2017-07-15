@@ -15,12 +15,17 @@
         <div id="results" class="container-fluid" >
             <button type="button" id="branch-text-toggle" class="btn btn-default" onclick="toggle_branch_text()">Branch text on</button>
             <button type="button" id="additive-toggle" class="btn btn-default" onclick="toggle_additive()">Cladogram</button>
-            
+
+
             <div id="phylo-tree" class="col-sm-12">
 
 
             </div>
 
+            <div id="poag" class="col-sm-12">
+
+
+            </div>
 
                 <div class="col-sm-12">
                     <div class="input-group">
@@ -102,7 +107,7 @@
                         </script>
                     </div>
 
-                    <div id="poag" class="col-sm-12">
+                    <div id="poag-all" class="col-sm-12">
 
                     </div>
                     
@@ -121,9 +126,13 @@
                             }
 
                             json_str = /*[[${graph}]]*/;
-                            var options = setup_options("poag");
+                            var options = setup_options("poag-all");
                             options = set_poag_data(options, json_str);
                             options = create_poags(options);
+                            var json_parsed = JSON.parse(json_str);
+                            var graphs = [json_parsed, json_parsed];
+                            var newGraph = fuse_multipleGraphs(graphs);
+                            console.log(newGraph);
                             /*]]>*/
                     </script>
 

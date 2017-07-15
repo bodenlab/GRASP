@@ -104,6 +104,9 @@ add_edges = function (graph, poag, name) {
  * added and add the new nodes to our list of nodes.
  */
 add_poag = function (graph, poag, name) {
+    // Added as the merging of POAGs takes a list of the POAG strings
+    graph.poags.push(poag);
+
     var node_dict = graph.node_dict;
     var nodes = graph.all_nodes;
     for (var n in poag.nodes) {
@@ -365,6 +368,7 @@ create_poags = function (options) {
     // Stores everything for the graph
     // create an empty array to store the edges in 
     graph.edges = [];
+    graph.poags =[];
     graph.options = options;
     graph.max_depth = 0;
     // Setup the MSA POAG and the edges

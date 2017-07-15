@@ -226,6 +226,7 @@ var generate_mutants = function(graph) {
 /*
  * re-draw popups to re-position on window size change
  */
+/*
 $(window).resize(function () {
     $(this).delay(100).queue(function() {
         if ($("#help-btn").attr("aria-pressed") === 'true') {
@@ -243,4 +244,4 @@ $(window).resize(function () {
         // redraw graphs for sizing
         refresh_graphs(setup_options("poag",json_str));
     }, 100);
-});
+});*/

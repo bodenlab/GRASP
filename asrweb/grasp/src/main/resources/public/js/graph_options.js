@@ -8,16 +8,7 @@
 
 var selected_colour = taylor_colours;
 
-/* Tip which is displayed when hovering over the nodes */
-var tip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([0, +110])
-        .html(function (d) {
-            //label = d.label;
-            temp =
-                    "Sample Type: <br/>"
-            return temp;
-        });
+
 
 var setup_options = function (svg_id) {
     //The main options for the graph
@@ -141,6 +132,7 @@ var setup_options = function (svg_id) {
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
         colours: selected_colour,
+	poagColours: {"poag1": "red", "poag2": "blue", "poag3": "yellow", "poag4": "orange", "poag5": "green"},
         svg_padding: 40, // The padding of the svg within the div given
         padding_between_views: 100,
         /*********** End of sizing options **********************************/
@@ -156,7 +148,6 @@ var setup_options = function (svg_id) {
         text_size: "12px",
         title: "Alignment Vis Tool",
         title_text_size: "16px",
-        tip: tip, //second tip to just display the sample type
         x_axis_text_angle: -45,
         x_axis_title: "Samples",
         x_column: 'Sample_ID',

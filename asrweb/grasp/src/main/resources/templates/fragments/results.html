@@ -15,19 +15,18 @@
 
         </div>
         <div id="results" class="container-fluid" >
-            <div class="row col-xs-12">
-                <div id="reconstructed-tree" class="well col-sm-4" data-toggle="popover" data-placement="top" data-content="Annotated phylogenetic tree. Click on the internal nodes for ancestral reconstruction options: perform marginal inference or view joint reconstruction results.">
-                    <svg id="phylo">
+
+                <div style="display: none;">
                             <script type="text/javascript" th:inline="javascript">
                                 /*<![CDATA[*/
                                     var label = /*[[${label}]]*/;
                                     set_recon_label(label);
                                     var recon = /*[[${tree}]]*/;
-                                    setup_tree("#phylo", recon);
                                     setup_phylo_tree("#phylo-tree", recon);
+
                                 /*]]>*/
                             </script>
-                    </svg>
+
                 </div>
                 <div class="col-sm-8">
                     <div class="input-group">
@@ -131,7 +130,6 @@
                             /*]]>*/
                     </script>
                 </div>
-            </div>
 
             <div class="row col-xs-12">
                 <button id="download-toggle" class="btn btn-default col-xs-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>

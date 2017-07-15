@@ -96,6 +96,7 @@ function create_bars(node, options, graph_group) {
     var y = options.y;
     var padding_x = 0;
     var outer_padding = 1;
+    var formatDetails = [num_bars, size, y, padding_x, outer_padding];
 
     // Just to make it look  nicer if there is only one bar we want it to look nicer
     if (num_bars == 1) {
@@ -108,7 +109,85 @@ function create_bars(node, options, graph_group) {
     }
     for (var bar in node.graph.bars) {
         bar_info = node.graph.bars[bar];
-        graph_group.append("rect")
+
+	//if has poagValues indicates need to draw stacked bar for fused graph
+	if (!bar_info.hasOwnProperty("poagValues")){
+	    create_bar(bar, bar_info, bar_sum, formatDetails, options, graph_group); 
+
+	} else {
+	    
+	    create_stackedbar(bar, bar_info, bar_sum, formatDetails, options, graph_group);
+	}
+
+    // Conditionally displays the labels at the bottom as text
+    if (options.display_axis_text == true) {
+        graph_group.append("text")
+                .attr("class", "y axis")
+                .attr("x", function () {
+                    return (2 * padding_x) + bar * (options.size / num_bars);
+                }) //Need to determine algoritm for determineing this
+                .attr("y", options.graph_height + 10)
+                .text(bar_info.label);
+        }
+    }
+}
+
+
+/*
+* Creates a stacked bar from the poag info for a fused graph
+*/
+function create_stackedbar(bar, bar_info, bar_sum, formatDetails, options, graph_group){
+    var num_bars = formatDetails[0]; //options.max_bar_count;
+    var size = formatDetails[1];
+    var y = formatDetails[2];
+    var padding_x = formatDetails[3];
+    var outer_padding = formatDetails[4];
+
+    //keeping track where to put the next bar 
+    var previousY = 0;
+    
+    var subVals = bar_info.poagValues;
+    i = 0;
+
+    //this color object need work, tried to get into options but couldn't, need to ask Ariane
+    var colors = {"poag1": "red", "poag2": "blue", "poag3": "yellow", "poag4": "orange", "poag5": "green"};
+    for (var subVal in subVals) {
+
+	var heightValue = y(subVals[subVal]/100);
+	previousY = y((subVals[subVal])*(i+1)/100);
+
+	graph_group.append("rect")
+                .attr("class", function () {
+                    return "bar";
+                })
+                .attr("x", function () {
+                    return outer_padding + padding_x + (bar * (size / num_bars)); /* where to place it */
+                }) //Need to determine algoritm for determineing this
+                .attr("width", (size / num_bars) - (3 * padding_x) - outer_padding/2)
+                .attr("y", function () {
+                    return previousY;
+                })
+                .attr("height", function () {
+                    // As the number is out of 100 need to modulate it
+                    return options.graph_height - heightValue;
+                })
+                .attr("fill", colors[subVal]);
+	
+	i++;
+    }
+} 
+
+/*
+* Creates a single bar for an inputted bar object from an unfused poag
+*/
+function create_bar(bar, bar_info, bar_sum, formatDetails, options, graph_group) {
+    var num_bars = formatDetails[0]; //options.max_bar_count;
+    var size = formatDetails[1];
+    var y = formatDetails[2];
+    var padding_x = formatDetails[3];
+    var outer_padding = formatDetails[4];
+
+    graph_group.append("rect")
                 .attr("class", function () {
                     return "bar";
                 })
@@ -124,18 +203,6 @@ function create_bars(node, options, graph_group) {
                     return options.graph_height - y(bar_info.value/bar_sum);
                 })
                 .attr("fill", options.colours[bar_info.label]);
-
-    // Conditionally displays the labels at the bottom as text
-    if (options.display_axis_text == true) {
-        graph_group.append("text")
-                .attr("class", "y axis")
-                .attr("x", function () {
-                    return (2 * padding_x) + bar * (options.size / num_bars);
-                }) //Need to determine algoritm for determineing this
-                .attr("y", options.graph_height + 10)
-                .text(bar_info.label);
-        }
-    }
 }
 
 /**

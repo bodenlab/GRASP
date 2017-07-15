@@ -34,14 +34,18 @@ setup_main_poag = function (graph) {
         if (node.seq.chars.length > max_seq_len) {
             max_seq_len = node.seq.chars.length;
         }
-        node.graph = {};
-        if (mutants > 0) {
-            node.graph.bars = node.mutants.chars;
-        } else {
-            node.graph.bars = node.seq.chars;
-        }
+
+	formatMutants(node, poag);
+	/*if (node.type != "fused"){
+            node.graph = {};
+            if (mutants > 0) {
+                node.graph.bars = node.mutants.chars;
+            } else {
+                node.graph.bars = node.seq.chars;
+            }
+	}*/
         nodes.push(node);
-        node_dict[node.id] = node;
+        node_dict["root" + "-" + node.id] = node;
     }
     // Add variables to the graph object
     graph.nodes = nodes;
@@ -74,7 +78,7 @@ update_lanes = function (graph) {
 /**
  * Adds the edges to the visualisation
  */
-add_edges = function (graph, poag) {
+add_edges = function (graph, poag, name) {
     var current_y_position = graph.max_depth;
     var edges = graph.edges;
     var node_dict = graph.node_dict;
@@ -84,8 +88,8 @@ add_edges = function (graph, poag) {
         edge.y2 += current_y_position;
         // Update the to and from ID's for the nodes to include the POAG
         // if we are in the inferred version we need to get the updated x coods as above
-        var node_inferred_from = node_dict[edge.from];
-        var node_inferred_to = node_dict[edge.to];
+        var node_inferred_from = node_dict[name + "-" + edge.from];
+        var node_inferred_to = node_dict[name + "-" + edge.to];
         edge.x1 = node_inferred_from.x;
         edge.x2 = node_inferred_to.x;
         edges.push(edge);
@@ -99,7 +103,7 @@ add_edges = function (graph, poag) {
  * Here we need to keep track of how many POAGS have been
  * added and add the new nodes to our list of nodes.
  */
-add_poag = function (graph, poag) {
+add_poag = function (graph, poag, name) {
     var node_dict = graph.node_dict;
     var nodes = graph.all_nodes;
     for (var n in poag.nodes) {
@@ -108,32 +112,57 @@ add_poag = function (graph, poag) {
             node.first_node = true; // Used to make the line for the mini line
         }
         node.y += graph.max_depth;
-        var node_inferred = node_dict[node.id];
+        var node_inferred = node_dict["root" + '-' + node.id];
         // Update the x coords to match that of the MSA node (to account for deletions)
         node.x = node_inferred.x;
         node.msa = false;
         node.mutant = false;
+        node.name = name;
         if (node.inferred == true && node.mutants.chars.length > 0) {
             node.mutant = true;
         }
         // Add the type to the node so we know whether or not to draw the distributions
         node.type = poag.metadata.type;
-        node.graph = {};
-        if (mutants > 0) {
-            node.graph.bars = node.mutants.chars;
-        } else {
-            node.graph.bars = node.seq.chars;
-        }
+	formatMutants(node, poag);
+
         node.inferred = true;
         node.many_edges = false;
         // Update to say that it hasn't been deleted since it appears in both
         node.deleted_during_inference = false;
         node_inferred.deleted_during_inference = false;
+        // Add a unique identifier so we can find it in the node dictionary
+        node.unique_id = name + "-" + node.id;
         nodes.push(node);
+        node_dict[name + "-" + node.id] = node;
     }
     graph.all_nodes = nodes;
     graph.node_dict = node_dict;
     return graph;
+}
+
+function formatMutants(node, poag){
+
+    if (node.type != "fused"){
+	node.graph = {};
+        if (mutants > 0) {
+            node.graph.bars = node.mutants.chars;
+        } else {
+            node.graph.bars = node.seq.chars;
+        }
+    } else {
+	//adding number of poags fused
+	node.npoags = poag.metadata.npoags;
+
+	node["subtype"] = poag.metadata.subtype;
+	
+	//changing graph if fused marginal graph
+	if (node.subtype == "marginal"){
+		
+	    node.graph = {};
+	    node.graph.bars = node.mutants.chars;
+
+	}
+    }
 }
 
 
@@ -202,8 +231,8 @@ setup_svg = function (graph) {
 
     var max_depth = graph.max_depth;
     // Get the width of the DIV that we are appending the svg to so we can scale the height and width values
-    var actual_svg_width = document.getElementById(options.raw_svg_id).offsetWidth;
-    var actual_svg_height =  document.getElementById(options.raw_svg_id).offsetHeight;
+    var actual_svg_width = width;//document.getElementById(options.raw_svg_id).offsetWidth;
+    var actual_svg_height = height;// document.getElementById(options.raw_svg_id).offsetHeight;
     // We don't want to get the height as we only want to develop the scale based on one element
     var scale_width = 0.9;// Want it to be 10% smaller than the space to add even padding
     var scale_height = 0.9;
@@ -324,6 +353,7 @@ setup_brush = function (graph) {
  * Sets the MSA graph at the top of the page
  */
 var set_poag_data = function (options, json_str) {
+    console.log(json_str);
     var data = JSON.parse(json_str);
     options.stored_data.msa = data.top;
     options.stored_data.inferred.push(data.bottom);
@@ -338,7 +368,7 @@ create_poags = function (options) {
     graph.max_depth = 0;
     // Setup the MSA POAG and the edges
     graph = setup_main_poag(graph);
-    graph = add_edges(graph, options.stored_data.msa);
+    graph = add_edges(graph, options.stored_data.msa, "root");
     graph.max_depth += options.stored_data.msa.max_depth + 1;
 
     // Setup the secondary POAG (inferred)
@@ -369,7 +399,7 @@ create_poags = function (options) {
 function display() {
     var brush = graph.brush;
     var nodes_curr = graph.all_nodes;
-
+    console.log(JSON.stringify(graph.all_nodes));
     var mini = graph.mini;
 
     var x_scale = graph.scale.x1;
@@ -456,10 +486,10 @@ function getPaths(graph) {
 /**
  * Adds a new POAG to the existing visualisation (can be marginal or joint)
  */
-var add_new_poag = function (json_str) {
+var add_new_poag = function (json_str, poag_name) {
     var data = JSON.parse(json_str);
-    graph = add_poag(graph, data.bottom);
-    graph = add_edges(graph, data.bottom);
+    graph = add_poag(graph, data.bottom, poag_name);
+    graph = add_edges(graph, data.bottom, poag_name);
     graph.max_depth += data.bottom.max_depth + 1;
     graph = update_lanes(graph);
     graph = make_scales(graph); 

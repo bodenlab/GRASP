@@ -285,19 +285,23 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
                             .text(node.label);
             }
         }
-        if (options.graphs_display == true && node.type == 'marginal') {
+        if (options.graphs_display == true && (node.type == 'marginal'||node.type=='fused')) {
             // Check if there is any bars to display first
             if (node.graph.bars.length > 1) {
                 var graph_node = create_new_graph(node, options.graph, x_scale(node.x), (y_scale(node.y) + y_scale(node.y + 1)) / 2);
                 options.graph.graphs.push(graph_node);
             }
         }
-        if (options.seq_display == true && node.type == 'marginal') {
+        if (options.seq_display == true && (node.type == 'marginal'||node.type=='fused')) {
             // Check whether or not there is a range of sequences
             // i.e. there may have just been the one amino acid in this
             // case there is no point re drawing it
-            if (node.seq.chars.length > 1) {
-                var seq_node = make_pie(node, graph, radius);
+            if (node.seq.chars.length > 1 || node.type == 'fused') {
+		if (node.type == 'fused'){
+                    var seq_node = make_pie(node, graph, radius, true);
+		} 
+
+		var seq_node = make_pie(node, graph, radius);
                 //options.graph.graphs.push(graph_node);
             }
         }
@@ -309,18 +313,30 @@ draw_nodes = function (graph, nodes, x_min, x_max) {
 };
 
 
-make_pie = function (node, graph, radius) {
+make_pie = function (node, graph, radius, poagPi) {
     var options = graph.options;
     var group = graph.node_group;
     var x_scale = graph.scale.x1;
     var y_scale = graph.scale.y1;
     var node_cx = x_scale(node.x);
+    var node_opt = options.node;
+    var colors = options.poagColours;
+    
+    //poagPi indicates whether to draw a pi chart colored by poag of origin or not
+    var poagPi = poagPi || false;
+
     //var radius = graph.max_radius;
     var node_cy = (y_scale(node.y) + y_scale(node.y + 1)) / 2;
     var stroke_width = options.pie.stroke_width;
     if (radius < graph.min_radius || graph.max_seq_len > options.pie.max_seq_len) {
         stroke_width = 0;
     }
+    
+    //making pi slightly larger for poagPi, to create ring effect for fused pi chart
+    if (poagPi) {
+	radius += 5;
+    }
+
     var pie_group = group.append("g")
             .attr("id", "pie" + node.name)
             .attr('transform', 'translate(' + node_cx + "," + node_cy + ")")
@@ -343,24 +359,63 @@ make_pie = function (node, graph, radius) {
                 .data(pie(node.mutants.chars))
                 .enter().append("g")
                 .attr("class", "arc");
-    } else {
+
+    } else if (!node.seq.hasOwnProperty("poagValues")) {
         var arc = pie_group.selectAll(".arc")
                 .data(pie(node.seq.chars))
                 .enter().append("g")
                 .attr("class", "arc");
+	
+    } else {
+        radius = radius - 10
+
+	//binding the poag data since fused poag type
+	var arc = pie_group.selectAll(".arc")
+                .data(pie(node.seq.poagValues))
+                .enter().append("g")
+                .attr("class", "arc");
+
     }
+
     arc.append("path")
             .attr("class", "pie")
             .attr("d", path_pie)
             .attr("stroke-width", stroke_width)
             .attr("stroke", options.pie.stroke)
-            .attr("fill", function (d) {
-                return options.colours[(d.data.label)];
+            .attr("fill", function (d, i) {
+
+		//"poag" in data suggest fused type pi should be draw
+		if (!d.data.hasOwnProperty("poag")){
+		    return options.colours[(d.data.label)];
+
+		} else {
+		    if (!poagPi){
+		        
+			if (d.data.label != "0"){
+
+			    //other labels in the inner fused pi chart
+			    return options.colours[(d.data.label)];
+
+			} else {
+
+			    //the white slice in inner fused pi chart
+			    return "white";
+			}
+			
+		    } else {
+
+			//draws for outter ring in fused node
+                        return colors[(d.data.poag)];
+		    }
+		}
             });
 
     // Don't want to append text if it is smaller than the min radius
 
-    if (radius > graph.min_radius) {
+    if (radius > graph.min_radius && node.seq.chars.length>1) {
+	//array to store labels already added
+	var labelsAdded = [];
+
         arc.append("text")
                 .attr("class", "pie")
                 .attr("transform", function (d) {
@@ -371,8 +426,37 @@ make_pie = function (node, graph, radius) {
                 })
                 .attr("dy", "0.35em")
                 .text(function (d) {
-                    return d.data.label;
+
+		    if (d.data.label != "0" && labelsAdded.indexOf(d.data.label) == -1) {
+			
+			labelsAdded.push(d.data.label);
+                        return d.data.label;
+
+		    } else{
+			return "";
+		    }
                 });
+    } else{
+	//Appending single big label to node if in consensus
+	group.append("text")
+             .attr("class", "node_text")
+             .attr("id", "node_text_" + node.label + node.id)
+             .attr('x', function () {
+                   var tmp = x_scale(node.x);
+                   return tmp;
+             })
+             .attr('y', function () {
+                   var tmp = (y_scale(node.y) + y_scale(node.y + 1)) / 2 + node_opt.text_padding;
+                   return tmp;
+             })
+             .attr("text-anchor", "middle")
+             .attr("stroke-width", node_opt.stroke_width)
+             .style("font-family", node_opt.font_family)
+             .style("font-size", node_opt.text_size)
+             .attr("stroke", function () {
+                    return getNodeTextColour(options.colours[(node.label)]);
+             })
+             .text(node.label);
     }
 }
 

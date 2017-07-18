@@ -5,17 +5,17 @@ var tree; // global tree object for updating parameters, etc
 /*
 ** Function to set the tree node colours; selected node is a different colour to other nodes
 */
-var node_colorizer = function(element, node) {
+/*var node_colorizer = function(element, node) {
     if (node.name == selectedNode) {
         element.select("circle").style('fill', "hsl(219,70%,80%)");
     } else {
         element.select("circle").style('fill', "hsl(211,10%,80%)");
     }
-};
+};*/
 
 /*
 ** Function to set up the phylogenetic tree structure (options and menu items)
-*/
+*//*
 var setup_tree = function(tree_div, newick_string) {
     tree = d3.layout.phylotree()
                     .svg (d3.select(tree_div))
@@ -42,22 +42,22 @@ var setup_tree = function(tree_div, newick_string) {
                  }
             );
     });
-};
+};*/
 
 /*
 ** Perform marginal reconstruction of the selected tree node
 */
-var perform_marginal = function(node, node_fill) {
+var perform_marginal = function(node_name, node_fill) {
     $("#progress").removeClass("disable");
-    selectedNode = node.name;
+    selectedNode = node_name;
     inferType = "marginal";
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-            var json_str = data;
-            add_new_poag(json_str, node_name, node_fill);
+            json_str = data;
+            //add_new_poag(json_str, node_name, node_fill);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
@@ -69,7 +69,7 @@ var perform_marginal = function(node, node_fill) {
                 $('#mutant-input').fadeOut();
                 view_marginal();
             }
-
+            refresh_labels();
         }
     });
     $("#progress").addClass("disable");
@@ -78,18 +78,31 @@ var perform_marginal = function(node, node_fill) {
 /*
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
-var displayJointGraph = function(node, node_fill) {
-    selectedNode = node.name;
+var displayJointGraph = function(node_name, node_fill) {
+    selectedNode = node_name;
+    var resetGraphs = false;
+    if (inferType == "marginal") {
+        resetGraphs = true;
+    }
     inferType = "joint";
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
+            json_str = data;
             drawMutants = false;
-            var json_str = data;
-            add_new_poag(json_str, node_name, node_fill);
-
+            if (resetGraphs == true) {
+                options = setup_options("poag-all");
+                refresh_graphs(options);
+            } else {
+                add_new_poag(data, node_name, node_fill);
+            }
+            var newGraph = fuse_multipleGraphs(graph_array);
+            var options_merged = setup_options("poag");
+            options_merged = set_poag_data(options_merged, newGraph);
+            options_merged = create_poags(options_merged);
+            refresh_labels;
         }
     });
     $("#progress").addClass("disable");

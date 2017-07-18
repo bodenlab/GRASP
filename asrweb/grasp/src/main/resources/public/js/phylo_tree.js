@@ -996,9 +996,9 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"));
+                    displayJointGraph(d3.select(this).attr("id"), node_fill); // TODO: change node_fill to be the actual bg for the ancestor
                 } else {
-                    perform_marginal(d3.select(this).attr("id"));
+                    perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
             }); 
 
@@ -1016,9 +1016,9 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"));
+                    displayJointGraph(d3.select(this).attr("id"), node_fill);
                 } else {
-                    perform_marginal(d3.select(this).attr("id"));
+                    perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
             });
 

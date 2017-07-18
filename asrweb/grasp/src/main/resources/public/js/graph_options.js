@@ -128,7 +128,7 @@ var setup_options = function (svg_id) {
         legend_padding: 0,
         legend_rect_size: 0,
         height: 500,
-        width: document.getElementById("poag").offsetWidth,//600,
+        width: document.getElementById("poag-all").offsetWidth,//600,
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
         colours: selected_colour,

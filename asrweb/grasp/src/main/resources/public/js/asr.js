@@ -53,7 +53,7 @@ var view_mutant_library = function(num) {
     set_mutant(num);
 
     // Get graph options to alter mutant library
-    var options = setup_options("poag", json_str);
+    var options = setup_options("poag-all", json_str);
 
     options.data.bottom = generate_mutants(options.data.bottom);
 
@@ -75,7 +75,7 @@ var view_mutant_library = function(num) {
  */
 var view_marginal = function() {
     set_mutant(0);
-    refresh_graphs(setup_options("poag", json_str));
+    refresh_graphs(setup_options("poag-all", json_str));
 }
 
 /* Define the alphabet so we can convert to distributions to numeric arrays */
@@ -226,7 +226,6 @@ var generate_mutants = function(graph) {
 /*
  * re-draw popups to re-position on window size change
  */
-/*
 $(window).resize(function () {
     $(this).delay(100).queue(function() {
         if ($("#help-btn").attr("aria-pressed") === 'true') {
@@ -241,7 +240,8 @@ $(window).resize(function () {
     });
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
+        // TODO: re-size tree so it's 100% div sizing (like graphs)
         // redraw graphs for sizing
-        refresh_graphs(setup_options("poag",json_str));
+        display();
     }, 100);
-});*/
+});

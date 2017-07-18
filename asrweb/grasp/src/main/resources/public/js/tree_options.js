@@ -5,17 +5,17 @@ var tree; // global tree object for updating parameters, etc
 /*
 ** Function to set the tree node colours; selected node is a different colour to other nodes
 */
-var node_colorizer = function(element, node) {
+/*var node_colorizer = function(element, node) {
     if (node.name == selectedNode) {
         element.select("circle").style('fill', "hsl(219,70%,80%)");
     } else {
         element.select("circle").style('fill', "hsl(211,10%,80%)");
     }
-};
+};*/
 
 /*
 ** Function to set up the phylogenetic tree structure (options and menu items)
-*/
+*//*
 var setup_tree = function(tree_div, newick_string) {
     tree = d3.layout.phylotree()
                     .svg (d3.select(tree_div))
@@ -42,15 +42,16 @@ var setup_tree = function(tree_div, newick_string) {
                  }
             );
     });
-};
+};*/
 
 /*
 ** Perform marginal reconstruction of the selected tree node
 */
-var perform_marginal = function(node, node_fill) {
+var perform_marginal = function(node_name, node_fill) {
     $("#progress").removeClass("disable");
-    selectedNode = node.name;
+    selectedNode = node_name;
     inferType = "marginal";
+    console.log(window.location);
     $.ajax({
         url : window.location,
         type : 'POST',
@@ -69,7 +70,6 @@ var perform_marginal = function(node, node_fill) {
                 $('#mutant-input').fadeOut();
                 view_marginal();
             }
-
         }
     });
     $("#progress").addClass("disable");
@@ -78,9 +78,10 @@ var perform_marginal = function(node, node_fill) {
 /*
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
-var displayJointGraph = function(node, node_fill) {
-    selectedNode = node.name;
+var displayJointGraph = function(node_name, node_fill) {
+    selectedNode = node_name;
     inferType = "joint";
+    console.log({infer: inferType, node: selectedNode});
     $.ajax({
         url : window.location,
         type : 'POST',
@@ -89,7 +90,6 @@ var displayJointGraph = function(node, node_fill) {
             drawMutants = false;
             var json_str = data;
             add_new_poag(json_str, node_name, node_fill);
-
         }
     });
     $("#progress").addClass("disable");

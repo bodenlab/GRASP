@@ -7,7 +7,7 @@
 
 
 var selected_colour = taylor_colours;
-
+var graph_array = [];
 
 
 var setup_options = function (svg_id) {
@@ -132,7 +132,7 @@ var setup_options = function (svg_id) {
         margin: {top: 100, left: 60, bottom: 0, right: 10},
         initial_padding: 0,
         colours: selected_colour,
-	poagColours: {"poag1": "red", "poag2": "blue", "poag3": "yellow", "poag4": "orange", "poag5": "green"},
+	poagColours: {"poag1": "red", "poag2": "blue", "poag3": "yellow", "poag4": "orange", "poag5": "green"}, // tODO: change based on tree colours
         svg_padding: 40, // The padding of the svg within the div given
         padding_between_views: 100,
         /*********** End of sizing options **********************************/

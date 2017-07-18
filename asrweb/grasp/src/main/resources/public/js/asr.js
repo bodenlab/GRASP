@@ -4,7 +4,7 @@ var drawMutants = false;    // flag for drawing mutants (only during marginal)
 
 var refresh_elements = function() {
     refresh_labels();
-    d3_phylotree_trigger_refresh (tree);
+    //d3_phylotree_trigger_refresh (tree);
     if (inferType === "marginal") {
         $('#mutant-btn').removeClass("disabled");
         $('#mutant-btn').prop("disabled", false);
@@ -75,7 +75,8 @@ var view_mutant_library = function(num) {
  */
 var view_marginal = function() {
     set_mutant(0);
-    refresh_graphs(setup_options("poag-all", json_str));
+    options = setup_options("poag-all");
+    refresh_graphs(options);
 }
 
 /* Define the alphabet so we can convert to distributions to numeric arrays */

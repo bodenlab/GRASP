@@ -51,14 +51,13 @@ var perform_marginal = function(node_name, node_fill) {
     $("#progress").removeClass("disable");
     selectedNode = node_name;
     inferType = "marginal";
-    console.log(window.location);
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-            var json_str = data;
-            add_new_poag(json_str, node_name, node_fill);
+            json_str = data;
+            //add_new_poag(json_str, node_name, node_fill);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
@@ -70,6 +69,7 @@ var perform_marginal = function(node_name, node_fill) {
                 $('#mutant-input').fadeOut();
                 view_marginal();
             }
+            refresh_labels();
         }
     });
     $("#progress").addClass("disable");
@@ -80,16 +80,29 @@ var perform_marginal = function(node_name, node_fill) {
 */
 var displayJointGraph = function(node_name, node_fill) {
     selectedNode = node_name;
+    var resetGraphs = false;
+    if (inferType == "marginal") {
+        resetGraphs = true;
+    }
     inferType = "joint";
-    console.log({infer: inferType, node: selectedNode});
     $.ajax({
         url : window.location,
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
+            json_str = data;
             drawMutants = false;
-            var json_str = data;
-            add_new_poag(json_str, node_name, node_fill);
+            if (resetGraphs == true) {
+                options = setup_options("poag-all");
+                refresh_graphs(options);
+            } else {
+                add_new_poag(data, node_name, node_fill);
+            }
+            var newGraph = fuse_multipleGraphs(graph_array);
+            var options_merged = setup_options("poag");
+            options_merged = set_poag_data(options_merged, newGraph);
+            options_merged = create_poags(options_merged);
+            refresh_labels;
         }
     });
     $("#progress").addClass("disable");

@@ -65,7 +65,7 @@ function fuse_multipleGraphs(graphs, innerNodeGrouped){
     //adding the mutant information if fusing marginal poags
     if (fusedGraph.bottom.metadata.subtype == "marginal") {
 
-	// Need to fix when integrate to grasp
+	    // Need to fix when integrate to grasp
         var fusedGraphBottom = generate_mutants(fusedGraph.bottom);
         add_poagValuesToMutants(fusedGraph.bottom.nodes);
 
@@ -88,28 +88,28 @@ function add_poagValuesToMutants(nodes){
 
     for (var nodei in nodes){
 
-	var node = nodes[nodei];
+	    var node = nodes[nodei];
 
-	for (var chari in node.mutants.chars){
+	    for (var chari in node.mutants.chars){
 	    
-	    var char = node.mutants.chars[chari];
+	        var char = node.mutants.chars[chari];
 
-	    for (var bari in node.graph.bars){
+	        for (var bari in node.graph.bars){
 		
-		var bar = node.graph.bars[bari];
+		        var bar = node.graph.bars[bari];
 
-		if (char.label == bar.label) {
+		        if (char.label == bar.label) {
 			
-		    //adding normalised poagValues
-		    char["poagValues"] = {};
-		    for (var poag in bar.poagValues){
+		            //adding normalised poagValues
+		            char["poagValues"] = {};
+		            for (var poag in bar.poagValues){
 			
-			char.poagValues[poag] = 
-			(bar.poagValues[poag]/bar.value)*char.value;
-		    } 
-		}
+			            char.poagValues[poag] =
+			            (bar.poagValues[poag]/bar.value)*char.value;
+		            }
+		        }
+	        }
 	    }
-	}
     }
 }
 
@@ -134,56 +134,146 @@ function add_poagsToSeq(seq, npoags, innerNodeGrouped){
     var poagValues = seq.poagValues;
 
     //getting poags which don't have node
-    var poagsAbsent = [];
-    for (var poagi = 1; poagi<npoags+1; poagi++){
-	
-	var poagPresent = false;
-	for (var poag in poagValues){
-	    
-	    if (poagValues[poag].poag == ("poag" + poagi)){
-
-		poagPresent = true;
-		break;
-	    } 
-	}
-
-	if (!poagPresent){
-
-	    poagsAbsent.push(("poag" + poagi));
-
-	}
-    }
+    var poagsAbsent = getPoagsAbsent(npoags, poagValues);
 
     //updating seq appropriately to contain poag with label "0"
     if (poagsAbsent.length > 0){
 	
-	//inserting absent poags into seq object with label "0"
-	seq.chars.push({"label": "0", "value": 0});
+	    //inserting absent poags into seq object with label "0"
+	    seq.chars.push({"label": "0", "value": 0});
 
-	//add absent poags with label "0" for pi chart display
-	for (var poagAbsenti in poagsAbsent){
+        //for determining location of already added poags
+        var firstPoagi = -1;
 
-	    var poagAbsent = poagsAbsent[poagAbsenti];
+        //getting poagValues length before append extra poags
+        var originalLength = poagValues.length;
 
-	    var newPoagObject = {"label": "0", 
-				"value": 1, "poag": poagAbsent};
+	    //add absent poags with label "0" for pi chart display
+	    for (var poagAbsenti in poagsAbsent){
 
-	    //poag order in poagValues determines pi chart slice order
-	    if (!innerNodeGrouped){
+	        var poagAbsent = poagsAbsent[poagAbsenti];
 
-	        poagValues.splice(Number(poagAbsent
-		  .charAt(poagAbsent.length-1))-1, 0, newPoagObject);
+	        var newPoagObject = {"label": "0",
+				                "value": 1, "poag": poagAbsent};
 
-	    } else{
+            //getting poag number from poag name (e.g 1 from 'poag1')
+            var poagNumber = poagAbsent.charAt(poagAbsent.length-1) - 1;
 
-	 	//groups according to character when pi displayed
-		poagValues.push(newPoagObject); //needs changing
+	        //poag order in poagValues determines pi chart slice order
+	        if ( (!innerNodeGrouped) || originalLength == 1 || poagsAbsent.length == 1){
 
+                //nodes ordered according to poagNumber
+	            poagValues.splice(poagNumber, 0, newPoagObject);
+
+	        } else{
+
+	 	        //groups according to character when pi displayed
+	 	        firstpoagi = addpoag_InnerOrdered(firstpoagi, poagNumber,
+	 	                                          poagValues, newPoagObject);
+	 	    }
+
+	        seq.chars[seq.chars.length-1].value += 1;
+	    }
+    }
+}
+
+/*
+* Gets the poags not already described in poagValues
+*
+* params: npoags -> number of poags fused in the fused graph object
+*         poagValues -> seq.poagValues from the fused graph object
+*
+* returns: poagsAbsent -> array containing names of poags not present in
+*                         poagValues.
+*/
+function getPoagsAbsent(npoags, poagValues){
+
+    var poagsAbsent = [];
+
+    //getting poags no present in poag values
+    for (var poagi = 1; poagi<npoags+1; poagi++){
+
+	    var poagPresent = false;
+	    for (var poag in poagValues){
+
+	        if (poagValues[poag].poag == ("poag" + poagi)){
+
+		        poagPresent = true;
+		        break;
+	        }
 	    }
 
-	    seq.chars[seq.chars.length-1].value += 1;
-	}
+	    if (!poagPresent){
+
+	        poagsAbsent.push(("poag" + poagi));
+	    }
     }
+
+    return poagsAbsent;
+}
+
+/*
+* Adds the newPoagObject in the appropriate position in poagValues
+* params: firstpoagi -> index in poagValues first poagAbsent was added to.
+*                       firstpoagi == -1 if absent poag not yet added.
+*         poagNumber -> poags number (e.g. 1 from 'poag1') minus 1 for indexing.
+*         poagValues -> same as described in getPoagsAbsent.
+*         newPoagObject -> poagObject describing absent poag corresponding to poagNumber.
+* returns: firstpoagi -> same as described above.
+*/
+function addpoag_InnerOrdered(firstpoagi, poagNumber, poagValues, newPoagObject){
+
+    //groups according to character when pi displayed
+    if (firstpoagi == -1 && poagNumber > 0 && poagNumber < poagValues.length-1){
+
+	    for (var i = poagNumber; i<poagValues.length; i++){
+
+	        //adding poag at nearest site to poagNumber between poags with different labels
+	 	    if (poagValues[i-1].label != poagValues[i].label){
+	 	        poagValues.splice(i, 0, newPoagObject);
+	 	        firstpoagi = i;
+	 	        break;
+	 	    }
+	    }
+
+	    //means all of the poags in seq have same label, so don't want to split up
+	    if (firstpoagi == -1){
+
+	        //to check whether poag should be inserted at end or start
+	 	    var endDist = poagValues.length - poagNumber;
+
+            //if poag closer to end, insert there, else at start
+	 	    if (endDist < poagNumber){
+	 	        poagValues.push(newPoagObject);
+                firstpoagi = poagValues.length-1;
+
+	 	    } else {
+
+	 	        poagValues.splice(0, 0, newPoagObject);
+	 	        firstpoagi = 0;
+	 	    }
+	    }
+
+	} else if (firstpoagi == -1 && poagNumber == 0){
+
+	    //poag can just go at the start, won't split up poags with same labels
+	 	poagValues.splice(0, 0, newPoagObject);
+	 	firstpoagi = 0;
+
+
+	} else if (firstpoagi == -1 && poagNumber == poagValues.length-1){
+
+	    //poag can just go at the end, won't split up poags with same labels
+	 	poagValues.push(newPoagObject);
+	 	firstpoagi = poagValues.length-1;
+
+	} else {
+
+	    //just adding in front of last added absent poag
+	 	poagValues.splice(firstpoagi+1, 0, newPoagObject);
+	}
+
+	return firstpoagi;
 }
 
 /*

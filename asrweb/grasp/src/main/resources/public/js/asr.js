@@ -10,6 +10,7 @@ var refresh_elements = function() {
         $('#mutant-btn').prop("disabled", false);
     } else {
         drawMutants = false;
+        set_mutant(0);
         $('#mutant-input').fadeOut();
         $('#mutant-btn').prop("disabled", true);
         $('#mutant-btn').addClass("disabled");
@@ -53,28 +54,30 @@ var view_mutant_library = function(num) {
     set_mutant(num);
 
     // Get graph options to alter mutant library
-    var options = setup_options("poag-all", json_str);
+    options = set_poag_data(setup_options("poag-all"), json_str);
 
-    options.data.bottom = generate_mutants(options.data.bottom);
+    options.stored_data.inferred[0] = generate_mutants(options.stored_data.inferred[0]);
 
     // refresh options
     options.nodes = [];
-    for (var n in options.data.top.nodes) {
-        options.nodes.push(options.data.top.nodes[n]);
+    for (var n in options.stored_data.msa.nodes) {
+        options.nodes.push(options.stored_data.msa.nodes[n]);
     }
-    for (var n in options.data.bottom.nodes) {
-        options.nodes.push(options.data.bottom.nodes[n]);
+    for (var n in options.stored_data.inferred[0].nodes) {
+        options.nodes.push(options.stored_data.inferred[0].nodes[n]);
     }
 
     // Re-draw graph with mutants
-    refresh_graphs(options);
+    d3.select(".svg-content").remove();
+    retain_previous_position = true;
+    options = create_poags(options);
 };
 
 /*
  * Reset view to the full marginal distribution
  */
 var view_marginal = function() {
-    set_mutant(0);
+    //set_mutant(0);
     options = setup_options("poag-all");
     refresh_graphs(options);
 }
@@ -242,6 +245,7 @@ $(window).resize(function () {
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
         // TODO: re-size tree so it's 100% div sizing (like graphs)
+        run_phylo_tree();
         // redraw graphs for sizing
         display();
     }, 100);

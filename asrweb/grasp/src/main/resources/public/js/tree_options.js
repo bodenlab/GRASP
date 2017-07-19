@@ -57,6 +57,7 @@ var perform_marginal = function(node_name, node_fill) {
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
             json_str = data;
+            graph_array = [];
             //add_new_poag(json_str, node_name, node_fill);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
@@ -69,7 +70,7 @@ var perform_marginal = function(node_name, node_fill) {
                 $('#mutant-input').fadeOut();
                 view_marginal();
             }
-            refresh_labels();
+            refresh_elements();
         }
     });
     $("#progress").addClass("disable");
@@ -98,11 +99,13 @@ var displayJointGraph = function(node_name, node_fill) {
             } else {
                 add_new_poag(data, node_name, node_fill);
             }
-            var newGraph = fuse_multipleGraphs(graph_array);
-            var options_merged = setup_options("poag");
-            options_merged = set_poag_data(options_merged, newGraph);
-            options_merged = create_poags(options_merged);
-            refresh_labels;
+            graph_array.push(JSON.parse(data));
+            graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = node_fill;
+            if (graph_array.length > 1) {
+                new_graph = fuse_multipleGraphs(graph_array);
+                add_new_poag(new_graph, "", "");
+            }
+            refresh_elements();
         }
     });
     $("#progress").addClass("disable");

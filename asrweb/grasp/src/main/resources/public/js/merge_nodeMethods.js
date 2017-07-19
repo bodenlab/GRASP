@@ -617,6 +617,9 @@ function graph_deepCopy(node, npoags){
 
     for (var i=0; i<node.seq.chars.length; i++) {
 	    //adding graph details from node to graph object of new node
+        if (i >= node.graph.bars.length) {
+        	return newGraph;
+        }
 	    newGraph.bars.push({});
 
 	    newBars = newGraph.bars;

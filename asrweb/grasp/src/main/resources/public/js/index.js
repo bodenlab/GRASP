@@ -491,12 +491,11 @@ function getPaths(graph) {
  */
 var add_new_poag = function (json_str, poag_name) {
     var data = JSON.parse(json_str);
-    graph_array.push(data);
     graph = add_poag(graph, data.bottom, poag_name);
     graph = add_edges(graph, data.bottom, poag_name);
     graph.max_depth += data.bottom.max_depth + 1;
     graph = update_lanes(graph);
-    graph = make_scales(graph); 
+    graph = make_scales(graph);
     display();
 }
 

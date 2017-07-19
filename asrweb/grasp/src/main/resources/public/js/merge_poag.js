@@ -304,7 +304,7 @@ function fuse_graphs(graph1, graph2){
     var newGraph = {};
     newGraph.top = graph1.top;
     newGraph.bottom = {};
-    newGraph.bottom.metadata = graph1.bottom.metadata;
+    newGraph.bottom.metadata = metadata_DeepCopy(graph1.bottom.metadata);
 
     newGraph.bottom.metadata.type = 'fused';
     newGraph.bottom.metadata["subtype"] =
@@ -317,4 +317,19 @@ function fuse_graphs(graph1, graph2){
     return newGraph;
 }
 
+/*
+* Creates a deep copy of a metadata object
+* params: -> metadata - e.g. from graph.bottom.metadata
+* returns: -> metadataCopy - a deep copy of metadata.
+*/
+function metadata_DeepCopy (metadata){
 
+    var metadataCopy = {};
+
+    //copying over all properties from metadata to metadataCopy
+    for (var property in metadata){
+        metadataCopy[property] = metadata[property];
+    }
+
+    return metadataCopy;
+}

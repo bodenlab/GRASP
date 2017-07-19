@@ -10,6 +10,7 @@ var refresh_elements = function() {
         $('#mutant-btn').prop("disabled", false);
     } else {
         drawMutants = false;
+        set_mutant(0);
         $('#mutant-input').fadeOut();
         $('#mutant-btn').prop("disabled", true);
         $('#mutant-btn').addClass("disabled");
@@ -76,7 +77,7 @@ var view_mutant_library = function(num) {
  * Reset view to the full marginal distribution
  */
 var view_marginal = function() {
-    set_mutant(0);
+    //set_mutant(0);
     options = setup_options("poag-all");
     refresh_graphs(options);
 }

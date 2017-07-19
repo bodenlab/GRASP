@@ -3,7 +3,6 @@
  * @ariane.mora 29/06/2017
  */
 
-
 var phylo_options = {
     svg_info: {
         div_id: "", // The ID of the div you want to draw the graph in.
@@ -995,7 +994,7 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"), node_fill); // TODO: change node_fill to be the actual bg for the ancestor
+                    displayJointGraph(d3.select(this).attr("id"), node_fill);
                 } else {
                     perform_marginal(d3.select(this).attr("id"), node_fill);
                 }

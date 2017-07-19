@@ -100,7 +100,7 @@ var displayJointGraph = function(node_name, node_fill) {
                 add_new_poag(data, node_name, node_fill);
             }
             graph_array.push(JSON.parse(data));
-            graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = node_fill; // TODO
+            graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = node_fill;
             if (graph_array.length > 1) {
                 new_graph = fuse_multipleGraphs(graph_array);
                 add_new_poag(new_graph, "", "");

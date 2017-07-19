@@ -22,10 +22,7 @@
 
             </div>
 
-            <div id="poag" class="col-sm-12">
-
-
-            </div>
+            <!--<div id="poag" class="col-sm-12"></div>--> <!-- div for merged poags -->
 
                 <div class="col-sm-12">
                     <div class="input-group">
@@ -85,7 +82,6 @@
 
                             $('#btn-mutant-up').on('click', function() {
                                 var old = parseInt($('#text-mutant').val());
-                                console.log(isNaN(old));
                                 if (isNaN(old)) {
                                     $('#text-mutant').val(1);
                                     view_mutant_library(1);
@@ -129,18 +125,10 @@
                             var options = setup_options("poag-all");
                             options = set_poag_data(options, json_str);
                             options = create_poags(options);
+                            graph_array.push(JSON.parse(json_str));
+                            graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = graph.options.root_node_fill;
+                            var new_graph = "";
 
-                            /**
-                             * Adding in Brad's initially here to test that it works.
-                             * Once it is rendering will add to general code (easier to keep
-                             * modular until then.)
-                             */
-                            var json_parsed = JSON.parse(json_str);
-                            var graphs = [json_parsed, json_parsed];
-                            var newGraph = fuse_multipleGraphs(graphs);
-                            console.log(newGraph);
-
-                            /*]]>*/
                     </script>
 
                 </div>

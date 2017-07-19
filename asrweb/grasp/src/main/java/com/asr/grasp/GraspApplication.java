@@ -34,7 +34,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-	final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
+	final String sessionPath = "/home/brad/Desktop/Uni_Studies/Projects/POAGProject/ASRSETUP2/WebSessions";
+	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
 	//final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//final String sessionPath = "/var/www/GRASP/";
 

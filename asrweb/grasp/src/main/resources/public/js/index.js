@@ -357,7 +357,6 @@ setup_brush = function (graph) {
  * Sets the MSA graph at the top of the page
  */
 var set_poag_data = function (options, json_str) {
-    console.log(json_str);
     var data = JSON.parse(json_str);
     options.stored_data.msa = data.top;
     options.stored_data.inferred.push(data.bottom);
@@ -404,7 +403,6 @@ create_poags = function (options) {
 function display() {
     var brush = graph.brush;
     var nodes_curr = graph.all_nodes;
-    console.log(JSON.stringify(graph.all_nodes));
     var mini = graph.mini;
 
     var x_scale = graph.scale.x1;
@@ -497,7 +495,7 @@ var add_new_poag = function (json_str, poag_name) {
     graph = add_edges(graph, data.bottom, poag_name);
     graph.max_depth += data.bottom.max_depth + 1;
     graph = update_lanes(graph);
-    graph = make_scales(graph); 
+    graph = make_scales(graph);
     display();
 }
 
@@ -508,5 +506,6 @@ var add_new_poag = function (json_str, poag_name) {
 var refresh_graphs = function(options) {
     d3.select(".svg-content").remove();
     retain_previous_position = true;
+    options = set_poag_data(options, json_str);
     options = create_poags(options);
 };

@@ -3,7 +3,6 @@
  * @ariane.mora 29/06/2017
  */
 
-
 var phylo_options = {
     svg_info: {
         div_id: "", // The ID of the div you want to draw the graph in.
@@ -241,12 +240,11 @@ var draw_phylo_circle = function (group, node, n) {
             on_node_mouseout(node_selected);
         })
         .on("contextmenu", function() {
-            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class"); 
-            var node_fill = d3.select("#circle-" + d3.select(this).attr("id")).attr("fill");
+            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class");
+            var node_fill = phylo_options.legend.colour_scale(node.y);//d3.select("#circle-" + d3.select(this).attr("id")).attr("fill");
             console.log(node_name, node_fill);
             d3.event.preventDefault();
             menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill);
-
         });
 
 }
@@ -927,9 +925,9 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"));
+                    displayJointGraph(d3.select(this).attr("id"), node_fill);
                 } else {
-                    perform_marginal(d3.select(this).attr("id"));
+                    perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
             }); 
 
@@ -947,9 +945,9 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"));
+                    displayJointGraph(d3.select(this).attr("id"), node_fill);
                 } else {
-                    perform_marginal(d3.select(this).attr("id"));
+                    perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
             });
 

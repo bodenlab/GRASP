@@ -14,17 +14,16 @@ function getFusedEdges(edges1, edges2, newNodes, metadata1, metadata2) {
 
     //pairwise comparison of edges, fusing if same edge name
     for (var edge1 in edges1) {
-	for (var edge2 in edges2) {
+	    for (var edge2 in edges2) {
 
-	    if (edge1 == edge2){
+	        if (edge1 == edge2){
 
-		var newEdge = fuse_edges(edges1[edge1], edges2[edge2], 
+		        var newEdge = fuse_edges(edges1[edge1], edges2[edge2],
 						metadata1, metadata2);
-		newEdges[edge1] = newEdge;
+		        newEdges[edge1] = newEdge;
 
-		break;
-	    }
-
+		        break;
+	        }
         }
     }
 
@@ -40,13 +39,13 @@ function getFusedEdges(edges1, edges2, newNodes, metadata1, metadata2) {
 *
 * params = -> edges - object containing edges desired to get its 
 *		      unique edges.
-* 	   -> edgesFused - array of edge names added to newEdges. 
-*	   -> newEdges - array containing all the fused edges 
+* 	       -> edgesFused - array of edge names added to newEdges.
+*	       -> newEdges - array containing all the fused edges
 *			 already proccessed
 *
 * ensures -> All of the unique edges in edges will be added to 
 *	     newEdges.
-*	  -> Edges added to newEdges are a deep copy version of 
+*	      -> Edges added to newEdges are a deep copy version of
 *	     the edge.
 */
 function add_uncommonEdges(edges, newEdges, newNodes, metadata){
@@ -56,18 +55,18 @@ function add_uncommonEdges(edges, newEdges, newNodes, metadata){
 
         if (!(edge in newEdges)){
 
-	    var edgeCopy = {};
-	    var edgeInfo = edges[edge];
+	        var edgeCopy = {};
+	        var edgeInfo = edges[edge];
 
-	    for (var property in edgeInfo) {
-		edgeCopy[property] = edgeInfo[property];
-	    }
+	        for (var property in edgeInfo) {
+		        edgeCopy[property] = edgeInfo[property];
+	        }
 
-	    //setting the new y-values
-	    setY(edgeCopy, newNodes);
+	        //setting the new y-values
+	        setY(edgeCopy, newNodes);
 	    
-	    newEdges[edge] = edgeCopy;
-	}
+	        newEdges[edge] = edgeCopy;
+	    }
     }
 }
 
@@ -77,7 +76,7 @@ function add_uncommonEdges(edges, newEdges, newNodes, metadata){
 *
 * params: -> edgeCopy - deepCopy of the edge being created to 
 *			be added to the new edges.
-*	  -> newNodes - array of nodes created due to fusing 
+*	      -> newNodes - array of nodes created due to fusing
 *			the two graphs.
 *
 * ensures: -> The edgeCopy has it's y-values set so the edge 
@@ -89,26 +88,26 @@ function setY(edgeCopy, newNodes){
 
     //looping through each node and checking if involved in edge
     for (var i=0; i<newNodes.length; i++){
-	var node = newNodes[i];
+	    var node = newNodes[i];
 
-	//no. of nodes corresponding to edgeCopy
-	var hits = 0;
+	    //no. of nodes corresponding to edgeCopy
+	    var hits = 0;
 
-	//Setting the y for the from node
-	if (node.id==edgeCopy.from){
-	    edgeCopy.y1 = node.y;
-	    hits++;
+	    //Setting the y for the from node
+	    if (node.id==edgeCopy.from){
+	        edgeCopy.y1 = node.y;
+	        hits++;
 
-	//setting the y for the to node
-	} else if(node.id==edgeCopy.to){
-	    edgeCopy.y2 = node.y;
-	    hits++;
-	}
+	    //setting the y for the to node
+	    } else if(node.id==edgeCopy.to){
+	        edgeCopy.y2 = node.y;
+	        hits++;
+	    }
 	
-	//edge can only have two nodes, so:
-	if (hits==2){
-	    break;
-	}
+	    //edge can only have two nodes, so:
+	    if (hits==2){
+	        break;
+	    }
     }
 }
 
@@ -131,16 +130,16 @@ function fuse_edges(edge1Info, edge2Info, metadata1, metadata2){
 
     //making y1 for new edge be equal to edge with largest y1
     if (edge1Info.y1 > edge2Info.y1){
-	newEdge.y1 = edge1Info.y1;
+	    newEdge.y1 = edge1Info.y1;
     } else {
-	newEdge.y1 = edge2Info.y1;
+	    newEdge.y1 = edge2Info.y1;
     }
 
     //making y2 for new edge be equal to edge with largest y2
     if (edge1Info.y2 > edge2Info.y2) {
-	newEdge.y2 = edge1Info.y2;
+	    newEdge.y2 = edge1Info.y2;
     } else {
-	newEdge.y2 = edge2Info.y2;
+	    newEdge.y2 = edge2Info.y2;
     }
 
     return newEdge;

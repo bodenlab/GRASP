@@ -22,10 +22,7 @@
 
             </div>
 
-            <!--<div id="poag" class="col-sm-12">
-
-
-            </div>-->
+            <!--<div id="poag" class="col-sm-12"></div>--> <!-- div for merged poags -->
 
                 <div class="col-sm-12">
                     <div class="input-group">
@@ -129,18 +126,19 @@
                             var options = setup_options("poag-all");
                             options = set_poag_data(options, json_str);
                             options = create_poags(options);
+                            graph_array.push(JSON.parse(json_str));
+                            var new_graph = "";
 
                             /**
                              * Adding in Brad's initially here to test that it works.
                              * Once it is rendering will add to general code (easier to keep
                              * modular until then.)
                              */
-                            var json_parsed = JSON.parse(json_str);
+                            /*var json_parsed = JSON.parse(json_str);
                             var graphs = [json_parsed, json_parsed];
                             var newGraph = fuse_multipleGraphs(graphs);
                             add_new_poag(newGraph, "");
-                            console.log(newGraph);
-
+                            console.log(newGraph);*/
                             /*]]>*/
                     </script>
 

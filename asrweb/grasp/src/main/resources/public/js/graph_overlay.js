@@ -150,7 +150,8 @@ function create_stackedbar(bar, bar_info, bar_sum, formatDetails, options, graph
     i = 0;
 
     //this color object need work, tried to get into options but couldn't, need to ask Ariane
-    var colors = {"poag1": "red", "poag2": "blue", "poag3": "yellow", "poag4": "orange", "poag5": "green"};
+    //var colors = {"poag1": "red", "poag2": "blue", "poag3": "yellow", "poag4": "orange", "poag5": "green"}; // TODO: try to grab from options (so in the same place)
+    var colors = graph.options.poagColours;
     for (var subVal in subVals) {
 
 	var heightValue = y(subVals[subVal]/100);

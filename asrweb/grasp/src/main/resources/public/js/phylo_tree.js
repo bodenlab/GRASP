@@ -241,12 +241,11 @@ var draw_phylo_circle = function (group, node, n) {
             on_node_mouseout(node_selected);
         })
         .on("contextmenu", function() {
-            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class"); 
-            var node_fill = d3.select("#circle-" + d3.select(this).attr("id")).attr("fill");
+            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class");
+            var node_fill = phylo_options.legend.colour_scale(node.y);//d3.select("#circle-" + d3.select(this).attr("id")).attr("fill");
             console.log(node_name, node_fill);
             d3.event.preventDefault();
             menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill);
-
         });
 
 }

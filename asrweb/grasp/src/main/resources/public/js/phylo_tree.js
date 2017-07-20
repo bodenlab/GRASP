@@ -22,7 +22,7 @@ var phylo_options = {
         extents: new Array(),
         min_x: 0,
         additive: true, // Whether or not we want to display the branches as additiv
-
+        node_instep: 0.1,
     },
     legend: {
         width: 50,
@@ -167,7 +167,7 @@ var setup_phylo_svg = function (phylo_options) {
     var tree_div = phylo_options.svg_info.div_id;
 
 	var options = phylo_options.svg_info; 
-    var width = graph.page_options.width;//document.getElementById(options.raw_svg_id).offsetWidth;
+    var width = graph.page_options.width;
 
     var svg = d3.select(options.div_id).append("svg")
             .attr("width", width + options.margin.left + options.margin.right)
@@ -584,20 +584,8 @@ var run_phylo_tree = function () {
 
     phylo_options.tree.all_nodes.push(make_child(tree_json, false));
 
-    // Recursivly add the depths to the tree 
-    //assign_depths(tree_json);
-
-    // Sort the nodes by depth because we always want to 
-    // assign the coords from 
-    
-    //add_children_nodes(tree_json);
-    //for (var n in phylo_options.tree.tree_nodes) {
     assign_node_coords(tree_json, false, 0);
-    //}
-
-    //for (var n in phylo_options.tree.tree_nodes) {
     add_children_nodes(tree_json);
-    //}
 
     // collect all the nodes
     var nodes = phylo_options.tree.all_nodes;
@@ -725,33 +713,6 @@ var assign_num_children = function(node) {
     return assign_num_children(node.parent_node);
 }
 
-/**
- * Recursively update the x coordinates based on how many nodes there are
- * at a particular level, this will prevent the tree from squashing up.
- *
- * At each level we get the nodes at that depth, order ascending based
- * on x coordinates and then position the nodes accordingly by dividing
- */
-var update_x_coords_based_on_num_nodes_at_depth = function(depth) {
-    // Get the nodes at this depth and sort on the original x
-    // coords.
-    var padding = 100;
-    var nodes_at_depth = phylo_options.tree.node_depth_dict[depth];
-    var num_nodes = Object.keys(nodes_at_depth).length;
-    
-    // Sort the nodes based on their current x-coords
-    nodes_at_depth.sort(function (a, b) { return a.x - b.x;});
-
-    // For each of the nodes now that they are sorted we want to assign
-    // new x coords based on how many nodes there are at this depth.
-    var size_of_compartment = (phylo_options.width - padding) /num_nodes;
-
-    for (var n in nodes_at_depth) {
-        var node = nodes_at_depth[n];
-        node.x = (size_of_compartment * n) + (padding / 2);
-    }
-}
-
 
 /**
  * Recur one more time and add all the children.
@@ -809,9 +770,23 @@ var add_children_nodes = function(node) {
     }
 }
 
-
+/**
+ * Assign node coods updates the node x and y coords
+ * to be valyes to draw on the page rather than placement
+ * variables i.e. scales the coordinates depending on the
+ * with and height of the VSG element.
+ *
+ * Parameters:
+ *      node: the node that we are adding -> recursively
+ *          calls the function on the children nodes.
+ *
+ *      depth: Used when we are making the tree into a cladogram 
+ *          rather than an additive tree.
+ */
 var assign_node_coords = function (node, depth) {
     var additive = phylo_options.tree.additive;
+    var node_instep = phylo_options.tree.node_instep;
+
 
     if (additive) {
         node.y = phylo_options.y_scale(node.distance_from_root);
@@ -822,9 +797,11 @@ var assign_node_coords = function (node, depth) {
 
     // Check that the node.x is not NAN
     if (node.is_left) {
-        node.x = phylo_options.x_scale(node.raw_x + 0.1);//node.parent_node.raw_x - 1);
+        // We add a instep if it is on the LHS and RHS so that we
+        // don't get overlap.
+        node.x = phylo_options.x_scale(node.raw_x + node_instep);
     } else {
-        node.x = phylo_options.x_scale(node.raw_x - 0.1);//)node.parent_node.raw_x + 1);
+        node.x = phylo_options.x_scale(node.raw_x - node_instep);
     }
 
     if (node.children == undefined) {
@@ -838,63 +815,17 @@ var assign_node_coords = function (node, depth) {
         }
     }
 
+    // Recursively call the assign node coords on each child of
+    // the node.
     if (node.children != undefined) {
-        assign_node_coords(node.children[0], depth + 1)
-        assign_node_coords(node.children[1], depth + 1);
+        for (var n in node.children) {
+            assign_node_coords(node.children[n], depth + 1);
+        }
     }
+    // Return after recurring.
     return;
 }
 
-/**
- * Assign depths to tree. Goes through the nested JSON object
- * and adds as nodes, assigning a depth so that the y value
- * can be calculated.
- *
- * Also when we are adding the children we also add the branches
- * between the children and their parents.
- * 1. branch from parent to center of children
- * 2. branch between children
- */
-var assign_depths = function (node) {
-    var additive = phylo_options.tree.additive;
-
-
-    if (node.children == undefined) {
-        // update that this node is an extent
-        return;
-    }
-
-    cl_y = phylo_options.y_scale(node.children[0].depth);
-    cr_y = phylo_options.y_scale(node.children[1].depth); 
-    
-    if (additive) {
-        cl_y = phylo_options.y_scale(node.children[0].distance_from_root);
-        cr_y = phylo_options.y_scale(node.children[1].distance_from_root);
-    }
-        
-    if (node.children[0].children == undefined) {
-        cl_y = cl_y - (phylo_options.y_scale(0.5));
-    }
-    if (node.children[1].children == undefined) {
-        cr_y = cr_y - (phylo_options.y_scale(0.5));
-    }
-
-    node.children[0].y = cl_y;
-    // Right
-    node.children[1].y = cr_y;
-    // Left
-    node.children[0].x = phylo_options.x_scale(node.children[0].raw_x + 0.1);//node.x - (left_max_children * (phylo_options.width / Math.pow(2, new_depth)));
-    // Right
-    node.children[1].x = phylo_options.x_scale(node.children[1].raw_x - 0.1);//node.x + (right_max_children * (phylo_options.width / Math.pow(2, new_depth)));
-    
-    // Add the parent y coords to the node so we can use this later
-    node.children[0].parent_y = node.y;
-    node.children[1].parent_y = node.y;
-
-//    assign_depths(node.children[0]);
-//    assign_depths(node.children[1]);
-    return node;
-}
 
 /**
  * Parsing the newick format of a tree to JSON.
@@ -1021,15 +952,11 @@ function contextMenu() {
                 }
             });
 
-
-
-
         // Other interactions
         d3.select('body')
             .on('click', function() {
                 d3.select('.context-menu').remove();
             });
-
     }
     
     menu.items = function(e) {
@@ -1091,31 +1018,17 @@ function contextMenu() {
  *              
  */
 
+
 /**
- * var first_walk = function(node, distance) {
-    if (node.children == undefined) {
-        // If it is the left node then we want to assign the x-coord based on 
-        if (node.left) {
-            node.x = 
-        }
-    }
-}
-
-var buchheim_tree = function (node, tree, node_parent, position) {
-    node.x = -1;
-    node.y = depth;
-    node.node_parent;
-    node.thread = null;
-    node.offset = 0;
-    node.ancestor = node;
-    node.change = 0; // node.shift?
-    node.left_most_sibling = null;
-    node.position = position; // i.e. the position in the tree
-    // left child or right child.
-}
-*/
-
-// https://stackoverflow.com/questions/8584902/get-closest-number-out-of-array
+ * A helper function to assign the y coordinate so that we group the 
+ * coordinates by the y coord rather than the depth.
+ * 
+ * i.e. used when we are creating an additive tree rather than a 
+ * cladogram -> the nodes are thus placed at depths dependent on how far from the root they 
+ * are rather than the pre defined depth.
+ *
+ * https://stackoverflow.com/questions/8584902/get-closest-number-out-of-array
+ */
 var assign_depth_from_y = function (num, arr) {
             
     var curr = arr[0];
@@ -1131,6 +1044,20 @@ var assign_depth_from_y = function (num, arr) {
 
 }
 
+/**
+ * The main function which assigns the node x and y coords.
+ * These are done in a recursive manner.
+ *
+ * 1. depth - how far down the tree the node occurs.
+ * 2. mod   - how far we need to move the node to the
+ *            right when whave clashes (i.e. for x coord).
+ * 3. is_left - whether it is a right or left child (assuming
+ *          bifurcating trees).
+ * 4. raw_x - the x coord without factoring the width
+ *          of the page into account. In this function
+ *          the raw_x is preliminary as we update it based on
+ *          the contour and mod.
+ */
 var setup = function(node, depth) {
     node.depth = depth;
     node.mod = 0;
@@ -1161,9 +1088,7 @@ var setup = function(node, depth) {
     left.is_left = true;
     right.is_left = false;
 
-    //if (left != undefined && right != undefined) {
     node.raw_x = fix_subtrees(left, right);
-    //}
 
     if (node.raw_x < phylo_options.tree.min_x) {
         phylo_options.tree.min_x = node.raw_x;
@@ -1171,84 +1096,44 @@ var setup = function(node, depth) {
 
     return node;
 }
-/*
-var setup_tree = function (node, nexts, offset, phylo_options, depth) {
 
-    //var depth = assign_depth_from_y(node.distance_from_root, phylo_options.depth_array);
-    depth += 1;
-    if (nexts == null) {
-        nexts = {};
-        nexts[depth] = 0;
-    }
-    if (offset == null) {
-        offset = {};
-        offset[depth] = 0;
-    }
-    if (nexts[depth] == undefined) {
-        nexts[depth] = 0;
-    }
-    if (offset[depth] == undefined) {
-        offset[depth] = 0;
-    }
 
-    for (var child in node.children) {
-        setup_tree(node.children[child], nexts, offset, phylo_options, depth);
-    }
-
-    node.y = depth;
-    // Keep track of the max depth
-    if (node.y > phylo_options.tree.max_y) {
-        phylo_options.tree.max_y = node.y;
-    }
-
-    var position = 0;
-
-    if (node.children == undefined) {
-        position = nexts[depth];
-        node.raw_x = position;
-    }
-    else if (node.children.length == 1) {
-        position = node.children[0].raw_x - 1;
-    }
-    else {
-        position = (node.children[0].raw_x + node.children[1].raw_x) / 2;
-    }
-    offset[depth] = Math.max(offset[depth], nexts[depth] - position);
-    
-    if (node.children != undefined) {
-        node.raw_x = position + offset[depth];
-    }
-
-    nexts[depth] += 2
-    node.mod = offset[depth];
-    if (depth > phylo_options.tree.max_y) {
-        phylo_options.tree.max_y = depth;
-    }
-}
-
-*/
-var add_mods = function (node, modsum, phylo_options) {
+/**
+ * add mods is a second walk through of the tree.
+ * Adds the offsets to the nodes that were calculated when 
+ * we did the first walk of the tree and came accross 
+ * the clashes.
+ *
+ * Parameters:
+ *      modsum: the cummlative offset from the root of the tree
+ *          to add to the x-coord of the node. 
+ *      node: the node we are currently adding the mod to.
+ *
+ * Recurs on the children of the node.
+ */
+var add_mods = function (node, modsum) {
 //    if (phylo_options.tree.min_x < 0) {
         // Don't want to have negative x values so we shift everything
         // by the minimum x.
 //        node.raw_x += (-1 * phylo_options.tree.min_x);
 //    }
+
     node.raw_x = node.raw_x + modsum;
     
-    if (node.mod == undefined) {
-        console.log(node);
-    }
-       
+    
     // Keep track of the largest x coord
     if (node.raw_x > phylo_options.tree.max_x) {
         phylo_options.tree.max_x = node.raw_x + 1;
     }
 
     for (var child in node.children) {
-        add_mods(node.children[child], modsum + node.mod, phylo_options);
+        add_mods(node.children[child], modsum + node.mod);
     }
 
+    // Add the node to a list of nodes so that we can just draw all
+    // in a single function that itterates over the array.
     phylo_options.tree.tree_nodes.push(node);
+    return;
 }
 
 var contour = function (left, right, max_offset, left_offset, right_offset, left_outer, right_outer) {
@@ -1280,6 +1165,15 @@ var contour = function (left, right, max_offset, left_offset, right_offset, left
     return {'li': li, 'ri': ri, 'max_offset': max_offset, 'left_offset': left_offset, 'right_offset': right_offset, 'lo': left_outer, 'ro': right_outer};
 }
 
+
+/**
+ * Helper function which returns the thread of the next node
+ * if one exists.
+ *
+ * Otherwise if the node has a left child we return that.
+ *
+ * Undefined is returned otherwise.
+ */
 var next_left = function(node) {
     if (node.thread != undefined) {
         return node.thread;
@@ -1290,6 +1184,9 @@ var next_left = function(node) {
     return undefined;
 }
 
+/**
+ * Similar to the next_left function.
+ */
 var next_right = function(node) {
     if (node.thread != undefined) {
         return node.thread;
@@ -1300,8 +1197,28 @@ var next_right = function(node) {
     return undefined;
 }
 
+
+/**
+ * fix_subtrees updates the subtrees of a node.
+ *
+ * This is done itterattively so that each time we progress up the levels
+ * of the trees we know w edon't have to fix any lower trees as they
+ * have already been fixed.
+ *
+ * Parameters:
+ *      left    - the left child of the node, contains the left subtree.
+ *      right   - the right child of th node, contains the right subtree.
+ *
+ * Returns: 
+ *      half way between the left and right sub tree children nodes.
+ */
 var fix_subtrees = function (left, right) {
+    // The first time we get the contours we have to srat it with
+    // no offsets etc. 
     var contours = contour(left, right, null, null, null, null, null);
+    // Contours is recursively called on the tree to determine how far
+    // we need to offset the top nodes to ensure that none of the 
+    // lower subtrees are conflicting in the x nodes.
     var diff = contours['max_offset'];
     var ri = contours['ri'];
     var ro = contours['ro'];
@@ -1326,16 +1243,12 @@ var fix_subtrees = function (left, right) {
         ro.thread = li;
         ro.mod = left_offset - right_offset;
     }
+
     return (left.raw_x +  right.raw_x) /2;
 }
-
 
 var refresh_tree = function () {
     clear_svg();
     phylo_options.svg_info.width = window.innerWidth - 200;
     run_phylo_tree();
 }
-
-
-
-

@@ -517,6 +517,7 @@ var make_depth_array = function(phylo_options) {
 
 var set_phylo_params = function (tree_div, tree_string) {
     phylo_options.svg_info.div_id = tree_div;
+    phylo_options.svg_info.width = window.innerWidth - 200;
     phylo_options.tree_string = tree_string;
     //var tree_json = parse_newick(tree_string);
     //phylo_options.tree_json = tree_json;
@@ -1326,6 +1327,13 @@ var fix_subtrees = function (left, right) {
         ro.mod = left_offset - right_offset;
     }
     return (left.raw_x +  right.raw_x) /2;
+}
+
+
+var refresh_tree = function () {
+    clear_svg();
+    phylo_options.svg_info.width = window.innerWidth - 200;
+    run_phylo_tree();
 }
 
 

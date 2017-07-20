@@ -245,7 +245,7 @@ $(window).resize(function () {
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
         // TODO: re-size tree so it's 100% div sizing (like graphs)
-        run_phylo_tree();
+        refresh_tree();
         // redraw graphs for sizing
         display();
     }, 100);

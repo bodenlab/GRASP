@@ -100,6 +100,8 @@ var displayJointGraph = function(node_name, node_fill) {
                 add_new_poag(data, node_name, node_fill);
             }
             graph_array.push(JSON.parse(data));
+            //problem below, this only colours for the second poag, leaving the colour for 'poag1'
+            //undefined, hence why it comes up black for the fused nodes
             graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = node_fill;
             if (graph_array.length > 1) {
                 new_graph = fuse_multipleGraphs(graph_array);

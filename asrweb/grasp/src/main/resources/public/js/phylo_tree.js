@@ -167,7 +167,7 @@ var setup_phylo_svg = function (phylo_options) {
     var tree_div = phylo_options.svg_info.div_id;
 
 	var options = phylo_options.svg_info; 
-    var width = graph.page_options.width;//document.getElementById(options.raw_svg_id).offsetWidth;
+    var width = graph.page_options.width;
 
     var svg = d3.select(options.div_id).append("svg")
             .attr("width", width + options.margin.left + options.margin.right)
@@ -784,7 +784,7 @@ var add_children_nodes = function(node) {
  */
 var assign_node_coords = function (node, depth) {
     var additive = phylo_options.tree.additive;
-    var instep = phylo_options.tree.node_instep;
+    var node_instep = phylo_options.tree.node_instep;
 
 
     if (additive) {

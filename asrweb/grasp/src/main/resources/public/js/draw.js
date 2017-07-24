@@ -184,7 +184,6 @@ draw_mini_line = function (graph) {
 
                 circle.moveToBack();
             }
-            // indicate mutant locations
             if (drawMutants && mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
                 var tri = group.append("path")
                         .attr('transform', 'translate(' + (line_x - x_padding) + ',' + (y_scale(0) - 10) + ')')

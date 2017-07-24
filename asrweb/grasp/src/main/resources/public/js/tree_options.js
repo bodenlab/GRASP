@@ -93,21 +93,18 @@ var displayJointGraph = function(node_name, node_fill) {
         success: function(data) {
             json_str = data;
             drawMutants = false;
-            if (resetGraphs == true) {
-                options = setup_options("poag-all");
-                refresh_graphs(options);
-            } else {
-                add_new_poag(data, node_name, node_fill);
-            }
             graph_array.push(JSON.parse(data));
             //problem below, this only colours for the second poag, leaving the colour for 'poag1'
-            //undefined, hence why it comes up black for the fused nodes
-            graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = node_fill;
-            if (graph_array.length > 1) {
-                new_graph = fuse_multipleGraphs(graph_array);
-                add_new_poag(new_graph, "", "");
-            }
-            refresh_elements();
+            //undefined, hence why it comes up black for the fused nodes -> I may have fixed this
+            setup_poags(json_str, false, false, false, node_name)
+            graph_array.push(JSON.parse(json_str));
+            poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = node_fill;
+            poags.options.name_to_merged_id[node_name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+            poags.options.names_to_colour[node_name] = node_fill;
+
+            var new_graph = fuse_multipleGraphs(graph_array);
+            setup_poags(new_graph, false, false, true, 'Merged')
+
         }
     });
     $("#progress").addClass("disable");

@@ -1,4 +1,6 @@
-
+/*
+ * http://bl.ocks.org/bunkat/1962173
+ */
 
 
 /**
@@ -32,7 +34,7 @@ var poags = {
     min_y: 1000,
     max_y: 0,
     // Current x coords visible in the window frame
-    cur_x_max: 10,
+    cur_x_max: 100,
     cur_x_min: 0,
     // SVG and group elements
     svgs: {},
@@ -47,7 +49,7 @@ var poags = {
         raw: {},
         class_name: 'single-',
         height: 200,
-        margin: {left: 0, right: 0, top: 100, bottom: 0}
+        margin: {left: 0, right: 0, top: 150, bottom: 0}
     },
     multi: {
         names: [],
@@ -56,7 +58,7 @@ var poags = {
         raw: {},
         class_name: 'multi-',
         height: 250,
-        margin: {left: 0, right: 0, top: 100, bottom: 0}
+        margin: {left: 0, right: 0, top: 150, bottom: 0}
     }
 };
 
@@ -82,6 +84,7 @@ var random = {"C": "#33CCFF", "S": "#A55FEB", "T": "#FF68DD", "Y": "#9A03FE", "Q
  *      8. Data             -> SVG information and div ID.
  */
 var poag_options = {
+
     poagColours: {},
     // Keep track of the colours assigned to the poag name
     name_to_merged_id: {},
@@ -93,9 +96,9 @@ var poag_options = {
     root_node_fill: "#EA78F5",
     legend_rect: {
         width: 90,
-        stroke_width: 0,
+        stroke_width: 3,
         stroke: "white",
-        default_opacity: 1,
+        opacity: 0.3,
         text_padding: 10,
     },
 
@@ -270,15 +273,13 @@ var draw_all_poags = function(poags) {
         var edges = poags.single.edges[poag_name];
         var group = poags.groups.single[poag_name];
         var scale_y = poags.scale['single_y'];
-        var colour = poags.options.names_to_colour[poag_name];
 
         if (poag_name == poags.merged_poag_name) {
             poagPi = true;
         }
         if (nodes != undefined) {
             var height = poags.single.height - poags.single.margin.top/2;
-            draw_legend_rect(poags, nodes[0], group, height, scale_y, colour);
-            draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi);
+            draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi, height);
         }
     }
 
@@ -292,15 +293,20 @@ var draw_all_poags = function(poags) {
         var colour = poags.options.names_to_colour[poag_name];
 
         if (nodes != undefined) {
-            var height = poags.single.height - poags.single.margin.top/2;
-            draw_legend_rect(poags, nodes[0], group, height, scale_y, colour);
-
-            draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi);
+            var height = poags.multi.height - poags.multi.margin.top/2;
+            draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi, height);
         }
     }
     return poags;
 }
 
+
+/**
+ * Add new poag, need to remove the SVG and children.
+ */
+ var refresh_svg_content = function() {
+    svg.selectAll("*").remove();
+ }
 
 /**
  * Redraws the POAG elements.
@@ -312,17 +318,17 @@ var redraw_poags = function() {
     poags = update_x_scale(poags);
     var group = poags.group;
 
-    group.selectAll("path").remove();
-    group.selectAll("circle").remove();
-    group.selectAll("text").remove();
-    group.selectAll("rect.mini").remove();
+    group.selectAll("path.poag").remove();
+    group.selectAll("circle.poag").remove();
+    group.selectAll("text.poag").remove();
+    group.selectAll("rect.poag").remove();
+    group.selectAll("defs.poag").remove();
     poags = draw_all_poags(poags);
 }
 
 
 /**
  * Sets the brush x coords.
- * http://bl.ocks.org/bunkat/1962173
  */
 
 function moveBrush() {
@@ -339,7 +345,6 @@ function moveBrush() {
     poags.retain_previous_position = true;
     redraw_poags();
 }
-
 /**
  * Sets up the brush element.
  *
@@ -348,6 +353,7 @@ function moveBrush() {
 var setup_brush = function (poags) {
 
     poags.groups.mini.append('rect')
+            .attr("class", "mini")
             .attr('pointer-events', 'painted')
             .attr('width', poags.options.style.width)
             .attr('height', poags.options.mini.height)
@@ -375,7 +381,10 @@ var setup_brush = function (poags) {
 /**
  * Draws POAG.
  */
-var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi) {
+var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi, height) {
+    var draw_legend = true;
+    var colour = poags.options.names_to_colour[poag_name];
+
     for (var e in edges) {
         var edge = edges[e];
         if (edge.from.x >= poags.cur_x_min - 1 && edge.to.x <= poags.cur_x_max + 1) {
@@ -388,7 +397,12 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
         var node_cx = poags.scale.x(node.x);
         var node_cy = scale_y(node.y);
         if (node.x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
+           if (draw_legend) {
+                draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
+                draw_legend = false;
+            }
             var radius = draw_nodes(poags, node, group, node_cx, node_cy);
+
             if (poag_name == poags.root_poag_name || poagPi) {
                 draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
                 // if it is a merged node, we want to draw a layered Pie chart
@@ -713,14 +727,17 @@ var setup_poag_svg = function (poags, set_msa) {
 
     // If we are resetting the SVG element we want to add a svg otherwise
     // we just use the existing svg element
-    if (d3.select("svg")) {
-        d3.select("svg").remove();
+    if (poags.svg == undefined) {
+        var svg = d3.select(options.data.target)
+            .append("svg")
+            .attr("viewBox", "0 0 " + width + " " + 3 * height )   // TODO need to change this to be height of div
+            .classed("svg-content", true);
+
+    } else {
+        poags.svg.selectAll("*").remove();
+        var svg = poags.svg;
     }
 
-    var svg = d3.select(options.data.target)
-        .append("svg")
-        .attr("viewBox", "0 0 " + width + " " + height )
-        .classed("svg-content", true);
     poags.groups = {'single': {}, 'multi': {}};
 
     var group = svg.append('g')
@@ -791,7 +808,7 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
     }
 
     group.append('circle')
-        .attr("class", 'node-' + node.name)
+        .attr("class", 'poag')
         .attr("id", "node-" + node.unique_id)
         .attr('cx', node_cx)
         .attr('cy', node_cy)
@@ -803,7 +820,7 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
 
     if (radius > node_opt.min_radius && node.label.length == 1) {
         group.append("text")
-             .attr("class", "ptext")
+             .attr("class", "poag")
              .attr("id", "ptext-" + node.unique_id)
              .attr('x', node_cx)
              .attr('y', function () {
@@ -856,7 +873,7 @@ var draw_mini_msa = function (poags) {
 
         if (node.num_out_edges > options.number_of_edges_to_be_interesting) {
             var rect = group.append("rect")
-                    .attr("class", "mini")
+                    .attr("class", "poag")
                     .attr('x', line_x)
                     .attr('y', function () {
                         var tmp = y_scale(0); // Have it at the top
@@ -872,7 +889,7 @@ var draw_mini_msa = function (poags) {
         }
         if (node.deleted_during_inference == true) {
             var circle = group.append("circle")
-                    .attr("class", "mini_node")
+                    .attr("class", "poag")
                     .attr("id", "node_" + node.label + n)
                     .attr('cx', line_x)
                     .attr('cy', line_y)
@@ -884,6 +901,7 @@ var draw_mini_msa = function (poags) {
         }
         if (drawMutants && mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
             var tri = group.append("path")
+                    .attr("class", "poag")
                     .attr('transform', 'translate(' + (line_x - mini_opt.x_padding) + ',' + (y_scale(0) - 10) + ')')
                     .attr("d", d3.svg.symbol().type("triangle-down"))
                     .attr("opacity", 0.7)
@@ -895,8 +913,8 @@ var draw_mini_msa = function (poags) {
     }
 
     var path = group.append("path")
+            .attr("class", "poag")
             .attr("d", line_function(line_points))
-            .attr("class", "edge")
             .attr("stroke-width", mini_opt.stroke_width)
             .attr("stroke", mini_opt.stroke)
             .attr("fill", "none")
@@ -960,7 +978,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
 
     group.append("path")
         .attr("d", line_function(line_points))
-        .attr("class", 'edge-' + edge.name)
+        .attr("class", 'poag')
         .attr("id", 'edge-' + edge.from.unique_id + '-' + edge.to.unique_id)
         .attr("stroke-width", edge_opt.stroke_width)
         .attr("stroke", edge_opt.stroke)
@@ -996,25 +1014,57 @@ combine_points = function (x_var, y_var) {
  * Draws a rectangle beside the first node with the
  * poag name.
  */
-var draw_legend_rect = function (poags, node, group, height, scale_y, colour) {
+var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, colour) {
     var rect_opt = poags.options.legend_rect;
     var node_cx = poags.scale.x(node.x);
     var node_cy = scale_y(node.y);
+    //var width = poags.scale.x(node_end.x) - node_cx;
+    // TODO need to update the height to be based on the height
+    // TODO need to make the width based on the last node
+    // of the POAG i.e. diff between least y and max y.
+    if (colour != "none" && colour != undefined ) {
+        var gradient_id = "gradient" + node.unique_id;
+        var legend = group.append("defs")
+                    .attr("class", "poag")
+                    .append("svg:linearGradient")
+                    .attr("id", gradient_id)
+                    .attr("x1", "100%")
+                    .attr("y1", "0%")
+                    .attr("x2", "100%")
+                    .attr("y2", "100%")
+                    .attr("spreadMethod", "pad");
 
-    group.append('rect')
-        .attr("class", 'rect-' + node.name)
-        .attr("id", "rect-" + node.unique_id)
-        .attr('x', node_cx - poags.options.style.margin.left/2)
-        .attr('y', node_cy - height/2)
-        .attr('width', rect_opt.width)
-        .attr('height', height)
-        .attr("stroke-width", rect_opt.stroke_width)
-        .attr("stroke", rect_opt.stroke)
-        .attr("opacity", rect_opt.default_opacity)
-        .attr("fill", colour);
+    legend.append("stop").attr("offset", "0%").attr("stop-color", colour).attr("stop-opacity", 1);
+
+    legend.append("stop").attr("offset", "100%").attr("stop-color", "white").attr("stop-opacity", 1);
+
+        group.append('rect')
+            .attr("class", 'poag')
+            .attr("id", "rect-" + node.unique_id)
+            .attr('x', node_cx - poags.options.style.margin.left/2)
+            .attr('y', node_cy - height/2 )
+            .attr('width',  poags.options.style.width)
+            .attr('height', height + height/2 - 20)
+            .attr("stroke-width", rect_opt.stroke_width)
+            .attr("stroke", rect_opt.stroke)
+            .attr("opacity", rect_opt.opacity)
+            .attr("fill", "url(#" + gradient_id + ")");
+
+        group.append('rect')
+            .attr("class", 'poag')
+            .attr("id", "rect-" + node.unique_id)
+            .attr('x', node_cx - poags.options.style.margin.left/2)
+            .attr('y', node_cy - height/2)
+            .attr('width', poags.options.style.width)
+            .attr('height', 10)
+            .attr("stroke-width", rect_opt.stroke_width)
+            .attr("stroke", rect_opt.stroke)
+            .attr("opacity", 1)
+            .attr("fill", colour);
+    }
 
     group.append("text")
-         .attr("class", "rtext")
+         .attr("class", "poag")
          .attr("id", "rtext-" + node.unique_id)
          .attr('x', node_cx - poags.options.style.margin.left/2 + 10)
          .attr('y', function () {
@@ -1022,7 +1072,6 @@ var draw_legend_rect = function (poags, node, group, height, scale_y, colour) {
                return tmp;
          })
          .attr("text-anchor", "start")
-         .attr("stroke-width", rect_opt.stroke_width)
          .style("font-family", poags.options.style.font_family)
          .style("font-size", poags.options.style.text_size)
          .attr("stroke", function () {
@@ -1059,6 +1108,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 
     var pie_group = group.append("g")
             .attr("id", "pie" + node.name)
+            .attr("class", "poag")
             .attr('transform', 'translate(' + node_cx + "," + node_cy + ")")
 
     var pie = d3.layout.pie()
@@ -1088,10 +1138,10 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     var arc = pie_group.selectAll(".arc")
             .data(pie(pie_data))
             .enter().append("g")
-            .attr("class", "arc");
+            .attr("class", "poag");
 
     arc.append("path")
-            .attr("class", "pie")
+            .attr("class", "poag")
             .attr("d", path_pie)
             .attr("stroke-width", pie_opt.stroke_width)
             .attr("stroke", pie_opt.stroke)
@@ -1121,7 +1171,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 	    //array to store labels already added
 	    var labelsAdded = [];
         arc.append("text")
-                .attr("class", "pie")
+                .attr("class", "poag")
                 .attr("transform", function (d) {
                     return "translate(" + label_pie.centroid(d) + ")";
                 })
@@ -1144,7 +1194,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     } else{
 	    //Appending single big label to node if in consensus
 	    group.append("text")
-             .attr("class", "ptext")
+             .attr("class", "poag")
              .attr("id", "ptext-" + node.unique_id)
              .attr('x', node_cx)
              .attr('y', function () {
@@ -1281,9 +1331,9 @@ setup_graph_overlay = function (options) {
 
 function create_outer_circle(node, options, graph_group) {
     var circle = graph_group.append("circle")
-            .attr("class", "outside")
+            .attr("class", "poag")
             .attr("id", function () {
-                return "node-" + node;
+                return "poag-node-" + node;
             })
             .attr("cx", options.size / 2 - 12)
             .attr("cy", options.size / 2 - 2)
@@ -1298,9 +1348,8 @@ function create_outer_circle(node, options, graph_group) {
 function create_rect(node, options, graph_group) {
 
     graph_group.append("rect")
-            .attr("class", function () {
-                return "outline";
-            })
+            .attr("id", "poag-graph-" + node.unique_id)
+            .attr("class", "poag")
             .attr("x", function () {
                 return options.offset_graph_width;
             }) //Need to determine algoritm for determineing this
@@ -1527,6 +1576,1196 @@ create_new_graph = function (node, options, cx, cy) {
 
     create_bars(node, options, graph_group);
     return graph_group;
+}
+
+
+/**
+ *
+ * From http://www.bioinformatics.nl/~berndb/aacolour.html
+ */
+
+
+json_str = '{"top":{"metadata":{"title":"MSA","type":"marginal"},"nodes":[{"x":0,"y":0,"id":0,"label":"PM","num_out_edges":2,"graph":{"bars":[{"x_label":"P","value":57.14285714285714},{"x_label":"M","value":42.857142857142854}]},"seq":{"chars":[{"label":"P","value":4},{"label":"M","value":3}]}},{"x":1,"y":2,"id":1,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"K","value":100}]},"seq":{"chars":[{"label":"K","value":4}]}},{"x":2,"y":1,"id":2,"label":"DQ","num_out_edges":1,"graph":{"bars":[{"x_label":"D","value":87.5},{"x_label":"Q","value":12.5}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"D","value":14}]}},{"x":3,"y":1,"id":3,"label":"R","num_out_edges":3,"graph":{"bars":[{"x_label":"R","value":100}]},"seq":{"chars":[{"label":"R","value":6}]}},{"x":4,"y":1,"id":4,"label":"SATV","num_out_edges":1,"graph":{"bars":[{"x_label":"A","value":5.88235294117647},{"x_label":"S","value":76.47058823529412},{"x_label":"T","value":5.88235294117647},{"x_label":"V","value":11.76470588235294}]},"seq":{"chars":[{"label":"A","value":1},{"label":"S","value":13},{"label":"T","value":1},{"label":"V","value":2}]}},{"x":5,"y":1,"id":5,"label":"TIMV","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":52.94117647058824},{"x_label":"T","value":11.76470588235294},{"x_label":"M","value":29.411764705882355},{"x_label":"V","value":5.88235294117647}]},"seq":{"chars":[{"label":"T","value":2},{"label":"V","value":1},{"label":"I","value":9},{"label":"M","value":5}]}},{"x":6,"y":1,"id":6,"label":"SNDEA","num_out_edges":2,"graph":{"bars":[{"x_label":"A","value":9.523809523809524},{"x_label":"S","value":19.047619047619047},{"x_label":"D","value":4.761904761904762},{"x_label":"E","value":28.57142857142857},{"x_label":"N","value":38.095238095238095}]},"seq":{"chars":[{"label":"A","value":2},{"label":"S","value":4},{"label":"D","value":1},{"label":"E","value":6},{"label":"N","value":8}]}},{"x":7,"y":1,"id":7,"label":"F","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":100}]},"seq":{"chars":[{"label":"F","value":20}]}},{"x":8,"y":0,"id":8,"label":"LF","num_out_edges":3,"graph":{"bars":[{"x_label":"L","value":38.095238095238095},{"x_label":"F","value":61.904761904761905}]},"seq":{"chars":[{"label":"F","value":13},{"label":"L","value":8}]}},{"x":9,"y":2,"id":9,"label":"TRKSEQ","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":10},{"x_label":"R","value":15},{"x_label":"S","value":5},{"x_label":"T","value":10},{"x_label":"E","value":5},{"x_label":"K","value":55.00000000000001}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"R","value":3},{"label":"S","value":1},{"label":"T","value":2},{"label":"E","value":1},{"label":"K","value":11}]}},{"x":10,"y":1,"id":10,"label":"KQN","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":4.761904761904762},{"x_label":"K","value":85.71428571428571},{"x_label":"N","value":9.523809523809524}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"K","value":18},{"label":"N","value":2}]}},{"x":11,"y":1,"id":11,"label":"SF","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":52.63157894736842},{"x_label":"S","value":47.368421052631575}]},"seq":{"chars":[{"label":"S","value":9},{"label":"F","value":10}]}},{"x":12,"y":0,"id":12,"label":"VI","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":13.636363636363635},{"x_label":"V","value":86.36363636363636}]},"seq":{"chars":[{"label":"V","value":19},{"label":"I","value":3}]}},{"x":13,"y":0,"id":13,"label":"KNEQDYH","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":4.545454545454546},{"x_label":"D","value":18.181818181818183},{"x_label":"E","value":4.545454545454546},{"x_label":"H","value":4.545454545454546},{"x_label":"Y","value":13.636363636363635},{"x_label":"K","value":40.909090909090914},{"x_label":"N","value":13.636363636363635}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"D","value":4},{"label":"E","value":1},{"label":"H","value":1},{"label":"Y","value":3},{"label":"K","value":9},{"label":"N","value":3}]}},{"x":14,"y":1,"id":14,"label":"QR","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":25},{"x_label":"R","value":75}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"R","value":3}]}},{"x":15,"y":0,"id":15,"label":"IMT","num_out_edges":2,"graph":{"bars":[{"x_label":"I","value":22.727272727272727},{"x_label":"T","value":4.545454545454546},{"x_label":"M","value":72.72727272727273}]},"seq":{"chars":[{"label":"T","value":1},{"label":"I","value":5},{"label":"M","value":16}]}},{"x":16,"y":1,"id":16,"label":"KQT","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":5},{"x_label":"K","value":90},{"x_label":"T","value":5}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"T","value":1},{"label":"K","value":18}]}},{"x":17,"y":1,"id":17,"label":"EKQ","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":5},{"x_label":"K","value":30},{"x_label":"E","value":65}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"E","value":13},{"label":"K","value":6}]}},{"x":18,"y":1,"id":18,"label":"GSNT","num_out_edges":1,"graph":{"bars":[{"x_label":"S","value":53.333333333333336},{"x_label":"T","value":26.666666666666668},{"x_label":"N","value":6.666666666666667},{"x_label":"G","value":13.333333333333334}]},"seq":{"chars":[{"label":"S","value":8},{"label":"T","value":4},{"label":"G","value":2},{"label":"N","value":1}]}},{"x":19,"y":1,"id":19,"label":"R","num_out_edges":1,"graph":{"bars":[{"x_label":"R","value":100}]},"seq":{"chars":[{"label":"R","value":15}]}},{"x":20,"y":0,"id":20,"label":"L","num_out_edges":1,"graph":{"bars":[{"x_label":"L","value":100}]},"seq":{"chars":[{"label":"L","value":17}]}},{"x":21,"y":0,"id":21,"label":"ADKHQ","num_out_edges":0,"graph":{"bars":[{"x_label":"H","value":9.090909090909092},{"x_label":"A","value":18.181818181818183},{"x_label":"Q","value":9.090909090909092},{"x_label":"K","value":9.090909090909092},{"x_label":"D","value":54.54545454545454}]},"seq":{"chars":[{"label":"A","value":2},{"label":"Q","value":1},{"label":"D","value":6},{"label":"H","value":1},{"label":"K","value":1}]}}],"max_depth":2,"edges":{"edges_19:20":{"y1":1,"x1":19,"y2":0,"weight":50,"from":19,"x2":20,"to":20},"edges_15:16":{"y1":0,"x1":15,"y2":1,"weight":90.9090909090909,"from":15,"x2":16,"to":16},"edges_17:18":{"y1":1,"x1":17,"y2":1,"weight":68.18181818181817,"from":17,"x2":18,"to":18},"edges_0:2":{"y1":0,"x1":0,"y2":1,"weight":27.27272727272727,"from":0,"x2":2,"to":2},"edges_11:12":{"y1":1,"x1":11,"y2":0,"weight":86.36363636363636,"from":11,"x2":12,"to":12},"edges_13:15":{"y1":0,"x1":13,"y2":0,"weight":81.81818181818183,"from":13,"x2":15,"to":15},"edges_13:14":{"y1":0,"x1":13,"y2":1,"weight":18.181818181818183,"from":13,"x2":14,"to":14},"edges_8:11":{"y1":0,"x1":8,"y2":1,"weight":4.545454545454546,"from":8,"x2":11,"to":11},"edges_8:10":{"y1":0,"x1":8,"y2":1,"weight":4.545454545454546,"from":8,"x2":10,"to":10},"edges_14:15":{"y1":1,"x1":14,"y2":0,"weight":18.181818181818183,"from":14,"x2":15,"to":15},"edges_16:17":{"y1":1,"x1":16,"y2":1,"weight":90.9090909090909,"from":16,"x2":17,"to":17},"edges_18:19":{"y1":1,"x1":18,"y2":1,"weight":68.18181818181817,"from":18,"x2":19,"to":19},"edges_10:11":{"y1":1,"x1":10,"y2":1,"weight":81.81818181818183,"from":10,"x2":11,"to":11},"edges_10:12":{"y1":1,"x1":10,"y2":0,"weight":13.636363636363635,"from":10,"x2":12,"to":12},"edges_12:13":{"y1":0,"x1":12,"y2":0,"weight":100,"from":12,"x2":13,"to":13},"edges_0:3":{"y1":0,"x1":0,"y2":1,"weight":4.545454545454546,"from":0,"x2":3,"to":3},"edges_1:2":{"y1":2,"x1":1,"y2":1,"weight":18.181818181818183,"from":1,"x2":2,"to":2},"edges_2:4":{"y1":1,"x1":2,"y2":1,"weight":72.72727272727273,"from":2,"x2":4,"to":4},"edges_3:4":{"y1":1,"x1":3,"y2":1,"weight":4.545454545454546,"from":3,"x2":4,"to":4},"edges_15:20":{"y1":0,"x1":15,"y2":0,"weight":9.090909090909092,"from":15,"x2":20,"to":20},"edges_17:20":{"y1":1,"x1":17,"y2":0,"weight":18.181818181818183,"from":17,"x2":20,"to":20},"edges_3:6":{"y1":1,"x1":3,"y2":1,"weight":18.181818181818183,"from":3,"x2":6,"to":6},"edges_4:5":{"y1":1,"x1":4,"y2":1,"weight":77.27272727272727,"from":4,"x2":5,"to":5},"edges_20:21":{"y1":0,"x1":20,"y2":0,"weight":50,"from":20,"x2":21,"to":21},"edges_3:8":{"y1":1,"x1":3,"y2":0,"weight":4.545454545454546,"from":3,"x2":8,"to":8},"edges_5:6":{"y1":1,"x1":5,"y2":1,"weight":77.27272727272727,"from":5,"x2":6,"to":6},"edges_6:7":{"y1":1,"x1":6,"y2":1,"weight":90.9090909090909,"from":6,"x2":7,"to":7},"edges_6:9":{"y1":1,"x1":6,"y2":2,"weight":4.545454545454546,"from":6,"x2":9,"to":9},"edges_7:8":{"y1":1,"x1":7,"y2":0,"weight":90.9090909090909,"from":7,"x2":8,"to":8},"edges_8:9":{"y1":0,"x1":8,"y2":2,"weight":86.36363636363636,"from":8,"x2":9,"to":9},"edges_9:10":{"y1":2,"x1":9,"y2":1,"weight":90.9090909090909,"from":9,"x2":10,"to":10}}},"bottom":{"metadata":{"title":"Inferred","type":"joint"},"nodes":[{"x":0,"y":0,"id":0,"label":"M","num_out_edges":2,"graph":{"bars":[{"x_label":"P","value":57.14285714285714},{"x_label":"M","value":42.857142857142854}]},"seq":{"chars":[{"label":"P","value":4},{"label":"M","value":3}]}},{"x":2,"y":0,"id":2,"label":"D","num_out_edges":1,"graph":{"bars":[{"x_label":"D","value":87.5},{"x_label":"Q","value":12.5}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"D","value":14}]}},{"x":4,"y":0,"id":4,"label":"S","num_out_edges":1,"graph":{"bars":[{"x_label":"A","value":5.88235294117647},{"x_label":"S","value":76.47058823529412},{"x_label":"T","value":5.88235294117647},{"x_label":"V","value":11.76470588235294}]},"seq":{"chars":[{"label":"A","value":1},{"label":"S","value":13},{"label":"T","value":1},{"label":"V","value":2}]}},{"x":5,"y":0,"id":5,"label":"I","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":52.94117647058824},{"x_label":"T","value":11.76470588235294},{"x_label":"M","value":29.411764705882355},{"x_label":"V","value":5.88235294117647}]},"seq":{"chars":[{"label":"T","value":2},{"label":"V","value":1},{"label":"I","value":9},{"label":"M","value":5}]}},{"x":6,"y":0,"id":6,"label":"N","num_out_edges":2,"graph":{"bars":[{"x_label":"A","value":9.523809523809524},{"x_label":"S","value":19.047619047619047},{"x_label":"D","value":4.761904761904762},{"x_label":"E","value":28.57142857142857},{"x_label":"N","value":38.095238095238095}]},"seq":{"chars":[{"label":"A","value":2},{"label":"S","value":4},{"label":"D","value":1},{"label":"E","value":6},{"label":"N","value":8}]}},{"x":7,"y":0,"id":7,"label":"F","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":100}]},"seq":{"chars":[{"label":"F","value":20}]}},{"x":8,"y":0,"id":8,"label":"L","num_out_edges":3,"graph":{"bars":[{"x_label":"L","value":38.095238095238095},{"x_label":"F","value":61.904761904761905}]},"seq":{"chars":[{"label":"F","value":13},{"label":"L","value":8}]}},{"x":9,"y":2,"id":9,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":10},{"x_label":"R","value":15},{"x_label":"S","value":5},{"x_label":"T","value":10},{"x_label":"E","value":5},{"x_label":"K","value":55.00000000000001}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"R","value":3},{"label":"S","value":1},{"label":"T","value":2},{"label":"E","value":1},{"label":"K","value":11}]}},{"x":10,"y":1,"id":10,"label":"K","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":4.761904761904762},{"x_label":"K","value":85.71428571428571},{"x_label":"N","value":9.523809523809524}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"K","value":18},{"label":"N","value":2}]}},{"x":11,"y":2,"id":11,"label":"S","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":52.63157894736842},{"x_label":"S","value":47.368421052631575}]},"seq":{"chars":[{"label":"S","value":9},{"label":"F","value":10}]}},{"x":12,"y":0,"id":12,"label":"V","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":13.636363636363635},{"x_label":"V","value":86.36363636363636}]},"seq":{"chars":[{"label":"V","value":19},{"label":"I","value":3}]}},{"x":13,"y":0,"id":13,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":4.545454545454546},{"x_label":"D","value":18.181818181818183},{"x_label":"E","value":4.545454545454546},{"x_label":"H","value":4.545454545454546},{"x_label":"Y","value":13.636363636363635},{"x_label":"K","value":40.909090909090914},{"x_label":"N","value":13.636363636363635}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"D","value":4},{"label":"E","value":1},{"label":"H","value":1},{"label":"Y","value":3},{"label":"K","value":9},{"label":"N","value":3}]}},{"x":15,"y":0,"id":15,"label":"M","num_out_edges":2,"graph":{"bars":[{"x_label":"I","value":22.727272727272727},{"x_label":"T","value":4.545454545454546},{"x_label":"M","value":72.72727272727273}]},"seq":{"chars":[{"label":"T","value":1},{"label":"I","value":5},{"label":"M","value":16}]}},{"x":16,"y":1,"id":16,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":5},{"x_label":"K","value":90},{"x_label":"T","value":5}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"T","value":1},{"label":"K","value":18}]}},{"x":17,"y":1,"id":17,"label":"E","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":5},{"x_label":"K","value":30},{"x_label":"E","value":65}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"E","value":13},{"label":"K","value":6}]}},{"x":20,"y":0,"id":20,"label":"L","num_out_edges":1,"graph":{"bars":[{"x_label":"L","value":100}]},"seq":{"chars":[{"label":"L","value":17}]}},{"x":21,"y":0,"id":21,"label":"Q","num_out_edges":0,"graph":{"bars":[{"x_label":"H","value":9.090909090909092},{"x_label":"A","value":18.181818181818183},{"x_label":"Q","value":9.090909090909092},{"x_label":"K","value":9.090909090909092},{"x_label":"D","value":54.54545454545454}]},"seq":{"chars":[{"label":"A","value":2},{"label":"Q","value":1},{"label":"D","value":6},{"label":"H","value":1},{"label":"K","value":1}]}}],"max_depth":2,"edges":{"edges_15:16":{"y1":0,"x1":15,"y2":1,"weight":90.9090909090909,"from":15,"x2":16,"to":16},"edges_16:17":{"y1":1,"x1":16,"y2":1,"weight":90.9090909090909,"from":16,"x2":17,"to":17},"edges_0:2":{"y1":0,"x1":0,"y2":0,"weight":27.27272727272727,"from":0,"x2":2,"to":2},"edges_10:11":{"y1":1,"x1":10,"y2":2,"weight":81.81818181818183,"from":10,"x2":11,"to":11},"edges_11:12":{"y1":2,"x1":11,"y2":0,"weight":86.36363636363636,"from":11,"x2":12,"to":12},"edges_13:15":{"y1":0,"x1":13,"y2":0,"weight":100,"from":13,"x2":15,"to":15},"edges_10:12":{"y1":1,"x1":10,"y2":0,"weight":13.636363636363635,"from":10,"x2":12,"to":12},"edges_12:13":{"y1":0,"x1":12,"y2":0,"weight":100,"from":12,"x2":13,"to":13},"edges_2:4":{"y1":0,"x1":2,"y2":0,"weight":72.72727272727273,"from":2,"x2":4,"to":4},"edges_0:8":{"y1":0,"x1":0,"y2":0,"weight":4.545454545454546,"from":0,"x2":8,"to":8},"edges_15:20":{"y1":0,"x1":15,"y2":0,"weight":9.090909090909092,"from":15,"x2":20,"to":20},"edges_17:20":{"y1":1,"x1":17,"y2":0,"weight":68.18181818181817,"from":17,"x2":20,"to":20},"edges_4:5":{"y1":0,"x1":4,"y2":0,"weight":77.27272727272727,"from":4,"x2":5,"to":5},"edges_20:21":{"y1":0,"x1":20,"y2":0,"weight":50,"from":20,"x2":21,"to":21},"edges_5:6":{"y1":0,"x1":5,"y2":0,"weight":77.27272727272727,"from":5,"x2":6,"to":6},"edges_6:7":{"y1":0,"x1":6,"y2":0,"weight":90.9090909090909,"from":6,"x2":7,"to":7},"edges_6:9":{"y1":0,"x1":6,"y2":2,"weight":4.545454545454546,"from":6,"x2":9,"to":9},"edges_7:8":{"y1":0,"x1":7,"y2":0,"weight":90.9090909090909,"from":7,"x2":8,"to":8},"edges_8:11":{"y1":0,"x1":8,"y2":2,"weight":4.545454545454546,"from":8,"x2":11,"to":11},"edges_8:9":{"y1":0,"x1":8,"y2":2,"weight":86.36363636363636,"from":8,"x2":9,"to":9},"edges_8:10":{"y1":0,"x1":8,"y2":1,"weight":4.545454545454546,"from":8,"x2":10,"to":10},"edges_9:10":{"y1":2,"x1":9,"y2":1,"weight":90.9090909090909,"from":9,"x2":10,"to":10}}}}';
+
+var node_name = "N8_66.0"
+var name = 'Inferred'
+var node_fill = "#3AFEF5";
+var resetGraphs = false;
+drawMutants = false;
+setup_poags(json_str, true, true, false, name)
+
+
+//var options = setup_options(rootDiv.id);
+graph_array.push(JSON.parse(json_str));
+poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
+poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+
+
+var json_str = '{"top":{"metadata":{"title":"MSA","type":"marginal"},"nodes":[{"x":0,"y":0,"id":0,"label":"PM","num_out_edges":2,"graph":{"bars":[{"x_label":"P","value":57.14285714285714},{"x_label":"M","value":42.857142857142854}]},"seq":{"chars":[{"label":"P","value":4},{"label":"M","value":3}]}},{"x":1,"y":2,"id":1,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"K","value":100}]},"seq":{"chars":[{"label":"K","value":4}]}},{"x":2,"y":1,"id":2,"label":"DQ","num_out_edges":1,"graph":{"bars":[{"x_label":"D","value":87.5},{"x_label":"Q","value":12.5}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"D","value":14}]}},{"x":3,"y":1,"id":3,"label":"R","num_out_edges":3,"graph":{"bars":[{"x_label":"R","value":100}]},"seq":{"chars":[{"label":"R","value":6}]}},{"x":4,"y":1,"id":4,"label":"SATV","num_out_edges":1,"graph":{"bars":[{"x_label":"A","value":5.88235294117647},{"x_label":"S","value":76.47058823529412},{"x_label":"T","value":5.88235294117647},{"x_label":"V","value":11.76470588235294}]},"seq":{"chars":[{"label":"A","value":1},{"label":"S","value":13},{"label":"T","value":1},{"label":"V","value":2}]}},{"x":5,"y":1,"id":5,"label":"TIMV","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":52.94117647058824},{"x_label":"T","value":11.76470588235294},{"x_label":"M","value":29.411764705882355},{"x_label":"V","value":5.88235294117647}]},"seq":{"chars":[{"label":"T","value":2},{"label":"V","value":1},{"label":"I","value":9},{"label":"M","value":5}]}},{"x":6,"y":1,"id":6,"label":"SNDEA","num_out_edges":2,"graph":{"bars":[{"x_label":"A","value":9.523809523809524},{"x_label":"S","value":19.047619047619047},{"x_label":"D","value":4.761904761904762},{"x_label":"E","value":28.57142857142857},{"x_label":"N","value":38.095238095238095}]},"seq":{"chars":[{"label":"A","value":2},{"label":"S","value":4},{"label":"D","value":1},{"label":"E","value":6},{"label":"N","value":8}]}},{"x":7,"y":1,"id":7,"label":"F","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":100}]},"seq":{"chars":[{"label":"F","value":20}]}},{"x":8,"y":0,"id":8,"label":"LF","num_out_edges":3,"graph":{"bars":[{"x_label":"L","value":38.095238095238095},{"x_label":"F","value":61.904761904761905}]},"seq":{"chars":[{"label":"F","value":13},{"label":"L","value":8}]}},{"x":9,"y":2,"id":9,"label":"TRKSEQ","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":10},{"x_label":"R","value":15},{"x_label":"S","value":5},{"x_label":"T","value":10},{"x_label":"E","value":5},{"x_label":"K","value":55.00000000000001}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"R","value":3},{"label":"S","value":1},{"label":"T","value":2},{"label":"E","value":1},{"label":"K","value":11}]}},{"x":10,"y":1,"id":10,"label":"KQN","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":4.761904761904762},{"x_label":"K","value":85.71428571428571},{"x_label":"N","value":9.523809523809524}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"K","value":18},{"label":"N","value":2}]}},{"x":11,"y":1,"id":11,"label":"SF","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":52.63157894736842},{"x_label":"S","value":47.368421052631575}]},"seq":{"chars":[{"label":"S","value":9},{"label":"F","value":10}]}},{"x":12,"y":0,"id":12,"label":"VI","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":13.636363636363635},{"x_label":"V","value":86.36363636363636}]},"seq":{"chars":[{"label":"V","value":19},{"label":"I","value":3}]}},{"x":13,"y":0,"id":13,"label":"KNEQDYH","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":4.545454545454546},{"x_label":"D","value":18.181818181818183},{"x_label":"E","value":4.545454545454546},{"x_label":"H","value":4.545454545454546},{"x_label":"Y","value":13.636363636363635},{"x_label":"K","value":40.909090909090914},{"x_label":"N","value":13.636363636363635}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"D","value":4},{"label":"E","value":1},{"label":"H","value":1},{"label":"Y","value":3},{"label":"K","value":9},{"label":"N","value":3}]}},{"x":14,"y":1,"id":14,"label":"QR","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":25},{"x_label":"R","value":75}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"R","value":3}]}},{"x":15,"y":0,"id":15,"label":"IMT","num_out_edges":2,"graph":{"bars":[{"x_label":"I","value":22.727272727272727},{"x_label":"T","value":4.545454545454546},{"x_label":"M","value":72.72727272727273}]},"seq":{"chars":[{"label":"T","value":1},{"label":"I","value":5},{"label":"M","value":16}]}},{"x":16,"y":1,"id":16,"label":"KQT","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":5},{"x_label":"K","value":90},{"x_label":"T","value":5}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"T","value":1},{"label":"K","value":18}]}},{"x":17,"y":1,"id":17,"label":"EKQ","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":5},{"x_label":"K","value":30},{"x_label":"E","value":65}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"E","value":13},{"label":"K","value":6}]}},{"x":18,"y":1,"id":18,"label":"GSNT","num_out_edges":1,"graph":{"bars":[{"x_label":"S","value":53.333333333333336},{"x_label":"T","value":26.666666666666668},{"x_label":"N","value":6.666666666666667},{"x_label":"G","value":13.333333333333334}]},"seq":{"chars":[{"label":"S","value":8},{"label":"T","value":4},{"label":"G","value":2},{"label":"N","value":1}]}},{"x":19,"y":1,"id":19,"label":"R","num_out_edges":1,"graph":{"bars":[{"x_label":"R","value":100}]},"seq":{"chars":[{"label":"R","value":15}]}},{"x":20,"y":0,"id":20,"label":"L","num_out_edges":1,"graph":{"bars":[{"x_label":"L","value":100}]},"seq":{"chars":[{"label":"L","value":17}]}},{"x":21,"y":0,"id":21,"label":"ADKHQ","num_out_edges":0,"graph":{"bars":[{"x_label":"H","value":9.090909090909092},{"x_label":"A","value":18.181818181818183},{"x_label":"Q","value":9.090909090909092},{"x_label":"K","value":9.090909090909092},{"x_label":"D","value":54.54545454545454}]},"seq":{"chars":[{"label":"A","value":2},{"label":"Q","value":1},{"label":"D","value":6},{"label":"H","value":1},{"label":"K","value":1}]}}],"max_depth":2,"edges":{"edges_19:20":{"y1":1,"x1":19,"y2":0,"weight":50,"from":19,"x2":20,"to":20},"edges_15:16":{"y1":0,"x1":15,"y2":1,"weight":90.9090909090909,"from":15,"x2":16,"to":16},"edges_17:18":{"y1":1,"x1":17,"y2":1,"weight":68.18181818181817,"from":17,"x2":18,"to":18},"edges_0:2":{"y1":0,"x1":0,"y2":1,"weight":27.27272727272727,"from":0,"x2":2,"to":2},"edges_11:12":{"y1":1,"x1":11,"y2":0,"weight":86.36363636363636,"from":11,"x2":12,"to":12},"edges_13:15":{"y1":0,"x1":13,"y2":0,"weight":81.81818181818183,"from":13,"x2":15,"to":15},"edges_13:14":{"y1":0,"x1":13,"y2":1,"weight":18.181818181818183,"from":13,"x2":14,"to":14},"edges_8:11":{"y1":0,"x1":8,"y2":1,"weight":4.545454545454546,"from":8,"x2":11,"to":11},"edges_8:10":{"y1":0,"x1":8,"y2":1,"weight":4.545454545454546,"from":8,"x2":10,"to":10},"edges_14:15":{"y1":1,"x1":14,"y2":0,"weight":18.181818181818183,"from":14,"x2":15,"to":15},"edges_16:17":{"y1":1,"x1":16,"y2":1,"weight":90.9090909090909,"from":16,"x2":17,"to":17},"edges_18:19":{"y1":1,"x1":18,"y2":1,"weight":68.18181818181817,"from":18,"x2":19,"to":19},"edges_10:11":{"y1":1,"x1":10,"y2":1,"weight":81.81818181818183,"from":10,"x2":11,"to":11},"edges_10:12":{"y1":1,"x1":10,"y2":0,"weight":13.636363636363635,"from":10,"x2":12,"to":12},"edges_12:13":{"y1":0,"x1":12,"y2":0,"weight":100,"from":12,"x2":13,"to":13},"edges_0:3":{"y1":0,"x1":0,"y2":1,"weight":4.545454545454546,"from":0,"x2":3,"to":3},"edges_1:2":{"y1":2,"x1":1,"y2":1,"weight":18.181818181818183,"from":1,"x2":2,"to":2},"edges_2:4":{"y1":1,"x1":2,"y2":1,"weight":72.72727272727273,"from":2,"x2":4,"to":4},"edges_3:4":{"y1":1,"x1":3,"y2":1,"weight":4.545454545454546,"from":3,"x2":4,"to":4},"edges_15:20":{"y1":0,"x1":15,"y2":0,"weight":9.090909090909092,"from":15,"x2":20,"to":20},"edges_17:20":{"y1":1,"x1":17,"y2":0,"weight":18.181818181818183,"from":17,"x2":20,"to":20},"edges_3:6":{"y1":1,"x1":3,"y2":1,"weight":18.181818181818183,"from":3,"x2":6,"to":6},"edges_4:5":{"y1":1,"x1":4,"y2":1,"weight":77.27272727272727,"from":4,"x2":5,"to":5},"edges_20:21":{"y1":0,"x1":20,"y2":0,"weight":50,"from":20,"x2":21,"to":21},"edges_3:8":{"y1":1,"x1":3,"y2":0,"weight":4.545454545454546,"from":3,"x2":8,"to":8},"edges_5:6":{"y1":1,"x1":5,"y2":1,"weight":77.27272727272727,"from":5,"x2":6,"to":6},"edges_6:7":{"y1":1,"x1":6,"y2":1,"weight":90.9090909090909,"from":6,"x2":7,"to":7},"edges_6:9":{"y1":1,"x1":6,"y2":2,"weight":4.545454545454546,"from":6,"x2":9,"to":9},"edges_7:8":{"y1":1,"x1":7,"y2":0,"weight":90.9090909090909,"from":7,"x2":8,"to":8},"edges_8:9":{"y1":0,"x1":8,"y2":2,"weight":86.36363636363636,"from":8,"x2":9,"to":9},"edges_9:10":{"y1":2,"x1":9,"y2":1,"weight":90.9090909090909,"from":9,"x2":10,"to":10}}},"bottom":{"metadata":{"title":"Inferred","type":"joint"},"nodes":[{"x":0,"y":0,"id":0,"label":"M","num_out_edges":2,"graph":{"bars":[{"x_label":"P","value":57.14285714285714},{"x_label":"M","value":42.857142857142854}]},"seq":{"chars":[{"label":"P","value":4},{"label":"M","value":3}]}},{"x":2,"y":0,"id":2,"label":"D","num_out_edges":1,"graph":{"bars":[{"x_label":"D","value":87.5},{"x_label":"Q","value":12.5}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"D","value":14}]}},{"x":4,"y":0,"id":4,"label":"V","num_out_edges":1,"graph":{"bars":[{"x_label":"A","value":5.88235294117647},{"x_label":"S","value":76.47058823529412},{"x_label":"T","value":5.88235294117647},{"x_label":"V","value":11.76470588235294}]},"seq":{"chars":[{"label":"A","value":1},{"label":"S","value":13},{"label":"T","value":1},{"label":"V","value":2}]}},{"x":5,"y":0,"id":5,"label":"I","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":52.94117647058824},{"x_label":"T","value":11.76470588235294},{"x_label":"M","value":29.411764705882355},{"x_label":"V","value":5.88235294117647}]},"seq":{"chars":[{"label":"T","value":2},{"label":"V","value":1},{"label":"I","value":9},{"label":"M","value":5}]}},{"x":6,"y":0,"id":6,"label":"N","num_out_edges":2,"graph":{"bars":[{"x_label":"A","value":9.523809523809524},{"x_label":"S","value":19.047619047619047},{"x_label":"D","value":4.761904761904762},{"x_label":"E","value":28.57142857142857},{"x_label":"N","value":38.095238095238095}]},"seq":{"chars":[{"label":"A","value":2},{"label":"S","value":4},{"label":"D","value":1},{"label":"E","value":6},{"label":"N","value":8}]}},{"x":7,"y":0,"id":7,"label":"F","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":100}]},"seq":{"chars":[{"label":"F","value":20}]}},{"x":8,"y":0,"id":8,"label":"L","num_out_edges":3,"graph":{"bars":[{"x_label":"L","value":38.095238095238095},{"x_label":"F","value":61.904761904761905}]},"seq":{"chars":[{"label":"F","value":13},{"label":"L","value":8}]}},{"x":9,"y":2,"id":9,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":10},{"x_label":"R","value":15},{"x_label":"S","value":5},{"x_label":"T","value":10},{"x_label":"E","value":5},{"x_label":"K","value":55.00000000000001}]},"seq":{"chars":[{"label":"Q","value":2},{"label":"R","value":3},{"label":"S","value":1},{"label":"T","value":2},{"label":"E","value":1},{"label":"K","value":11}]}},{"x":10,"y":1,"id":10,"label":"K","num_out_edges":2,"graph":{"bars":[{"x_label":"Q","value":4.761904761904762},{"x_label":"K","value":85.71428571428571},{"x_label":"N","value":9.523809523809524}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"K","value":18},{"label":"N","value":2}]}},{"x":11,"y":2,"id":11,"label":"S","num_out_edges":1,"graph":{"bars":[{"x_label":"F","value":52.63157894736842},{"x_label":"S","value":47.368421052631575}]},"seq":{"chars":[{"label":"S","value":9},{"label":"F","value":10}]}},{"x":12,"y":0,"id":12,"label":"V","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":13.636363636363635},{"x_label":"V","value":86.36363636363636}]},"seq":{"chars":[{"label":"V","value":19},{"label":"I","value":3}]}},{"x":13,"y":0,"id":13,"label":"K","num_out_edges":1,"graph":{"bars":[{"x_label":"Q","value":4.545454545454546},{"x_label":"D","value":18.181818181818183},{"x_label":"E","value":4.545454545454546},{"x_label":"H","value":4.545454545454546},{"x_label":"Y","value":13.636363636363635},{"x_label":"K","value":40.909090909090914},{"x_label":"N","value":13.636363636363635}]},"seq":{"chars":[{"label":"Q","value":1},{"label":"D","value":4},{"label":"E","value":1},{"label":"H","value":1},{"label":"Y","value":3},{"label":"K","value":9},{"label":"N","value":3}]}},{"x":15,"y":0,"id":15,"label":"M","num_out_edges":1,"graph":{"bars":[{"x_label":"I","value":22.727272727272727},{"x_label":"T","value":4.545454545454546},{"x_label":"M","value":72.72727272727273}]},"seq":{"chars":[{"label":"T","value":1},{"label":"I","value":5},{"label":"M","value":16}]}},{"x":20,"y":0,"id":20,"label":"L","num_out_edges":1,"graph":{"bars":[{"x_label":"L","value":100}]},"seq":{"chars":[{"label":"L","value":17}]}},{"x":21,"y":0,"id":21,"label":"Q","num_out_edges":0,"graph":{"bars":[{"x_label":"H","value":9.090909090909092},{"x_label":"A","value":18.181818181818183},{"x_label":"Q","value":9.090909090909092},{"x_label":"K","value":9.090909090909092},{"x_label":"D","value":54.54545454545454}]},"seq":{"chars":[{"label":"A","value":2},{"label":"Q","value":1},{"label":"D","value":6},{"label":"H","value":1},{"label":"K","value":1}]}}],"max_depth":2,"edges":{"edges_0:2":{"y1":0,"x1":0,"y2":0,"weight":27.27272727272727,"from":0,"x2":2,"to":2},"edges_10:11":{"y1":1,"x1":10,"y2":2,"weight":81.81818181818183,"from":10,"x2":11,"to":11},"edges_11:12":{"y1":2,"x1":11,"y2":0,"weight":86.36363636363636,"from":11,"x2":12,"to":12},"edges_13:15":{"y1":0,"x1":13,"y2":0,"weight":100,"from":13,"x2":15,"to":15},"edges_10:12":{"y1":1,"x1":10,"y2":0,"weight":13.636363636363635,"from":10,"x2":12,"to":12},"edges_12:13":{"y1":0,"x1":12,"y2":0,"weight":100,"from":12,"x2":13,"to":13},"edges_2:4":{"y1":0,"x1":2,"y2":0,"weight":72.72727272727273,"from":2,"x2":4,"to":4},"edges_0:8":{"y1":0,"x1":0,"y2":0,"weight":4.545454545454546,"from":0,"x2":8,"to":8},"edges_15:20":{"y1":0,"x1":15,"y2":0,"weight":77.27272727272727,"from":15,"x2":20,"to":20},"edges_4:5":{"y1":0,"x1":4,"y2":0,"weight":77.27272727272727,"from":4,"x2":5,"to":5},"edges_20:21":{"y1":0,"x1":20,"y2":0,"weight":50,"from":20,"x2":21,"to":21},"edges_5:6":{"y1":0,"x1":5,"y2":0,"weight":77.27272727272727,"from":5,"x2":6,"to":6},"edges_6:7":{"y1":0,"x1":6,"y2":0,"weight":90.9090909090909,"from":6,"x2":7,"to":7},"edges_6:9":{"y1":0,"x1":6,"y2":2,"weight":4.545454545454546,"from":6,"x2":9,"to":9},"edges_7:8":{"y1":0,"x1":7,"y2":0,"weight":90.9090909090909,"from":7,"x2":8,"to":8},"edges_8:11":{"y1":0,"x1":8,"y2":2,"weight":4.545454545454546,"from":8,"x2":11,"to":11},"edges_8:9":{"y1":0,"x1":8,"y2":2,"weight":86.36363636363636,"from":8,"x2":9,"to":9},"edges_8:10":{"y1":0,"x1":8,"y2":1,"weight":4.545454545454546,"from":8,"x2":10,"to":10},"edges_9:10":{"y1":2,"x1":9,"y2":1,"weight":90.9090909090909,"from":9,"x2":10,"to":10}}}}';
+
+
+//refresh_elements();
+
+setup_poags(json_str, false, false, false, node_name)
+graph_array.push(JSON.parse(json_str));
+poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = node_fill;
+poags.options.name_to_merged_id[node_name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+poags.options.names_to_colour[node_name] = node_fill;
+
+var new_graph = fuse_multipleGraphs(graph_array);
+setup_poags(new_graph, false, false, true, 'Merged')
+
+
+function formatMutants(node, poag){
+
+    if (node.type != "fused"){
+	    node.graph = {};
+        if (graph.options.mutants.count > 0) {
+            node.graph.bars = node.mutants.chars;
+        } else {
+            node.graph.bars = node.seq.chars;
+        }
+    } else {
+	    //adding number of poags fused
+	    node.npoags = poag.metadata.npoags;
+
+    	node["subtype"] = poag.metadata.subtype;
+	    //changing graph if fused marginal graph
+	    if (node.subtype == "marginal"){
+
+	        node.graph = {};
+	        node.graph.bars = node.mutants.chars;
+
+	    }
+    }
+}
+
+
+
+/*
+* Fuses the information from two objects containing edge objects
+* params = edges1 and edges2 are objects containing edge objects
+*	   from two different POAGS.
+*
+* returns object containing the unique edges from each edge object, and
+* for each edge in common a fused edge will be stored in the object with
+* the same information as the two original edges but with y-values
+* corresponding to the highest y-value between the two edges fused.
+*/
+function getFusedEdges(edges1, edges2, newNodes, metadata1, metadata2) {
+    //object to store fused edges
+    var newEdges = {};
+
+    //pairwise comparison of edges, fusing if same edge name
+    for (var edge1 in edges1) {
+	    for (var edge2 in edges2) {
+
+	        if (edge1 == edge2){
+
+		        var newEdge = fuse_edges(edges1[edge1], edges2[edge2],
+						metadata1, metadata2);
+		        newEdges[edge1] = newEdge;
+
+		        break;
+	        }
+        }
+    }
+
+    //add uncommon edges
+    add_uncommonEdges(edges1, newEdges, newNodes, metadata1);
+    add_uncommonEdges(edges2, newEdges, newNodes, metadata2);
+
+    return newEdges;
+}
+
+/*
+* Gets unique edges and appends them to newEdge
+*
+* params = -> edges - object containing edges desired to get its
+*		      unique edges.
+* 	       -> edgesFused - array of edge names added to newEdges.
+*	       -> newEdges - array containing all the fused edges
+*			 already proccessed
+*
+* ensures -> All of the unique edges in edges will be added to
+*	     newEdges.
+*	      -> Edges added to newEdges are a deep copy version of
+*	     the edge.
+*/
+function add_uncommonEdges(edges, newEdges, newNodes, metadata){
+
+    //adding edges in edges not in newEdges
+    for (var edge in edges){
+
+        if (!(edge in newEdges)){
+
+	        var edgeCopy = {};
+	        var edgeInfo = edges[edge];
+
+	        for (var property in edgeInfo) {
+		        edgeCopy[property] = edgeInfo[property];
+	        }
+
+	        //setting the new y-values
+	        setY(edgeCopy, newNodes);
+
+	        newEdges[edge] = edgeCopy;
+	    }
+    }
+}
+
+/*
+* Sets the y-values for the edges based off the nodes already
+* created due to fusing the graphs
+*
+* params: -> edgeCopy - deepCopy of the edge being created to
+*			be added to the new edges.
+*	      -> newNodes - array of nodes created due to fusing
+*			the two graphs.
+*
+* ensures: -> The edgeCopy has it's y-values set so the edge
+*	      goes from the y specified as the starting node
+*	      in new nodes and goes to the ending nodes y in
+*	      newNodes.
+*/
+function setY(edgeCopy, newNodes){
+
+    //looping through each node and checking if involved in edge
+    for (var i=0; i<newNodes.length; i++){
+	    var node = newNodes[i];
+
+	    //no. of nodes corresponding to edgeCopy
+	    var hits = 0;
+
+	    //Setting the y for the from node
+	    if (node.id==edgeCopy.from){
+	        edgeCopy.y1 = node.y;
+	        hits++;
+
+	    //setting the y for the to node
+	    } else if(node.id==edgeCopy.to){
+	        edgeCopy.y2 = node.y;
+	        hits++;
+	    }
+
+	    //edge can only have two nodes, so:
+	    if (hits==2){
+	        break;
+	    }
+    }
+}
+
+/*
+* Fuse the two inputted edges
+*
+* params = two inputted edges with equivalent names from two
+*	   different POAGs
+*
+* returns = A new edge with the same details of both input
+*	    edges but y1 for the edge is equal to the largest
+*	    y1 of the two edges, same for y2.
+*/
+function fuse_edges(edge1Info, edge2Info, metadata1, metadata2){
+
+    //initialising new edge with equivalent information to edge1
+    var newEdge = {"x1": edge1Info.x1, "weight": edge1Info.weight,
+		   "from": edge1Info.from, "x2": edge1Info.x2,
+		   "to": edge1Info.to};
+
+    //making y1 for new edge be equal to edge with largest y1
+    if (edge1Info.y1 > edge2Info.y1){
+	    newEdge.y1 = edge1Info.y1;
+    } else {
+	    newEdge.y1 = edge2Info.y1;
+    }
+
+    //making y2 for new edge be equal to edge with largest y2
+    if (edge1Info.y2 > edge2Info.y2) {
+	    newEdge.y2 = edge1Info.y2;
+    } else {
+	    newEdge.y2 = edge2Info.y2;
+    }
+
+    return newEdge;
+}
+
+
+
+
+/*
+* Fuses inputted two list of nodes from two different POAGs
+*
+* param = -> nodes1 and nodes2 are arrays containing node objects from
+*	     different POAGS.
+*	  -> nodes1 can be from a fused type poag, marginal type, or
+*	     joint type.
+*	  -> nodes2 must be from either a marginal type, or joint type
+*	     poag.
+*	  -> metadata1 is the metadata from the nodes1 poag.
+*	  -> metadata2 is the metadata from the nodes2 poag.
+*
+* returns -> list of nodes with the information from the two different
+*						 lists of nodes fused.
+*/
+function getFusedNodes(nodes1, nodes2, metadata1, metadata2) {
+
+    //fusing the common nodes
+    var commonNodeInfo = add_commonNodes(nodes1, nodes2, metadata1,
+							metadata2);
+    var idNodesFused = commonNodeInfo[0];
+    var newNodes = commonNodeInfo[1];
+
+    //adding the uncommon nodes to newNodes in fused format
+    add_uncommonNodes(nodes1, idNodesFused, newNodes, metadata1);
+    add_uncommonNodes(nodes2, idNodesFused, newNodes, metadata2);
+
+    return newNodes;
+}
+
+/*
+* Get common nodes IDs and fuse common nodes
+*
+* params = same as for function 'getFusedNodes'
+*
+* returns -> commonNodeInfo - array containing idNodesFused and newNodes.
+*		-> idNodesFused is an array of ids of common nodes
+*		-> newNodes is an array of the common nodes fused
+*/
+function add_commonNodes(nodes1, nodes2, metadata1, metadata2){
+    //array to store new, fused nodes
+    var newNodes = [];
+
+    //IDs of the nodes already fused
+    var idNodesFused = [];
+
+    //pairwise comparison of nodes, fusing if same id
+    for (var i = 0; i < nodes1.length; i++){
+
+            var nodes1Id = nodes1[i].id;
+
+            for ( var j = 0; j < nodes2.length; j++ ){
+                var nodes2Id = nodes2[j].id;
+
+                if (nodes1Id == nodes2Id) {
+
+                    idNodesFused.push(nodes1Id);
+
+                    var newNode = fuse_nodes(nodes1[i], nodes2[j], newNodes,
+						      metadata1, metadata2);
+                    newNodes.push( newNode );
+
+		            break;
+                }
+
+            }
+    }
+
+    var commonNodeInfo = [idNodesFused, newNodes];
+    return commonNodeInfo;
+}
+
+/*
+* Gets nodes unique to nodes, adds them in ordered way to idNodesFused
+* and newNodes
+*
+* params = -> nodes is an array of nodes.
+*	       -> idNodesFused is an array of ids from nodes present in
+*	                        newNodes.
+* 	       -> newNodes is an array of nodes already fused/added.
+*	       -> metadata is the metadata object from the same poag as
+*	                    nodes.
+*
+* ensures = -> All of the nodes unique to nodes will be added in ascending
+*	      order in both idNodesFused and newNodes depending on node ID.
+*	        -> Nodes added to newNodes are a deep copy version of the nodes,
+*	      (are converted to fused format if not already.
+*/
+function add_uncommonNodes(nodes, idNodesFused, newNodes, metadata){
+
+    //adding nodes from first graph not contained in the other graph
+    for (var i = 0; i < nodes.length; i++){
+
+	//checking if node already in newNodes, if not then add
+        if (idNodesFused.indexOf(nodes[i].id) == -1){
+
+	        //adding to idNodesFused in ordered way
+	        idNodesFused.push(nodes[i].id);
+	        idNodesFused.sort(d3.ascending);
+
+	        var nodeCopy = node_DeepCopy(nodes[i], metadata);
+
+	        //using ordering in idNodesFused to add node to newNodes
+	        newNodes.splice(idNodesFused.indexOf(nodes[i].id), 0, nodeCopy);
+	    }
+    }
+}
+
+
+/*
+* Returns deep copy of inputted node, if from an unfused type will return in
+* a fused type format
+*
+* params = -> node is an inputted node from a POAG
+*	       -> metadata is the metdata from the same poag as node
+*
+* returns = -> newNode - is is exactly the same(if node is fused type),
+*	       else returns copy of node in fused type format.
+*/
+function node_DeepCopy(node, metadata) {
+    //need to check what the point of class, lane, and seq are.
+    var newNode = {"id": node.id, "x": node.x, "y": node.y, "label": node.label,
+		  "num_out_edges": node.num_out_edges};
+
+    //checking if node from fused poag and
+    if (metadata.type == "fused" && node.graph.bars[0]
+					       .hasOwnProperty("poagValues")) {
+
+	    //already in fused format, just add deep copies of graph and seq
+	    newNode.graph = graph_deepCopy(node);
+        newNode.seq = seq_deepCopy(node);
+
+    } else if (metadata.type != "marginal") {
+
+	    //putting in details in fused type format
+	    newNode.seq = {"chars": [{"label": newNode.label, "value": 1}],
+							     "poagValues": []};
+
+	    newNode.seq.poagValues.push({"label": newNode.label, "value": 1,
+					"poag": "poag" + (metadata.npoags+1)});
+
+	    newNode.graph = {"bars": [{"label": newNode.label, "value": 100,
+							   "poagValues": {}}]};
+
+	    newNode.graph.bars[0].poagValues["poag" + (metadata.npoags+1)] = 100;
+
+    } else{
+
+	    //putting in details in fused type format
+	    newNode.seq = {"chars": [{"label": newNode.label, "value": 1}],
+							     "poagValues": []};
+
+	    newNode.seq.poagValues.push({"label": newNode.label, "value": 1,
+					"poag": "poag" + (metadata.npoags+1)});
+
+	    //need to treat the marginal graph object differently
+	    newNode.graph = add_poagValues(node.graph, metadata.npoags);
+    }
+
+    return newNode;
+}
+
+/*
+* Creates a fused poag version of the marginal poags graph object
+* (i.e. has poag information)
+*
+* params: -> graph - marginal poags graph object
+*
+* returns: -> fusedGraphObject - fused poag version of graph object
+*/
+function add_poagValues(graph, npoags){
+
+    var bars = graph.bars;
+
+    var fusedGraphObject = {"bars":[]};
+
+    for (var bari in bars) {
+
+	    var bar = bars[bari];
+
+	    //copying over graph information and adding poag info
+	    var newBar = {"label": bar.x_label, "value": bar.value,
+						"poagValues": {}};
+
+	    newBar.poagValues["poag" + (npoags+1)] = bar.value;
+
+	    fusedGraphObject.bars.push(newBar);
+    }
+
+    return fusedGraphObject;
+}
+
+
+/*
+* Fuses two inputted nodes
+*
+* params = -> node1, node2, metadata1 & metadata2 same as described
+*	      for 'getFusedNodes' method
+*	       -> newNodes is an array of the fused nodes
+*
+* returns = -> newNode - A single node with attributes of both nodes
+*			 fused.
+*/
+function fuse_nodes(node1, node2, newNodes, metadata1, metadata2) {
+    //need to check what the point of class, lane, and seq are.
+    var newNode = {"id": node1.id, "lane": 0, "x": node1.x};
+
+    //fusing the nodes appropriately depending on the poags they are from
+    if (metadata1.type == "joint" && metadata2.type == "joint") {
+
+	    //need to create new graph and seq objects when fusing joint types
+    	newNode.seq = create_seqObject(node1, node2);
+	    newNode.graph = createGraphObject(newNode.seq, node1, node2);
+
+    } else if (metadata1.type == "fused" && metadata2.type == "joint") {
+
+	    //adding the label information from the joint node (node2) to node1
+	    newNode.seq = add_labelToSeq(node1, node2, metadata1.npoags);
+	    newNode.graph = add_labelToGraph(newNode.seq, node1, node2,
+							metadata1.npoags);
+
+    } else if (metadata1.type == "marginal" && metadata2.type == "marginal"){
+
+	    //Need to create new seq object with the marginal but fuse distributions
+	    newNode.seq = create_seqObject(node1, node2);
+	    newNode.graph = fuse_marginalGraphs(node1, node2, metadata1.npoags,
+							 metadata2.npoags);
+
+    } else if (metadata1.type == "fused" && metadata2.type == "marginal"){
+
+	    //need to add label information to seq, but still fuse distributions
+	    newNode.seq = add_labelToSeq(node1, node2);
+	    newNode.graph = fuse_marginalGraphs(node1, node2, metadata1.npoags,
+							 metadata2.npoags);
+    }
+
+    //node with highest y becomes y of new node
+    if (node1.y > node2.y) {
+        newNode.y = node1.y;
+    } else {
+        newNode.y = node2.y;
+    }
+
+    //label with highest frequency becomes new label
+    newNode.label = getNodeLabel(newNode.seq);
+
+    return newNode;
+}
+
+/*
+* Fuses the graph information present in two marginal poags or a fused poag
+* and marginal poag
+*
+* params: -> node1 must either be a node from a fused or marginal poag
+*	      -> node2 must be a node from a marginal poag
+*	      -> npoags is the total number of nodes fused thus far
+*	        (refer to fuse_multiplegraphs in merge_poag.js)
+*
+* returns: -> fusedGraph - fused graph object of the two inputted nodes
+*			   and returns a new graphh object in the fused
+*			   graph format (i.e. has poagValues).
+*/
+function fuse_marginalGraphs(node1, node2, npoags1, npoags2){
+
+    var bars1 = node1.graph.bars;
+    var bars2 = node2.graph.bars;
+
+    var fusedGraph = {"bars": []};
+
+    //pairwise comparison of the bars, fusing if have the same label
+    for (var bar1i in bars1){
+
+	    var bar1 = bars1[bar1i];
+
+	    for (var bar2i in bars2){
+	        var bar2 = bars2[bar2i];
+
+	        if (bar1.x_label == bar2.x_label){
+
+		        var newBar = fuse_Bar(bar1, bar2, npoags1, npoags2);
+		        fusedGraph.bars.push(newBar);
+	        }
+	    }
+    }
+    return fusedGraph;
+}
+
+/*
+* Fuses two bar objects with the same label
+*
+* params: -> bar1 must be from a graph object from either a fused or
+*	     marginal poag
+*	      -> bar2 must be from a graph object from a marginal poag
+*	         Both bar objects must have the same label.
+*	     -> npoags1 and 2 is the same as described in params for
+*	        'fused_marginalGraphs'
+*
+* returns: -> newBar - object containing information between the
+*		       two bars fused. If bar1 is from a fused graph,
+*		       will appropriately normalise poagValues and add
+*		       the extra poagValue from bar2.
+*/
+function fuse_Bar(bar1, bar2, npoags1, npoags2){
+
+    var newValue = (bar1.value + bar2.value)/2;
+    var newBar = {"label": bar1.x_label, "value": newValue,
+						"poagValues": {}};
+
+    //if has "poagValues", bar1 is from fused type
+    if (bar1.hasOwnProperty("poagValues")) {
+
+	    //Copying over the poagValues from bar1 and normalising
+	    for (var poag in bar1.poagValues){
+
+	        newBar.poagValues[poag] = bar1.poagValues[poag]/2;
+	    }
+
+    } else {
+
+	    //adding new poagValue information since must be marginal type here
+	    newBar.poagValues["poag" + (npoags1+1)] = bar1.value/2;
+    }
+
+    //bar2 is always from marginal type so just add the barValue for that poag
+    newBar.poagValues["poag" + (npoags2+1)] = bar2.value/2;
+
+    return newBar;
+}
+
+/*
+* Creates a seq object based off the labels of two inputted nodes
+*
+* params: Nodes 1 and 2 are both nodes with the same id from two
+*	      different POAGs which are unfused and represent a
+*	      sequence at an intermediate node in the tree.
+*
+* return: seq object created based off the labels of the inputted nodes
+*/
+function create_seqObject(node1, node2){
+
+    var newSeq = {"chars": [], "poagValues": []};
+
+    if (node1.label!=node2.label){
+
+	    //creating two new seperate char objects
+	    newSeq.chars[0] = {"label": node1.label, "value": 1};
+	    newSeq.chars[1] = {"label": node2.label, "value": 1};
+    } else{
+
+	    //just adding one new char object, but with a value of 2
+	    newSeq.chars[0] = {"label": node1.label, "value": 2};
+    }
+
+    //adding the different values for the poags
+    newSeq.poagValues[0] = {"label": node1.label, "value": 1,
+							"poag": "poag1"};
+
+    newSeq.poagValues[1] = {"label": node2.label, "value": 1,
+							"poag": "poag2"};
+
+    return newSeq;
+}
+
+/*
+* Adds to the existing seq object in node1 based off the seq label in
+* node2
+*
+* params: -> node1 - is from a POAG which is fused
+*	      -> node2 - has the same ID as node1, and is from either
+*	                 joint or marginal poag
+*	      -> npoags - same as described in 'fused_marginalGraphs'
+*
+* returns: -> seq - A seq object in node1 updated to include node2's
+*		    label details. Added if label already present in chars,
+*		    otherwise label added as new char with value of 1.
+*/
+function add_labelToSeq(node1, node2, npoags){
+
+    //getting deep copy of characters in seq object
+    var newSeq = seq_deepCopy(node1);
+    var chars = newSeq.chars;
+
+    var foundMatch = false;
+    for (var i=0; i<chars.length; i++){
+
+	    //if found match, increment character value
+        if ( node2.label == chars[i].label ){
+	        chars[i].value += 1;
+	        foundMatch = true;
+	        break;
+        }
+
+    }
+
+    //adding new char object if no match found
+    if (!foundMatch){
+	    chars.push({});
+	    chars[chars.length-1].label = node2.label
+	    chars[chars.length-1].value = 1;
+    }
+
+    //adding the poagValue in
+    newSeq.poagValues.push({"label": node2.label, "value": 1,
+				    "poag": ("poag" + (npoags+1))});
+
+    return newSeq;
+}
+
+/*
+* Creates deep copy of seq object in inputted node
+*
+* params: node -> node wish to make deep copy of its seq object,
+*		          must be fused type
+*
+* returns: -> newSeq - Deep copy of node seq, is identical to node.seq.
+*/
+function seq_deepCopy(node){
+    //to store all the sequence information
+    var newSeq = {"chars": [], "poagValues": []};
+
+    for (var i=0; i<node.seq.chars.length; i++) {
+
+	    //adding seq details from inputted node to seq object of new node
+	    newSeq.chars.push({});
+	    newSeq.chars[i].label = node.seq.chars[i].label;
+        newSeq.chars[i].value = node.seq.chars[i].value;
+    }
+
+    //copying over the poagValue details
+    var poagValues = node.seq.poagValues;
+    for (var j = 0; j<poagValues.length; j++) {
+	    newSeq.poagValues.push({"label": poagValues[j].label, "value":
+		      poagValues[j].value, "poag": poagValues[j].poag});
+    }
+
+    return newSeq;
+}
+
+/*
+* Gets the label in a given seq object with the highest value.
+*
+* params: -> seq - seq object from a node from any type of poag
+*
+* returns: -> label with the highest associated value in the seq object
+*/
+function getNodeLabel(seq) {
+    //getting the characters
+    var chars = seq.chars;
+
+    //initially assigning chars with max freq as the first
+    var charMaxFreq = chars[0];
+
+    //getting char with max freq
+    for (var i = 1; i<seq.chars.length; i++) {
+	    if (chars[i].value > chars[chars.indexOf(charMaxFreq)].value) {
+	        charMaxFreq = chars[i];
+	    }
+    }
+
+    return charMaxFreq.label;
+}
+
+/*
+* Creates node graph object from inputted seq object and
+* nodes from joint type poags. Called on initial graph fusion.
+*
+* params = -> seq - fused seq object generated from
+*		     create_seqObject(node1, node2).
+*	       -> node1 - node from joint type poag
+*	       -> node2 - node from joint type poag
+*
+* require = -> node1.label == node2.label
+*	        -> node1 and node2 from different poags
+*
+* returns = -> newGraph - A new graph object generated from
+*			  the seq and node data
+*/
+function createGraphObject(seq, node1, node2){
+    var overallCharCount = 0;
+    var chars = seq.chars;
+
+    var newGraph = {"bars": []};
+
+    //getting total character count
+    for (var i = 0; i < chars.length; i++){
+        overallCharCount += chars[i].value;
+    }
+
+    //calculating freq of each character relative to total
+    for (var i = 0; i < chars.length; i++){
+
+        var char = chars[i];
+        var graphValue = (char.value/overallCharCount)*100;
+
+	    //adding the char label and value
+        newGraph.bars.push({"label": char.label, "value":
+				graphValue, "poagValues": {}});
+
+	    if (char.label == node1.label && char.label == node2.label){
+
+	        //add both the poags to poag values since match char
+	        newGraph.bars[i].poagValues["poag1"] =
+			            		(1/overallCharCount)*100;
+
+	        newGraph.bars[i].poagValues["poag2"] =
+					(1/overallCharCount)*100;
+
+	    } else if (char.label == node1.label) {
+
+	        //add just node1s poag to graph object
+	        newGraph.bars[i].poagValues["poag1"] =
+			        		(1/overallCharCount)*100;
+
+	    } else {
+
+	        //add just node2s poag to graph object
+	        newGraph.bars[i].poagValues["poag2"] =
+			        		(1/overallCharCount)*100;
+
+	    }
+    }
+    return newGraph;
+}
+
+/*
+* Adds the information from node2 to the graph in node1
+*
+* params = -> seq - fused seq object from nodes inputted
+*	       -> node1 - node from fused poag
+*	       -> node2 - node from joint poag
+*	       -> npoags - number of poags fused in the poag from
+*		       which node1 is derived.
+*
+* returns = -> newGraph - new graph object which is the same as
+*			  node1s graph but with the extra label
+*			  information incorporated from node2.
+*/
+function add_labelToGraph(seq, node1, node2, npoags){
+    var overallCharCount = 0;
+    var chars = seq.chars;
+
+    var newGraph = graph_deepCopy(node1);
+
+    //getting total character count
+    for (var i = 0; i < chars.length; i++){
+        overallCharCount += chars[i].value;
+    }
+
+    //calculating freq of each character relative to total
+    for (var i = 0; i < chars.length; i++){
+        var char = chars[i];
+
+	    var graphValue = (char.value/overallCharCount)*100;
+
+	    var graphBars = newGraph.bars;
+
+	    var labelIndex = -1;
+
+	    for (var k=0; k < graphBars.length; k++) {
+
+	        if (graphBars[k].label == node2.label &&
+			    	node2.label == char.label ){
+
+		        graphBars[k].value = graphValue;
+
+		        labelIndex = k;
+		        break;
+	        }
+	    }
+
+	    /****updating the poag values for every poagvalue*****/
+	    for (var k = 0; k<graphBars.length; k++) {
+
+	        //for updating the whole bars value
+	        graphBars[k].value = 0;
+
+	        for (var poagValue in graphBars[k].poagValues){
+
+	            graphBars[k].poagValues[poagValue] =
+				              (1/overallCharCount)*100;
+
+		        graphBars[k].value += (1/overallCharCount)*100;
+	        }
+	    }
+
+	    /*********adding new graph poag info *************/
+	    if (labelIndex != -1) {
+
+	        graphBars[labelIndex].poagValues["poag" +
+			             (npoags+1)] = (1/overallCharCount)*100;
+
+	        graphBars[labelIndex].value += (1/overallCharCount)*100;
+
+	    } else if (char.label == node2.label) {
+
+	        graphBars.push({"label": char.label, "value": graphValue,
+			    			"poagValues": {}});
+
+	        graphBars[graphBars.length-1].poagValues["poag" +
+			            (npoags+1)] = (1/overallCharCount)*100;
+
+	    }
+    }
+
+    return newGraph;
+}
+
+/*
+* Creates deep copy of graph object in node, graph must be fused type
+* param: node object of fused type
+* returns deep copy of graph in node
+*/
+function graph_deepCopy(node, npoags){
+
+    //to store graph information
+    var newGraph = {"bars": []};
+
+    for (var i=0; i<node.seq.chars.length; i++) {
+	    //adding graph details from node to graph object of new node
+        if (i >= node.graph.bars.length) {
+        	return newGraph;
+        }
+	    newGraph.bars.push({});
+
+	    newBars = newGraph.bars;
+	    nodeBars = node.graph.bars;
+	    newBars[i].value = nodeBars[i].value;
+	    newBars[i].label = nodeBars[i].label;
+
+	    newBars[i]["poagValues"] = {};
+
+	    for (var poagValue in nodeBars[i].poagValues){
+
+	        newBars[i].poagValues[poagValue] = nodeBars[i]
+			                    		      .poagValues[poagValue];
+	    }
+    }
+    return newGraph;
+}
+
+//  Have moved the following code to results.html line 140
+
+//var graph1 = JSON.parse(json_str);
+//var graph2 = JSON.parse(poag_json_n4);
+//var graph3 = JSON.parse(poag_json_n9);
+//var graph5 = JSON.parse(joint4);
+//var graph6 = JSON.parse(joint5);
+
+//var graphs = graph.poags;//[graph1, graph2, graph3, graph5, graph6];
+
+//var marginalGraph1 = JSON.parse(marginal1);
+//var marginalGraph2 = JSON.parse(marginal2);
+
+//var marginalGraphs = [marginalGraph1, marginalGraph2];
+
+//var newGraph = fuse_multipleGraphs(graphs);
+//console.log(newGraph);
+
+/*
+* Fuses multiple poags of either marginal or joint type
+*
+* params: -> graphs - an array of either marginal or joint poags
+*	  -> innerNodeGrouped - boolean whether the user wants
+*				the nodes displayed with the inner
+*				colours grouped or not.
+*
+* returns: string JSON object (of fused poag object)
+*	   of all the poags in the array.
+*/
+function fuse_multipleGraphs(graphs, innerNodeGrouped){
+
+    var innerNodeGrouped = innerNodeGrouped || false;
+
+    //assigning each poag a no. to identify it
+    for (var j = 0; j<graphs.length; j++) {
+
+	graphs[j].bottom.metadata["npoags"] = j;
+
+    }
+
+    //initial graph fusion
+    var fusedGraph = fuse_graphs(graphs[0], graphs[1]);
+
+    fusedGraph.bottom.metadata.npoags = 2;
+
+    //if list of poags >2, fused next poag with the current fused poag
+    if (graphs.length>2){
+
+    	for (var i = 2; i<graphs.length; i++){
+
+	    fusedGraph = fuse_graphs(fusedGraph, graphs[i]);
+	    fusedGraph.bottom.metadata.npoags += 1;
+
+    	}
+    }
+
+    //adding the poags which aren't described into seq
+    for (var node in fusedGraph.bottom.nodes){
+
+	var seq = fusedGraph.bottom.nodes[node].seq;
+	add_poagsToSeq(seq, fusedGraph.bottom.metadata.npoags,
+						innerNodeGrouped);
+    }
+
+    //adding the mutant information if fusing marginal poags
+    if (fusedGraph.bottom.metadata.subtype == "marginal") {
+
+	    // Need to fix when integrate to grasp
+        var fusedGraphBottom = generate_mutants(fusedGraph.bottom);
+        add_poagValuesToMutants(fusedGraph.bottom.nodes);
+
+    }
+
+    return JSON.stringify(fusedGraph);
+}
+
+/*
+* Add normalised poagValue information to each mutant object in
+* nodes[nodei]
+*
+* params: nodes are nodes from a fused poag
+*
+* ensures: for each node in the list of nodes, poagValues are
+*	   added so that the degree each poag contributes to
+*	    the mutant frequency is present.
+*/
+function add_poagValuesToMutants(nodes){
+
+    for (var nodei in nodes){
+
+	    var node = nodes[nodei];
+
+	    for (var chari in node.mutants.chars){
+
+	        var char = node.mutants.chars[chari];
+
+	        for (var bari in node.graph.bars){
+
+		        var bar = node.graph.bars[bari];
+
+		        if (char.label == bar.label) {
+
+		            //adding normalised poagValues
+		            char["poagValues"] = {};
+		            for (var poag in bar.poagValues){
+
+			            char.poagValues[poag] =
+			            (bar.poagValues[poag]/bar.value)*char.value;
+		            }
+		        }
+	        }
+	    }
+    }
+}
+
+/*
+* Adds to the seq object the poags which were not present with a label of "0"
+*
+* params: -> seq - seq object from the final fused poag
+*	  -> npoags - number of poags fused to created the final fused poag.
+*	  -> innerNodeGrouped - *optional* boolean as to whether the seq
+*				poagValues should be order so that the
+*				kind of labels in the inner pi chart are
+*				grouped.
+*
+* ensures: -> All poags not present in the seq object added with label "0"
+*	      to indicate that poag does not have that node. If
+*	      innerNodeGrouped then poags added so labels grouped together
+*	      in pi chart, else added so pi chart ordered based off poag
+*	      number.
+*/
+function add_poagsToSeq(seq, npoags, innerNodeGrouped){
+
+    var poagValues = seq.poagValues;
+
+    //getting poags which don't have node
+    var poagsAbsent = getPoagsAbsent(npoags, poagValues);
+
+    //updating seq appropriately to contain poag with label "0"
+    if (poagsAbsent.length > 0){
+
+	    //inserting absent poags into seq object with label "0"
+	    seq.chars.push({"label": "0", "value": 0});
+
+        //for determining location of already added poags
+        var firstPoagi = -1;
+
+        //getting poagValues length before append extra poags
+        var originalLength = poagValues.length;
+
+	    //add absent poags with label "0" for pi chart display
+	    for (var poagAbsenti in poagsAbsent){
+
+	        var poagAbsent = poagsAbsent[poagAbsenti];
+
+	        var newPoagObject = {"label": "0",
+				                "value": 1, "poag": poagAbsent};
+
+            //getting poag number from poag name (e.g 1 from 'poag1')
+            var poagNumber = poagAbsent.charAt(poagAbsent.length-1) - 1;
+
+	        //poag order in poagValues determines pi chart slice order
+	        if ( (!innerNodeGrouped) || originalLength == 1 || poagsAbsent.length == 1){
+
+                //nodes ordered according to poagNumber
+	            poagValues.splice(poagNumber, 0, newPoagObject);
+
+	        } else{
+
+	 	        //groups according to character when pi displayed
+	 	        firstpoagi = addpoag_InnerOrdered(firstpoagi, poagNumber,
+	 	                                          poagValues, newPoagObject);
+	 	    }
+
+	        seq.chars[seq.chars.length-1].value += 1;
+	    }
+    }
+}
+
+/*
+* Gets the poags not already described in poagValues
+*
+* params: npoags -> number of poags fused in the fused graph object
+*         poagValues -> seq.poagValues from the fused graph object
+*
+* returns: poagsAbsent -> array containing names of poags not present in
+*                         poagValues.
+*/
+function getPoagsAbsent(npoags, poagValues){
+
+    var poagsAbsent = [];
+
+    //getting poags no present in poag values
+    for (var poagi = 1; poagi<npoags+1; poagi++){
+
+	    var poagPresent = false;
+	    for (var poag in poagValues){
+
+	        if (poagValues[poag].poag == ("poag" + poagi)){
+
+		        poagPresent = true;
+		        break;
+	        }
+	    }
+
+	    if (!poagPresent){
+
+	        poagsAbsent.push(("poag" + poagi));
+	    }
+    }
+
+    return poagsAbsent;
+}
+
+/*
+* Adds the newPoagObject in the appropriate position in poagValues
+* params: firstpoagi -> index in poagValues first poagAbsent was added to.
+*                       firstpoagi == -1 if absent poag not yet added.
+*         poagNumber -> poags number (e.g. 1 from 'poag1') minus 1 for indexing.
+*         poagValues -> same as described in getPoagsAbsent.
+*         newPoagObject -> poagObject describing absent poag corresponding to poagNumber.
+* returns: firstpoagi -> same as described above.
+*/
+function addpoag_InnerOrdered(firstpoagi, poagNumber, poagValues, newPoagObject){
+
+    //groups according to character when pi displayed
+    if (firstpoagi == -1 && poagNumber > 0 && poagNumber < poagValues.length-1){
+
+	    for (var i = poagNumber; i<poagValues.length; i++){
+
+	        //adding poag at nearest site to poagNumber between poags with different labels
+	 	    if (poagValues[i-1].label != poagValues[i].label){
+	 	        poagValues.splice(i, 0, newPoagObject);
+	 	        firstpoagi = i;
+	 	        break;
+	 	    }
+	    }
+
+	    //means all of the poags in seq have same label, so don't want to split up
+	    if (firstpoagi == -1){
+
+	        //to check whether poag should be inserted at end or start
+	 	    var endDist = poagValues.length - poagNumber;
+
+            //if poag closer to end, insert there, else at start
+	 	    if (endDist < poagNumber){
+	 	        poagValues.push(newPoagObject);
+                firstpoagi = poagValues.length-1;
+
+	 	    } else {
+
+	 	        poagValues.splice(0, 0, newPoagObject);
+	 	        firstpoagi = 0;
+	 	    }
+	    }
+
+	} else if (firstpoagi == -1 && poagNumber == 0){
+
+	    //poag can just go at the start, won't split up poags with same labels
+	 	poagValues.splice(0, 0, newPoagObject);
+	 	firstpoagi = 0;
+
+
+	} else if (firstpoagi == -1 && poagNumber == poagValues.length-1){
+
+	    //poag can just go at the end, won't split up poags with same labels
+	 	poagValues.push(newPoagObject);
+	 	firstpoagi = poagValues.length-1;
+
+	} else {
+
+	    //just adding in front of last added absent poag
+	 	poagValues.splice(firstpoagi+1, 0, newPoagObject);
+	}
+
+	return firstpoagi;
+}
+
+/*
+* Fuses two inputted POAG graphs
+* params = two graphs aligned and aligned nodes have the same ids
+* returns single graph with attributes of both graphs fused.
+*/
+function fuse_graphs(graph1, graph2){
+    //getting nodes from inputted graphs
+    var nodes1 = graph1.bottom.nodes;
+    var nodes2 = graph2.bottom.nodes;
+
+    //graph metadata
+    var metadata1 = graph1.bottom.metadata;
+    var metadata2 = graph2.bottom.metadata;
+
+    var newNodes = getFusedNodes(nodes1, nodes2, metadata1,
+						metadata2);
+
+    //Getting edges from inputted graphs
+    var edges1 = graph1.bottom.edges;
+    var edges2 = graph2.bottom.edges;
+
+    var fusedEdges = getFusedEdges(edges1, edges2, newNodes,
+				      metadata1, metadata2);
+
+    //Creating the newGraph
+    var newGraph = {};
+    newGraph.top = graph1.top;
+    newGraph.bottom = {};
+    newGraph.bottom.metadata = metadata_DeepCopy(graph1.bottom.metadata);
+
+    newGraph.bottom.metadata.type = 'fused';
+    newGraph.bottom.metadata["subtype"] =
+			    graph2.bottom.metadata.type;
+
+    newGraph.bottom.max_depth = graph1.bottom.max_depth;
+    newGraph.bottom.edges = fusedEdges;
+    newGraph.bottom.nodes = newNodes;
+
+    return newGraph;
+}
+
+/*
+* Creates a deep copy of a metadata object
+* params: -> metadata - e.g. from graph.bottom.metadata
+* returns: -> metadataCopy - a deep copy of metadata.
+*/
+function metadata_DeepCopy (metadata){
+
+    var metadataCopy = {};
+
+    //copying over all properties from metadata to metadataCopy
+    for (var property in metadata){
+        metadataCopy[property] = metadata[property];
+    }
+
+    return metadataCopy;
 }
 
 

@@ -93,7 +93,6 @@ var displayJointGraph = function(node_name, node_fill) {
         success: function(data) {
             json_str = data;
             drawMutants = false;
-            graph_array.push(JSON.parse(data));
             //problem below, this only colours for the second poag, leaving the colour for 'poag1'
             //undefined, hence why it comes up black for the fused nodes -> I may have fixed this
             setup_poags(json_str, false, false, false, node_name)

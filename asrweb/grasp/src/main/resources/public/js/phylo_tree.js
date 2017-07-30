@@ -22,7 +22,7 @@ var phylo_options = {
         extents: new Array(),
         min_x: 0,
         additive: true, // Whether or not we want to display the branches as additiv
-        node_instep: 0.1,
+        node_instep: 0,
     },
     legend: {
         width: 50,
@@ -568,9 +568,26 @@ var run_phylo_tree = function () {
     phylo_options.tree.max_y = 0;
 
 
-    tree_json = setup(tree_json, 0);
+    //tree_json = setup(tree_json, 0);
 
-    add_mods(tree_json, 0, phylo_options)
+    //add_mods(tree_json, 0, phylo_options)
+    
+    /* Assign the x coords */
+    phylo_options.leaf_count = 0;
+    phylo_options.left_leaf_nodes = [];
+    assign_leaf_x_coords(tree_json, phylo_options);
+
+    /* For each of the leaf nodes itterate back up
+     * through the tree and assign x coords to inner nodes. */
+    for (var n in phylo_options.left_leaf_nodes) {
+        assign_inner_x_coords(phylo_options.left_leaf_nodes[n].parent, phylo_options);
+    }
+
+    /* Assign x coords of the root */
+    tree_json.raw_x = (tree_json.children[0].raw_x + tree_json.children[1].raw_x) / 2;
+
+    /* Set the max x */
+    phylo_options.tree.max_x = phylo_options.leaf_count;
 
     phylo_options = make_tree_scale(phylo_options);
     tree_json.y = phylo_options.y_scale(0);
@@ -595,6 +612,57 @@ var run_phylo_tree = function () {
     draw_phylo_nodes(phylo_options);
 }
 
+/**
+ * Assigns the parent nodes based on the x coords of the children.
+ *
+ * Traels from the leaf nodes up assigning parent node based on
+ * 1/2 between left and right child.
+ */
+var assign_inner_x_coords = function (node, phylo_options) {
+    /* Assign the x coords based on that of the childern*/
+    node.raw_x = (node.children[0].raw_x + node.children[1].raw_x) / 2;
+    if (node.parent != undefined) {
+        assign_inner_x_coords(node.parent, phylo_options);
+    }
+}
+
+
+/**
+ * Assigns the x coords of leafs/terminating nodes.
+ *
+ * Leaf is used to define either a left node, i.e. extent or
+ * a terminating node (i.e. we are not displaying the children
+ * of that node).
+ */
+var assign_leaf_x_coords = function (node, phylo_options) {
+
+    /* This is a leaf (or terminating node) so assign the current x count */
+    if (node.children == undefined || node.terminated == true) {
+        node.raw_x = phylo_options.leaf_count;
+        phylo_options.leaf_count += 1;
+        /* Add one of the children to the leaf node array so
+         * we traverse up from only half the nodes when assigning
+         * parent coords. */
+        if (node.left) {
+            phylo_options.left_leaf_nodes.push(node);
+        }
+        return;
+    }
+
+    /* Otherwise DFS left child first */
+    if (node.children[0] != undefined) {
+        node.children[0].left = true;
+        node.children[0].parent = node;
+        assign_leaf_x_coords(node.children[0], phylo_options);
+    }
+
+    /* Finnally search right subtree */
+    if (node.children[1] != undefined) {
+        node.children[1].left = false;
+        node.children[1].parent = node;
+        assign_leaf_x_coords(node.children[1], phylo_options);
+    }
+}
 
 
 /**
@@ -808,9 +876,9 @@ var assign_node_coords = function (node, depth) {
             node.y -= phylo_options.y_scale(0.2);
         }
         if (node.is_left) {
-            node.x = phylo_options.x_scale(node.raw_x + 0.3);
+            node.x = phylo_options.x_scale(node.raw_x + node_instep);
         } else {
-            node.x = phylo_options.x_scale(node.raw_x - 0.3);
+            node.x = phylo_options.x_scale(node.raw_x - node_instep);
         }
     }
 

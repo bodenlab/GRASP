@@ -103,7 +103,7 @@
                         </script>
                     </div>
 
-                    <div id="poag-all" class="col-sm-12">
+                    <div id="poag-all" class="col-sm-12" style="height: 3000px;">
 
                     </div>
                     
@@ -122,12 +122,24 @@
                             }
 
                             json_str = /*[[${graph}]]*/;
-                            var options = setup_options("poag-all");
-                            options = set_poag_data(options, json_str);
-                            options = create_poags(options);
+                            var resetGraphs = false;
+                            drawMutants = false;
+                            // Set the SVG ID in the poags data struct
+                            poags.options = poag_options;
+                            poags.options.data.raw_svg_id = "poag-all";   // HTML representation
+                            poags.options.data.target = "#poag-all";  // D3 representation
+                            setup_poags(json_str, true, true, false, 'Inferred')
+
+                            /**
+                             * Add inferred graph to the graph array so that when more graphs
+                             * are added we get a merged copy of the inferred + added graphs
+                             */
                             graph_array.push(JSON.parse(json_str));
-                            graph.options.poagColours["poag" + (Object.keys(graph.options.poagColours).length+1)] = graph.options.root_node_fill;
-                            var new_graph = "";
+                            // Add the colours of the POAG assigned by name and merged_id
+                            poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
+                            poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+
+
 
                     </script>
 

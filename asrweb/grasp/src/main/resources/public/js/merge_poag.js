@@ -31,15 +31,20 @@ function fuse_multipleGraphs(graphs, innerNodeGrouped){
     
     var innerNodeGrouped = innerNodeGrouped || false;
 
-    //assigning each poag a no. to identify it
+    //storing deep copies of the metadata from the first two graphs
+    var metadatas = [];
+
+    //assigning each poag a no. to identify it in metadata deep copy
     for (var j = 0; j<graphs.length; j++) {
-	
-	graphs[j].bottom.metadata["npoags"] = j;
+
+	    metadatas[j] = metadata_DeepCopy(graphs[j].bottom.metadata);
+	    metadatas[j]["npoags"] = j;
 
     }
   
     //initial graph fusion  
-    var fusedGraph = fuse_graphs(graphs[0], graphs[1]);
+    var fusedGraph = fuse_graphs(graphs[0], graphs[1],
+                                 metadatas[0], metadatas[1]);
 
     fusedGraph.bottom.metadata.npoags = 2;
 
@@ -48,7 +53,9 @@ function fuse_multipleGraphs(graphs, innerNodeGrouped){
 
     	for (var i = 2; i<graphs.length; i++){
 
-	    fusedGraph = fuse_graphs(fusedGraph, graphs[i]);
+	    fusedGraph = fuse_graphs(fusedGraph, graphs[i],
+	                            fusedGraph.bottom.metadata,
+	                            metadatas[i]);
 	    fusedGraph.bottom.metadata.npoags += 1;
 
     	}
@@ -57,15 +64,16 @@ function fuse_multipleGraphs(graphs, innerNodeGrouped){
     //adding the poags which aren't described into seq
     for (var node in fusedGraph.bottom.nodes){
 
-	var seq = fusedGraph.bottom.nodes[node].seq;
-	add_poagsToSeq(seq, fusedGraph.bottom.metadata.npoags, 
+	    var seq = fusedGraph.bottom.nodes[node].seq;
+	    // TODO: fix below function so groups like labels. When innerNodeGrouped == true
+	    add_poagsToSeq(seq, fusedGraph.bottom.metadata.npoags,
 						innerNodeGrouped);
     }
 
     //adding the mutant information if fusing marginal poags
     if (fusedGraph.bottom.metadata.subtype == "marginal") {
 
-	    // Need to fix when integrate to grasp
+	    // TODO: Need to fix when integrate to grasp
         var fusedGraphBottom = generate_mutants(fusedGraph.bottom);
         add_poagValuesToMutants(fusedGraph.bottom.nodes);
 
@@ -168,7 +176,7 @@ function add_poagsToSeq(seq, npoags, innerNodeGrouped){
 	        } else{
 
 	 	        //groups according to character when pi displayed
-	 	        firstpoagi = addpoag_InnerOrdered(firstpoagi, poagNumber,
+	 	        firstPoagi = addpoag_InnerOrdered(firstPoagi, poagNumber,
 	 	                                          poagValues, newPoagObject);
 	 	    }
 
@@ -278,33 +286,36 @@ function addpoag_InnerOrdered(firstpoagi, poagNumber, poagValues, newPoagObject)
 
 /*
 * Fuses two inputted POAG graphs
-* params = two graphs aligned and aligned nodes have the same ids
+*
+* params = -> Graphs 1 and 2 are parsed and aligned poasg.
+              Aligned nodes have the same ids
+           -> metadata1 is a deep copy of graph 1s metadata
+              (unless graph is fused type, then is just the
+               same copy present in the fused JSON object)
+           -> metadata2 is a deep copy of graph 2s metadata
+*
 * returns single graph with attributes of both graphs fused.
 */
-function fuse_graphs(graph1, graph2){
+function fuse_graphs(graph1, graph2, metadata1, metadata2){
     //getting nodes from inputted graphs
     var nodes1 = graph1.bottom.nodes;
     var nodes2 = graph2.bottom.nodes;
 
-    //graph metadata
-    var metadata1 = graph1.bottom.metadata;
-    var metadata2 = graph2.bottom.metadata;
-
     var newNodes = getFusedNodes(nodes1, nodes2, metadata1, 
-						metadata2);
+						         metadata2);
 
     //Getting edges from inputted graphs
     var edges1 = graph1.bottom.edges;
     var edges2 = graph2.bottom.edges;
 
     var fusedEdges = getFusedEdges(edges1, edges2, newNodes, 
-				      metadata1, metadata2);
+				                   metadata1, metadata2);
     
     //Creating the newGraph
     var newGraph = {};
     newGraph.top = graph1.top;
     newGraph.bottom = {};
-    newGraph.bottom.metadata = metadata_DeepCopy(graph1.bottom.metadata);
+    newGraph.bottom.metadata = metadata1;
 
     newGraph.bottom.metadata.type = 'fused';
     newGraph.bottom.metadata["subtype"] =

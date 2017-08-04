@@ -10,7 +10,7 @@ var refresh_elements = function() {
         $('#mutant-btn').prop("disabled", false);
     } else {
         drawMutants = false;
-        set_mutant(0);
+            set_mutant(0);
         $('#mutant-input').fadeOut();
         $('#mutant-btn').prop("disabled", true);
         $('#mutant-btn').addClass("disabled");
@@ -76,11 +76,14 @@ var view_mutant_library = function(num) {
 /*
  * Reset view to the full marginal distribution
  */
-var view_marginal = function() {
-    //set_mutant(0);
-    options = setup_options("poag-all");
-    refresh_graphs(options);
-}
+/*var view_marginal = function() {
+    set_mutant(0);
+    setup_poags(json_str, true, true, false, 'Inferred');
+    graph_array.push(JSON.parse(json_str));
+    // Add the colours of the POAG assigned by name and merged_id
+    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
+    poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+}*/
 
 /* Define the alphabet so we can convert to distributions to numeric arrays */
 var alphabet = ['I','V','L','F','C','M','A','G','S','T','W','Y','P','H','E','Q','D','N','K','R'];
@@ -245,8 +248,8 @@ $(window).resize(function () {
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
         // TODO: re-size tree so it's 100% div sizing (like graphs)
-        refresh_tree();
+        run_phylo_tree();
         // redraw graphs for sizing
-        display();
+        redraw_poags();
     }, 100);
 });

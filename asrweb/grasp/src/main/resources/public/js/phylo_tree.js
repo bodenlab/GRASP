@@ -80,7 +80,7 @@ var phylo_options = {
 /**
  * The context menu, has the names for the events that a user can perform.
  */
-var menu = contextMenu().items('add joint reconstruction', 'add marginal reconstruction',);
+var menu = contextMenu().items('view marginal reconstruction', 'view joint reconstruction', 'add joint reconstruction');
 
 
 
@@ -241,8 +241,7 @@ var draw_phylo_circle = function (group, node, n) {
         })
         .on("contextmenu", function() {
             var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class");
-            var node_fill = phylo_options.legend.colour_scale(node.y);//d3.select("#circle-" + d3.select(this).attr("id")).attr("fill");
-            console.log(node_name, node_fill);
+            var node_fill = phylo_options.legend.colour_scale(node.y);
             d3.event.preventDefault();
             menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill);
         });
@@ -993,8 +992,10 @@ function contextMenu() {
             .style(style.rect.mouseout)
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
-                if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"), node_fill);
+                if (call_type == "view joint reconstruction") {
+                    displayJointGraph(d3.select(this).attr("id"), node_fill, true);
+                } else if (call_type == "add joint reconstruction") {
+                    displayJointGraph(d3.select(this).attr("id"), node_fill, false);
                 } else {
                     perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
@@ -1013,8 +1014,10 @@ function contextMenu() {
             .attr('class', function(d) { return d;})
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
-                if (call_type == "add joint reconstruction") {
-                    displayJointGraph(d3.select(this).attr("id"), node_fill);
+                if (call_type == "view joint reconstruction") {
+                    displayJointGraph(d3.select(this).attr("id"), node_fill, true);
+                } else if (call_type == "add joint reconstruction") {
+                    displayJointGraph(d3.select(this).attr("id"), node_fill, false);
                 } else {
                     perform_marginal(d3.select(this).attr("id"), node_fill);
                 }

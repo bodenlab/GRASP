@@ -16,6 +16,7 @@ var phylo_options = {
     tree: {
         longest_distance_from_root_to_extent: 0,
         node_count: 0, // used to assign ids
+        selected_node: null,
         all_nodes: new Array(),
         all_branches: new Array(),
         node_depth_dict: {}, // keeps track of the depth of each node
@@ -26,10 +27,9 @@ var phylo_options = {
     },
     legend: {
         width: 50,
-        top_colour: "#7F74F3",
-        bottom_colour: "#33FFB5",
-        colours: ["#7F74F3", "#33FFB5"],
-
+        top_colour: "#3C6AC4",
+        bottom_colour: "#F7FBFF",
+        colours: ["#3C6AC4", "#F7FBFF"],
     },
 
     // Options for node style
@@ -46,7 +46,7 @@ var phylo_options = {
           * interfering with hover events. 
           **/
         // --------------- Fills --------------------//
-        root_node_fill: "red",
+        root_node_fill: "black",
         extent_fill: "white",
         hover_fill: "#D77DE3",
         // --------------- Strokes ------------------//
@@ -61,7 +61,7 @@ var phylo_options = {
 
         // ----------------- Text ------------------//
         font_family: "Varela Round, sans-serif",
-        font_size: "16px",
+        font_size: "14px",
         font_colour: "#24232d",
 
         // ---------------- Context menu style ----//
@@ -70,10 +70,10 @@ var phylo_options = {
 
         // --------------- Action styles ----------//
         /** 
-         * The colour for when a user selects to perform a joint reconstruction
+         * The colour for when a user selects to perform a reconstruction
          * it will be shaded based on how "far" the node is from the root
          */
-        select_colour: "#342D7E"
+        select_colour: "#F780C9",
     }
 }
 
@@ -215,12 +215,15 @@ var draw_phylo_circle = function (group, node, n) {
                 return options.node_radius;
             }
         })
-        .attr("fill", function(d) { 
-            if (node.root_node) {
-                options.root_node_fill;
-            }
+        .attr("fill", function(d) {
             if (node.extent) {
                 return options.extent_fill;
+            }
+            if (node.selected) {
+                return options.select_colour;
+            }
+            if (node.root_node) {
+                return options.root_node_fill;
             }
             else {
                 return phylo_options.legend.colour_scale(node.y);
@@ -376,7 +379,6 @@ var on_node_mouseover = function (node_selected) {
  */
 var on_node_mouseout = function (node_selected) {
     var options = phylo_options.style;
-
     if (node_selected.attr("class") == "extent") {
         node_selected.attr("r", options.extent_radius);
         d3.select("#circle-" + node_selected.attr("id")).attr("r", options.extent_radius * options.under_node_multiplier);
@@ -390,6 +392,7 @@ var on_node_mouseout = function (node_selected) {
     node_selected.attr("opacity", 1);
     node_selected.attr("stroke-width", options.stroke_width)
     d3.select("#text-" + node_selected.attr("id")).style("opacity",  0);
+    select_node(phylo_options.tree.selected_node.id);
 }
 
 
@@ -432,7 +435,7 @@ var draw_branch_text = function (group, branch) {
         .attr("font-size", options.font_size)
         .attr("fill", options.branch_stroke)
         .attr("text-anchor", "start")
-        .attr("opacity", 1);
+        .attr("opacity", 0);
 
 }
 
@@ -442,13 +445,13 @@ var draw_branch_text = function (group, branch) {
  */
 
 var toggle_branch_text = function () {
-    var button_text = document.getElementById('branch-text-toggle').innerHTML.split(" ")[2];
-    if (button_text == "on") {
+    var button_text = document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1];
+    if (button_text == "ON") {
         phylo_options.svg.selectAll('text.branch-text').attr("opacity", 0);
-        document.getElementById('branch-text-toggle').innerHTML = "Branch text off";
+        document.getElementById('branch-text-toggle').innerHTML = "View branch length | OFF";
     } else {
         phylo_options.svg.selectAll('text.branch-text').attr("opacity", 1);
-        document.getElementById('branch-text-toggle').innerHTML = "Branch text on";
+        document.getElementById('branch-text-toggle').innerHTML = "View branch length | ON";
     }
 }
 
@@ -682,9 +685,11 @@ var make_child = function(node, left) {
     } else {
         child.extent = false;
     }
-
+    child.selected = false;
     if (node.root_node == undefined) {
         child.root_node = false;
+    } else {
+        child.selected = true;
     }
 
     return child;
@@ -993,10 +998,14 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "view joint reconstruction") {
+                    select_node(d3.select(this).attr("id"));
+                    refresh_tree();
                     displayJointGraph(d3.select(this).attr("id"), node_fill, true);
                 } else if (call_type == "add joint reconstruction") {
                     displayJointGraph(d3.select(this).attr("id"), node_fill, false);
                 } else {
+                    select_node(d3.select(this).attr("id"));
+                    refresh_tree();
                     perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
             }); 
@@ -1015,10 +1024,14 @@ function contextMenu() {
             .on('click', function() {
                 var call_type = d3.select(this).attr("class");
                 if (call_type == "view joint reconstruction") {
+                    select_node(d3.select(this).attr("id"));
+                    refresh_tree();
                     displayJointGraph(d3.select(this).attr("id"), node_fill, true);
                 } else if (call_type == "add joint reconstruction") {
                     displayJointGraph(d3.select(this).attr("id"), node_fill, false);
                 } else {
+                    select_node(d3.select(this).attr("id"));
+                    refresh_tree();
                     perform_marginal(d3.select(this).attr("id"), node_fill);
                 }
             });
@@ -1062,6 +1075,21 @@ function contextMenu() {
     }
 
     return menu;
+}
+
+/**
+ * Indicate that the node has been selected, and set all other nodes to be not selected (boolean flag node param).
+**/
+var select_node = function(node) {
+    var nodes = phylo_options.tree.all_nodes;
+    for (var n in nodes) {
+        if (nodes[n].name == node) {
+            nodes[n].selected = true;
+            phylo_options.tree.selected_node = nodes[n];
+        } else {
+            nodes[n].selected = false;
+        }
+    }
 }
 
 /**
@@ -1321,5 +1349,15 @@ var fix_subtrees = function (left, right) {
 var refresh_tree = function () {
     clear_svg();
     phylo_options.svg_info.width = window.innerWidth - 200;
+
+    // temporarily store the current selected node
+    var selected_node = phylo_options.tree.selected_node;
+
     run_phylo_tree();
+    select_node(selected_node.name);
+
+    // redraw the branches and the nodes
+    make_tree_scale(phylo_options);
+    draw_phylo_branches(phylo_options);
+    draw_phylo_nodes(phylo_options);
 }

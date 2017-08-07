@@ -3,48 +3,6 @@ var selectedNode = "root";              // Keep track of which tree node is sele
 var tree; // global tree object for updating parameters, etc
 
 /*
-** Function to set the tree node colours; selected node is a different colour to other nodes
-*/
-/*var node_colorizer = function(element, node) {
-    if (node.name == selectedNode) {
-        element.select("circle").style('fill', "hsl(219,70%,80%)");
-    } else {
-        element.select("circle").style('fill', "hsl(211,10%,80%)");
-    }
-};*/
-
-/*
-** Function to set up the phylogenetic tree structure (options and menu items)
-*//*
-var setup_tree = function(tree_div, newick_string) {
-    tree = d3.layout.phylotree()
-                    .svg (d3.select(tree_div))
-                    .options({
-                         'selectable': false,
-                         'collapsible': true})
-                    .radial(false)
-                    .node_circle_size(6)
-                    .style_nodes(node_colorizer);
-    tree(d3_phylotree_newick_parser(newick_string)).layout();
-
-    // add a custom menu for (in this case) terminal nodes
-    tree.get_nodes().forEach (function (node) {
-        d3_add_custom_menu (node, // add to this node
-      	        function(node) {return("Create marginal reconstruction")},
-      		    function () {
-      		        perform_marginal(node);
-      		    }
-     	 	);
-     	d3_add_custom_menu (node, // add to this node
-      		function(node) {return("View joint reconstruction results");},
-      			 function () {
-                     displayJointGraph(node);
-                 }
-            );
-    });
-};*/
-
-/*
 ** Perform marginal reconstruction of the selected tree node
 */
 var perform_marginal = function(node_name, node_fill) {
@@ -75,6 +33,7 @@ var perform_marginal = function(node_name, node_fill) {
                 poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
 
                 setup_poags(json_str, true, false, false, 'Inferred');
+                redraw_poags();
             }
             refresh_elements();
         }
@@ -116,7 +75,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
                 var new_graph = fuse_multipleGraphs(graph_array);
                 setup_poags(new_graph, false, false, true, 'Merged');
             }
-
+            redraw_poags();
         }
     });
     $("#progress").addClass("disable");

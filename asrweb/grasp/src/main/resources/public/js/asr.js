@@ -1,6 +1,4 @@
 var inferType = "joint"; // Keep track of which reconstruction is being displayed
-var mutants = 0; // flag for generating mutant distribution
-var drawMutants = false;    // flag for drawing mutants (only during marginal)
 
 var refresh_elements = function() {
     refresh_labels();
@@ -39,12 +37,16 @@ var set_recon_label = function(label) {
 };
 
 var set_mutant = function(numMutants) {
-    mutants = numMutants;
+    if (isNaN(numMutants)) {
+        poags.options.mutants.count = 0;
+    } else {
+        poags.options.mutants.count = numMutants;
+    }
 };
 
 var set_draw_mutants = function(flag) {
-    drawMutants = flag;
-};
+    poags.options.mutants.draw = flag;
+}
 
 /*
  * View the mutant library distribution instead of the full marginal distribution
@@ -54,36 +56,14 @@ var view_mutant_library = function(num) {
     set_mutant(num);
 
     // Get graph options to alter mutant library
-    options = set_poag_data(setup_options("poag-all"), json_str);
-
-    options.stored_data.inferred[0] = generate_mutants(options.stored_data.inferred[0]);
-
-    // refresh options
-    options.nodes = [];
-    for (var n in options.stored_data.msa.nodes) {
-        options.nodes.push(options.stored_data.msa.nodes[n]);
-    }
-    for (var n in options.stored_data.inferred[0].nodes) {
-        options.nodes.push(options.stored_data.inferred[0].nodes[n]);
-    }
+    poags.retain_previous_position = true;
+    poags.options.mutants.count = num;
+    poags.options.mutants.draw = true;
+    generate_mutants();
 
     // Re-draw graph with mutants
-    d3.select(".svg-content").remove();
-    retain_previous_position = true;
-    options = create_poags(options);
+    redraw_poags();
 };
-
-/*
- * Reset view to the full marginal distribution
- */
-/*var view_marginal = function() {
-    set_mutant(0);
-    setup_poags(json_str, true, true, false, 'Inferred');
-    graph_array.push(JSON.parse(json_str));
-    // Add the colours of the POAG assigned by name and merged_id
-    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
-    poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
-}*/
 
 /* Define the alphabet so we can convert to distributions to numeric arrays */
 var alphabet = ['I','V','L','F','C','M','A','G','S','T','W','Y','P','H','E','Q','D','N','K','R'];
@@ -167,12 +147,12 @@ function makeNumDistrib(arrLabelValue) {
 }
 
 /*
- * Generate mutant library for graph
+ * Generate mutant library for the inferred graph
  */
-var generate_mutants = function(graph) {
+var generate_mutants = function() {
 
-    var nMutants = mutants;
-    var nodes = graph.nodes;
+    var nMutants = poags.options.mutants.count;
+    var nodes = poags.single.nodes['Inferred'];
     var Ns = [];
     var myPs = [];
     var KLcur = [];
@@ -183,7 +163,7 @@ var generate_mutants = function(graph) {
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
         Ns[i] = 1;
-        myPs[i] = makeNumDistrib(node.mutants.chars);
+        myPs[i] = makeNumDistrib(node.seq.chars);
         var myQ1 = getQ(myPs[i], Ns[i]);
         var myQ2 = getQ(myPs[i], Ns[i] + 1);
         KLcur[i] = KL_div(myPs[i], myQ1);
@@ -211,7 +191,7 @@ var generate_mutants = function(graph) {
         KLgains[best] = Math.max(KLcur[best] - KLnxt[best], 0);
     }
 
-    graph.nodes = [];
+    poags.single.nodes['Inferred'] = [];
     // now back to the nodes...
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
@@ -224,10 +204,13 @@ var generate_mutants = function(graph) {
             var myMutant = {value:myMutantValue,label:myMutantLabel};
             node.mutants.chars.push(myMutant);
         }
+        node.mutant = false;
+        if (idx.length > 1) {
+            node.mutant = true;
+        }
         // add node to node list
-        graph.nodes.push(node);
+        poags.single.nodes['Inferred'].push(node);
     }
-    return graph;
 }
 
 /*
@@ -248,7 +231,7 @@ $(window).resize(function () {
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
         // TODO: re-size tree so it's 100% div sizing (like graphs)
-        run_phylo_tree();
+        refresh_tree();
         // redraw graphs for sizing
         redraw_poags();
     }, 100);

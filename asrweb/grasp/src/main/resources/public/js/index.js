@@ -2,13 +2,6 @@
  * http://bl.ocks.org/bunkat/1962173
  */
 
-
-/**
- * Global variables
- */
-var drawMutants = false;
-var mutants = false;
-
 /**
  * Keeps track of the POAG information.
  *
@@ -62,10 +55,7 @@ var poags = {
     }
 };
 
-var graph_array = []
-
-var random = {"C": "#33CCFF", "S": "#A55FEB", "T": "#FF68DD", "Y": "#9A03FE", "Q": "#F900F9", "N": "#A27AFE", "H": "#7979FF", "K": "#86BCFF", "R": "#8CEFFD", "D": "#03F3AB", "E": "#4AE371", "I": "#FF8A8A", "L": "#FF5353", "M": "#FF9331", "V": "#FFCC33", "G": "#FF6600", "P": "#FF9999", "F": "#ff6666", "W": "#FF5353", "A": "#FF0033"};
-
+var graph_array = [];
 
 /**
  * Style and size options relating to all POAGs and related visualisations.
@@ -104,7 +94,7 @@ var poag_options = {
 
     display: {
         margin_between_single_multi: 50,
-        colours: random,
+        colours: clustal_colours,
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
         interesting_many_edges_colour: "Crimson",
         diff_colour: "SlateGrey",
@@ -274,7 +264,7 @@ var draw_all_poags = function(poags) {
         var group = poags.groups.single[poag_name];
         var scale_y = poags.scale['single_y'];
 
-        if (poag_name == poags.merged_poag_name) {
+        if (poag_name == poags.merged_poag_name ) {
             poagPi = true;
         }
         if (nodes != undefined) {
@@ -339,7 +329,7 @@ function moveBrush() {
             , start = point - halfExtent
             , end = point + halfExtent;
 
-    graph.brush.extent([start, end]);
+    poags.brush.extent([start, end]);
     prevbrushStart = start;
     prevbrushEnd = end;
     poags.retain_previous_position = true;
@@ -397,13 +387,13 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
         var node_cx = poags.scale.x(node.x);
         var node_cy = scale_y(node.y);
         if (node.x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
-           if (draw_legend) {
+            if (draw_legend) {
                 draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
                 draw_legend = false;
             }
             var radius = draw_nodes(poags, node, group, node_cx, node_cy);
 
-            if (poag_name == poags.root_poag_name || poagPi) {
+            if (poag_name == poags.root_poag_name || node.type == 'marginal' || poagPi) {
                 draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
                 // if it is a merged node, we want to draw a layered Pie chart
                 // so we set poagPi to false and re draw a smaller pie chart with
@@ -873,9 +863,11 @@ var draw_mini_msa = function (poags) {
     var y_scale = poags.scale.mini_y;
     var group = poags.groups.mini;
     var nodes = poags.single.nodes[poags.root_poag_name];
+    var nodes_inferred = poags.single.nodes[poags.inferred_poag_name];
 
     for (var n in nodes) {
         var node = nodes[n];
+        var node_inferred = nodes_inferred[n];
         var line_y = (y_scale(node.y) + (y_scale(node.y + 1)) / 2);
         var line_x = x_scale(node.x);
         line_points.push(combine_points(line_x, line_y));
@@ -908,7 +900,7 @@ var draw_mini_msa = function (poags) {
 
             circle.moveToBack();
         }
-        if (drawMutants && mutants > 0 && node.inferred == true && node.mutants.chars.length > 1) {
+        if (node_inferred != undefined && poags.options.mutants.draw == true && node_inferred.mutant == true) {
             var tri = group.append("path")
                     .attr("class", "poag")
                     .attr('transform', 'translate(' + (line_x - mini_opt.x_padding) + ',' + (y_scale(0) - 10) + ')')
@@ -1136,7 +1128,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     var pie_data = node.seq.chars;
     radius -= 10;
 
-    if (options.mutants.count > 0) {
+    if (node.name == 'Inferred' && options.mutants.count > 0 && options.mutants.draw == true) {
         pie_data = node.mutants.chars;
     } else if (node.seq.hasOwnProperty("poagValues")) {
     	//binding the poag data since fused poag type

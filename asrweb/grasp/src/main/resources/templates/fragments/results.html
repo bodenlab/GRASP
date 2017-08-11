@@ -15,6 +15,7 @@
         <div id="results" class="container-fluid" >
             <button type="button" id="branch-text-toggle" class="btn btn-default" onclick="toggle_branch_text()">View branch length | OFF</button>
             <!--<button type="button" id="additive-toggle" class="btn btn-default" onclick="toggle_additive()">Cladogram</button>-->
+            <button type="button" id="saveButton" class="btn btn-default" onclick="save_phylo_svg_to_png()">Save Tree</button>
 
 
             <div id="phylo-tree" class="col-sm-12">
@@ -26,6 +27,8 @@
 
                 <div class="col-sm-12">
                     <div class="input-group">
+                        <button type="button" id="savepoagButton" class="btn btn-default" onclick="save_poag_svg_to_png()">Save POAG</button>
+
                         <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
                             <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span id="selected-scheme">Clustal</span> | <small>Select other colour scheme...  </small><span class="caret"></span>

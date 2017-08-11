@@ -27,6 +27,7 @@ var perform_marginal = function(node_name, node_fill) {
                 set_draw_mutants(false);
                 $('#mutant-input').fadeOut();
                 set_mutant(0);
+                console.log(json_str);
                 graph_array.push(JSON.parse(json_str));
                 // Add the colours of the POAG assigned by name and merged_id
                 poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];

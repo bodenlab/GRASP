@@ -19,9 +19,9 @@ import java.io.IOException;
 public class ASR {
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
-    private ASRPOG asrJoint;
+    private ASRPOG asrJoint = null;
     // ASR object to store marginal reconstruction of current node (if given)
-    private ASRPOG asrMarginal;
+    private ASRPOG asrMarginal = null;
 
     private String sessionDir;
 
@@ -95,18 +95,18 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        if (inferenceType.equalsIgnoreCase("joint") && asrJoint == null)
-            runReconstructionJoint();
-        else
+        System.out.println(inferenceType);
+        if (inferenceType.equalsIgnoreCase("marginal"))
             runReconstructionMarginal();
+        else if (asrJoint == null)
+                runReconstructionJoint();
     }
 
     /**
      * Run joint reconstruction using uploaded files and specified options
      */
     private void runReconstructionJoint() throws Exception {
-        System.out.println(nodeLabel);
-        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true,true);
+        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true);
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -114,12 +114,10 @@ public class ASR {
      * Run marginal reconstruction using uploaded files and specified options
      */
     private void runReconstructionMarginal() throws Exception {
-        if (nodeLabel != null && nodeLabel.equalsIgnoreCase("root"))
-            nodeLabel = null;
-        if (nodeLabel != null)
-            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, true);
+        if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
+            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel);
         else
-            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, true);
+            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false);
         asrMarginal.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -240,6 +238,8 @@ public class ASR {
      */
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa;
+        System.out.println(asrJoint == null);
+        System.out.println(asrMarginal == null);
         if (inferenceType.equalsIgnoreCase("joint"))
             msa = asrJoint.getMSAGraph();
         else

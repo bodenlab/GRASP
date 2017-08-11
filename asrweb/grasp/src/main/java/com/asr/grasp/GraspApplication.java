@@ -35,8 +35,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
 	//final String sessionPath = "/home/brad/Desktop/Uni_Studies/Projects/POAGProject/ASRSETUP2/WebSessions";
-	final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
-	//final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
+	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
@@ -178,29 +178,34 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return graphs in JSON format
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node"})
-	public @ResponseBody String performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model) {
+	public @ResponseBody String performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model) throws Exception{
 
 		System.out.println("infer,node: " + infer + " " + node);
 		model.addAttribute("results", true);
 		model.addAttribute("label", asr.getLabel());
 
 		// TODO: push exceptions to error message on view...
-		try {
 			asr.setInferenceType(infer);
 
 			if (infer.equalsIgnoreCase("marginal"))
 				asr.setMarginalNodeLabel(node);
+
+		//try {
 			asr.runReconstruction();
 
-			// add reconstructed newick string to send to javascript
-			model.addAttribute("tree", asr.getReconstructedNewickString());
 
-		} catch (Exception e) {
+		/*} catch (Exception e) {
 			model.addAttribute("error", true);
 			model.addAttribute("errorMessage", e.getMessage());
 			System.out.println("Error: " + e.getMessage());
 			return "index";
-		}
+		}*/
+
+
+		// add reconstructed newick string to send to javascript
+		model.addAttribute("tree", asr.getReconstructedNewickString());
+
+
 		// add msa and inferred ancestral graph
 		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
 

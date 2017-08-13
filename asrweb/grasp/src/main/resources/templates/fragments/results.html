@@ -52,114 +52,16 @@
                                 </div>
                             </div>
                         </div>
-                        <script type="text/javascript">
-                            /*<![CDATA[*/
-                            if ($('.infer-label').text() === "joint") {
-                                $('#mutant-btn').prop("disabled", true);
-                                $('#mutant-btn').addClass("disabled");
-                                $('#mutant-input').fadeOut();
-                            } else {
-                                $('#mutant-btn').prop("disabled", false);
-                                $('#mutant-btn').removeClass("disabled");
-                                $('#mutant-btn').removeClass("active");
-                            }
-
-                            $("#mutant-btn").click(function () {
-                                $(this).delay(100).queue(function() {
-                                    if ($("#mutant-btn").attr("aria-pressed") === 'true') {
-                                        set_draw_mutants(true);
-                                        $('#mutant-input').fadeIn();
-                                        view_mutant_library($('#text-mutant').val());
-                                    } else {
-                                        set_draw_mutants(false);
-                                        $('#mutant-input').fadeOut();
-                                        poags.options.mutants.draw = false;
-                                        redraw_poags();
-                                    }
-                                    $(this).dequeue();
-                                });
-                            });
-
-                            $('#text-mutant').on('input', function() {
-                                view_mutant_library($(this).val());
-                            });
-
-                            $('#btn-mutant-up').on('click', function() {
-                                var old = parseInt($('#text-mutant').val());
-                                if (isNaN(old)) {
-                                    $('#text-mutant').val(1);
-                                    view_mutant_library(1);
-                                } else {
-                                    $('#text-mutant').val(old + 1);
-                                    view_mutant_library(old + 1);
-                                }
-                            });
-
-                            $('#btn-mutant-down').on('click', function() {
-                                var old = parseInt($('#text-mutant').val());
-                                if (!isNaN(old) && old - 1 >= 0) {
-                                    $('#text-mutant').val(old - 1);
-                                    view_mutant_library(old - 1);
-                                }
-                            });
-
-                            /*]]>*/
-                        </script>
                     </div>
 
                     <div id="poag-all" class="col-sm-12" style="height: 3000px;">
 
                     </div>
                     
-                    <script type="text/javascript" th:inline="javascript">
-                            /*<![CDATA[*/
-                            var update_scheme = function(scheme) {
-                                 var glyphs = document.querySelectorAll(".glyph-selected");
-                                  for (var i = 0; i < glyphs.length; i++) {
-                                      if (!glyphs[i].classList.contains('disable')) {
-                                          glyphs[i].classList.add('disable');
-                                      }
-                                  }
-                                  document.querySelector("#" + scheme + "-selected").classList.remove('disable');
-                                  document.getElementById("selected-scheme").textContent = document.getElementById(scheme).textContent;
-                                  update_colour(scheme);
-                            }
 
-                            json_str = /*[[${graph}]]*/;
-                            drawMutants = false;
-                            // Set the SVG ID in the poags data struct
-                            poags.options = poag_options;
-                            poags.options.data.raw_svg_id = "poag-all";   // HTML representation
-                            poags.options.data.target = "#poag-all";  // D3 representation
-                            setup_poags(json_str, true, true, false, 'Inferred')
-
-                            /**
-                             * Add inferred graph to the graph array so that when more graphs
-                             * are added we get a merged copy of the inferred + added graphs
-                             */
-                            graph_array.push(JSON.parse(json_str));
-                            // Add the colours of the POAG assigned by name and merged_id
-                            poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
-                            poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
-                            redraw_poags();
-
-
-                    </script>
 
                 </div>
 
-            <div style="display: none;">
-                <script type="text/javascript" th:inline="javascript">
-                                /*<![CDATA[*/
-                                    var label = /*[[${label}]]*/;
-                                    set_recon_label(label);
-                                    var recon = /*[[${tree}]]*/;
-                                    set_phylo_params("#phylo-tree", recon);
-                                    run_phylo_tree();
-                                /*]]>*/
-                </script>
-
-            </div>
 
             <div class="row col-xs-12">
                 <button id="download-toggle" class="btn btn-default col-xs-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
@@ -182,6 +84,20 @@
             </div>
         </div>
     </div>
+            <div style="display: none;">
+                    <script type="text/javascript" th:inline="javascript">
+                            
+                                /*<![CDATA[*/
+				$(document).ready(function () {
+				    	var json_str = /*[[${graph}]]*/;
+                                    	var label = /*[[${label}]]*/;
+                                    	var recon = /*[[${tree}]]*/;
+					run_asr_app(json_str, recon, label);
+				});
+                                /*]]>*/
+                    </script>
+            </div>
+
 </div>
 
 </body>

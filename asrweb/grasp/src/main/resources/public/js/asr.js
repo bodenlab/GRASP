@@ -1,3 +1,4 @@
+var selectedNode = "root";              // Keep track of which tree node is selected
 var inferType = "joint"; // Keep track of which reconstruction is being displayed
 
 var refresh_elements = function() {
@@ -230,9 +231,8 @@ $(window).resize(function () {
     });
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
-        // TODO: re-size tree so it's 100% div sizing (like graphs)
+        refresh_labels();
         refresh_tree();
-        // redraw graphs for sizing
         redraw_poags();
     }, 100);
 });

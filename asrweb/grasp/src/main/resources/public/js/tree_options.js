@@ -1,7 +1,4 @@
 
-var selectedNode = "root";              // Keep track of which tree node is selected
-var tree; // global tree object for updating parameters, etc
-
 /*
 ** Perform marginal reconstruction of the selected tree node
 */
@@ -46,9 +43,16 @@ var perform_marginal = function(node_name, node_fill) {
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
 var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
-    selectedNode = node_name;
     if (reset_graphs == false && inferType == "marginal") {
         reset_graphs = true;
+    }
+    // check if we are adding a joint reconstruction, and if so, only add if it hasn't already been added
+    if (!reset_graphs) {
+        for (var n in merged_graphs) {
+            if (merged_graphs[n] === node_name) {
+                return;
+            }
+        }
     }
     inferType = "joint";
     $.ajax({
@@ -62,22 +66,25 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
             //undefined, hence why it comes up black for the fused nodes -> I may have fixed this
             if (reset_graphs) {
                 graph_array = [];
+                merged_graphs = [];
             }
             graph_array.push(JSON.parse(json_str));
+            merged_graphs.push(node_name);
             poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = node_fill;
             poags.options.name_to_merged_id[node_name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
             poags.options.names_to_colour[node_name] = node_fill;
-
-            if (reset_graphs) {
-                setup_poags(json_str, true, false, false, 'Inferred');
-                refresh_elements();
-            } else {
-                setup_poags(json_str, false, false, false, node_name);
-                var new_graph = fuse_multipleGraphs(graph_array);
-                setup_poags(new_graph, false, false, true, 'Merged');
-            }
-            redraw_poags();
         }
     });
+    if (reset_graphs) {
+        selectedNode = node_name;
+        setup_poags(json_str, true, false, false, 'Inferred');
+    } else {
+        setup_poags(json_str, false, false, false, node_name);
+        var new_graph = fuse_multipleGraphs(graph_array);
+        setup_poags(new_graph, false, false, true, 'Merged');
+    }
+    refresh_elements();
+    redraw_poags();
     $("#progress").addClass("disable");
+    redraw_poags();
 };

@@ -61,7 +61,7 @@ var phylo_options = {
 
         // ----------------- Text ------------------//
         font_family: "Varela Round, sans-serif",
-        font_size: "14px",
+        font_size: "10px",
         font_colour: "#24232d",
 
         // ---------------- Context menu style ----//
@@ -77,11 +77,11 @@ var phylo_options = {
     }
 }
 
+
 /**
  * The context menu, has the names for the events that a user can perform.
  */
 var menu = contextMenu().items('view marginal reconstruction', 'view joint reconstruction', 'add joint reconstruction');
-
 
 
 /**
@@ -114,7 +114,6 @@ var make_tree_scale = function (phylo_options) {
     legend.append("stop").attr("offset", "0%").attr("stop-color", phylo_options.legend.top_colour).attr("stop-opacity", 1);
 
     legend.append("stop").attr("offset", "100%").attr("stop-color", phylo_options.legend.bottom_colour).attr("stop-opacity", 1);
-
 
     phylo_options.group.append("rect")
         .attr("width", phylo_options.legend.width)
@@ -173,7 +172,7 @@ var setup_phylo_svg = function (phylo_options) {
             .attr("width", width + options.margin.left + options.margin.right)
             .attr("height", options.height + options.margin.top + options.margin.bottom); // Add the height of the action panel
     
-   
+
     phylo_options.svg = svg;
 
     return phylo_options;
@@ -199,6 +198,7 @@ var draw_phylo_circle = function (group, node, n) {
 
     group.append("circle")
         .attr("id", n)
+        .attr("name", node.name)
         .attr("class", function() {
             if (node.extent) {
                 return "extent";
@@ -219,7 +219,7 @@ var draw_phylo_circle = function (group, node, n) {
             if (node.extent) {
                 return options.extent_fill;
             }
-            if (node.selected) {
+            if (node.name === phylo_options.tree.selected_node.name) {
                 return options.select_colour;
             }
             if (node.root_node) {
@@ -234,7 +234,7 @@ var draw_phylo_circle = function (group, node, n) {
         .attr("stroke-width", options.stroke_width)
         .on("mouseover", function() {
             var node_selected = d3.select(this);
-            // call function to update componenets
+            // call function to update components
             on_node_mouseover(node_selected);
         })
         .on("mouseout", function() {
@@ -246,7 +246,9 @@ var draw_phylo_circle = function (group, node, n) {
             var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class");
             var node_fill = phylo_options.legend.colour_scale(node.y);
             d3.event.preventDefault();
-            menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill);
+            if (!node.extent){
+                menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill);
+            }
         });
 
 }
@@ -269,15 +271,16 @@ var draw_phylo_text = function (group, node, n) {
 
     group.append("text")
         .attr("id", "text-" + n)
-        .attr("x", node.x)
-        .attr("y", node.y)
+        //.attr("x", node.x)
+        //.attr("y", node.y)
         .attr("class", node.name)
-        .text(node.name)
         .attr("font-family", options.font_family)
         .attr("font-size", options.font_size)
         .attr("fill", options.font_colour)
         .attr("text-anchor", "middle")
-        .attr("opacity", 0);
+        .attr("transform", "translate(" + node.x + "," + node.y + ") rotate(10)")
+        .attr("opacity", 0)
+        .text(node.name);
 
 }
 
@@ -387,12 +390,16 @@ var on_node_mouseout = function (node_selected) {
         node_selected.attr("r", options.node_radius);
         d3.select("#circle-" + node_selected.attr("id")).attr("r", options.node_radius * options.under_node_multiplier);
         var y = d3.select("#circle-" + node_selected.attr("id")).attr("cy");
-        node_selected.attr("fill", phylo_options.legend.colour_scale(y));
+        if (node_selected.attr("name") == phylo_options.tree.selected_node.name) {
+            node_selected.attr("fill", phylo_options.style.select_colour);
+        } else {
+            node_selected.attr("fill", phylo_options.legend.colour_scale(y));
+        }
     }
     node_selected.attr("opacity", 1);
     node_selected.attr("stroke-width", options.stroke_width)
     d3.select("#text-" + node_selected.attr("id")).style("opacity",  0);
-    select_node(phylo_options.tree.selected_node.id);
+    select_node(node_selected.attr("id"));
 }
 
 
@@ -427,14 +434,15 @@ var draw_branch_text = function (group, branch) {
 
     group.append("text")
         .attr("class", "branch")
-        .attr("x", branch.x1 + 5) // add a little padding for prettiness sake
+        .attr("x", branch.x1) // add a little padding for prettiness sake
         .attr("y", (branch.y1 + branch.y2) / 2)
         .text(branch.label.toFixed(4)) // Limit to 4 decimal places
         .attr("class", "branch-text")
+        .attr("text-anchor", "end")
         .attr("font-family", options.font_family)
         .attr("font-size", options.font_size)
         .attr("fill", options.branch_stroke)
-        .attr("text-anchor", "start")
+        .attr("transform", "rotate(90deg) translate(50%, 50%) ;")
         .attr("opacity", 0);
 
 }
@@ -608,6 +616,9 @@ var run_phylo_tree = function () {
 
     // collect all the nodes
     var nodes = phylo_options.tree.all_nodes;
+    if (phylo_options.tree.selected_node === null) {
+        phylo_options.tree.selected_node = nodes[0]; // set root node as selected (initial)
+    }
  
     // Draw the branches and the nodes
     draw_phylo_branches(phylo_options);
@@ -684,12 +695,6 @@ var make_child = function(node, left) {
         child.extent = true;
     } else {
         child.extent = false;
-    }
-    child.selected = false;
-    if (node.root_node == undefined) {
-        child.root_node = false;
-    } else {
-        child.selected = true;
     }
 
     return child;
@@ -967,8 +972,8 @@ function contextMenu() {
                 'fill': phylo_options.style.text_fill,
                 'font-size': '16'
             }
-        }; 
-    
+        };
+
     function menu(x, y, node_name, node_fill) {
         d3.select('.context-menu').remove();
         //scaleItems();
@@ -1081,13 +1086,13 @@ function contextMenu() {
  * Indicate that the node has been selected, and set all other nodes to be not selected (boolean flag node param).
 **/
 var select_node = function(node) {
+    var options = phylo_options.style;
     var nodes = phylo_options.tree.all_nodes;
     for (var n in nodes) {
         if (nodes[n].name == node) {
-            nodes[n].selected = true;
             phylo_options.tree.selected_node = nodes[n];
-        } else {
-            nodes[n].selected = false;
+            d3.select("#circle-" + nodes[n].id).attr("fill",options.select_colour);
+            return;
         }
     }
 }
@@ -1349,15 +1354,5 @@ var fix_subtrees = function (left, right) {
 var refresh_tree = function () {
     clear_svg();
     phylo_options.svg_info.width = window.innerWidth - 200;
-
-    // temporarily store the current selected node
-    var selected_node = phylo_options.tree.selected_node;
-
     run_phylo_tree();
-    select_node(selected_node.name);
-
-    // redraw the branches and the nodes
-    make_tree_scale(phylo_options);
-    draw_phylo_branches(phylo_options);
-    draw_phylo_nodes(phylo_options);
 }

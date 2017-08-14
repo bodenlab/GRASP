@@ -56,6 +56,7 @@ var poags = {
 };
 
 var graph_array = [];
+var merged_graphs = [];
 
 /**
  * Style and size options relating to all POAGs and related visualisations.

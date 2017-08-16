@@ -47,7 +47,10 @@ var set_mutant = function(numMutants) {
 
 var set_draw_mutants = function(flag) {
     poags.options.mutants.draw = flag;
-}
+    poags.groups.mini.selectAll("*").remove();
+    poags = setup_brush(poags);
+    draw_mini_msa(poags);
+};
 
 /*
  * View the mutant library distribution instead of the full marginal distribution
@@ -63,6 +66,7 @@ var view_mutant_library = function(num) {
     generate_mutants();
 
     // Re-draw graph with mutants
+    draw_mini_msa(poags);
     redraw_poags();
 };
 

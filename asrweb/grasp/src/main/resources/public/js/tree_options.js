@@ -1,3 +1,4 @@
+var json_str = "";
 
 /*
 ** Perform marginal reconstruction of the selected tree node
@@ -24,7 +25,6 @@ var perform_marginal = function(node_name, node_fill) {
                 set_draw_mutants(false);
                 $('#mutant-input').fadeOut();
                 set_mutant(0);
-                console.log(json_str);
                 graph_array.push(JSON.parse(json_str));
                 // Add the colours of the POAG assigned by name and merged_id
                 poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
@@ -45,11 +45,12 @@ var perform_marginal = function(node_name, node_fill) {
 var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
     if (reset_graphs == false && inferType == "marginal") {
         reset_graphs = true;
+        selectedNode = node_name;
     }
     // check if we are adding a joint reconstruction, and if so, only add if it hasn't already been added
     if (!reset_graphs) {
-        for (var n in merged_graphs) {
-            if (merged_graphs[n] === node_name) {
+        for (var n in poags.multi.names) {
+            if (poags.multi.names[n] === node_name) {
                 return;
             }
         }
@@ -58,7 +59,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
     $.ajax({
         url : window.location,
         type : 'POST',
-        data : {infer: inferType, node: selectedNode},
+        data : {infer: inferType, node: node_name},
         success: function(data) {
             json_str = data;
             drawMutants = false;
@@ -69,22 +70,21 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
                 merged_graphs = [];
             }
             graph_array.push(JSON.parse(json_str));
-            merged_graphs.push(node_name);
             poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = node_fill;
             poags.options.name_to_merged_id[node_name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
             poags.options.names_to_colour[node_name] = node_fill;
+            if (reset_graphs) {
+                selectedNode = node_name;
+                setup_poags(json_str, true, false, false, node_name);
+            } else {
+                setup_poags(json_str, false, false, false, node_name);
+                var new_graph = fuse_multipleGraphs(graph_array);
+                setup_poags(new_graph, false, false, true, 'Merged');
+            }
+            refresh_elements();
+            redraw_poags();
         }
     });
-    if (reset_graphs) {
-        selectedNode = node_name;
-        setup_poags(json_str, true, false, false, 'Inferred');
-    } else {
-        setup_poags(json_str, false, false, false, node_name);
-        var new_graph = fuse_multipleGraphs(graph_array);
-        setup_poags(new_graph, false, false, true, 'Merged');
-    }
-    refresh_elements();
-    redraw_poags();
     $("#progress").addClass("disable");
     redraw_poags();
 };

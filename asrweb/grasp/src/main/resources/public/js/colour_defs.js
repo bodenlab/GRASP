@@ -26,12 +26,12 @@ var clustal_colours = {
 'M': "#6AFB92",
 'V': "#6AFB92",
 /*white (added by Mikael to cover all 20 AAs) */
-'A':"#FEFCFF",
-'C':"#FEFCFF",
-'Q':"#FEFCFF",
-'N':"#FEFCFF",
-'D':"#FEFCFF",
-'E':"#FEFCFF"};
+'A':"#f6f2f7",
+'C':"#f6f2f7",
+'Q':"#f6f2f7",
+'N':"#f6f2f7",
+'D':"#f6f2f7",
+'E':"#f6f2f7"};
 
 var lesk_colours = {
 /*orange*/

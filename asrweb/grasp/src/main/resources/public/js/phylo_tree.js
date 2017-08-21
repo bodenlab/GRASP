@@ -1522,10 +1522,18 @@ var refresh_tree = function () {
     }
     if (document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON") {
         phylo_options.svg.selectAll('circle.extent').each(function () {
-            $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+            $(this).attr("opacity", 0);
         });
         phylo_options.svg.selectAll('text.extent').each(function () {
-            $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+            $(this).attr("opacity", 1);
+        });
+    }
+    if (document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON") {
+        phylo_options.svg.selectAll('circle.node').each(function () {
+            $(this).attr("opacity", 0);
+        });
+        phylo_options.svg.selectAll('text.node').each(function () {
+            $(this).attr("opacity", 1);
         });
     }
 }

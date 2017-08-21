@@ -245,7 +245,7 @@ var draw_phylo_circle = function (group, node, n) {
             on_node_mouseout(node_selected);
         })
         .on("contextmenu", function() {
-            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("class");
+            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("name");
             var node_id = d3.select(this).attr("id");
             var node_fill = phylo_options.legend.colour_scale(node.y);
             d3.event.preventDefault();

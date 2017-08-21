@@ -4,7 +4,6 @@
 <div th:fragment="results" th:if="${results}">
     <a id="results-nav"></a>
     <div class="content-section-b">
-        <div th:replace="fragments/help :: help"></div>
         <div class="row">
             <div id="heading">
                 <h2><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
@@ -14,6 +13,7 @@
 
         <div id="results" class="container-fluid" >
             <button type="button" id="extant-text-toggle" class="btn btn-default" onclick="toggle_extant_text()">View extant labels | OFF</button>
+            <button type="button" id="node-text-toggle" class="btn btn-default" onclick="toggle_node_text()">View node labels | OFF</button>
             <button type="button" id="branch-text-toggle" class="btn btn-default" onclick="toggle_branch_text()">View branch length | OFF</button>
             <button type="button" id="additive-toggle" class="btn btn-default" onclick="toggle_additive()">View tree type | Additive</button>
             <button type="button" id="saveButton" class="btn btn-default" onclick="save_phylo_svg_to_png()">Save Tree</button>
@@ -38,6 +38,10 @@
                                 <li><a id="ma" onclick="update_scheme('ma')">MAEditor <span id="ma-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                 <li><a id="taylor" onclick="update_scheme('taylor')">Taylor <span id="taylor-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                 <li><a id="zappo" onclick="update_scheme('zappo')">Zappo <span id="zappo-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="helix" onclick="update_scheme('helix')">Helix Propensity <span id="helix-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="strand" onclick="update_scheme('strand')">Strand Propensity <span id="strand-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="turn" onclick="update_scheme('turn')">Turn Propensity <span id="turn-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="buried" onclick="update_scheme('buried')">Buried Index <span id="buried-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                             </ul>
                             <div class="input-group" data-toggle="popover" data-placement="bottom"  data-content="View the mutant library for the marginal reconstruction. Likely mutants are calculated using the Kullback-Leibler divergence on the set of possible characters. Default: 5 mutants are shown for each character position in the reconstructed ancestor.">
                                 <button type="button" id="mutant-btn" class="btn btn-default disabled" data-toggle="button" aria-pressed="false" autocomplete="false" disabled="disabled">View mutants</button>

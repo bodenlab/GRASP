@@ -7,36 +7,37 @@
  */
 
 var run_asr_app = function(json_str, recon, label) {
+// todo root name
     /**
      * Run POAG setup
      */
-
     // Set the SVG ID in the poags data struct
     poags.options = poag_options;
     poags.options.data.raw_svg_id = "poag-all"; // HTML representation
     poags.options.data.target = "#poag-all"; // D3 representation
-    setup_poags(json_str, true, true, false, 'Root')
 
     /**
      * Add inferred graph to the graph array so that when more graphs
      * are added we get a merged copy of the inferred + added graphs
      */
     graph_array.push(JSON.parse(json_str));
-    // Add the colours of the POAG assigned by name and merged_id
-    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour['Root'];
-    poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
-    redraw_poags();
-    
+
+
     /**
-     * 
+     *
      * Run Tree setup
      */
-    //var label = document.getElementById("phylo-tree-label").innerHTML;
     set_recon_label(label);
-    //var recon = document.getElementById("phylo-tree-newick").innerHTML;
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
+    selectedNode = phylo_options.tree.selected_node.name;
     refresh_elements();
+
+    // draw poags
+    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node.name)
+    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name];
+    poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+    redraw_poags();
     poags.retain_previous_position = true;
 }
 
@@ -83,11 +84,11 @@ var update_colour = function (value) {
     poags.options.graph.colours = colour_schemes[value];
     //selected_colour = colour_schemes[value];
 
-    if (value == "cinema") {
-        poags.options.pie.stroke = "grey";
-    } else {
-        poags.options.pie.stroke = "white";
-    }
+    //if (value == "cinema") {
+    //    poags.options.pie.stroke = "grey";
+    //} else {
+    //    poags.options.pie.stroke = "white";
+    //}
 
     redraw_poags();
 }

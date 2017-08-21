@@ -114,7 +114,7 @@ var poag_options = {
         background_stroke_colour: "grey",
         background_stroke_width: "1px",
         stroke_width: "3px",
-        font_size: "12px",
+        font_size: "20px",
         font_family: "Gill Sans, sans-serif",
     },
     mutants: {

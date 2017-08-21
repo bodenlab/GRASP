@@ -31,6 +31,17 @@ var refresh_labels = function() {
 
 var set_inf_type = function(type) {
     inferType = type;
+    if (inferType == "marginal") {
+        $(".margopt").each(function() {
+            $(this).removeClass("disabled");
+            $(this).prop("disabled", false);
+        });
+    } else {
+        $(".margopt").each(function() {
+            $(this).addClass("disabled");
+            $(this).prop("disabled", true);
+        });
+    }
 };
 
 var set_recon_label = function(label) {

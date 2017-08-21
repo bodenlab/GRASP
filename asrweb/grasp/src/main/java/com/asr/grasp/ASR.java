@@ -95,18 +95,17 @@ public class ASR {
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
-        System.out.println(inferenceType);
         if (inferenceType.equalsIgnoreCase("marginal"))
             runReconstructionMarginal();
         else if (asrJoint == null)
-                runReconstructionJoint();
+            runReconstructionJoint();
     }
 
     /**
      * Run joint reconstruction using uploaded files and specified options
      */
     private void runReconstructionJoint() throws Exception {
-        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true);
+        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, false);
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -115,9 +114,9 @@ public class ASR {
      */
     private void runReconstructionMarginal() throws Exception {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
-            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel);
+            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, false);
         else
-            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false);
+            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, false);
         asrMarginal.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -206,20 +205,8 @@ public class ASR {
         if (asrMarginal != null && !node.equalsIgnoreCase("msa"))
             asrMarginal.saveDistrib(filepath + "/" + node);
         else if (node.equalsIgnoreCase("msa"))
-            System.err.println("Ariane removed!");
-
-
-            //asrJoint.saveMSADistrib(filepath + "/msa");
+            asrJoint.saveMSADistrib(filepath + "/" );
     }
-/*
-    public void saveMSAImage(String filepath) throws IOException {
-        DrawGraph dg;
-        if (inferenceType.equalsIgnoreCase("joint"))
-            dg = new DrawGraph((new POAGJson(asrJoint.getMSAGraph())).toJSON());
-        else
-            dg = new DrawGraph((new POAGJson(asrMarginal.getMSAGraph())).toJSON());
-        dg.drawImage(filepath);
-    }*/
 
     /**
      * Save consensus sequence of marginal node
@@ -227,9 +214,13 @@ public class ASR {
      * @param filepath  filepath of where to save consensus sequence
      * @throws IOException
      */
-    public void saveConsensusJoint(String filepath) throws IOException {
+    public void saveConsensusJoint(String filepath, String label) throws IOException {
+        System.out.println(label);
         if (asrJoint != null)
-            asrJoint.saveSupportedAncestors(filepath);
+            if (label == null)
+                asrJoint.saveSupportedAncestors(filepath);
+            else
+                asrJoint.saveSupportedAncestor(filepath, label);
     }
 
     /**
@@ -238,8 +229,6 @@ public class ASR {
      */
     public JSONObject getMSAGraphJSON() {
         PartialOrderGraph msa;
-        System.out.println(asrJoint == null);
-        System.out.println(asrMarginal == null);
         if (inferenceType.equalsIgnoreCase("joint"))
             msa = asrJoint.getMSAGraph();
         else
@@ -257,11 +246,11 @@ public class ASR {
      */
     public JSONObject getAncestralGraphJSON(String reconType, String nodeLabel) {
         PartialOrderGraph graph;
+        System.out.println("label=" + nodeLabel);
         if (reconType.equalsIgnoreCase("joint"))
             graph = asrJoint.getGraph(nodeLabel);
         else
             graph = asrMarginal.getGraph(nodeLabel);
-        System.err.println(graph);
         POAGJson json = new POAGJson(graph);
         return json.toJSON();
     }

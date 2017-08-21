@@ -6,7 +6,7 @@ var json_str = "";
 var perform_marginal = function(node_name, node_fill) {
     $("#progress").removeClass("disable");
     selectedNode = node_name;
-    inferType = "marginal";
+    set_inf_type("marginal");
     $.ajax({
         url : window.location,
         type : 'POST',
@@ -30,7 +30,7 @@ var perform_marginal = function(node_name, node_fill) {
                 poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
                 poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
 
-                setup_poags(json_str, true, false, false, 'Inferred');
+                setup_poags(json_str, true, false, false, node_name);
                 redraw_poags();
             }
             refresh_elements();
@@ -55,7 +55,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
             }
         }
     }
-    inferType = "joint";
+    set_inf_type("joint");
     $.ajax({
         url : window.location,
         type : 'POST',

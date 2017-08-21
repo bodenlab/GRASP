@@ -2,11 +2,9 @@
     font-size: 12px;
 }
 
-label, .btn, .form-control, .bootstrap-switch, .bootstrap-switch-label, legend {
+label, .btn, .form-control, .bootstrap-switch, .bootstrap-switch-label, legend, text {
     font-size: 12px;
 }
-
-
 
 .popover-content {
     font-size: 12px;
@@ -50,6 +48,10 @@ label, .btn, .form-control, .bootstrap-switch, .bootstrap-switch-label, legend {
 #phylo {
     display: block;
     margin: 0 auto;
+}
+
+#help-btn {
+    margin-top: 5px;
 }
 
 #poag {

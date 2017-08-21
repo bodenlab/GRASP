@@ -8,30 +8,33 @@ var random = {"C": "#33CCFF", "S": "#A55FEB", "T": "#FF68DD", "Y": "#9A03FE", "Q
 
 var clustal_colours = {
  /*orange*/
-'G': "#F05F40",
-'P': "#F05F40",
-'S': "#F05F40",
-'T': "#F05F40",
-/*red*/
-'H': "#F75D59",
-'K': "#F75D59",
-'R': "#F75D59",
-/*blue*/
-'F': "#3BB9FF",
-'W': "#3BB9FF",
-'Y': "#3BB9FF",
+'G': "#F5A259",
 /*green*/
-'I': "#6AFB92",
-'L': "#6AFB92",
-'M': "#6AFB92",
-'V': "#6AFB92",
-/*white (added by Mikael to cover all 20 AAs) */
-'A':"#f6f2f7",
-'C':"#f6f2f7",
-'Q':"#f6f2f7",
-'N':"#f6f2f7",
-'D':"#f6f2f7",
-'E':"#f6f2f7"};
+'N':"#00f900",
+'Q':"#00f900",
+'S': "#00f900",
+'T': "#00f900",
+/*red*/
+'K': "#f62f00",
+'R': "#f62f00",
+/*blue/purple*/
+'A':"#92b2f3",
+'I': "#92b2f3",
+'L': "#92b2f3",
+'M': "#92b2f3",
+'V': "#92b2f3",
+'W': "#92b2f3",
+'F': "#92b2f3",
+/*yellow*/
+'P': "#FFFB00",
+/*pink*/
+'C':"#F59692",
+/*aqua*/
+'H': "#04B2B3",
+'Y': "#04B2B3",
+/*purple*/
+'D':"#CE64CB",
+'E':"#CE64CB"};
 
 var lesk_colours = {
 /*orange*/
@@ -129,86 +132,178 @@ var ma_colours = {
 
 var zappo_colours = { /* Picked the RGB from JalView's Help page 17/5/2017 */
     /* aliphatic */
-    'I': "#FFAFAF",
-    'L': "#FFAFAF",
-    'V': "#FFAFAF",
-    'A': "#FFAFAF",
-    'M': "#FFAFAF",
+    'I': "#FFBEBC",
+    'L': "#FFBEBC",
+    'V': "#FFBEBC",
+    'A': "#FFBEBC",
+    'M': "#FFBEBC",
     /* aromatic */
-    'F': "#FFC803",
-    'W': "#FFC803",
-    'Y': "#FFC803",
+    'F': "#FFD000",
+    'W': "#FFD000",
+    'Y': "#FFD000",
     /* positive */
-    'K': "#6564FF",
-    'R': "#6564FF",
-    'H': "#6564FF",
+    'K': "#777FFF",
+    'R': "#777FFF",
+    'H': "#777FFF",
     /* negative */
-    'D': "#FF0201",
-    'E': "#FF0201",
+    'D': "#FF2700",
+    'E': "#FF2700",
     /* hydrophilic */
-    'S': "#00FF03",
-    'T': "#00FF03",
-    'N': "#00FF03",
-    'Q': "#00FF03",
+    'S': "#00F900",
+    'T': "#00F900",
+    'N': "#00F900",
+    'Q': "#00F900",
     /* conformationally special */
-    'P': "#FF00FF",
-    'G': "#FF00FF",
+    'P': "#FF41FF",
+    'G': "#FF41FF",
     /* cysteine */
-    'C': "#FFFF04"};
+    'C': "#FFFB00"};
 
 var taylor_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Protein Engineering, Vol 10 , 743-746 (1997) */
     /* aliphatic */
-    'I': "#64FF03",
-    'L': "#2EFF03",
-    'V': "#98FF04",
-    'A': "#CBFF04",
-    'M': "#00FF03",
+    'V': "#A6FA00",
+    'A': "#D4FA00",
+    'I': "#72F900",
+    'L': "#32F900",
+    'M': "#00F900",
     /* aromatic */
-    'F': "#00FF66",
-    'W': "#00CCFF",
-    'Y': "#00FFCC",
+    'F': "#00FA79",
+    'W': "#00D6FF",
+    'Y': "#00FBD6",
     /* positive */
-    'K': "#6700FF",
-    'R': "#0700FF",
-    'H': "#0466FF",
+    'K': "#7B36FF",
+    'R': "#0432FF",
+    'H': "#0080FF",
     /* negative */
-    'D': "#FF0201",
-    'E': "#FF0166",
+    'D': "#FF2700",
+    'E': "#FF2D79",
     /* hydrophilic */
-    'S': "#FF3401",
-    'T': "#FF6601",
-    'N': "#CD00FF",
-    'Q': "#FF00CC",
+    'S': "#FF4C00",
+    'T': "#FF7C00",
+    'N': "#D83DFF",
+    'Q': "#FF39D6",
     /* conformationally special */
-    'P': "#FFCC03",
-    'G': "#FF9902",
+    'P': "#FFD300",
+    'G': "#FFA900",
     /* cysteine */
-    'C': "#FFFF04"};
+    'C': "#FFFB00"};
 
 var hydrophobicity_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Kyte, J., and Doolittle, R.F., J. Mol. Biol. 1157, 105-132, 1982 */
-    'I': "#FF0201",
-    'V': "#F6020A",
-    'L': "#EA0215",
-    'F': "#CB0134",
-    'C': "#C2013D",
-    'M': "#B0004F",
-    'A': "#AD0052",
-    'G': "#6A0095",
-    'S': "#5E00A1",
-    'T': "#61009E",
-    'W': "#5B00A4",
-    'Y': "#5000B0",
-    'P': "#4700B9",
-    'H': "#1800EA",
-    'E': "#1100F3",
-    'Q': "#1100F3",
-    'D': "#1100F3",
-    'N': "#1100F3",
-    'K': "#0700FF",
-    'R': "#0700FF"
+    'I': "#FF2700",
+    'V': "#FA2602",
+    'L': "#F02319",
+    'F': "#D72044",
+    'C': "#CF214E",
+    'M': "#C01F61",
+    'A': "#BE2065",
+    'G': "#7F23A6",
+    'S': "#7324B0",
+    'T': "#7624AE",
+    'W': "#7024B4",
+    'Y': "#6326BE",
+    'P': "#5927C6",
+    'H': "#1E2FEE",
+    'E': "#1031F6",
+    'Q': "#1031F6",
+    'D': "#1031F6",
+    'N': "#1031F6",
+    'K': "#0432FF",
+    'R': "#0432FF"
+};
+
+var helix_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Kyte, J., and Doolittle, R.F., J. Mol. Biol. 1157, 105-132, 1982 */
+    'I': "#9C899C",
+    'V': "#988E97",
+    'L': "#BD6BBC",
+    'F': "#A97EA9",
+    'C': "#16DD2E",
+    'M': "#F541F2",
+    'A': "#EE44EC",
+    'G': "#00F900",
+    'S': "#3CCF45",
+    'T': "#54C158",
+    'W': "#9C899C",
+    'Y': "#0FDF2B",
+    'P': "#00F900",
+    'H': "#889B87",
+    'E': "#889B87",
+    'Q': "#A482A3",
+    'D': "#89998A",
+    'N': "#00E324",
+    'K': "#B177AF",
+    'R': "#81A083"
+};
+
+var strand_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Kyte, J., and Doolittle, R.F., J. Mol. Biol. 1157, 105-132, 1982 */
+    'I': "#F0EC14",
+    'V': "#FFFB00",
+    'L': "#BFBE5F",
+    'F': "#CDCB4E",
+    'C': "#ADAB75",
+    'M': "#949490",
+    'A': "#6B6FB6",
+    'G': "#5B61C3",
+    'S': "#5B61C3",
+    'T': "#ADAB75",
+    'W': "#CBC950",
+    'Y': "#DBD838",
+    'P': "#2F41E3",
+    'H': "#7376AF",
+    'E': "#0432FF",
+    'Q': "#9E9D86",
+    'D': "#2C40E5",
+    'N': "#7779AC",
+    'K': "#595FC4",
+    'R': "#7E80A5"
+};
+
+var turn_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Kyte, J., and Doolittle, R.F., J. Mol. Biol. 1157, 105-132, 1982 */
+    'I': "#00FDFF",
+    'V': "#00F8FA",
+    'L': "#00E6E9",
+    'F': "#05E5E7",
+    'C': "#B86C6A",
+    'M': "#05E5E7",
+    'A': "#2BDADC",
+    'G': "#FF2700",
+    'S': "#EA3526",
+    'T': "#869D9D",
+    'W': "#869D9D",
+    'Y': "#AE7776",
+    'P': "#FA2702",
+    'H': "#83A0A0",
+    'E': "#89999A",
+    'Q': "#4BCACB",
+    'D': "#EF2F1C",
+    'N': "#FF2700",
+    'K': "#919393",
+    'R': "#83A0A0"
+};
+
+var buried_colours = { /* Picked the RGB from JalView's Help page 17/5/2017, see also Kyte, J., and Doolittle, R.F., J. Mol. Biol. 1157, 105-132, 1982 */
+    'I': "#006ABA",
+    'V': "#0074B0",
+    'L': "#008D96",
+    'F': "#00988B",
+    'C': "#0432FF",
+    'M': "#00A57B",
+    'A': "#00AF6F",
+    'G': "#00AA75",
+    'S': "#00D837",
+    'T': "#00DC2F",
+    'W': "#00B36A",
+    'Y': "#00E621",
+    'P': "#00E029",
+    'H': "#00D92F",
+    'E': "#00EE0B",
+    'Q': "#00EE0B",
+    'D': "#00EA17",
+    'N': "#00EA17",
+    'K': "#00F900",
+    'R': "#00F700"
 };
 
 
-
 var colour_schemes = {'taylor': taylor_colours, 'zappo': zappo_colours, 'random': random, 'clustal': clustal_colours,
-		      'lesk': lesk_colours, 'cinema': cinema_colours, 'ma': ma_colours, 'hydrophob': hydrophobicity_colours};
+		      'lesk': lesk_colours, 'cinema': cinema_colours, 'ma': ma_colours, 'hydrophob': hydrophobicity_colours,
+		      'helix': helix_colours, 'strand': strand_colours, 'turn': turn_colours, 'buried': buried_colours};

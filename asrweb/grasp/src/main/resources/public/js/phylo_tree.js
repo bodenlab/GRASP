@@ -42,8 +42,8 @@ var phylo_options = {
     style: {
         extent_radius: 5,
         node_radius: 5,
-        hover_radius: 35,
-        under_node_multiplier: 1.3,
+        hover_radius: 20,
+        under_node_multiplier: 1.1,
         /** 
          * There is a "white" node under each 
          * normal node -> allows us to change the opacity to view the text without
@@ -76,7 +76,7 @@ var phylo_options = {
          * The colour for when a user selects to perform a reconstruction
          * it will be shaded based on how "far" the node is from the root
          */
-        select_colour: "#F7B880",
+        select_colour: "black",
     }
 }
 
@@ -84,7 +84,7 @@ var phylo_options = {
 /**
  * The context menu, has the names for the events that a user can perform.
  */
-var menu = contextMenu().items('view marginal reconstruction', 'view joint reconstruction', 'add joint reconstruction', 'collapse subtree', 'extend subtree');
+var menu = contextMenu().items('view marginal reconstruction', 'view joint reconstruction', 'add joint reconstruction', 'collapse subtree', 'expand subtree');
 
 
 /**
@@ -270,7 +270,7 @@ var draw_phylo_circle = function (group, node, n) {
  */
 var draw_phylo_text = function (group, node, n) {
     var options = phylo_options.style;
-    var class_label = node.name;
+    var class_label = "node";
     var deg = 0;
     var x = node.x;
     var y = node.y;
@@ -281,10 +281,17 @@ var draw_phylo_text = function (group, node, n) {
     group.append("text")
         .attr("id", "text-" + node.id)
         .attr("class", class_label)
+        .attr("name", node.name)
         .attr("font-family", options.font_family)
         .attr("font-size", options.font_size)
         .attr("fill", options.font_colour)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", function() {
+            if (node.extent) {
+                return "start";
+            } else {
+                return "middle";
+            }
+        })
         .attr("opacity", 0)
         .attr("transform", "translate(" + x + "," + y + ") rotate(" + deg + ") translate(2,2)")
         .text(node.name);
@@ -372,13 +379,21 @@ var draw_phylo_nodes = function (phylo_options) {
 var on_node_mouseover = function (node_selected) {
     var options = phylo_options.style;
     var view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON";
-    if (!view_extant_labels || node_selected.attr("class") != "extent"){
+    var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
+    if (!view_extant_labels && node_selected.attr("class") == "extent"){
+        node_selected.attr("r", options.hover_radius);
+        node_selected.attr("fill", "white");
+        d3.select("#circle-" + node_selected.attr("id")).attr("r", options.extent_radius);
+        node_selected.attr("opacity", 0.2);
+        node_selected.attr("stroke-width", "0px");
+        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 1);
+    }
+    if (!view_node_labels && node_selected.attr("class") == "node"){
         node_selected.attr("r", options.hover_radius);
         node_selected.attr("fill", options.hover_fill);
         node_selected.attr("opacity", 0.2);
         node_selected.attr("stroke-width", "0px");
-        d3.select("#circle-" + node_selected.attr("id")).attr("r", options.hover_radius * options.under_node_multiplier);
-        d3.select("#text-" + node_selected.attr("id")).style("opacity", 1);
+        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 1);
     }
 }
 
@@ -392,25 +407,27 @@ var on_node_mouseover = function (node_selected) {
 var on_node_mouseout = function (node_selected) {
     var options = phylo_options.style;
     var view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON";
-    if (!view_extant_labels || node_selected.attr("class") != "extent") {
-    if (node_selected.attr("class") == "extent") {
+    var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
+    if (!view_extant_labels && node_selected.attr("class") == "extent") {
         node_selected.attr("r", options.extent_radius);
         d3.select("#circle-" + node_selected.attr("id")).attr("r", options.extent_radius * options.under_node_multiplier);
         node_selected.attr("fill", options.extent_fill);
-    } else {
+        node_selected.attr("opacity", 1);
+        node_selected.attr("stroke-width", options.stroke_width);
+        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 0);
+    }
+    if (!view_node_labels && node_selected.attr("class") == "node") {
         node_selected.attr("r", options.node_radius);
         d3.select("#circle-" + node_selected.attr("id")).attr("r", options.node_radius * options.under_node_multiplier);
         var y = d3.select("#circle-" + node_selected.attr("id")).attr("cy");
         if (node_selected.attr("name") == phylo_options.tree.selected_node.name) {
-            node_selected.attr("fill", phylo_options.style.select_colour);
+             node_selected.attr("fill", phylo_options.style.select_colour);
         } else {
-            node_selected.attr("fill", phylo_options.legend.colour_scale(y));
+             node_selected.attr("fill", phylo_options.legend.colour_scale(y));
         }
-    }
-    node_selected.attr("opacity", 1);
-    node_selected.attr("stroke-width", options.stroke_width)
-    d3.select("#text-" + node_selected.attr("id")).style("opacity", 0);
-    select_node(node_selected.attr("id"));
+        node_selected.attr("opacity", 1);
+        node_selected.attr("stroke-width", options.stroke_width);
+        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 0);
     }
 }
 
@@ -474,6 +491,21 @@ var toggle_branch_text = function () {
     }
 }
 
+var toggle_node_text = function () {
+    var button_text = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1];
+    phylo_options.svg.selectAll('circle.node').each(function () {
+        $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+    });
+    phylo_options.svg.selectAll('text.node').each(function () {
+        $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+    });
+    if (button_text == "ON") {
+            document.getElementById('node-text-toggle').innerHTML = "View node labels | OFF";
+    } else {
+            document.getElementById('node-text-toggle').innerHTML = "View node labels | ON";
+    }
+}
+
 var toggle_additive = function () {
     var additive = document.getElementById('additive-toggle').innerHTML.split(" | ")[1];
     if (additive == "Additive") {
@@ -494,23 +526,34 @@ var toggle_additive = function () {
         phylo_options.svg.selectAll('text.branch-text').attr("opacity", 0);
     }
     if (document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON") {
-        phylo_options.svg.selectAll('text.extent').attr("opacity", 1);
-        phylo_options.svg.selectAll('circle.extent').attr("opacity", 0);
-    } else {
-        phylo_options.svg.selectAll('text.extent').attr("opacity", 0);
-        phylo_options.svg.selectAll('circle.extent').attr("opacity", 1);
+        phylo_options.svg.selectAll('circle.extent').each(function () {
+            $(this).attr("opacity", 0);
+        });
+        phylo_options.svg.selectAll('text.extent').each(function () {
+            $(this).attr("opacity", 1);
+        });
+    }
+    if (document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON") {
+        phylo_options.svg.selectAll('circle.node').each(function () {
+            $(this).attr("opacity", 0);
+        });
+        phylo_options.svg.selectAll('text.node').each(function () {
+            $(this).attr("opacity", 1);
+        });
     }
 }
 
 var toggle_extant_text = function() {
     var button_text = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1];
+    phylo_options.svg.selectAll('circle.extent').each(function () {
+        $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+    });
+    phylo_options.svg.selectAll('text.extent').each(function () {
+        $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+    });
     if (button_text == "ON") {
-        phylo_options.svg.selectAll('text.extent').attr("opacity", 0);
-        phylo_options.svg.selectAll('circle.extent').attr("opacity", 1);
         document.getElementById('extant-text-toggle').innerHTML = "View extant labels | OFF";
     } else {
-        phylo_options.svg.selectAll('text.extent').attr("opacity", 1);
-        phylo_options.svg.selectAll('circle.extent').attr("opacity", 0);
         document.getElementById('extant-text-toggle').innerHTML = "View extant labels | ON";
     }
 }
@@ -1141,7 +1184,7 @@ function contextMenu() {
  *  2. Add marginal reconstruction
  *  3. view joint
  *  4. collapse subtree
- *  5. extend subtree
+ *  5. expand subtree
  */
 var context_menu_action = function (call, node_fill, node_id) {
     var call_type = call.attr("name");
@@ -1152,7 +1195,7 @@ var context_menu_action = function (call, node_fill, node_id) {
         displayJointGraph(call.attr("id"), node_fill, true);
     } else if (call_type == "add joint reconstruction") {
         displayJointGraph(call.attr("id"), node_fill, false);
-    } else if (call_type == "extend subtree") {
+    } else if (call_type == "expand subtree") {
         var node = phylo_options.tree.node_dict[node_id];
         phylo_options.tree.collapse_under = null;
         refresh_tree();
@@ -1459,7 +1502,30 @@ var fix_subtrees = function (left, right) {
 }
 
 var refresh_tree = function () {
+    var additive = document.getElementById('additive-toggle').innerHTML.split(" | ")[1];
+    if (additive != "Additive") {
+        phylo_options.tree.additive = false;
+    }
     clear_svg();
     phylo_options.svg_info.width = window.innerWidth - 200;
     run_phylo_tree();
+    if (document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1] == "ON") {
+        phylo_options.svg.selectAll('text.branch-text').attr("opacity", 1);
+    } else {
+        phylo_options.svg.selectAll('text.branch-text').attr("opacity", 0);
+    }
+
+    if (document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1] == "ON") {
+        phylo_options.svg.selectAll('text.branch-text').attr("opacity", 1);
+    } else {
+        phylo_options.svg.selectAll('text.branch-text').attr("opacity", 0);
+    }
+    if (document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON") {
+        phylo_options.svg.selectAll('circle.extent').each(function () {
+            $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+        });
+        phylo_options.svg.selectAll('text.extent').each(function () {
+            $(this).attr("opacity", ($(this).attr("opacity") == 1) ? 0 : 1);
+        });
+    }
 }

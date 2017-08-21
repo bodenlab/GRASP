@@ -34,7 +34,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-	//final String sessionPath = "/home/brad/Desktop/Uni_Studies/Projects/POAGProject/ASRSETUP2/WebSessions";
 	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
 	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//final String sessionPath = "/var/www/GRASP/";
@@ -144,7 +143,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 			Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 			// TODO: push exceptions to error message on view...
+
+			System.out.println("Running recon...");
 			asr.runReconstruction();
+			System.out.println("Done");
 
 			// add reconstructed newick string to send to javascript
 			model.addAttribute("tree", asr.getReconstructedNewickString());
@@ -252,13 +254,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 			asr.saveAncestors(tempDir + "/");
 		if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
 			asr.saveConsensusMarginal(tempDir + "/" + request.getParameter("marg-node") + "_consensus");
+		if (request.getParameter("check-seq-joint-single") != null && request.getParameter("check-seq-joint-single").equalsIgnoreCase("on"))
+			asr.saveConsensusJoint(tempDir + "/" + request.getParameter("joint-node") + "_consensus", request.getParameter("joint-node"));
 		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
 			asr.saveMarginalDistribution(tempDir + "/", "msa");
 		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
-			asr.saveConsensusJoint(tempDir + "/ancestors_consensus");
-
-
-		//asr.saveMSAImage(tempDir + "/MSA.png");
+			asr.saveConsensusJoint(tempDir + "/ancestors_consensus", null);
 
 		// send output folder to client
 		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());

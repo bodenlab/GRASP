@@ -294,7 +294,7 @@ var draw_phylo_text = function (group, node, n) {
         })
         .attr("opacity", 0)
         .attr("transform", "translate(" + x + "," + y + ") rotate(" + deg + ") translate(2,2)")
-        .text(node.name);
+        .text(node.name.split("_")[0]);
 }
 
 /**

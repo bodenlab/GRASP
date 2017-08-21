@@ -18,10 +18,11 @@ var refresh_elements = function() {
 };
 
 var refresh_labels = function() {
+    var label = selectedNode.split("_")[0];
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i].textContent = selectedNode;
-        nodeLabels[i].value = selectedNode;
+        nodeLabels[i].textContent = label;
+        nodeLabels[i].value = label;
     }
     var reconLabels = document.querySelectorAll(".infer-label");
     for (var i = 0; i < reconLabels.length; i++) {

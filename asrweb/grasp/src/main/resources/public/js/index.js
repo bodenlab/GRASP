@@ -1219,7 +1219,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 
     var stroke_width = options.pie.stroke_width;
 
-    if (radius < options.node.min_radius || poags.max_seq_len > options.pie.max_seq_len) {
+    if (radius < options.node.min_radius) {
         stroke_width = 0;
     }
 
@@ -1249,7 +1249,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     var pie_data = node.seq.chars;
     radius -= 10;
 
-    if (node.name == 'Inferred' && options.mutants.count > 0 && options.mutants.draw == true) {
+    if (node.name != 'MSA' && node.name != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
         pie_data = node.mutants.chars;
     } else if (node.seq.hasOwnProperty("poagValues")) {
         //binding the poag data since fused poag type
@@ -1265,7 +1265,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     arc.append("path")
             .attr("class", "poag")
             .attr("d", path_pie)
-            .attr("stroke-width", pie_opt.stroke_width)
+            .attr("stroke-width", stroke_width)
             .attr("stroke", pie_opt.stroke)
             .attr("fill", function (d, i) {
                 //"poag" in data suggest fused type pi should be draw

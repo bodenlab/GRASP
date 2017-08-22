@@ -169,7 +169,7 @@ function makeNumDistrib(arrLabelValue) {
 var generate_mutants = function() {
 
     var nMutants = poags.options.mutants.count;
-    var nodes = poags.single.nodes['Inferred'];
+    var nodes = poags.single.nodes[poags.inferred_poag_name];
     var Ns = [];
     var myPs = [];
     var KLcur = [];
@@ -208,7 +208,7 @@ var generate_mutants = function() {
         KLgains[best] = Math.max(KLcur[best] - KLnxt[best], 0);
     }
 
-    poags.single.nodes['Inferred'] = [];
+    poags.single.nodes[poags.inferred_poag_name] = [];
     // now back to the nodes...
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
@@ -226,7 +226,7 @@ var generate_mutants = function() {
             node.mutant = true;
         }
         // add node to node list
-        poags.single.nodes['Inferred'].push(node);
+        poags.single.nodes[poags.inferred_poag_name].push(node);
     }
 }
 

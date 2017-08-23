@@ -35,15 +35,16 @@ var poags = {
     groups: {
         'mini': {},
         'single': {},
-        'multi': {}
+        'multi': {},
+        'merged': {},
     },
     single: {
-        names: ['MSA', 'Root', 'Merged'],
+        names: ['MSA', 'Root'],
         nodes: {},
         edges: {},
         raw: {},
         class_name: 'single-',
-        height: 200,
+        height: 250,
         margin: {left: 0, right: 0, top: 150, bottom: 0}
     },
     multi: {
@@ -54,7 +55,16 @@ var poags = {
         class_name: 'multi-',
         height: 250,
         margin: {left: 0, right: 0, top: 150, bottom: 0}
-    }
+    },
+    merged: {
+        names: ['Merged'],
+        nodes: {},
+        edges: {},
+        raw: {},
+        class_name: 'merged-',
+        height: 250,
+        margin: {left: 0, right: 0, top: 150, bottom: 0}
+    },
 };
 
 var graph_array = [];
@@ -303,26 +313,37 @@ var draw_all_poags = function (poags) {
     // to append to.
     // Draw the mini msa first
 
+    // draw merged
+    var nodes = poags.merged.nodes;
+    var edges = poags.merged.edges;
+    var group = poags.groups.merged;
+    var scale_y = poags.scale['single_y'];
+    // Setup the graph overlay features
+    var graph_group = setup_graph_overlay(poag_options.graph, group);
+    if (nodes != undefined) {
+        var height = poags.merged.height - poags.merged.margin.top / 2;
+        draw_poag(poags, "Merged", nodes, edges, scale_y, group, true, height, graph_group);
+    }
+
+    // draw MSA and inferred graph
     for (var p in poags.single.names) {
-        var poagPi = false;
         var poag_name = poags.single.names[p];
         var nodes = poags.single.nodes[poag_name];
         var edges = poags.single.edges[poag_name];
-        // TODO var group = poags.groups.single[poag_name];
         var group = poags.groups.single[poag_name];
         var scale_y = poags.scale['single_y'];
         // Setup the graph overlay features
         var graph_group = setup_graph_overlay(poag_options.graph, group);
 
-        if (poag_name == poags.merged_poag_name) {
-            poagPi = true;
-        }
         if (nodes != undefined) {
             var height = poags.single.height - poags.single.margin.top / 2;
-            draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi, height, graph_group);
+            draw_poag(poags, poag_name, nodes, edges, scale_y, group, false, height, graph_group);
         }
     }
 
+    // draw POAG stack
+    document.getElementById("poag-all").style.display = "none";
+    document.getElementById("poag-merged").style.display = "none";
     for (var p in poags.multi.names) {
         var poag_name = poags.multi.names[p];
         var nodes = poags.multi.nodes[poag_name];
@@ -333,6 +354,8 @@ var draw_all_poags = function (poags) {
         var graph_group = setup_graph_overlay(poag_options.graph, group);
 
         if (nodes != undefined) {
+            document.getElementById("poag-all").style.display = "block";
+            document.getElementById("poag-merged").style.display = "block";
             var height = poags.multi.height - poags.multi.margin.top / 2;
             draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi, height, graph_group);
         }
@@ -379,6 +402,13 @@ var redraw_poags = function () {
     poags.brush.extent([poags.cur_x_min, poags.cur_x_max]);
     poags = update_x_scale(poags);
     var group = poags.single_group;
+    group.selectAll("g.graph").remove();
+    group.selectAll("path.poag").remove();
+    group.selectAll("circle.poag").remove();
+    group.selectAll("text.poag").remove();
+    group.selectAll("rect.poag").remove();
+    group.selectAll("defs.poag").remove();
+    var group = poags.merged_group;
     group.selectAll("g.graph").remove();
     group.selectAll("path.poag").remove();
     group.selectAll("circle.poag").remove();
@@ -543,8 +573,8 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
     if (inferred) {
         poags.multi.nodes = {};
         poags.multi.names = [];
-        poags.single.nodes['Merged'] = [];
-        poags.single.edges['Merged'] = [];
+        poags.merged.nodes = [];
+        poags.merged.edges = [];
         set_msa = true;
     }
 
@@ -552,14 +582,11 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
     // we reuse the already processed MSA.
     if (set_msa) {
         poags.single.raw.msa = data.top;
-
         poags = process_msa_data(poags);
-
         poags = process_edges(poags, data.top, poags.root_poag_name, inferred);
     }
 
     poags = process_poag_data(poags, data.bottom, name, inferred, merged);
-
     poags = process_edges(poags, data.bottom, name, inferred, merged);
 
     return poags;
@@ -658,8 +685,10 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
 
     var root_name = poags.root_poag_name;
 
-    if (inferred || merged) {
+    if (inferred) {
         poags.single.nodes[name] = [];
+    } else if (merged) {
+        poags.merged.nodes = [];
     } else {
         poags.multi.nodes[name] = [];
         poags.multi.names.push(name);
@@ -678,9 +707,12 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
 
         // Set that this msa node wasn't deleted during inference
         // Only set if the poag name is 'inferred'
-        if (inferred || merged) {
+        if (inferred) {
             msa_node.deleted_during_inference = false;
             poags.single.nodes[name].push(node);
+        } else if (merged) {
+            msa_node.deleted_during_inference = false; // TODO: should merged affect the mini graph?
+            poags.merged.nodes.push(node);
         } else {
             poags.multi.nodes[name].push(node);
         }
@@ -708,8 +740,10 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
 
     var edges = raw_poag.edges;
 
-    if (inferred || merged) {
+    if (inferred) {
         poags.single.edges[name] = [];
+    } else if (merged) {
+        poags.merged.edges = [];
     } else {
         poags.multi.edges[name] = [];
     }
@@ -727,8 +761,10 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
 
         reduced_edge.name = name;
 
-        if (inferred || merged) {
+        if (inferred) {
             poags.single.edges[name].push(reduced_edge);
+        } else if (merged) {
+            poags.merged.edges.push(reduced_edge);
         } else {
             poags.multi.edges[name].push(reduced_edge);
         }
@@ -827,7 +863,7 @@ var setup_poag_svg = function (poags, set_msa) {
 
     // Calculate the total height of the SVG element based
     // on the number of POAGs which are to be displayed.
-    var single_height = poags.single.names.length * (poags.single.height);
+    var single_height = poags.single.names.length * (poags.single.height) + 50;
     var multi_height = poags.multi.names.length*(poags.multi.height + poag_options.display.margin_between_single_multi);
     var mini_height = options.mini.height + options.mini.margin.top + options.mini.margin.bottom;
     var height = single_height + multi_height + mini_height + margin.top;
@@ -873,6 +909,14 @@ var setup_poag_svg = function (poags, set_msa) {
 
         poags.single_svg = single_svg;
 
+        // setup merged svg
+        var merged_svg = d3.select("#poag-merged")
+                .append("svg")
+                .attr("viewBox", "0 0 " + width + " " + poags.merged.height)
+                .classed("svg-content", true);
+
+        poags.merged_svg = merged_svg;
+
     } else {
         // reset graphs
         poags.single_svg.selectAll("*").remove();
@@ -882,16 +926,28 @@ var setup_poag_svg = function (poags, set_msa) {
         poags.svg.selectAll("*").remove();
         poags.svg.attr("viewBox", "0 0 " + width + " " + multi_height);
         var svg = poags.svg;
+
+        poags.merged_svg.selectAll("*").remove();
+        poags.merged_svg.attr("viewBox", "0 0 " + width + " " + poags.merged.height);
+        var merged_svg = poags.merged_svg;
     }
 
     poags.groups.single = {};
     poags.groups.multi = {};
 
     var single_group = single_svg.append('g')
-                    .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+            .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
 
     var group = svg.append('g')
             .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+
+    var merged_group = merged_svg.append('g')
+            .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+
+    poags.merged_group = merged_group;
+    poags.groups.merged = merged_group;
+    poags.merged_svg = merged_svg;
+    poags.groups.merged_svg = merged_svg;
 
     // Make a group for each of the individual POAGs for displaying in single_svg
     for (var n in poags.single.names) {

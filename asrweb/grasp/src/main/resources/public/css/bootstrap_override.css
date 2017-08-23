@@ -59,12 +59,13 @@ text {
 }
 
 #poag-all {
-    height: 530px;
+    height: 550px;
     overflow: auto;
     margin-bottom: 2em;
-    border: 1px solid #888;
-    border-style: inset;
+    border: 1px solid #cfcfcf;
     border-radius: 3px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     padding-left: 0px;
     padding-right: 0px;
 }

@@ -175,7 +175,7 @@ var poag_options = {
     },
     /*********** Histogram options  ************************************/
     graph: {
-        draw_position_in_histogram: true, // Draws the position as a title above the node
+        draw_position_in_histogram: true, // Draws the position as a title above the node TODO?
         x_size: 150, // Multiplication factor for positions
         y_size: 100,
         y_start: 200,
@@ -195,11 +195,11 @@ var poag_options = {
         graph_height: 70,
         max_height: 10,
         max_bar_count: 2,
-        hist_bar_thresh: 0.01,
+        hist_bar_thresh: 0.1,
         hover: true,
         metabolite_count: 0,
-        display_label_text: true, // true means display the label text below the MSA graph
-        display_axis_text: true, // Text on the axis (as in the numbers on the y axis)
+        display_label_text: true, // true means display the label text below the MSA graph TODO ?
+        display_axis_text: true, // Text on the axis (as in the numbers on the y axis) TODO ?
         draw_axis: true, // Whether or not to draw the y axis
         colours: clustal_colours
     },
@@ -211,6 +211,7 @@ var poag_options = {
 };
 
 graph = {};
+
 graph.options = poag_options;
 
 
@@ -234,6 +235,7 @@ graph.options = poag_options;
  */
 var setup_poags = function (json_str, set_inferred, set_msa, set_merged, name) {
     if (set_inferred) {
+        console.log(name);
         delete poag_options.names_to_colour[poags.inferred_poag_name];
         poags.inferred_poag_name = name;
         poags.single.names[1] = name;
@@ -306,6 +308,7 @@ var draw_all_poags = function (poags) {
         var poag_name = poags.single.names[p];
         var nodes = poags.single.nodes[poag_name];
         var edges = poags.single.edges[poag_name];
+        // TODO var group = poags.groups.single[poag_name];
         var group = poags.groups.single[poag_name];
         var scale_y = poags.scale['single_y'];
         // Setup the graph overlay features
@@ -327,7 +330,6 @@ var draw_all_poags = function (poags) {
         var group = poags.groups.multi[poag_name];
         var scale_y = poags.scale['multi_y'];
         var poagPi = false;
-        var colour = poags.options.names_to_colour[poag_name];
         var graph_group = setup_graph_overlay(poag_options.graph, group);
 
         if (nodes != undefined) {
@@ -376,6 +378,13 @@ var redraw_poags = function () {
     }
     poags.brush.extent([poags.cur_x_min, poags.cur_x_max]);
     poags = update_x_scale(poags);
+    var group = poags.single_group;
+    group.selectAll("g.graph").remove();
+    group.selectAll("path.poag").remove();
+    group.selectAll("circle.poag").remove();
+    group.selectAll("text.poag").remove();
+    group.selectAll("rect.poag").remove();
+    group.selectAll("defs.poag").remove();
     var group = poags.group;
     group.selectAll("g.graph").remove();
     group.selectAll("path.poag").remove();
@@ -384,10 +393,6 @@ var redraw_poags = function () {
     group.selectAll("rect.poag").remove();
     group.selectAll("defs.poag").remove();
     poags = draw_all_poags(poags);
-    // change the div sizing to show all poags
-    var total_height = 2*poags.single.height + (poags.multi.names.length)*(poags.multi.height - 10) + 50; // add padding
-    //document.getElementById("poag-all").style.height = total_height + "px";
-
 }
 
 
@@ -830,11 +835,13 @@ var setup_poag_svg = function (poags, set_msa) {
     // If we are resetting the SVG element we want to add a svg otherwise
     // we just use the existing svg element
     if (poags.svg == undefined) {
+        // setup stacked svg
         var svg = d3.select(options.data.target)
                 .append("svg")
-                .attr("viewBox", "0 0 " + width + " " + height)
+                .attr("viewBox", "0 0 " + width + " " + multi_height)
                 .classed("svg-content", true);
 
+        // setup mini svg
         var mini_svg = d3.select("#poag-mini")
                 .append("svg")
                 .attr("viewBox", "0 0 " + width + " " + mini_height)
@@ -858,44 +865,58 @@ var setup_poag_svg = function (poags, set_msa) {
         poags.mini_svg = mini_svg;
         poags.groups.mini = mini;
 
+        // setup msa/inferred svg
+        var single_svg = d3.select("#poag-msa")
+                .append("svg")
+                .attr("viewBox", "0 0 " + width + " " + single_height)
+                .classed("svg-content", true);
+
+        poags.single_svg = single_svg;
+
     } else {
+        // reset graphs
+        poags.single_svg.selectAll("*").remove();
+        poags.single_svg.attr("viewBox", "0 0 " + width + " " + single_height);
+        var single_svg = poags.single_svg;
+
         poags.svg.selectAll("*").remove();
-        poags.svg.attr("viewBox", "0 0 " + width + " " + height);
+        poags.svg.attr("viewBox", "0 0 " + width + " " + multi_height);
         var svg = poags.svg;
     }
-
 
     poags.groups.single = {};
     poags.groups.multi = {};
 
+    var single_group = single_svg.append('g')
+                    .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+
     var group = svg.append('g')
-            .attr('transform', 'translate(' + 0 + ',' + margin.top + ')')
+            .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
 
-
-
-    // Make a group for each of the individual POAGs
+    // Make a group for each of the individual POAGs for displaying in single_svg
     for (var n in poags.single.names) {
         var name = poags.single.names[n];
-        var tmp_group = group.append('g')
+        var tmp_group = single_group.append('g')
                 .attr('transform', 'translate(' + margin.left / 2 + ',' +
                         (n * poags.single.height) + ' )')
         poags.groups.single[name] = tmp_group;
     }
+    poags.single_group = single_group;
+    poags.single_svg = single_svg;
+    poags.groups.single_svg = single_svg;
 
-    // Make a group for each of the multi POAGs
+    // Make a group for each of the multi POAGs for displaying in svg
     for (var n in poags.multi.names) {
         var name = poags.multi.names[n];
         var tmp_group = group.append('g')
                 .attr('transform', 'translate(' + margin.left / 2 + ',' + (
-                        (n * (poags.multi.height)) +
-                        poags.options.display.margin_between_single_multi + single_height
-                        ) + ' )')
+                        (n * (poags.multi.height))) + ' )')
         poags.groups.multi[name] = tmp_group;
     }
     poags.group = group;
     poags.svg = svg;
-
     poags.groups.svg = svg;
+
     options.style.width = width;
     options.style.height = height;
 

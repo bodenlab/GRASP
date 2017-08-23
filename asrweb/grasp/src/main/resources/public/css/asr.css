@@ -3,6 +3,10 @@ body.container-fluid {
     padding: 0;
 }
 
+body {
+padding-bottom: 70px;
+}
+
 body,
 html {
     width: 100%;
@@ -29,9 +33,9 @@ h6 {
 }
 
 .intro-header {
-    padding-top: 80px; /* If you're making other pages, make sure there is 50px of padding to make sure the navbar doesn't overlap content! */
+    padding-top: 90px; /* If you're making other pages, make sure there is 50px of padding to make sure the navbar doesn't overlap content! */
     padding-bottom: 50px;
-    height: 270px;
+    height: 280px;
     text-align: center;
     color: #f8f8f8;
     background: url(../images/bg_tmp.jpeg) no-repeat center center;
@@ -107,7 +111,7 @@ h6 {
 .section-heading-spacer {
     float: left;
     width: 200px;
-    border-top: 3px solid #e7e7e7;
+    border-top: 0px solid #e7e7e7;
 }
 
 .banner {
@@ -117,10 +121,11 @@ h6 {
     background-size: cover;
 }
 
-.banner h2 {
+.bh2 {
     margin: 0;
     text-shadow: 2px 2px 3px rgba(0,0,0,0.6);
-    font-size: 3em;
+    font-size: 24px;
+    color: white;
 }
 
 .banner ul {
@@ -158,10 +163,11 @@ h6 {
 }
 
 footer {
-    padding: 50px 0;
+    padding: 5px 0;
     background-color: #f8f8f8;
+    font-size: 12px;
 }
 
 p.copyright {
-    margin: 15px 0 0;
+    margin: 5px 0 0;
 }

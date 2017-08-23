@@ -76,7 +76,7 @@ var phylo_options = {
          * The colour for when a user selects to perform a reconstruction
          * it will be shaded based on how "far" the node is from the root
          */
-        select_colour: "black",
+        select_colour: "#EA78F5",
     }
 }
 

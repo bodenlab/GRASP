@@ -3,7 +3,7 @@
 <body>
 <div th:fragment="form">
     <a name="reconstruct"></a>
-    <div class="content-section-a" th:if="${results == null}">
+    <div class="content-section-b" th:if="${results == null}">
         <div class="container-fluid">
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom">

@@ -36,7 +36,7 @@ var run_asr_app = function(json_str, recon, label) {
     // draw poags
     setup_poags(json_str, true, true, false, phylo_options.tree.selected_node.name.split("_")[0])
     poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name.split("_")[0]];
-    poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+    poags.options.name_to_merged_id[phylo_options.tree.selected_node.name.split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
     redraw_poags();
     poags.retain_previous_position = true;
 }

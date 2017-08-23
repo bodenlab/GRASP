@@ -71,8 +71,8 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
             }
             graph_array.push(JSON.parse(json_str));
             poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = node_fill;
-            poags.options.name_to_merged_id[node_name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
-            poags.options.names_to_colour[node_name] = node_fill;
+            poags.options.name_to_merged_id[node_name.split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+            poags.options.names_to_colour[node_name.split("_")[0]] = node_fill;
             if (reset_graphs) {
                 selectedNode = node_name;
                 setup_poags(json_str, true, false, false, node_name.split("_")[0]);

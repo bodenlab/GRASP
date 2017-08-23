@@ -62,9 +62,9 @@ text {
     height: 530px;
     overflow: auto;
     margin-bottom: 2em;
-    border: 1px solid #777;
+    border: 1px solid #888;
     border-style: inset;
-    border-radius: 5px;
+    border-radius: 3px;
     padding-left: 0px;
     padding-right: 0px;
 }

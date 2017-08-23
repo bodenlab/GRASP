@@ -195,7 +195,7 @@ var poag_options = {
         graph_height: 70,
         max_height: 10,
         max_bar_count: 2,
-        hist_bar_thresh: 0.1,
+        hist_bar_thresh: 1, // percentage (0-100%)
         hover: true,
         metabolite_count: 0,
         display_label_text: true, // true means display the label text below the MSA graph TODO ?
@@ -1564,8 +1564,8 @@ function create_bars(node, options, graph_group) {
             bars.push(node.graph.bars[bar]);
         }
     }
-    num_bars = bars.length;
-
+    num_bars = Object.keys(bars).length;
+    console.log(bars);
     for (var bar in bars) {
         var bar_info = bars[bar];
         graph_group.append("rect")

@@ -165,19 +165,3 @@ footer {
 p.copyright {
     margin: 15px 0 0;
 }
-
-
-.poag-container {
-  float:left;
-  height: 500px;
-  width:95%;
-  margin-left: 2%;
-  padding:3px; 
-  background:#f8f8f8;
-}
-
-.poag-content{
-  height:500px;
-  overflow:auto;
-  background:#FFFFFF;
-}

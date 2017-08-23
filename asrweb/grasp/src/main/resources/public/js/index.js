@@ -99,7 +99,7 @@ var poag_options = {
         colours: clustal_colours,
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
         interesting_many_edges_colour: "Crimson",
-        diff_colour: "SlateGrey",
+        diff_colour: "black",
         diff_opacity: 0.3,
         num_start_nodes: 10, // How many nodes that it starts with
     },
@@ -129,8 +129,8 @@ var poag_options = {
         x_padding: 10,
         fill: "#3636FF",
         opacity: 0.3,
-        height: 30,
-        margin: {top: 50, left: 60, bottom: 100, right: 10},
+        height: 50,
+        margin: {top: 40, left: 60, bottom: 100, right: 10},
     },
     position: {
         text_padding: 10, // How high above the mini it will appear
@@ -195,9 +195,10 @@ var poag_options = {
         graph_height: 70,
         max_height: 10,
         max_bar_count: 2,
+        hist_bar_thresh: 0.01,
         hover: true,
         metabolite_count: 0,
-        display_label_text: false, // true means display the label text below the MSA graph
+        display_label_text: true, // true means display the label text below the MSA graph
         display_axis_text: true, // Text on the axis (as in the numbers on the y axis)
         draw_axis: true, // Whether or not to draw the y axis
         colours: clustal_colours
@@ -300,7 +301,6 @@ var draw_all_poags = function (poags) {
     // to append to.
     // Draw the mini msa first
 
-
     for (var p in poags.single.names) {
         var poagPi = false;
         var poag_name = poags.single.names[p];
@@ -358,8 +358,23 @@ var refresh_svg_content = function () {
  */
 var redraw_poags = function () {
     var extent = poags.brush.extent();
-    poags.cur_x_min = extent[0];
-    poags.cur_x_max = extent[1];
+    if (extent[0] == extent[1]) {
+        var diff = poags.cur_x_max - poags.cur_x_min;
+        if ((extent[0] + diff/2) > poags.max_x) {
+            poags.cur_x_max = poags.max_x;
+            poags.cur_x_min = poags.max_x - diff;
+        } else if ((extent[0] - diff/2) < 0) {
+            poags.cur_x_max = diff;
+            poags.cur_x_min = 0;
+        } else {
+            poags.cur_x_max = extent[0] + diff/2;
+            poags.cur_x_min = extent[0] - diff/2;
+        }
+    } else {
+        poags.cur_x_min = extent[0];
+        poags.cur_x_max = extent[1];
+    }
+    poags.brush.extent([poags.cur_x_min, poags.cur_x_max]);
     poags = update_x_scale(poags);
     var group = poags.group;
     group.selectAll("g.graph").remove();
@@ -371,7 +386,8 @@ var redraw_poags = function () {
     poags = draw_all_poags(poags);
     // change the div sizing to show all poags
     var total_height = 2*poags.single.height + (poags.multi.names.length)*(poags.multi.height - 10) + 50; // add padding
-    document.getElementById("poag-all").style.height = total_height + "px";
+    //document.getElementById("poag-all").style.height = total_height + "px";
+
 }
 
 
@@ -380,13 +396,26 @@ var redraw_poags = function () {
  */
 
 function moveBrush() {
-    var brush = poags.brush;
-    var origin = d3.mouse(this)
-            , point = poags.scale.mini_x.invert(origin[0])
-            , halfExtent = (brush.extent()[1] - brush.extent()[0]) / 2
-            , start = point - halfExtent
-            , end = point + halfExtent;
-
+    var extent = poags.brush.extent();
+    var origin = d3.mouse(this);
+    var point = poags.scale.mini_x.invert(origin[0]);
+    var halfExtent = (poags.brush.extent()[1] - poags.brush.extent()[0]) / 2;
+    var start = point - halfExtent;
+    var end = point + halfExtent;
+    if (extent[0] == extent[1]) {
+        console.log(poags);
+        var diff = poags.cur_x_max - poags.cur_x_min;
+        if ((extent[0] + diff/2) > poags.max_x) {
+            end = poags.max_x;
+            start = poags.max_x - diff;
+        } else if ((extent[0] - diff/2) < 0) {
+            end = diff;
+            start = 0;
+        } else {
+            end = extent[0] + diff/2;
+            start = extent[0] - diff/2;
+        };
+    }
     poags.brush.extent([start, end]);
     poags.retain_previous_position = true;
     redraw_poags();
@@ -422,10 +451,10 @@ var setup_brush = function (poags) {
             .attr("class", "x brush")
             .call(brush)  //call the brush function, causing it to create the rectangles
             .selectAll("rect") //select all the just-created rectangles
-            .attr("y", -10)
+            .attr("y", -(poags.options.mini.height/2 + 5))
             .attr("fill", poags.options.mini.fill)
             .attr("opacity", poags.options.mini.opacity)
-            .attr("height", (poags.options.mini.height * poags.max_y) + 20); //set their height
+            .attr("height", poags.options.mini.height + 10); //set their height
 
     poags.brush = brush;
     return poags;
@@ -464,12 +493,10 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                 if (poagPi) {
                     draw_pie(poags, node, group, radius, false, node_cx, node_cy);
                 }
-                //if (poag_name === poags.root_poag_name) {
-                    // Check if there is any bars to display first
                 // check whether to display a graph
                 var count = 0;
                 for (var b in node.graph.bars) {
-                    if (node.graph.bars[b].value > 2) {
+                    if (node.graph.bars[b].value > poag_options.graph.hist_bar_thresh) {
                         count++;
                     }
                 }
@@ -477,8 +504,6 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                     var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
                     poag_options.graph.graphs.push(graph_node);
                 }
-                //}
-            
             }
         }
     }
@@ -807,12 +832,12 @@ var setup_poag_svg = function (poags, set_msa) {
     if (poags.svg == undefined) {
         var svg = d3.select(options.data.target)
                 .append("svg")
-                .attr("viewBox", "0 0 " + width + " " + height)   // TODO need to change this to be height of div
+                .attr("viewBox", "0 0 " + width + " " + height)
                 .classed("svg-content", true);
 
         var mini_svg = d3.select("#poag-mini")
                 .append("svg")
-                .attr("viewBox", "0 0 " + width + " " + mini_height)   // TODO need to change this to be height of div
+                .attr("viewBox", "0 0 " + width + " " + mini_height)
                 .classed("svg-content", true);
 
         var mini_group = mini_svg.append('g')
@@ -972,16 +997,25 @@ var draw_mini_msa = function (poags) {
         var line_x = x_scale(node.x);
         line_points.push(combine_points(line_x, line_y));
 
-        if (node.num_out_edges > options.number_of_edges_to_be_interesting) {
+        // find node out edges
+        var out_edge_count = 0;
+        if (node_inferred != null) {
+            for (var e in poags.single.edges[poags.inferred_poag_name]) {
+                if (poags.single.edges[poags.inferred_poag_name][e].from.id == node_inferred.id) {
+                    out_edge_count++;
+                }
+            }
+        }
+        if (out_edge_count >= options.number_of_edges_to_be_interesting) {
             var rect = group.append("rect")
                     .attr("class", "poag")
                     .attr('x', line_x)
                     .attr('y', function () {
-                        var tmp = y_scale(0); // Have it at the top
+                        var tmp = y_scale(0) - mini_opt.height/4; // Have it at the top
                         return tmp;
                     })
                     .attr('width', 2 * mini_opt.radius)
-                    .attr('height', mini_opt.height * poags.max_y)
+                    .attr('height', mini_opt.height/2)
                     .attr("stroke-width", mini_opt.stroke_width)
                     .attr("stroke", mini_opt.stroke)
                     .attr("opacity", options.diff_opacity)
@@ -1219,7 +1253,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 
     var stroke_width = options.pie.stroke_width;
 
-    if (radius < options.node.min_radius) {
+    if (radius < options.node.min_radius || (!poagPi && node.name == "Merged")) {
         stroke_width = 0;
     }
 
@@ -1252,7 +1286,6 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     if (node.name != 'MSA' && node.name != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
         pie_data = node.mutants.chars;
     } else if (node.seq.hasOwnProperty("poagValues")) {
-        //binding the poag data since fused poag type
         var pie_data = node.seq.poagValues;
         radius += 10;
     }
@@ -1503,10 +1536,18 @@ function create_bars(node, options, graph_group) {
         padding_x = size/6.0;
     }
 
+    var bars = [];
     for (var bar in node.graph.bars) {
-        bar_info = node.graph.bars[bar];
-        if (bar_info.value > 0.1) {
-            graph_group.append("rect")
+        var bar_info = node.graph.bars[bar];
+        if (bar_info.value > poag_options.graph.hist_bar_thresh) {
+            bars.push(node.graph.bars[bar]);
+        }
+    }
+    num_bars = bars.length;
+
+    for (var bar in bars) {
+        var bar_info = bars[bar];
+        graph_group.append("rect")
                 .attr("class", function () {
                     return "bar2";
                 })
@@ -1521,16 +1562,15 @@ function create_bars(node, options, graph_group) {
                     // As the number is out of 100 need to modulate it
                     return options.graph_height - y(bar_info.value/100.0);
                 })
-                .attr("fill", options.colours[bar_info.x_label]);
+                .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
 
-            graph_group.append("text")
+        graph_group.append("text")
                 .attr("class", "y axis")
                 .attr("x", function () {
                     return (2 * padding_x) + bar * (options.size / num_bars);
                 }) //Need to determine algorithm for determining this
                 .attr("y", options.graph_height + 10)
-                .text(bar_info.x_label);
-        }
+                .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
     }
 }
 

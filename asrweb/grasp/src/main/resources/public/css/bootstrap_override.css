@@ -44,7 +44,7 @@ text {
 }
 
 #reconstructed-tree {
-    height: 600px;
+    height: 900px;
     overflow: auto;
 }
 
@@ -58,9 +58,15 @@ text {
     margin-top: 5px;
 }
 
-#poag {
-    height: 570px;
+#poag-all {
+    height: 530px;
     overflow: auto;
+    margin-bottom: 2em;
+    border: 1px solid #777;
+    border-style: inset;
+    border-radius: 5px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 #heading {

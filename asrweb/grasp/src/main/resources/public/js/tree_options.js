@@ -17,6 +17,14 @@ var perform_marginal = function(node_name, node_fill) {
             //add_new_poag(json_str, node_name, node_fill);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
             // display the marginal distribution in the nodes
+            graph_array.push(JSON.parse(json_str));
+            // Add the colours of the POAG assigned by name and merged_id
+            poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
+            poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+
+            setup_poags(json_str, true, false, false, node_name.split("_")[0]);
+            redraw_poags();
+            refresh_elements();
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
                 set_draw_mutants(true);
                 $('#mutant-input').fadeIn();
@@ -25,15 +33,7 @@ var perform_marginal = function(node_name, node_fill) {
                 set_draw_mutants(false);
                 $('#mutant-input').fadeOut();
                 set_mutant(0);
-                graph_array.push(JSON.parse(json_str));
-                // Add the colours of the POAG assigned by name and merged_id
-                poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
-                poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
-
-                setup_poags(json_str, true, false, false, node_name.split("_")[0]);
-                redraw_poags();
             }
-            refresh_elements();
         }
     });
     $("#progress").addClass("disable");

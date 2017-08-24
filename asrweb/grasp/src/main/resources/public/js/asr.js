@@ -78,6 +78,8 @@ var view_mutant_library = function(num) {
     generate_mutants();
 
     // Re-draw graph with mutants
+    poags.groups.mini.selectAll("*").remove();
+    poags = setup_brush(poags);
     draw_mini_msa(poags);
     redraw_poags();
 };

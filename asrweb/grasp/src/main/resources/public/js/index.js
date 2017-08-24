@@ -245,7 +245,6 @@ graph.options = poag_options;
  */
 var setup_poags = function (json_str, set_inferred, set_msa, set_merged, name) {
     if (set_inferred) {
-        console.log(name);
         delete poag_options.names_to_colour[poags.inferred_poag_name];
         poags.inferred_poag_name = name;
         poags.single.names[1] = name;
@@ -438,7 +437,6 @@ function moveBrush() {
     var start = point - halfExtent;
     var end = point + halfExtent;
     if (extent[0] == extent[1]) {
-        console.log(poags);
         var diff = poags.cur_x_max - poags.cur_x_min;
         if ((extent[0] + diff/2) > poags.max_x) {
             end = poags.max_x;
@@ -758,7 +756,7 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         //reduced_edge.next = poags.node_dict[name + '-' + edge.from + 1];
         // To node
         reduced_edge.to = poags.node_dict[name + '-' + edge.to];
-
+        reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
 
         if (inferred) {
@@ -1621,7 +1619,6 @@ function create_bars(node, options, graph_group) {
         }
     }
     num_bars = Object.keys(bars).length;
-    console.log(bars);
     for (var bar in bars) {
         var bar_info = bars[bar];
         graph_group.append("rect")

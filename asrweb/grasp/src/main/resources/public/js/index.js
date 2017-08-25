@@ -167,6 +167,8 @@ var poag_options = {
     edge: {
         y_curve_amount: 30,
         stroke_width: 3,
+        consensus_stroke_width: 10,
+        single_seq_dash: 5,
         stroke: "grey",
         opacity: 0.5,
         stroke_opacity: 1,
@@ -751,11 +753,23 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         var reduced_edge = {};
         // From node
         reduced_edge.from = poags.node_dict[name + '-' + edge.from];
-        // Node after from node, used to determine curvature of the
-        // edge.
-        //reduced_edge.next = poags.node_dict[name + '-' + edge.from + 1];
         // To node
         reduced_edge.to = poags.node_dict[name + '-' + edge.to];
+        // check if edge is consensus or not
+        // check weight of all edges from the same node
+        // TODO: probably need to input the consensus because of multiple starting nodes, etc.. hard to identify in JS
+        // because no initial node etc
+        reduced_edge.consensus = true;
+        if (reduced_edge.from.consensus == false) {
+            reduced_edge.consensus = false;
+        } else {
+            for (var e1 in edges) {
+                if (edges[e1].from == edge.from && (edges[e1].weight > edge.weight)) {
+                    reduced_edge.consensus = false;
+                    break;
+                }
+            }
+        }
         reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
 
@@ -1186,11 +1200,18 @@ var draw_edges = function (poags, edge, group, scale_y) {
     }
     line_points.push(combine_points(x_end, y_end));
 
+    // identify stroke width to use based on consensus
+    // if not the consensus, then identify whether a single sequence on the edge or not
+    var stroke_width = edge_opt.stroke_width;
+    if (edge.consensus) {
+        stroke_width = edge_opt.consensus_stroke_width;
+    }
+
     group.append("path")
             .attr("d", line_function(line_points))
             .attr("class", 'poag')
             .attr("id", 'edge-' + edge.from.unique_id + '-' + edge.to.unique_id)
-            .attr("stroke-width", edge_opt.stroke_width)
+            .attr("stroke-width", stroke_width)
             .attr("stroke", edge_opt.stroke)
             .attr("opacity", edge_opt.opacity)
             .attr("fill", "none")

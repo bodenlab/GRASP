@@ -17,6 +17,8 @@ import java.io.IOException;
  * Created by marnie on 11/4/17.
  */
 public class ASR {
+    private int NUM_THREADS = 1;
+
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
     private ASRPOG asrJoint = null;
@@ -45,6 +47,8 @@ public class ASR {
     private String nodeLabel = null;
 
     private boolean performAlignment = false;
+
+    private String model = "JTT";
 
     public ASR() {}
 
@@ -86,6 +90,8 @@ public class ASR {
     public String getSessionDir() { return this.sessionDir; }
     public void setMarginalNodeLabel(String node) { this.nodeLabel = node; }
     public String getMarginalNodeLabel() { return this.nodeLabel; }
+    public void setModel(String model) { this.model = model; }
+    public String getModel() { return this.model; }
 
     /*******************************************************************************************************************
      ****** ASR functional methods
@@ -105,7 +111,7 @@ public class ASR {
      * Run joint reconstruction using uploaded files and specified options
      */
     private void runReconstructionJoint() throws Exception {
-        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, false);
+        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, false, model, NUM_THREADS);
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -114,9 +120,9 @@ public class ASR {
      */
     private void runReconstructionMarginal() throws Exception {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
-            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, false);
+            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, false, model, NUM_THREADS);
         else
-            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, false);
+            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, false, model, NUM_THREADS);
         asrMarginal.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -191,7 +197,6 @@ public class ASR {
     public void saveConsensusMarginal(String filepath) throws IOException {
         if (asrMarginal != null)
             asrMarginal.saveSupportedAncestors(filepath);
-
     }
 
     /**
@@ -215,7 +220,6 @@ public class ASR {
      * @throws IOException
      */
     public void saveConsensusJoint(String filepath, String label) throws IOException {
-        System.out.println(label);
         if (asrJoint != null)
             if (label == null)
                 asrJoint.saveSupportedAncestors(filepath);
@@ -246,7 +250,6 @@ public class ASR {
      */
     public JSONObject getAncestralGraphJSON(String reconType, String nodeLabel) {
         PartialOrderGraph graph;
-        System.out.println("label=" + nodeLabel);
         if (reconType.equalsIgnoreCase("joint"))
             graph = asrJoint.getGraph(nodeLabel);
         else

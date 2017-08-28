@@ -167,9 +167,10 @@ var poag_options = {
     edge: {
         y_curve_amount: 30,
         stroke_width: 3,
-        consensus_stroke_width: 10,
+        consensus_stroke_width: 6,
         single_seq_dash: 5,
         stroke: "grey",
+        consensus_stroke: "black",
         opacity: 0.5,
         stroke_opacity: 1,
         x_length: 160,
@@ -751,25 +752,13 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
     for (var e in edges) {
         var edge = edges[e];
         var reduced_edge = {};
+        reduced_edge.id = e;
         // From node
         reduced_edge.from = poags.node_dict[name + '-' + edge.from];
         // To node
-        reduced_edge.to = poags.node_dict[name + '-' + edge.to];
-        // check if edge is consensus or not
-        // check weight of all edges from the same node
-        // TODO: probably need to input the consensus because of multiple starting nodes, etc.. hard to identify in JS
-        // because no initial node etc
-        reduced_edge.consensus = true;
-        if (reduced_edge.from.consensus == false) {
-            reduced_edge.consensus = false;
-        } else {
-            for (var e1 in edges) {
-                if (edges[e1].from == edge.from && (edges[e1].weight > edge.weight)) {
-                    reduced_edge.consensus = false;
-                    break;
-                }
-            }
-        }
+        reduced_edge.to = poags.node_dict[name + '-' + edge.to]
+
+        reduced_edge.consensus = edge.consensus;
         reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
 
@@ -1203,8 +1192,10 @@ var draw_edges = function (poags, edge, group, scale_y) {
     // identify stroke width to use based on consensus
     // if not the consensus, then identify whether a single sequence on the edge or not
     var stroke_width = edge_opt.stroke_width;
+    var stroke = edge_opt.stroke;
     if (edge.consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
+        stroke = edge_opt.consensus_stroke;
     }
 
     group.append("path")
@@ -1212,7 +1203,15 @@ var draw_edges = function (poags, edge, group, scale_y) {
             .attr("class", 'poag')
             .attr("id", 'edge-' + edge.from.unique_id + '-' + edge.to.unique_id)
             .attr("stroke-width", stroke_width)
-            .attr("stroke", edge_opt.stroke)
+            .attr("stroke", stroke)
+            .attr("stroke-dasharray", function() {
+                console.log(edge.from.unique_id + " weight: " + edge.weight + " # seqs: " + phylo_options.tree.extents.length + " : " + 0.01*edge.weight*phylo_options.tree.extents.length);
+                if (edge.weight*phylo_options.tree.extents.length/100 <= 1) {
+                    return "3,3";
+                } else {
+                    return "0,0";
+                }
+            })
             .attr("opacity", edge_opt.opacity)
             .attr("fill", "none")
             .attr("marker-mid", "url(#triangle-end)");

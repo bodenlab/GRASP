@@ -143,10 +143,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 			// TODO: push exceptions to error message on view...
-
-			System.out.println("Running recon...");
 			asr.runReconstruction();
-			System.out.println("Done");
 
 			// add reconstructed newick string to send to javascript
 			model.addAttribute("tree", asr.getReconstructedNewickString());
@@ -187,9 +184,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("label", asr.getLabel());
 
 		// TODO: push exceptions to error message on view...
-			asr.setInferenceType(infer);
-
-
+		asr.setInferenceType(infer);
 
 		try {
 			if (infer.equalsIgnoreCase("marginal"))

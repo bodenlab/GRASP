@@ -22,7 +22,6 @@ var run_asr_app = function(json_str, recon, label) {
      */
     graph_array.push(JSON.parse(json_str));
 
-
     /**
      *
      * Run Tree setup
@@ -30,6 +29,7 @@ var run_asr_app = function(json_str, recon, label) {
     set_recon_label(label);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
+    refresh_tree(); // to set height properly
     selectedNode = phylo_options.tree.selected_node.name;
     refresh_elements();
 

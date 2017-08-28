@@ -1205,7 +1205,6 @@ var draw_edges = function (poags, edge, group, scale_y) {
             .attr("stroke-width", stroke_width)
             .attr("stroke", stroke)
             .attr("stroke-dasharray", function() {
-                console.log(edge.from.unique_id + " weight: " + edge.weight + " # seqs: " + phylo_options.tree.extents.length + " : " + 0.01*edge.weight*phylo_options.tree.extents.length);
                 if (edge.weight*phylo_options.tree.extents.length/100 <= 1) {
                     return "3,3";
                 } else {

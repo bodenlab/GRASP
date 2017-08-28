@@ -2,6 +2,7 @@ package com.asr.grasp;
 
 import api.PartialOrderGraph;
 import com.asr.grasp.validator.File;
+import dat.POGraph;
 import json.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 import reconstruction.ASRPOG;
@@ -232,12 +233,12 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getMSAGraphJSON() {
-        PartialOrderGraph msa;
+        POGraph msa;
         if (inferenceType.equalsIgnoreCase("joint"))
             msa = asrJoint.getMSAGraph();
         else
             msa = asrMarginal.getMSAGraph();
-        POAGJson json = new POAGJson(msa);
+        POAGJson json = new POAGJson(new PartialOrderGraph(msa));
         return json.toJSON();
     }
 

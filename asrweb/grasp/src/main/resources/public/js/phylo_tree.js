@@ -187,14 +187,10 @@ var setup_phylo_svg = function (phylo_options) {
 
 var resize_phylo_height = function() {
     for (var e in phylo_options.tree.extents) {
-        console.log(phylo_options.tree.extents[e].name.length);
         if (phylo_options.tree.extents[e].name.length*7 > phylo_options.tree.extant_label_height) {
             phylo_options.tree.extant_label_height = phylo_options.tree.extents[e].name.length*7;
         }
     }
-
-    console.log(phylo_options.tree.extant_label_height);
-
     phylo_options.svg.attr("height", phylo_options.svg_info.height + phylo_options.tree.extant_label_height);
     phylo_options.legend.height = phylo_options.svg_info.height + 0.25*phylo_options.tree.extant_label_height;
 
@@ -726,12 +722,16 @@ var run_phylo_tree = function () {
  *  Redraw the tree structure stored in phylo_options.tree
  */
 var redraw_phylo_tree = function() {
-
+    console.log("redraw  tree");
     var options = phylo_options;
     var root = phylo_options.tree.root;
 
     clear_svg();
     phylo_options.leaf_count = 0; // reset, will be re-calculated based on visible nodes TODO
+    // reset x value for drawing
+    for (var n in phylo_options.tree.node_dict) {
+        phylo_options.tree.node_dict[n].raw_x = 0;
+    }
 
     // Find the total distance to the root and assign
     // cummulative distances to each of the nodes
@@ -739,6 +739,7 @@ var redraw_phylo_tree = function() {
     phylo_options = make_depth_array(phylo_options);
 
     // Assign the x coords
+    phylo_options.left_leaf_nodes = [];
     assign_leaf_x_coords(root, phylo_options);
 
     // For each of the leaf nodes itterate back up
@@ -786,6 +787,7 @@ var redraw_phylo_tree = function() {
 var assign_inner_x_coords = function (node, phylo_options) {
     /* Assign the x coords based on that of the children*/
     node.raw_x = (node.children[0].raw_x + node.children[node.children.length - 1].raw_x) / 2;
+    console.log(node.id + " : " + node.raw_x);
     if (node.parent != undefined) {
         assign_inner_x_coords(node.parent, phylo_options);
     }
@@ -800,14 +802,14 @@ var assign_inner_x_coords = function (node, phylo_options) {
  */
 var assign_leaf_x_coords = function (node, phylo_options) {
 
-    var top_most_collapsed = false;
-    if (node.parent != undefined && !node.parent.collapsed && node.collapsed) {
-        top_most_collapsed = true;
+    if (node.collapsed && !node.terminated) {
+        return;
     }
 
     /* This is a leaf (or terminating node) so assign the current x count */
-    if (node.children == undefined || node.terminated == true || top_most_collapsed == true) {
+    if (node.children == undefined || node.terminated == true) {
         node.raw_x = phylo_options.leaf_count;
+        console.log(node.id + " : " + node.raw_x);
         phylo_options.leaf_count += 1;
         /* Add one of the children to the leaf node array so
          * we traverse up from only half the nodes when assigning
@@ -820,7 +822,6 @@ var assign_leaf_x_coords = function (node, phylo_options) {
 
     /* Otherwise DFS left child first */
     for (var n in node.children) {
-
         if (n == 0) {
             node.children[n].left = true;
         } else {
@@ -1262,10 +1263,12 @@ var context_menu_action = function (call, node_fill, node_id) {
     } else if (call_type == "Expand subtree") {
         var node = phylo_options.tree.node_dict[node_id];
         set_children_un_collapsed(phylo_options.tree.collapse_under);
+        phylo_options.tree.collapse_under.terminated = false;
         phylo_options.tree.collapse_under = null;
         refresh_tree();
     } else if (call_type == "Collapse subtree") {
         var node = phylo_options.tree.node_dict[node_id];
+        node.terminated = true;
         phylo_options.tree.collapse_under = node;
         set_children_collapsed(phylo_options.tree.collapse_under);
         refresh_tree();

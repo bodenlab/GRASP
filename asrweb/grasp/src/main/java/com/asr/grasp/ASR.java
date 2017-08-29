@@ -18,7 +18,7 @@ import java.io.IOException;
  * Created by marnie on 11/4/17.
  */
 public class ASR {
-    private int NUM_THREADS = 1;
+    private int NUM_THREADS = 5;
 
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query

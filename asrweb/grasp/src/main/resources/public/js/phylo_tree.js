@@ -16,7 +16,7 @@ var phylo_options = {
     tree: {
         longest_distance_from_root_to_extent: 0,
         extant_label_height: 200,
-        collapse_under: null,
+        collapse_under: [],
         selected_node: null,
         all_nodes: new Array(),
         all_branches: new Array(),
@@ -230,7 +230,7 @@ var draw_phylo_circle = function (group, node, n) {
         .attr("transform", function(d) {return "translate(" + node.x + "," + node.y + ")";})
         .style("fill", options.collapsed_colour)
         .style("opacity", function () {
-            if (node.terminated) {
+            if (!node.collapsed && node.terminated) {
                 return 1;
             } else {
                 return 0;
@@ -340,7 +340,7 @@ var draw_phylo_text = function (group, node, n) {
         })
         .attr("opacity", function () {
             if (node.extent) {
-                return phylo_options.style.extant_label_opacity;
+                return 1;
             } else {
                 return 0;
             }
@@ -394,7 +394,7 @@ var draw_phylo_under_circle = function (group, node, n) {
             .attr("fill", "white")
             .attr("stroke", options.under_stroke)
             .attr("opacity", function() {
-                if (node.extent) {
+                if (node.extent || node.terminated) {
                     return 0;
                 } else {
                     return options.opacity;
@@ -419,7 +419,7 @@ var draw_phylo_nodes = function (phylo_options, initial) {
     for (var n in phylo_options.tree.all_nodes) {
         var node = phylo_options.tree.all_nodes[n];
         // Check if this node is collapsed
-        if (initial || phylo_options.tree.node_dict[node.id].collapsed != true) {
+        if (initial || !phylo_options.tree.node_dict[node.id].collapsed) {
             // Add a white under circle to make it pretty
             draw_phylo_under_circle(group, node, n);
 
@@ -443,8 +443,9 @@ var draw_phylo_nodes = function (phylo_options, initial) {
 var on_node_mouseover = function (node_selected) {
     var options = phylo_options.style;
     var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
-    if (node_selected.attr("class") == "extent"){
-        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 1);
+    var view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON";
+    if (node_selected.attr("class") == "extent") {
+        d3.select("#text-" + node_selected.attr("id")).attr("opacity", view_extant_labels ? options.extant_label_opacity : 1);
     }
     if (!view_node_labels && node_selected.attr("class") == "node"){
         d3.select("#path-" + node_selected.attr("id")).style("opacity", 0);
@@ -466,8 +467,9 @@ var on_node_mouseover = function (node_selected) {
 var on_node_mouseout = function (node_selected) {
     var options = phylo_options.style;
     var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
+    var view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON";
     if (node_selected.attr("class") == "extent") {
-        d3.select("#text-" + node_selected.attr("id")).attr("opacity", phylo_options.style.extant_label_opacity);
+        d3.select("#text-" + node_selected.attr("id")).attr("opacity", view_extant_labels ? 1: options.extant_label_opacity);
     }
     var terminated = d3.select("#path-" + node_selected.attr("id")).attr("class") == "collapsed-node";
     if (!view_node_labels && node_selected.attr("class") == "node") {
@@ -622,7 +624,7 @@ var draw_phylo_branches = function (phylo_options, initial) {
 
     for (var b in phylo_options.tree.all_branches) {
         var branch = phylo_options.tree.all_branches[b];
-        if (initial || phylo_options.tree.node_dict[branch.id].collapsed != true) {
+        if (initial || (!phylo_options.tree.node_dict[branch.id].collapsed && !phylo_options.tree.node_dict[branch.id].terminated)) {
             group.append("line")
                     .attr("class", "branch")
                     .style("stroke", options.branch_stroke)
@@ -804,9 +806,11 @@ var redraw_phylo_tree = function() {
     // Draw the branches and the nodes
     draw_phylo_branches(phylo_options, false);
 
-    if (phylo_options.tree.collapse_under != null) {
-        phylo_options.tree.collapse_under.collapsed = false;
-        phylo_options.tree.collapse_under.terminated = true;
+    if (phylo_options.tree.collapse_under.length > 0) {
+        for (var n in phylo_options.tree.collapse_under) {
+            phylo_options.tree.collapse_under[n].collapsed = false;
+            phylo_options.tree.collapse_under[n].terminated = true;
+        }
     }
 
     draw_phylo_nodes(phylo_options, false);
@@ -875,6 +879,7 @@ var make_child = function (node, left, id) {
     child.name = node.name;
     child.y = node.y;
     child.x = node.x;
+    child.collapsed = node.collapsed;
     child.terminated = node.terminated;
     if (node.children == undefined) {
         child.extent = true;
@@ -1295,15 +1300,23 @@ var context_menu_action = function (call, node_fill, node_id) {
         displayJointGraph(call.attr("id"), node_fill, false);
     } else if (call_type == "Expand subtree") {
         var node = phylo_options.tree.node_dict[node_id];
-        set_children_un_collapsed(phylo_options.tree.collapse_under);
-        phylo_options.tree.collapse_under.terminated = false;
-        phylo_options.tree.collapse_under = null;
+        set_children_un_collapsed(node);
+        node.terminated = false;
+        var ind = phylo_options.tree.collapse_under.indexOf(node);
+        if (ind == -1) {
+            return;
+        }
+        phylo_options.tree.collapse_under.splice(ind,1);
         refresh_tree();
     } else if (call_type == "Collapse subtree") {
         var node = phylo_options.tree.node_dict[node_id];
+        if (phylo_options.tree.collapse_under.indexOf(node) > -1) {
+            return; // already collapsed
+        }
         node.terminated = true;
-        phylo_options.tree.collapse_under = node;
-        set_children_collapsed(phylo_options.tree.collapse_under);
+        set_children_collapsed(node);
+        node.collapsed = false;
+        phylo_options.tree.collapse_under.push(node);
         refresh_tree();
     } else {
         select_node(call.attr("id"));
@@ -1328,8 +1341,11 @@ var set_children_collapsed = function (node) {
  * Sets all the children of a node back to being not collapsed.
  */
 var set_children_un_collapsed = function (node) {
-    node.collapsed = false;  // TODO: this errors on multiple collapsed nodes...
+    node.collapsed = false;
     for (var n in node.children) {
+        if (node.children[n].terminated) {
+            return;
+        }
         set_children_un_collapsed(node.children[n]);
     }
 }

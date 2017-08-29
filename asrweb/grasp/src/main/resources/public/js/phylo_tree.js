@@ -56,6 +56,7 @@ var phylo_options = {
         root_node_fill: "black",
         extent_fill: "white",
         hover_fill: "#D77DE3",
+
         // --------------- Strokes ------------------//
         stroke: "#7F74F3",
         under_stroke: "white",
@@ -81,6 +82,9 @@ var phylo_options = {
          * it will be shaded based on how "far" the node is from the root
          */
         select_colour: "#EA78F5",
+        stacked_colour: "orange",            // colour for when a node appears in the poag stack
+        collapsed_colour: "black",           // colour for when a node is collapsed
+        collapsed_symbol: "triangle-down",   // symbol of tree node when sub-tree is collapsed
     }
 }
 
@@ -213,6 +217,25 @@ var resize_phylo_height = function() {
  */
 var draw_phylo_circle = function (group, node, n) {
     var options = phylo_options.style;
+    group.append("path")
+        .attr("id", "path-"+node.id)
+        .attr("class", function() {
+            if (node.terminated) {
+                return "collapsed-node";
+            } else {
+                return "uncollapsed-node";
+            }
+        })
+        .attr("d", d3.svg.symbol().type(options.collapsed_symbol).size(70))
+        .attr("transform", function(d) {return "translate(" + node.x + "," + node.y + ")";})
+        .style("fill", options.collapsed_colour)
+        .style("opacity", function () {
+            if (node.terminated) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
 
     group.append("circle")
         .attr("id", node.id)
@@ -249,7 +272,7 @@ var draw_phylo_circle = function (group, node, n) {
         })  
         .attr("stroke", options.stroke)
         .attr("opacity",function() {
-            if (node.extent) {
+            if (node.extent || node.terminated) {
                 return 0;
             } else {
                 return options.opacity;
@@ -275,6 +298,7 @@ var draw_phylo_circle = function (group, node, n) {
                 menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill, node_id);
             }
         });
+
 }
 
 /**
@@ -423,6 +447,7 @@ var on_node_mouseover = function (node_selected) {
         d3.select("#text-" + node_selected.attr("id")).attr("opacity", 1);
     }
     if (!view_node_labels && node_selected.attr("class") == "node"){
+        d3.select("#path-" + node_selected.attr("id")).style("opacity", 0);
         node_selected.attr("r", options.hover_radius);
         node_selected.attr("fill", options.hover_fill);
         node_selected.attr("opacity", 0.2);
@@ -444,6 +469,7 @@ var on_node_mouseout = function (node_selected) {
     if (node_selected.attr("class") == "extent") {
         d3.select("#text-" + node_selected.attr("id")).attr("opacity", phylo_options.style.extant_label_opacity);
     }
+    var terminated = d3.select("#path-" + node_selected.attr("id")).attr("class") == "collapsed-node";
     if (!view_node_labels && node_selected.attr("class") == "node") {
         node_selected.attr("r", options.node_radius);
         d3.select("#circle-" + node_selected.attr("id")).attr("r", options.node_radius * options.under_node_multiplier);
@@ -453,10 +479,17 @@ var on_node_mouseout = function (node_selected) {
         } else {
              node_selected.attr("fill", phylo_options.legend.colour_scale(y));
         }
-        node_selected.attr("opacity", 1);
-        node_selected.attr("stroke-width", options.stroke_width);
+        if (!terminated) {
+            // draw circle
+            node_selected.attr("opacity", 1);
+            node_selected.attr("stroke-width", options.stroke_width);
+        } else {
+            // draw collapsed symbol
+            d3.select("#path-" + node_selected.attr("id")).style("opacity", 1);
+        }
         d3.select("#text-" + node_selected.attr("id")).attr("opacity", 0);
     }
+
 }
 
 
@@ -634,6 +667,7 @@ var set_phylo_params = function (tree_div, tree_string) {
 
 var clear_svg = function () {
     var group = phylo_options.group;
+    group.selectAll("path").remove();
     group.selectAll("line").remove();
     group.selectAll("text").remove();
     group.selectAll("rect").remove();
@@ -722,7 +756,6 @@ var run_phylo_tree = function () {
  *  Redraw the tree structure stored in phylo_options.tree
  */
 var redraw_phylo_tree = function() {
-    console.log("redraw  tree");
     var options = phylo_options;
     var root = phylo_options.tree.root;
 
@@ -773,6 +806,7 @@ var redraw_phylo_tree = function() {
 
     if (phylo_options.tree.collapse_under != null) {
         phylo_options.tree.collapse_under.collapsed = false;
+        phylo_options.tree.collapse_under.terminated = true;
     }
 
     draw_phylo_nodes(phylo_options, false);
@@ -787,7 +821,6 @@ var redraw_phylo_tree = function() {
 var assign_inner_x_coords = function (node, phylo_options) {
     /* Assign the x coords based on that of the children*/
     node.raw_x = (node.children[0].raw_x + node.children[node.children.length - 1].raw_x) / 2;
-    console.log(node.id + " : " + node.raw_x);
     if (node.parent != undefined) {
         assign_inner_x_coords(node.parent, phylo_options);
     }
@@ -809,7 +842,6 @@ var assign_leaf_x_coords = function (node, phylo_options) {
     /* This is a leaf (or terminating node) so assign the current x count */
     if (node.children == undefined || node.terminated == true) {
         node.raw_x = phylo_options.leaf_count;
-        console.log(node.id + " : " + node.raw_x);
         phylo_options.leaf_count += 1;
         /* Add one of the children to the leaf node array so
          * we traverse up from only half the nodes when assigning
@@ -843,6 +875,7 @@ var make_child = function (node, left, id) {
     child.name = node.name;
     child.y = node.y;
     child.x = node.x;
+    child.terminated = node.terminated;
     if (node.children == undefined) {
         child.extent = true;
     } else {
@@ -1295,7 +1328,7 @@ var set_children_collapsed = function (node) {
  * Sets all the children of a node back to being not collapsed.
  */
 var set_children_un_collapsed = function (node) {
-    node.collapsed = false;
+    node.collapsed = false;  // TODO: this errors on multiple collapsed nodes...
     for (var n in node.children) {
         set_children_un_collapsed(node.children[n]);
     }

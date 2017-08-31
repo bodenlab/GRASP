@@ -10,17 +10,17 @@
                     <div class="input-group col-sm-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
                         <input type="text" class="form-control col-xs-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
                         <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
-                            <button type="submit" name="test" class="btn btn-default">Run Test Data</button>
+                            <button type="submit" name="test" class="btn btn-default"><small>Run Test Data</small></button>
                         </span>
                     </div>
                     <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-sm-7">
+                <div class="form-group row col-sm-offset-1 col-sm-6">
                     <div class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." >
                         <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200"  data-off-text="No" data-on-text="Yes" />
                     </div>
                 </div>
-                <div class="row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom">
+                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom" style="padding-bottom:0px;">
                     <div class="form-group row col-xs-12">
                         <div class="input-group col-xs-12" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
                             <label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">
@@ -85,7 +85,38 @@
                         <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
                     </div>
                 </div>
-                <div class="form-group row col-sm-offset-2 col-sm-7">
+                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6" style="padding-left: 0px; padding-right:25px; ">
+                    <div class="input-group col-xs-12 no-padding">
+                        <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Select the evolutionary model for inferring amino acid characters.">
+                            <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span id="selected-model">JTT</span> | <small>Select other evolutionary model...</small> <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a id="jtt" onclick="update_model('jtt')">JTT <span id="jtt-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="dayhoff" onclick="update_model('dayhoff')">Dayhoff <span id="dayhoff-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="lg" onclick="update_model('lg')">LG <span id="lg-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="wag" onclick="update_model('wag')">WAG <span id="wag-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            </ul>
+                            <input type="hidden" th:value="joint" th:field="*{model}" class="model" />
+                            <script type="text/javascript">
+                                    /*<![CDATA[*/
+                                    var update_model = function(model) {
+                                        var glyphs = document.querySelectorAll(".glyph-selected");
+                                        for (var i = 0; i < glyphs.length; i++) {
+                                            if (!glyphs[i].classList.contains('disable')) {
+                                                glyphs[i].classList.add('disable');
+                                            }
+                                        }
+                                        document.querySelector("#" + model + "-selected").classList.remove('disable');
+                                        document.getElementById("selected-model").textContent = document.getElementById(model).textContent;
+                                        $('#model').val(model);
+                                    };
+                                    /*]]>*/
+                    </script>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row col-sm-offset-1 col-sm-6">
                     <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction." >
                         <input id="check-infer" type="checkbox" data-size="small" data-label-text="Initial reconstruction" data-label-width="300" data-handle-width="200" data-off-text="Joint" data-off-color="primary" data-on-text="Marginal (root)" />
                     </div>
@@ -103,7 +134,7 @@
                                     /*]]>*/
                     </script>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" id="submit-btn">Perform Reconstruction</button></div>
+                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn">Perform Reconstruction</button></div>
                 <div class="row col-sm-offset-1 col-sm-8 alert alert-warning disable" role="alert" id="warning"><label> This library may take some time to reconstruct... </label></div>
             </form>
         </div>

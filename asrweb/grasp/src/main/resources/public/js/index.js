@@ -128,6 +128,7 @@ var poag_options = {
         stroke_width: "3px",
         font_size: "20px",
         font_family: "Gill Sans, sans-serif",
+        node_position_colour: "#AAA",
     },
     mutants: {
         count: 0,
@@ -1468,7 +1469,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .attr("stroke-width", options.node.stroke_width)
                 .style("font-family", options.style.font_family)
                 .style("font-size", options.style.font_size)
-                .attr("stroke", "black")
+                .attr("stroke", options.style.node_position_colour)
                 .text(function() {
                     var spacing = Math.floor((poags.cur_x_max - poags.cur_x_min)/10);
                     if (poags.node_radius > options.node.min_radius || node.id % spacing == 0) {

@@ -145,8 +145,9 @@ $('#btn-mutant-down').on('click', function () {
 				$(document).ready(function () {
 				    	var json_str = /*[[${graph}]]*/;
                         var label = /*[[${label}]]*/;
+                        var inf = /*[[${inferenceType}]]*/;
                         var recon = /*[[${tree}]]*/;
-					    run_asr_app(json_str, recon, label);
+					    run_asr_app(json_str, recon, label, inf);
 				});
                                 /*]]>*/
                     </script>

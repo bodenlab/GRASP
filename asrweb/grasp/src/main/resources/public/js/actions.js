@@ -6,7 +6,7 @@
  *  ------------------------------------------------------------------
  */
 
-var run_asr_app = function(json_str, recon, label) {
+var run_asr_app = function(json_str, recon, label, inf) {
 
     /**
      * Run POAG setup
@@ -27,6 +27,7 @@ var run_asr_app = function(json_str, recon, label) {
      * Run Tree setup
      */
     set_recon_label(label);
+    set_inf_type(inf);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
     refresh_tree(); // to set height properly

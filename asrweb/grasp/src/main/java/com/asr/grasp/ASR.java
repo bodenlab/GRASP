@@ -112,6 +112,7 @@ public class ASR {
      * Run joint reconstruction using uploaded files and specified options
      */
     private void runReconstructionJoint() throws Exception {
+        System.out.println(model);
         asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, false, model, NUM_THREADS);
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
     }

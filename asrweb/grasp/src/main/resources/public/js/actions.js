@@ -86,10 +86,9 @@ var save_poag_svg_to_png = function () {
     var width = poag_options.style.width;
     var height = poag_options.style.height;
     svgString2Image(svgString, 2 * width, 2 * height, 'png', save); // passes Blob and filesize String to the callback
-
     function save(dataBlob, filesize) {
-        saveAs(dataBlob, 'D3 vis exported to PNG.png'); // FileSaver.js function
-    }
+        saveAs(dataBlob, document.querySelector("#recon-label").textContent.slice(2) + '_graph.png');
+    } // FileSaver.js function    }
 };
 // Set-up the export button
 var save_phylo_svg_to_png = function () {
@@ -99,7 +98,7 @@ var save_phylo_svg_to_png = function () {
     svgString2Image(svgString, 2 * width, 2 * height, 'png', save); // passes Blob and filesize String to the callback
 
     function save(dataBlob, filesize) {
-        saveAs(dataBlob, 'D3 vis exported to PNG.png'); // FileSaver.js function
+        saveAs(dataBlob, document.querySelector("#recon-label").textContent.slice(2) + '_tree.png');
     }
 };
 // Below are the functions that handle actual exporting:

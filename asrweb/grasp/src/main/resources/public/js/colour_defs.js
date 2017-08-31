@@ -78,11 +78,11 @@ var cinema_colours = {
 'N': "#6AFB92",
 'Q': "#6AFB92",
 /*white*/
-'A':"#FEFCFF",
-'V':"#FEFCFF",
-'L':"#FEFCFF",
-'I':"#FEFCFF",
-'M':"#FEFCFF",
+'A':"#f7fafc",
+'V':"#f7fafc",
+'L':"#f7fafc",
+'I':"#f7fafc",
+'M':"#f7fafc",
 /*magenta*/
 'F': "#F778A1",
 'W': "#F778A1",

@@ -105,6 +105,7 @@ var poag_options = {
         text_padding: 10,
     },
     display: {
+        view_node_ids: true,    // view the node IDs under the MSA nodes
         margin_between_single_multi: 80,
         no_colour: "#f6f2f7",
         colours: clustal_colours,
@@ -161,8 +162,9 @@ var poag_options = {
         font_size: "18px",
         text_padding: 5,
         gradient: false,
-        min_radius: 5,
+        min_radius: 15,
         max_radius: 40,
+        position_label_padding: 50,
     },
     /**************** Options for style of the edges between nodes **********************/
     edge: {
@@ -1031,7 +1033,7 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
                 .attr("text-anchor", "middle")
                 .attr("stroke-width", node_opt.stroke_width)
                 .style("font-family", poags.options.style.font_family)
-                .style("font-size", poags.options.style.text_size)
+                .style("font-size", poags.options.style.font_size)
                 .attr("stroke", function () {
                     return getNodeTextColour(poags.options.display.colours[(node.label)]);
                 })
@@ -1331,7 +1333,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
             })
             .attr("text-anchor", "start")
             .style("font-family", poags.options.style.font_family)
-            .style("font-size", poags.options.style.text_size)
+            .style("font-size", poags.options.style.font_size)
             .attr("stroke", function () {
                 return getNodeTextColour(poags.options.display.colours[(node.label)]);
             })
@@ -1392,6 +1394,15 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
         radius += 10;
     }
 
+    var max = 0;
+    var lbl = "";
+    for (var d in pie_data) {
+        if (pie_data[d].value > max){
+            lbl = pie_data[d].label;
+            max = pie_data[d].value;
+        }
+    }
+
     var arc = pie_group.selectAll(".arc")
             .data(pie(pie_data))
             .enter().append("g")
@@ -1424,31 +1435,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
             });
 
     // Don't want to append text if it is smaller than the min radius
-    if (radius > options.node.min_radius && node.seq.chars.length > 1) {
-        //array to store labels already added
-        var labelsAdded = [];
-        arc.append("text")
-                .attr("class", "poag")
-                .attr("transform", function (d) {
-                    return "translate(" + label_pie.centroid(d) + ")";
-                })
-                .style("fill", function (d) {
-                    return getNodeTextColour(options.display.colours[(d.data.label)]);
-                })
-                .attr("stroke-width", options.node.stroke_width)
-                .style("font-family", options.style.font_family)
-                .style("font-size", options.style.text_size)
-                .attr("dy", "0.35em")
-                .attr("text-anchor", "middle")
-                .text(function (d) {
-                    if (d.data.label != "0" && labelsAdded.indexOf(d.data.label) == -1) {
-                        labelsAdded.push(d.data.label);
-                        return d.data.label;
-                    } else {
-                        return "";
-                    }
-                });
-    } else {
+    if (poags.node_radius > options.node.min_radius){
         //Appending single big label to node if in consensus
         group.append("text")
                 .attr("class", "poag")
@@ -1461,11 +1448,34 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .attr("text-anchor", "middle")
                 .attr("stroke-width", options.node.stroke_width)
                 .style("font-family", options.style.font_family)
-                .style("font-size", options.style.text_size)
+                .style("font-size", options.style.font_size)
                 .attr("stroke", function () {
                     return getNodeTextColour(options.display.colours[(node.label)]);
                 })
-                .text(node.label);
+                .text(lbl);
+    }
+
+    if (node.name == "MSA") {
+         group.append("text")
+                .attr("class", "poag")
+                .attr("id", "idtext-" + node.unique_id)
+                .attr('x', node_cx)
+                .attr('y', function () {
+                    var tmp = node_cy + 3*options.node.text_padding + options.node.position_label_padding;
+                    return tmp;
+                })
+                .attr("text-anchor", "middle")
+                .attr("stroke-width", options.node.stroke_width)
+                .style("font-family", options.style.font_family)
+                .style("font-size", options.style.font_size)
+                .attr("stroke", "black")
+                .text(function() {
+                    var spacing = Math.floor((poags.cur_x_max - poags.cur_x_min)/10);
+                    if (poags.node_radius > options.node.min_radius || node.id % spacing == 0) {
+                        return node.id;
+                    }
+                    return "";
+                });
     }
 }
 

@@ -946,7 +946,8 @@ var setup_poag_svg = function (poags, set_msa) {
             .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
 
     var merged_group = merged_svg.append('g')
-            .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+            .attr('transform', 'translate(' + margin.left / 2 + ',' + margin.left / 2 + ')');
+
 
     poags.merged_group = merged_group;
     poags.groups.merged = merged_group;

@@ -58,6 +58,11 @@ text {
     margin-top: 5px;
 }
 
+#poag-msa, #poag-merged {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 #poag-all {
     height: 550px;
     overflow: auto;

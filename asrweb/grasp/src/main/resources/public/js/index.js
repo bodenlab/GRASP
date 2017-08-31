@@ -23,6 +23,7 @@ var poags = {
     max_x: 0,
     min_y: 1000,
     max_y: 0,
+    node_radius: 0, // radius of the nodes in the current view (will be updated on draw)
     // Current x coords visible in the window frame
     cur_x_max: 100,
     cur_x_min: 0,
@@ -44,7 +45,7 @@ var poags = {
         edges: {},
         raw: {},
         class_name: 'single-',
-        height: 250,
+        height: 400,
         margin: {left: 0, right: 0, top: 150, bottom: 0}
     },
     multi: {
@@ -104,14 +105,14 @@ var poag_options = {
         text_padding: 10,
     },
     display: {
-        margin_between_single_multi: 50,
+        margin_between_single_multi: 80,
         no_colour: "#f6f2f7",
         colours: clustal_colours,
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
         interesting_many_edges_colour: "Crimson",
         diff_colour: "black",
         diff_opacity: 0.3,
-        num_start_nodes: 10, // How many nodes that it starts with
+        num_start_nodes: 20, // How many nodes that it starts with
     },
     style: {
         /******** Options for Sizing *****************************************/
@@ -165,13 +166,14 @@ var poag_options = {
     },
     /**************** Options for style of the edges between nodes **********************/
     edge: {
-        y_curve_amount: 30,
-        stroke_width: 3,
+        y_curve_amount: 5,
+        stroke_width: 2,
         consensus_stroke_width: 6,
         single_seq_dash: 5,
-        stroke: "grey",
+        stroke: "#BBB",
         consensus_stroke: "black",
-        opacity: 0.5,
+        reciprocated_stroke: "#111",
+        opacity: 0.8,
         stroke_opacity: 1,
         x_length: 160,
         font_color: "grey",
@@ -759,6 +761,7 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge.to = poags.node_dict[name + '-' + edge.to]
 
         reduced_edge.consensus = edge.consensus;
+        reduced_edge.reciprocated = edge.reciprocated;
         reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
 
@@ -864,7 +867,7 @@ var setup_poag_svg = function (poags, set_msa) {
 
     // Calculate the total height of the SVG element based
     // on the number of POAGs which are to be displayed.
-    var single_height = poags.single.names.length * (poags.single.height) + 50;
+    var single_height = poags.single.names.length * (poags.single.height);
     var multi_height = poags.multi.names.length*(poags.multi.height + poag_options.display.margin_between_single_multi);
     var mini_height = options.mini.height + options.mini.margin.top + options.mini.margin.bottom;
     var height = single_height + multi_height + mini_height + margin.top;
@@ -1000,6 +1003,8 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
     if (radius > node_opt.max_radius) {
         radius = node_opt.max_radius;
     }
+
+    poags.node_radius = radius;
 
     group.append('circle')
             .attr("class", 'poag')
@@ -1162,7 +1167,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
     y_mid = y_start - ((y_start - y_end) / 2);
 
     // If y start and y end are the same we want a nice curve
-    var y_jump_buffer = same_level_buffer * x_diff;
+    var y_jump_buffer = same_level_buffer * x_diff + poags.node_radius + 10;
 
     line_points.push(combine_points(x_start, y_start));
 
@@ -1193,11 +1198,13 @@ var draw_edges = function (poags, edge, group, scale_y) {
     // if not the consensus, then identify whether a single sequence on the edge or not
     var stroke_width = edge_opt.stroke_width;
     var stroke = edge_opt.stroke;
+    if (edge.reciprocated) {
+        stroke = edge_opt.reciprocated_stroke;
+    }
     if (edge.consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
-        stroke = edge_opt.consensus_stroke;
+     //   stroke = edge_opt.consensus_stroke;
     }
-
     group.append("path")
             .attr("d", line_function(line_points))
             .attr("class", 'poag')

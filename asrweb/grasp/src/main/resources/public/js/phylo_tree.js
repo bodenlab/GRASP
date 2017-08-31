@@ -570,35 +570,12 @@ var toggle_node_text = function () {
 var toggle_additive = function () {
     var additive = document.getElementById('additive-toggle').innerHTML.split(" | ")[1];
     if (additive == "Additive") {
-        clear_svg();
-        phylo_options.tree.additive = false;
-        run_phylo_tree(); // TODO: refresh? (not run)
         document.getElementById('additive-toggle').innerHTML = "View tree type | Cladogram";
     } else {
-        clear_svg();
-        phylo_options.tree.additive = true;
-        run_phylo_tree();
         document.getElementById('additive-toggle').innerHTML = "View tree type | Additive";
     }
-    // check labels
-    if (document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1] == "ON") {
-        phylo_options.svg.selectAll('text.branch-text').attr("opacity", 1);
-    } else {
-        phylo_options.svg.selectAll('text.branch-text').attr("opacity", 0);
-    }
-    if (document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON") {
-        phylo_options.svg.selectAll('text.extent').each(function () {
-            $(this).attr("opacity", 1);
-        });
-    }
-    if (document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON") {
-        phylo_options.svg.selectAll('circle.node').each(function () {
-            $(this).attr("opacity", 0);
-        });
-        phylo_options.svg.selectAll('text.node').each(function () {
-            $(this).attr("opacity", 1);
-        });
-    }
+    clear_svg();
+    refresh_tree();
 }
 
 var toggle_extant_text = function() {
@@ -1622,6 +1599,8 @@ var fix_subtrees = function (left, right) {
 var refresh_tree = function () {
     if (document.getElementById('additive-toggle').innerHTML.split(" | ")[1] != "Additive") {
         phylo_options.tree.additive = false;
+    } else {
+        phylo_options.tree.additive = true;
     }
     phylo_options.svg_info.width = window.innerWidth - 200;
     resize_phylo_height();

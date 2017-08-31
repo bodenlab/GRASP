@@ -41,17 +41,6 @@ var run_asr_app = function(json_str, recon, label) {
     poags.retain_previous_position = true;
 }
 
-/**
- * Keep the MSA and the infferd at the top of the page 
- * i.e. ignore the scroll.
- * 
- */
-//document.getElementById("poag-content").addEventListener('scroll', function(evt) {
-//    // For the MSA POAG we want to stick it to the top
-//    var group = poags.groups.single[poags.single.names[0]];
-//    group.node().setAttribute('y', 10 + this.scrollTop);
-//}, false)
-
 
 /**
  *  ------------------------------------------------------------------------
@@ -82,14 +71,6 @@ var update_colour = function (value) {
     poags.options.colours = colour_schemes[value];
     poags.options.display.colours = colour_schemes[value];
     poags.options.graph.colours = colour_schemes[value];
-    //selected_colour = colour_schemes[value];
-
-    //if (value == "cinema") {
-    //    poags.options.pie.stroke = "grey";
-    //} else {
-    //    poags.options.pie.stroke = "white";
-    //}
-
     redraw_poags();
 }
 /**

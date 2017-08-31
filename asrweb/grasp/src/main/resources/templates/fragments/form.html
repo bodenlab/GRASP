@@ -10,14 +10,14 @@
                     <div class="input-group col-sm-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
                         <input type="text" class="form-control col-xs-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
                         <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
-                            <button type="submit" name="test" class="btn btn-default"><small>Run Test Data</small></button>
+                            <button type="submit" name="test" class="btn btn-default"><small>Run test data</small></button>
                         </span>
                     </div>
                     <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
                 <div class="form-group row col-sm-offset-1 col-sm-6">
                     <div class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." >
-                        <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200"  data-off-text="No" data-on-text="Yes" />
+                        <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200" data-on-color="default" data-off-text="No" data-on-text="Yes" />
                     </div>
                 </div>
                 <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom" style="padding-bottom:0px;">
@@ -118,7 +118,7 @@
                 </div>
                 <div class="form-group row col-sm-offset-1 col-sm-6">
                     <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction." >
-                        <input id="check-infer" type="checkbox" data-size="small" data-label-text="Initial reconstruction" data-label-width="300" data-handle-width="200" data-off-text="Joint" data-off-color="primary" data-on-text="Marginal (root)" />
+                        <input id="check-infer" type="checkbox" data-size="small" data-label-text="Initial reconstruction" data-label-width="300" data-handle-width="200" data-off-text="Joint" data-on-color="default" data-on-text="Marginal (root)" />
                     </div>
                     <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
                     <script type="text/javascript">
@@ -134,7 +134,7 @@
                                     /*]]>*/
                     </script>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn">Perform Reconstruction</button></div>
+                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn">Perform reconstruction</button></div>
                 <div class="row col-sm-offset-1 col-sm-8 alert alert-warning disable" role="alert" id="warning"><label> This library may take some time to reconstruct... </label></div>
             </form>
         </div>

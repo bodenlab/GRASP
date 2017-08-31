@@ -46,6 +46,8 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
     if (reset_graphs == false && inferType == "marginal") {
         reset_graphs = true;
         selectedNode = node_name;
+        select_node(selectedNode);
+        refresh_tree();
     }
     // check if we are adding a joint reconstruction, and if so, only add if it hasn't already been added
     if (!reset_graphs) {

@@ -1911,6 +1911,9 @@ function fuse_edges(edge1Info, edge2Info, metadata1, metadata2) {
         "from": edge1Info.from, "x2": edge1Info.x2,
         "to": edge1Info.to};
 
+    newEdge.consensus = edge1Info.consensus || edge2Info.consensus;
+    newEdge.reciprocated = edge1Info.reciprocated || edge2Info.reciprocated;
+
     //making y1 for new edge be equal to edge with largest y1
     if (edge1Info.y1 > edge2Info.y1) {
         newEdge.y1 = edge1Info.y1;

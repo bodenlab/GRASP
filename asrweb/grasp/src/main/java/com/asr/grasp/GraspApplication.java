@@ -36,6 +36,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	//final String sessionPath = "/home/ariane/Documents/bodenlab/data/WebSessions";
 	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	//final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;

@@ -596,6 +596,10 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
     poags = process_poag_data(poags, data.bottom, name, inferred, merged);
     poags = process_edges(poags, data.bottom, name, inferred, merged);
 
+    if (poags.single.nodes[poags.root_poag_name].length < poags.options.display.num_start_nodes) {
+        poags.options.display.num_start_nodes = Math.floor(poags.single.nodes[poags.root_poag_name].length*0.8);
+    }
+
     return poags;
 }
 
@@ -708,6 +712,17 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         var msa_node = poags.node_dict[root_name + '-' + node.id]
         node.name = name;
         node.mutant = false;
+        // if x positions are not the same, change to be the same, and find the node
+        // with the current msa_node.x and swap co-ordinates
+        if (node.x != msa_node.x) {
+            for (var on in raw_poag.nodes) {
+                if (raw_poag.nodes[on].x == msa_node.x) {
+                    raw_poag.nodes[on].x = node.x;
+                    break;
+                }
+            }
+            node.x = msa_node.x;
+        }
         node.type = raw_poag.metadata.type;
         node.unique_id = name + '-' + node.id;
         poags = update_min_max(node.x, node.y, poags);

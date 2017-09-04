@@ -257,6 +257,7 @@ public class ASR {
         else
             graph = asrMarginal.getGraph(nodeLabel);
         POAGJson json = new POAGJson(graph);
+        // make sure node IDs line up with the correct positioning in the MSA graph
         return json.toJSON();
     }
 

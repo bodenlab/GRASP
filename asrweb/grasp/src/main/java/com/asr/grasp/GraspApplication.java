@@ -62,7 +62,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return index with results as attributes in the model
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = "submitAsr")
-	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) {
+	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) throws Exception {
 		this.asr = asrForm;
 
 		model.addAttribute("label", asr.getLabel());
@@ -74,15 +74,22 @@ public class GraspApplication extends SpringBootServletInitializer {
 		}
 
 		// upload supplied files
-		try {
+		//try {
 			File sessionDir = new File(sessionPath + sessionId);
 			if (!sessionDir.exists())
 				sessionDir.mkdir();
 
 			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
 
-			asr.getAlnFile().transferTo(new File(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename()));
-			asr.setAlnFilepath(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename());
+			if (asr.getSeqFile() != null) {
+				asr.getSeqFile().transferTo(new File(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename()));
+				asr.setAlnFilepath(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename());
+				asr.setPerformAlignment(true);
+			}
+			if (asr.getAlnFile() != null) {
+				asr.getAlnFile().transferTo(new File(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename()));
+				asr.setAlnFilepath(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename());
+			}
 			asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
 			asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
 
@@ -97,12 +104,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 			model.addAttribute("graph", graphs);
 
-		} catch (Exception e) {
+		/*} catch (Exception e) {
 			model.addAttribute("error", true);
 			model.addAttribute("errorMessage", e.getMessage());
 			System.out.println("Error: " + e.getMessage());
 			return "index";
-		}
+		}*/
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
 		model.addAttribute("inferenceType", asr.getInferenceType());

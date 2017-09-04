@@ -30,8 +30,8 @@ public class ASR {
 
     private String label = "Grasp";
 
-    @File(type="aln", message="File must be an alignment (*.aln)")
-    private MultipartFile alnFile;
+    //@File(type="aln", message="File must be an alignment (*.aln)")
+    private MultipartFile alnFile = null;
 
     private String alnFilepath;
 
@@ -113,7 +113,7 @@ public class ASR {
      */
     private void runReconstructionJoint() throws Exception {
         System.out.println(model);
-        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, false, model, NUM_THREADS);
+        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, performAlignment, model, NUM_THREADS);
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -122,9 +122,9 @@ public class ASR {
      */
     private void runReconstructionMarginal() throws Exception {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
-            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, false, model, NUM_THREADS);
+            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, performAlignment, model, NUM_THREADS);
         else
-            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, false, model, NUM_THREADS);
+            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, performAlignment, model, NUM_THREADS);
         asrMarginal.saveTree(sessionDir + label + "_recon.nwk");
     }
 

@@ -258,7 +258,6 @@ var setup_poags = function (json_str, set_inferred, set_msa, set_merged, name) {
         poags.single.names[1] = name;
         poag_options.names_to_colour[name] = "#C83AFE";
     }
-    console.log(json_str);
     //poags.svg.selectAll("*").remove();
     // Process_data
     poags = process_poags(json_str, poags, set_inferred, set_msa, set_merged, name);

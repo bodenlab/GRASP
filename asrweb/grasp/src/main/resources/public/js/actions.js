@@ -60,7 +60,22 @@ var update_scheme = function (scheme) {
     update_colour(scheme);
 }
 
-
+/**
+ * ----------------------------------------------------------------------------
+ *                      Reset the POAG stack
+ *
+ * ----------------------------------------------------------------------------
+*/
+var reset_poag_stack = function () {
+    document.getElementById('reset-button').disabled = true;
+    for (var n in phylo_options.tree.all_nodes) {
+        var node = phylo_options.tree.all_nodes[n];
+        d3.select('#fill-' + node.id).attr("stroke", phylo_options.legend.colour_scale(node.y));
+    }
+    var cur_node = phylo_options.tree.selected_node;
+    d3.select('#fill-' + cur_node.id).attr("stroke", phylo_options.style.select_colour);
+    displayJointGraph(cur_node.name, phylo_options.legend.colour_scale(cur_node.y), true);
+}
 
 /**
  * ----------------------------------------------------------------------------
@@ -92,10 +107,11 @@ var save_poag_svg_to_png = function () {
 };
 // Set-up the export button
 var save_phylo_svg_to_png = function () {
+    var width = $("#phylo-tree").width();
+    var height = $("#phylo-tree").height();
+    phylo_options.svg.attr("width", $("#phylo-tree").width());
     var svgString = getSVGString(phylo_options.svg.node());
-    var width = phylo_options.svg_info.width;
-    var height = phylo_options.svg_info.height;
-    svgString2Image(svgString, 2 * width, 2 * height, 'png', save); // passes Blob and filesize String to the callback
+    svgString2Image(svgString, 2*width, 2*height, 'png', save); // passes Blob and filesize String to the callback
 
     function save(dataBlob, filesize) {
         saveAs(dataBlob, document.querySelector("#recon-label").textContent.slice(2) + '_tree.png');

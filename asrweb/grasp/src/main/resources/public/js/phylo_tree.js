@@ -82,7 +82,7 @@ var phylo_options = {
          * it will be shaded based on how "far" the node is from the root
          */
         select_colour: "#EA78F5",
-        stacked_colour: "orange",            // colour for when a node appears in the poag stack
+        stacked_colour: "#EA78F5",           // colour for when a node appears in the poag stack
         collapsed_colour: "black",           // colour for when a node is collapsed
         collapsed_symbol: "triangle-down",   // symbol of tree node when sub-tree is collapsed
     }
@@ -180,9 +180,9 @@ var setup_phylo_svg = function (phylo_options) {
     var width = poags.options.style.width;
 
     var svg = d3.select(options.div_id).append("svg")
-            .attr("width", width + options.margin.left + options.margin.right)
+            .attr("width", "100%")//width + options.margin.left + options.margin.right)
             .attr("height", options.height + options.margin.top + options.margin.bottom);
-
+    phylo_options.svg_info.width = width + options.margin.left + options.margin.right;
     phylo_options.svg_info.height = options.height + options.margin.top + options.margin.bottom;
     phylo_options.svg = svg;
 
@@ -238,7 +238,7 @@ var draw_phylo_circle = function (group, node, n) {
         });
 
     group.append("circle")
-        .attr("id", node.id)
+        .attr("id", "fill-" + node.id)
         .attr("name", node.name)
         .attr("class", function() {
             if (node.extent) {
@@ -270,7 +270,20 @@ var draw_phylo_circle = function (group, node, n) {
                 return phylo_options.legend.colour_scale(node.y);
             } 
         })  
-        .attr("stroke", options.stroke)
+        .attr("stroke", function(d) {
+            if (node.name === phylo_options.tree.selected_node.name) {
+                return options.select_colour;
+            }
+            if (poags.multi.names.includes(node.name.split("_")[0])) {
+                return options.stacked_colour;
+            }
+            if (node.root_node) {
+                return options.root_node_fill;
+            }
+            else {
+                return phylo_options.legend.colour_scale(node.y);
+            }
+        })
         .attr("opacity",function() {
             if (node.extent || node.terminated) {
                 return 0;
@@ -290,8 +303,9 @@ var draw_phylo_circle = function (group, node, n) {
             on_node_mouseout(node_selected);
         })
         .on("contextmenu", function() {
-            var node_name = d3.select("#text-" + d3.select(this).attr("id")).attr("name");
-            var node_id = d3.select(this).attr("id");
+            var id = d3.select(this).attr("id").split("fill-")[1];
+            var node_name = d3.select("#text-" + id).attr("name");
+            var node_id = id;
             var node_fill = phylo_options.legend.colour_scale(node.y);
             d3.event.preventDefault();
             if (!node.extent){
@@ -442,18 +456,24 @@ var draw_phylo_nodes = function (phylo_options, initial) {
  */
 var on_node_mouseover = function (node_selected) {
     var options = phylo_options.style;
+    var id = node_selected.attr("id").split("fill-")[1];
     var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
     var view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON";
     if (node_selected.attr("class") == "extent") {
-        d3.select("#text-" + node_selected.attr("id")).attr("opacity", view_extant_labels ? options.extant_label_opacity : 1);
+        d3.select("#text-" + id).attr("opacity", view_extant_labels ? options.extant_label_opacity : 1);
     }
     if (!view_node_labels && node_selected.attr("class") == "node"){
-        d3.select("#path-" + node_selected.attr("id")).style("opacity", 0);
+        d3.select("#path-" + id).style("opacity", 0);
         node_selected.attr("r", options.hover_radius);
-        node_selected.attr("fill", options.hover_fill);
+        var y = d3.select("#circle-" + id).attr("cy");
+        if (node_selected.attr("name") == phylo_options.tree.selected_node.name) {
+            node_selected.attr("fill", phylo_options.style.select_colour);
+        } else {
+            node_selected.attr("fill", phylo_options.legend.colour_scale(y));
+        }
         node_selected.attr("opacity", 0.2);
         node_selected.attr("stroke-width", "0px");
-        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 1);
+        d3.select("#text-" + id).attr("opacity", 1);
     }
 }
 
@@ -466,16 +486,17 @@ var on_node_mouseover = function (node_selected) {
  */
 var on_node_mouseout = function (node_selected) {
     var options = phylo_options.style;
+    var id = node_selected.attr("id").split("fill-")[1];
     var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
     var view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] == "ON";
     if (node_selected.attr("class") == "extent") {
-        d3.select("#text-" + node_selected.attr("id")).attr("opacity", view_extant_labels ? 1: options.extant_label_opacity);
+        d3.select("#text-" + id).attr("opacity", view_extant_labels ? 1: options.extant_label_opacity);
     }
-    var terminated = d3.select("#path-" + node_selected.attr("id")).attr("class") == "collapsed-node";
+    var terminated = d3.select("#path-" + id).attr("class") == "collapsed-node";
     if (!view_node_labels && node_selected.attr("class") == "node") {
         node_selected.attr("r", options.node_radius);
-        d3.select("#circle-" + node_selected.attr("id")).attr("r", options.node_radius * options.under_node_multiplier);
-        var y = d3.select("#circle-" + node_selected.attr("id")).attr("cy");
+        d3.select("#circle-" + id).attr("r", options.node_radius * options.under_node_multiplier);
+        var y = d3.select("#fill-" + id).attr("cy");
         if (node_selected.attr("name") == phylo_options.tree.selected_node.name) {
              node_selected.attr("fill", phylo_options.style.select_colour);
         } else {
@@ -487,9 +508,9 @@ var on_node_mouseout = function (node_selected) {
             node_selected.attr("stroke-width", options.stroke_width);
         } else {
             // draw collapsed symbol
-            d3.select("#path-" + node_selected.attr("id")).style("opacity", 1);
+            d3.select("#path-" + id).style("opacity", 1);
         }
-        d3.select("#text-" + node_selected.attr("id")).attr("opacity", 0);
+        d3.select("#text-" + id).attr("opacity", 0);
     }
 
 }
@@ -638,7 +659,7 @@ var make_depth_array = function (phylo_options) {
 
 var set_phylo_params = function (tree_div, tree_string) {
     phylo_options.svg_info.div_id = tree_div;
-    phylo_options.svg_info.width = window.innerWidth - 200;
+    phylo_options.svg_info.width = '100%';//window.innerWidth - 200;
     phylo_options.tree_string = tree_string;
     phylo_options = setup_phylo_svg(phylo_options);
 }
@@ -1269,11 +1290,15 @@ function contextMenu() {
 var context_menu_action = function (call, node_fill, node_id) {
     var call_type = call.attr("name");
 
+    document.getElementById('reset-button').disabled = true;
     if (call_type == "View joint reconstruction") {
         select_node(call.attr("id"));
         refresh_tree();
         displayJointGraph(call.attr("id"), node_fill, true);
+        reset_poag_stack();
     } else if (call_type == "Add joint reconstruction") {
+        document.getElementById('reset-button').disabled = false;
+        d3.select("#fill-" + node_id).attr("stroke", phylo_options.style.stacked_colour);
         displayJointGraph(call.attr("id"), node_fill, false);
     } else if (call_type == "Expand subtree") {
         var node = phylo_options.tree.node_dict[node_id];
@@ -1299,6 +1324,7 @@ var context_menu_action = function (call, node_fill, node_id) {
         select_node(call.attr("id"));
         refresh_tree();
         perform_marginal(call.attr("id"), node_fill);
+        reset_poag_stack();
     }
 
 }
@@ -1336,7 +1362,7 @@ var select_node = function(node) {
     for (var n in nodes) {
         if (nodes[n].name == node) {
             phylo_options.tree.selected_node = nodes[n];
-            d3.select("#circle-" + nodes[n].id).attr("fill",options.select_colour);
+            d3.select("#fill-" + nodes[n].id).attr("fill",options.select_colour);
             return;
         }
     }

@@ -20,53 +20,47 @@
 
             <div id="phylo-tree" class="col-sm-12" data-toggle="popover" data-placement="top" data-content="Right click tree nodes to access reconstruction options: view marginal reconstruction, view joint reconstruction and add joint reconstruction. Adding a joint reconstruction will compare the reconstructions of multiple ancestors by showing the ancestral graphs stacked and a summary merged graph of the reconstructions.">
             </div>
-
-                <div class="col-sm-12">
-                    <div class="input-group">
-                        <button type="button" id="savepoagButton" class="btn btn-default" onclick="save_poag_svg_to_png()">Save graphs</button>
-                        <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
-                            <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span id="selected-scheme">Clustal</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <!--<li><a id="random" onclick="update_scheme('random')">GRASP <span id="random-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>-->
-                                <li><a id="cinema" onclick="update_scheme('cinema')">Cinema <span id="cinema-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="clustal" onclick="update_scheme('clustal')">Clustal <span id="clustal-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="hydrophob" onclick="update_scheme('hydrophob')">Hydrophobicity <span id="hydrophob-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="lesk" onclick="update_scheme('lesk')">Lesk <span id="lesk-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="ma" onclick="update_scheme('ma')">MAEditor <span id="ma-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="taylor" onclick="update_scheme('taylor')">Taylor <span id="taylor-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="zappo" onclick="update_scheme('zappo')">Zappo <span id="zappo-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="helix" onclick="update_scheme('helix')">Helix Propensity <span id="helix-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="strand" onclick="update_scheme('strand')">Strand Propensity <span id="strand-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="turn" onclick="update_scheme('turn')">Turn Propensity <span id="turn-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="buried" onclick="update_scheme('buried')">Buried Index <span id="buried-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                            </ul>
-                            <div class="input-group" data-toggle="popover" data-placement="bottom"  data-content="View the mutant library for the marginal reconstruction. Likely mutants are calculated using the Kullback-Leibler divergence on the set of possible characters. Default: 5 mutants are shown for each character position in the reconstructed ancestor.">
-                                <button type="button" id="mutant-btn" class="btn btn-default disabled" data-toggle="button" aria-pressed="false" autocomplete="false" disabled="disabled">View mutants</button>
-                                <div class="btn-group" id="mutant-input">
-                                    <button class="btn btn-default" id="btn-mutant-down" type="button"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
-                                    <input class="form-control" id="text-mutant" type="text" placeholder="0" maxlength="3" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
-                                    <button class="btn btn-default" id="btn-mutant-up" type="button"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button>
-                                </div>
-                            </div>
+            <div>
+                <div class="input-group col-sm-12">
+                    <button type="button" id="savepoagButton" class="btn btn-default" onclick="save_poag_svg_to_png()">Save graphs</button>
+                    <div class="btn-group" data-toggle="popover" data-placement="top" data-content="Change the colour scheme of the inferred character and representation of the distribution of characters in the sequence graphs.">
+                        <button type="button" class="btn btn-default dropdown-toggle dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="selected-scheme">Clustal</span> | <small>Select other colour scheme...  </small><span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <!--<li><a id="random" onclick="update_scheme('random')">GRASP <span id="random-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>-->
+                            <li><a id="cinema" onclick="update_scheme('cinema')">Cinema <span id="cinema-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="clustal" onclick="update_scheme('clustal')">Clustal <span id="clustal-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="hydrophob" onclick="update_scheme('hydrophob')">Hydrophobicity <span id="hydrophob-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="lesk" onclick="update_scheme('lesk')">Lesk <span id="lesk-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="ma" onclick="update_scheme('ma')">MAEditor <span id="ma-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="taylor" onclick="update_scheme('taylor')">Taylor <span id="taylor-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="zappo" onclick="update_scheme('zappo')">Zappo <span id="zappo-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="helix" onclick="update_scheme('helix')">Helix Propensity <span id="helix-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="strand" onclick="update_scheme('strand')">Strand Propensity <span id="strand-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="turn" onclick="update_scheme('turn')">Turn Propensity <span id="turn-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                            <li><a id="buried" onclick="update_scheme('buried')">Buried Index <span id="buried-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                        </ul>
+                    </div>
+                    <div class="btn-group" data-toggle="popover" data-placement="bottom"  data-content="View the mutant library for the marginal reconstruction. Likely mutants are calculated using the Kullback-Leibler divergence on the set of possible characters. Default: 5 mutants are shown for each character position in the reconstructed ancestor.">
+                        <button type="button" id="mutant-btn" class="btn btn-default disabled" data-toggle="button" aria-pressed="false" autocomplete="false" disabled="disabled">View mutants</button>
+                        <div class="btn-group" id="mutant-input">
+                            <button class="btn btn-default" id="btn-mutant-down" type="button"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></button>
+                            <input class="form-control" id="text-mutant" type="text" placeholder="0" maxlength="3" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" />
+                            <button class="btn btn-default" id="btn-mutant-up" type="button"><span class="glyphicon glyphicon-chevron-up" aria-hidden="true"></span></button>
                         </div>
                     </div>
-                    <div id="poag-mini" class="col-sm-12">
-
-                    </div>
-                    <div id="poag-msa" class="col-sm-12">
-
-                    </div>
-                    <div id="poag-all" class="col-sm-12" style="display: none;" data-toggle="popover" data-placement="top" data-content="Change the section of the graph in view by sliding the viewer window. Drag the edges of the viewer window to change the number of graph nodes that are in view. The MSA graph summarises the sequence alignment. Adding joint reconstructions (right click on a tree node and select 'add joint reconstruction') will visualise the ancestors stacked below each other and show a merged summary of the selected reconstructed ancestors.">
-
-                    </div>
-                    <div id="poag-merged" class="col-sm-12" style="display: none;">
-
-                    </div>
+                    <button type="button" id="reset-button" class="btn btn-default" disabled="true" onclick="reset_poag_stack()">Reset</button>
                 </div>
-
-
+                <div id="poag-mini" class="col-sm-12">
+                </div>
+                <div id="poag-msa" class="col-sm-12">
+                </div>
+                <div id="poag-all" class="col-sm-12" style="display: none;" data-toggle="popover" data-placement="top" data-content="Change the section of the graph in view by sliding the viewer window. Drag the edges of the viewer window to change the number of graph nodes that are in view. The MSA graph summarises the sequence alignment. Adding joint reconstructions (right click on a tree node and select 'add joint reconstruction') will visualise the ancestors stacked below each other and show a merged summary of the selected reconstructed ancestors.">
+                </div>
+                <div id="poag-merged" class="col-sm-12" style="display: none;">
+                </div>
+            </div>
             <div class="col-sm-12">
                 <button id="download-toggle" class="btn btn-default col-sm-12" data-target="#download-form" data-toggle="collapse">Download Results...   <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
                 <div th:replace="fragments/download_form :: download_form"></div>
@@ -90,8 +84,8 @@
             </div>
         </div>
     </div>
-            <div style="display: none;">
-                    <script type="text/javascript" th:inline="javascript">
+    <div style="display: none;">
+        <script type="text/javascript" th:inline="javascript">
 
                                 /*<![CDATA[*/
 
@@ -151,7 +145,7 @@ $('#btn-mutant-down').on('click', function () {
 				});
                                 /*]]>*/
                     </script>
-            </div>
+    </div>
 
 </div>
 

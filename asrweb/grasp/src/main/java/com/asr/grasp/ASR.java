@@ -167,16 +167,25 @@ public class ASR {
             asrMarginal.saveMSAGraph(filepath);
     }
 
+    public void saveMSAAln(String filepath) throws IOException {
+        if (inferenceType.equalsIgnoreCase("joint"))
+            asrJoint.saveALN(filepath + "MSA", "clustal");
+        else
+            asrMarginal.saveALN(filepath + "MSA", "clustal");
+    }
+
     /**
      * Save ancestor graph
      *
      * @param label     label of ancestor
      * @param filepath  filepath of where to save graph
+     * @param joint     flag: true, get from joint recon, false, get from marginal
      */
-    public void saveAncestorGraph(String label, String filepath) {
-        if (inferenceType.equalsIgnoreCase("joint"))
+    public void saveAncestorGraph(String label, String filepath, boolean joint) {
+        System.out.println(label);
+        if (joint && inferenceType.equalsIgnoreCase("joint"))
             asrJoint.saveGraph(filepath + "joint_", label);
-        else
+        else if (!joint)
             asrMarginal.saveGraph(filepath + "marginal_", label);
     }
 

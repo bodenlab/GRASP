@@ -24,6 +24,11 @@ var refresh_labels = function() {
         nodeLabels[i].textContent = label;
         nodeLabels[i].value = label;
     }
+    nodeLabels = document.querySelectorAll(".full-node-label");
+    for (var i = 0; i < nodeLabels.length; i++) {
+        nodeLabels[i].textContent = selectedNode;
+        nodeLabels[i].value = selectedNode;
+    }
     var reconLabels = document.querySelectorAll(".infer-label");
     for (var i = 0; i < reconLabels.length; i++) {
         reconLabels[i].textContent = inferType;

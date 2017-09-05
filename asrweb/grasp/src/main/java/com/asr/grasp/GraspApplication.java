@@ -34,9 +34,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+//	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 //	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	//final String sessionPath = "/var/www/GRASP/";
+	final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
 
@@ -241,6 +241,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 			sessionDir.delete();
 		}
 		sessionDir.mkdir();
+		System.out.println(request.getParameter("node-label"));
+		System.out.println(request.getParameter("joint-node"));
 
 		// copy output files to temporary folder, or generate output where needed and save in temporary folder
 		if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
@@ -249,11 +251,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa").equalsIgnoreCase("on"))
 			asr.saveMSA(tempDir + "/");
 		if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))
-			asr.saveAncestorGraph(request.getParameter("marg-node"), tempDir + "/");
+			asr.saveAncestorGraph(request.getParameter("node-label"), tempDir + "/", false);
 		if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on"))
 			asr.saveMarginalDistribution(tempDir, request.getParameter("marg-node"));
 		if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
 			asr.saveAncestors(tempDir + "/");
+		if (request.getParameter("check-pog-joint-single") != null && request.getParameter("check-pog-joint-single").equalsIgnoreCase("on"))
+			asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
 		if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
 			asr.saveConsensusMarginal(tempDir + "/" + request.getParameter("marg-node") + "_consensus");
 		if (request.getParameter("check-seq-joint-single") != null && request.getParameter("check-seq-joint-single").equalsIgnoreCase("on"))
@@ -262,6 +266,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 			asr.saveMarginalDistribution(tempDir + "/", "msa");
 		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
 			asr.saveConsensusJoint(tempDir + "/ancestors_consensus", null);
+		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
+			asr.saveMSAAln(tempDir + "/");
 
 		// send output folder to client
 		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());

@@ -1321,10 +1321,10 @@ var context_menu_action = function (call, node_fill, node_id) {
         phylo_options.tree.collapse_under.push(node);
         refresh_tree();
     } else {
+        reset_poag_stack();
         select_node(call.attr("id"));
         refresh_tree();
         perform_marginal(call.attr("id"), node_fill);
-        reset_poag_stack();
     }
 
 }

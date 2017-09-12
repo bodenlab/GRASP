@@ -1294,8 +1294,8 @@ var context_menu_action = function (call, node_fill, node_id) {
     if (call_type == "View joint reconstruction") {
         select_node(call.attr("id"));
         refresh_tree();
-        displayJointGraph(call.attr("id"), node_fill, true);
         reset_poag_stack();
+        displayJointGraph(call.attr("id"), node_fill, true);
     } else if (call_type == "Add joint reconstruction") {
         document.getElementById('reset-button').disabled = false;
         d3.select("#fill-" + node_id).attr("stroke", phylo_options.style.stacked_colour);
@@ -1321,9 +1321,10 @@ var context_menu_action = function (call, node_fill, node_id) {
         phylo_options.tree.collapse_under.push(node);
         refresh_tree();
     } else {
-        reset_poag_stack();
         select_node(call.attr("id"));
-        refresh_tree();
+        reset_poag_stack();
+        //refresh_tree();
+        //refresh_tree();
         perform_marginal(call.attr("id"), node_fill);
     }
 

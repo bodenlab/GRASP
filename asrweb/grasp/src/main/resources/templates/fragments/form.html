@@ -6,17 +6,69 @@
     <div class="content-section-b" th:if="${results == null}">
         <div class="container-fluid">
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
-                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom">
-                    <div class="input-group col-sm-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
-                        <input type="text" class="form-control col-xs-6" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
-                        <span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
+                <div class="form-group row col-sm-10 pad-top-bottom">
+                    <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
+                        <input type="text" class="form-input col-xs-8" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
+                        <!--<span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
                             <button type="submit" name="test" class="btn btn-default"><small>Run test data</small></button>
-                        </span>
+                        </span>-->
+                        <div class="form-group col-xs-4 no-padding">
+                            <div class="input-group col-xs-12 no-padding">
+                                <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Run joint reconstruction on the selected test dataset.">
+                                    <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span id="selected-example">...</span> | <small>Example datasets...</small> <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 <span id="cyp2u1-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                        <li><a id="tawfik" onclick="update_test('tawfik')">Tawfik <span id="tawfik-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                        <li><a id="none" onclick="update_test('none')">None <span id="none-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                    </ul>
+                                    <input type="hidden" th:value="null" th:field="*{data}" class="data" />
+                                    <script type="text/javascript">
+                                    /*<![CDATA[*/
+                                    var update_test = function(data) {
+                                        var glyphs = document.querySelectorAll(".ex-glyph-selected");
+                                        for (var i = 0; i < glyphs.length; i++) {
+                                            if (!glyphs[i].classList.contains('disable')) {
+                                                glyphs[i].classList.add('disable');
+                                            }
+                                        }
+                                        document.querySelector("#" + data + "-selected").classList.remove('disable');
+                                        document.getElementById("selected-example").textContent = document.getElementById(data).textContent;
+                                        $('#data').val(data);
+                                        if (data == "none") {
+                                            // enable sequence alignment and library inputs
+                                            $("[id='check-align']").bootstrapSwitch('disabled',false);
+                                            if ($("[id='check-align']").bootstrapSwitch('state') == false) {
+                                                $('#lbl-filealn').removeAttr('disabled');
+                                                $('#filealn').removeAttr('disabled');
+                                            } else {
+                                                $('#lbl-fileseq').removeAttr('disabled');
+                                                $('#fileseq').removeAttr('disabled');
+                                            }
+                                            $('#lbl-filetree').removeAttr('disabled');
+                                            $('#filetree').removeAttr('disabled');
+                                        } else {
+                                            // disable sequence alignment and library inputs
+                                            $("[id='check-align']").bootstrapSwitch('disabled',true);
+                                            $('#lbl-filealn').attr('disabled', true);
+                                            $('#filealn').attr('disabled', true);
+                                            $('#lbl-fileseq').attr('disabled', true);
+                                            $('#fileseq').attr('disabled', true);
+                                            $('#lbl-filetree').attr('disabled', true);
+                                            $('#filetree').attr('disabled', true);
+                                        }
+                                    };
+                                    /*]]>*/
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
                 <div class="form-group row col-sm-offset-1 col-sm-6">
-                    <div class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." >
+                    <div id="check-align-div" class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." >
                         <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200" data-on-color="default" data-off-text="No" data-on-text="Yes" />
                     </div>
                 </div>
@@ -75,7 +127,7 @@
                     </div>
                     <div class="form-group row col-xs-12">
                         <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
-                            <label class="btn btn-default col-xs-12" for="filetree">
+                            <label id="lbl-filetree" class="btn btn-default col-xs-12" for="filetree">
                                 <span class="glyphicon glyphicon-tree-conifer col-xs-1" aria-hidden="true"></span>
                                 Select phylogenetic tree file...
                                 <input type="file" class="col-xs-11" name="filetree" id="filetree" style="display:none;" onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);" hidden="hidden" th:field="*{treeFile}"></input>
@@ -97,7 +149,7 @@
                                 <li><a id="lg" onclick="update_model('lg')">LG <span id="lg-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                 <li><a id="wag" onclick="update_model('wag')">WAG <span id="wag-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                             </ul>
-                            <input type="hidden" th:value="joint" th:field="*{model}" class="model" />
+                            <input type="hidden" th:value="jtt" th:field="*{model}" class="model" />
                             <script type="text/javascript">
                                     /*<![CDATA[*/
                                     var update_model = function(model) {
@@ -112,7 +164,7 @@
                                         $('#model').val(model);
                                     };
                                     /*]]>*/
-                    </script>
+                            </script>
                         </div>
                     </div>
                 </div>

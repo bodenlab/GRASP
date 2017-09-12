@@ -163,7 +163,7 @@ var poag_options = {
         font_size: "18px",
         text_padding: 5,
         gradient: false,
-        min_radius: 15,
+        min_radius: 5,
         max_radius: 40,
         position_label_padding: 50,
     },
@@ -1487,7 +1487,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .attr("stroke", options.style.node_position_colour)
                 .text(function() {
                     var spacing = Math.floor((poags.cur_x_max - poags.cur_x_min)/10);
-                    if (poags.node_radius > options.node.min_radius || node.id % spacing == 0) {
+                    if (poags.node_radius > 2*options.node.min_radius || node.id % spacing == 0) {
                         return node.id;
                     }
                     return "";

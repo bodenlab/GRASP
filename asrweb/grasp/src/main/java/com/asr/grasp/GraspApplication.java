@@ -34,9 +34,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-//	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 //	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	final String sessionPath = "/var/www/GRASP/";
+//	final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
 
@@ -65,8 +65,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) throws Exception {
 		this.asr = asrForm;
 
-		model.addAttribute("label", asr.getLabel());
-
 		if (bindingResult.hasErrors()) {
 			for (String err : bindingResult.getSuppressedFields())
 				System.out.println(err);
@@ -74,27 +72,42 @@ public class GraspApplication extends SpringBootServletInitializer {
 		}
 
 		// upload supplied files
-		//try {
+		try {
 			File sessionDir = new File(sessionPath + sessionId);
 			if (!sessionDir.exists())
 				sessionDir.mkdir();
 
 			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
 
-			if (asr.getSeqFile() != null) {
-				asr.getSeqFile().transferTo(new File(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename()));
-				asr.setAlnFilepath(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename());
-				asr.setPerformAlignment(true);
+			// performing reconstruction on test data
+			if (asr.getData() != null && !asr.getData().equalsIgnoreCase("none")) {
+				System.out.println(asr.getData());
+				asr.setLabel(asr.getData());
+				File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".aln").toURI());
+				asr.setAlnFilepath(asr.getSessionDir() + asr.getData() + ".aln");
+				Files.copy(alnFile.toPath(), (new File(asr.getAlnFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
+				File treeFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".nwk").toURI());
+				asr.setTreeFilepath(asr.getSessionDir() + asr.getData() + ".nwk");
+				Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} else {
+				// aligning input data before performing reconstruction
+				if (asr.getSeqFile() != null) {
+					asr.getSeqFile().transferTo(new File(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename()));
+					asr.setAlnFilepath(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename());
+					asr.setPerformAlignment(true);
+				}
+				// performing reconstruction on already aligned data
+				if (asr.getAlnFile() != null) {
+					asr.getAlnFile().transferTo(new File(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename()));
+					asr.setAlnFilepath(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename());
+				}
+				asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
+				asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
 			}
-			if (asr.getAlnFile() != null) {
-				asr.getAlnFile().transferTo(new File(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename()));
-				asr.setAlnFilepath(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename());
-			}
-			asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
-			asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
-
 			// TODO: push exceptions to error message on view...
 			asr.runReconstruction();
+
+			model.addAttribute("label", asr.getLabel());
 
 			// add reconstructed newick string to send to javascript
 			model.addAttribute("tree", asr.getReconstructedNewickString());
@@ -104,12 +117,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 			model.addAttribute("graph", graphs);
 
-		/*} catch (Exception e) {
+		} catch (Exception e) {
 			model.addAttribute("error", true);
 			model.addAttribute("errorMessage", e.getMessage());
 			System.out.println("Error: " + e.getMessage());
 			return "index";
-		}*/
+		}
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
 		model.addAttribute("inferenceType", asr.getInferenceType());
@@ -125,7 +138,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @param model   com model
 	 * @return index with results as attributes in the model
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.POST, params = "test")
+/*	@RequestMapping(value = "/", method = RequestMethod.POST, params = "test")
 	public String performReconstruction(@ModelAttribute("asrForm") ASR asrForm, Model model) {
 
 		this.asr = asrForm;
@@ -173,7 +186,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("results", true);
 
 		return "index";
-	}
+	}*/
 
 	/**
 	 * Perform marginal reconstruction of specified tree node.
@@ -267,7 +280,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
 			asr.saveConsensusJoint(tempDir + "/ancestors_consensus", null);
 		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
-			asr.saveMSAAln(tempDir + "/");
+			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
 
 		// send output folder to client
 		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());

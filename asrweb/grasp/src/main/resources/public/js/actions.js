@@ -71,11 +71,18 @@ var reset_poag_stack = function () {
     for (var n in phylo_options.tree.all_nodes) {
         var node = phylo_options.tree.all_nodes[n];
         d3.select('#fill-' + node.id).attr("stroke", phylo_options.legend.colour_scale(node.y));
+        d3.select('#fill-' + node.id).attr("fill", phylo_options.legend.colour_scale(node.y));
     }
     var cur_node = phylo_options.tree.selected_node;
     d3.select('#fill-' + cur_node.id).attr("stroke", phylo_options.style.select_colour);
-    displayJointGraph(cur_node.name, phylo_options.legend.colour_scale(cur_node.y), true);
+    d3.select('#fill-' + cur_node.id).attr("fill", phylo_options.style.select_colour);
+    poags.multi.nodes = {};
+    poags.multi.names = [];
+    poags.merged.nodes = [];
+    poags.merged.edges = [];
+    redraw_poags();
 }
+
 
 /**
  * ----------------------------------------------------------------------------
@@ -97,9 +104,9 @@ var update_colour = function (value) {
  */
 // Set-up the export button
 var save_poag_svg_to_png = function () {
-    var svgString = getSVGString(poags.svg.node());
-    var width = poag_options.style.width;
-    var height = poag_options.style.height;
+    var svgString = getSVGString(poags.single_svg.node());// + poags.svg.node());
+    var width = $("#poag-msa").width();
+    var height = $("#poag-msa").height();
     svgString2Image(svgString, 2 * width, 2 * height, 'png', save); // passes Blob and filesize String to the callback
     function save(dataBlob, filesize) {
         saveAs(dataBlob, document.querySelector("#recon-label").textContent.slice(2) + '_graph.png');

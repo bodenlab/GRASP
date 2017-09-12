@@ -1,7 +1,6 @@
 package com.asr.grasp;
 
 import api.PartialOrderGraph;
-import com.asr.grasp.validator.File;
 import dat.POGraph;
 import json.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +34,7 @@ public class ASR {
 
     private String alnFilepath;
 
-    @File(type="nwk", message="File must be in newick format (*.nwk)")
+    //@File(type="nwk", message="File must be in newick format (*.nwk)")
     private MultipartFile treeFile;
 
     private String treeFilepath;
@@ -50,6 +49,8 @@ public class ASR {
     private boolean performAlignment = false;
 
     private String model = "JTT";
+
+    private String data = null; // example dataset to run, if applicable
 
     public ASR() {}
 
@@ -93,6 +94,8 @@ public class ASR {
     public String getMarginalNodeLabel() { return this.nodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }
+    public void setData(String data) { this.data = data; }
+    public String getData() { return this.data; }
 
     /*******************************************************************************************************************
      ****** ASR functional methods
@@ -168,10 +171,11 @@ public class ASR {
     }
 
     public void saveMSAAln(String filepath) throws IOException {
-        if (inferenceType.equalsIgnoreCase("joint"))
-            asrJoint.saveALN(filepath + "MSA", "clustal");
+        System.out.println(filepath + "_MSA");
+        if (asrJoint != null)
+            asrJoint.saveALN(filepath + "_MSA", "clustal");
         else
-            asrMarginal.saveALN(filepath + "MSA", "clustal");
+            asrMarginal.saveALN(filepath + "_MSA", "clustal");
     }
 
     /**
@@ -182,7 +186,6 @@ public class ASR {
      * @param joint     flag: true, get from joint recon, false, get from marginal
      */
     public void saveAncestorGraph(String label, String filepath, boolean joint) {
-        System.out.println(label);
         if (joint && inferenceType.equalsIgnoreCase("joint"))
             asrJoint.saveGraph(filepath + "joint_", label);
         else if (!joint)

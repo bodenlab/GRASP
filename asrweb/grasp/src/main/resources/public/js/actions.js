@@ -70,8 +70,10 @@ var reset_poag_stack = function () {
     document.getElementById('reset-button').disabled = true;
     for (var n in phylo_options.tree.all_nodes) {
         var node = phylo_options.tree.all_nodes[n];
-        d3.select('#fill-' + node.id).attr("stroke", phylo_options.legend.colour_scale(node.y));
-        d3.select('#fill-' + node.id).attr("fill", phylo_options.legend.colour_scale(node.y));
+        if (!node.extent) {
+            d3.select('#fill-' + node.id).attr("stroke", phylo_options.legend.colour_scale(node.y));
+            d3.select('#fill-' + node.id).attr("fill", phylo_options.legend.colour_scale(node.y));
+        }
     }
     var cur_node = phylo_options.tree.selected_node;
     d3.select('#fill-' + cur_node.id).attr("stroke", phylo_options.style.select_colour);

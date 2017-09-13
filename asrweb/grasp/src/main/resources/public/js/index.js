@@ -252,6 +252,7 @@ graph.options = poag_options;
  *                  multi display (false).
  */
 var setup_poags = function (json_str, set_inferred, set_msa, set_merged, name) {
+
     if (set_inferred) {
         delete poag_options.names_to_colour[poags.inferred_poag_name];
         poags.inferred_poag_name = name;
@@ -263,7 +264,7 @@ var setup_poags = function (json_str, set_inferred, set_msa, set_merged, name) {
     poags = process_poags(json_str, poags, set_inferred, set_msa, set_merged, name);
 
     // Create the SVG element
-    poag = setup_poag_svg(poags, set_msa || set_inferred);
+    poag = setup_poag_svg(poags);
 
     // Make the scales
     poags = setup_poag_scales(poags);
@@ -319,6 +320,7 @@ var draw_all_poags = function (poags) {
     // For each of the poags draw the nodes, pass in the group
     // to append to.
     // Draw the mini msa first
+    draw_mini_msa(poags);
 
     // draw merged
     var nodes = poags.merged.nodes;
@@ -408,6 +410,13 @@ var redraw_poags = function () {
     }
     poags.brush.extent([poags.cur_x_min, poags.cur_x_max]);
     poags = update_x_scale(poags);
+    var group = poags.groups.mini;
+    group.selectAll("g.graph").remove();
+    group.selectAll("path.poag").remove();
+    group.selectAll("circle.poag").remove();
+    group.selectAll("text.poag").remove();
+    group.selectAll("rect.poag").remove();
+    group.selectAll("defs.poag").remove();
     var group = poags.single_group;
     group.selectAll("g.graph").remove();
     group.selectAll("path.poag").remove();
@@ -582,6 +591,7 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
         poags.merged.nodes = [];
         poags.merged.edges = [];
         set_msa = true;
+        poags.single.raw.inferred = data.bottom;
     }
 
     // If it is the first time running we want to set the MSA data otherwise
@@ -878,7 +888,7 @@ var update_x_scale = function (poags) {
  * and the nodes be grouped an positioned accordingly.
  *
  */
-var setup_poag_svg = function (poags, set_msa) {
+var setup_poag_svg = function (poags) {
     var options = poags.options;
     var width = options.style.width;
     var margin = options.style.margin;

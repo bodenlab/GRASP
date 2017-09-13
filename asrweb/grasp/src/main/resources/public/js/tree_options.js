@@ -1,4 +1,3 @@
-var json_str = "";
 
 /*
 ** Perform marginal reconstruction of the selected tree node
@@ -12,7 +11,7 @@ var perform_marginal = function(node_name, node_fill) {
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
-            json_str = data;
+            var json_str = data;
             graph_array = [];
             //add_new_poag(json_str, node_name, node_fill);
             // if mutant library is selected, display mutant library with the selected number of mutants, else just
@@ -63,7 +62,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
         type : 'POST',
         data : {infer: inferType, node: node_name},
         success: function(data) {
-            json_str = data;
+            var json_str = data;
             drawMutants = false;
             //problem below, this only colours for the second poag, leaving the colour for 'poag1'
             //undefined, hence why it comes up black for the fused nodes -> I may have fixed this

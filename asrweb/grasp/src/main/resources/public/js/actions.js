@@ -82,6 +82,12 @@ var reset_poag_stack = function () {
     poags.multi.names = [];
     poags.merged.nodes = [];
     poags.merged.edges = [];
+    poags.single.edges = {};
+    poags.single.nodes = {};
+    poags = process_msa_data(poags);
+    poags = process_edges(poags, poags.single.raw.msa, poags.root_poag_name, true);
+    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
+    poags = process_edges(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
     redraw_poags();
 }
 

@@ -48,7 +48,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String showForm(Model model) {
-		System.out.println("showForm");
 		model.addAttribute("asrForm", new ASR());
 		return "index";
 	}
@@ -65,9 +64,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) throws Exception {
 		this.asr = asrForm;
 
-		if (bindingResult.hasErrors()) {
+		String errors = checkErrors(asr);
+		if (bindingResult.hasErrors() || errors != null) {
 			for (String err : bindingResult.getSuppressedFields())
-				System.out.println(err);
+				System.err.println(err);
+			model.addAttribute("error", true);
+			model.addAttribute("errorMessage", errors);
+			System.err.println("Error: " + errors);
 			return "index";
 		}
 
@@ -80,8 +83,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
 
 			// performing reconstruction on test data
-			if (asr.getData() != null && !asr.getData().equalsIgnoreCase("none")) {
-				System.out.println(asr.getData());
+			if (asr.getData() != null && !asr.getData().equalsIgnoreCase("none") && !asr.getData().equalsIgnoreCase("")) {
 				asr.setLabel(asr.getData());
 				File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".aln").toURI());
 				asr.setAlnFilepath(asr.getSessionDir() + asr.getData() + ".aln");
@@ -104,7 +106,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 				asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
 				asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
 			}
-			// TODO: push exceptions to error message on view...
 			asr.runReconstruction();
 
 			model.addAttribute("label", asr.getLabel());
@@ -119,8 +120,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		} catch (Exception e) {
 			model.addAttribute("error", true);
-			model.addAttribute("errorMessage", e.getMessage());
-			System.out.println("Error: " + e.getMessage());
+			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
+				String message = checkErrors(asr);
+				model.addAttribute("errorMessage", message);
+				System.err.println("Error: " + message);
+			} else {
+				model.addAttribute("errorMessage", e.getMessage());
+				System.err.println("Error: " + e.getMessage());
+			}
 			return "index";
 		}
 
@@ -130,63 +137,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		return "index";
 	}
-
-	/**
-	 * Submit the asr form (documenting input details, i.e. aln and tree file, etc)
-	 *
-	 * @param asrForm ASR object
-	 * @param model   com model
-	 * @return index with results as attributes in the model
-	 */
-/*	@RequestMapping(value = "/", method = RequestMethod.POST, params = "test")
-	public String performReconstruction(@ModelAttribute("asrForm") ASR asrForm, Model model) {
-
-		this.asr = asrForm;
-
-		// upload supplied files
-		try {
-			File sessionDir = new File(sessionPath + sessionId);
-			if (!sessionDir.exists())
-				sessionDir.mkdir();
-
-			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-			asr.setLabel("Test");
-			asr.setInferenceType("joint");
-
-			// copy default data to user session folder
-
-			File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource("default.aln").toURI());
-			asr.setAlnFilepath(asr.getSessionDir() + "default.aln");
-			Files.copy(alnFile.toPath(), (new File(asr.getAlnFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
-			File treeFile = new File(Thread.currentThread().getContextClassLoader().getResource("default.nwk").toURI());
-			asr.setTreeFilepath(asr.getSessionDir() + "default.nwk");
-			Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-			// TODO: push exceptions to error message on view...
-			asr.runReconstruction();
-
-			// add reconstructed newick string to send to javascript
-			model.addAttribute("tree", asr.getReconstructedNewickString());
-
-			// add msa and inferred ancestral graph
-			String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), "root"));
-
-			model.addAttribute("graph", graphs);
-			model.addAttribute("label", asr.getLabel());
-
-		} catch (Exception e) {
-			model.addAttribute("error", true);
-			model.addAttribute("errorMessage", e.getMessage());
-			System.out.println("Error: " + e.getMessage());
-			return "index";
-		}
-
-		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
-		model.addAttribute("inferenceType", asr.getInferenceType());
-		model.addAttribute("results", true);
-
-		return "index";
-	}*/
 
 	/**
 	 * Perform marginal reconstruction of specified tree node.
@@ -199,11 +149,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node"})
 	public @ResponseBody String performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model) {
 
-		System.out.println("infer,node: " + infer + " " + node);
 		model.addAttribute("results", true);
 		model.addAttribute("label", asr.getLabel());
 
-		// TODO: push exceptions to error message on view...
 		asr.setInferenceType(infer);
 
 		try {
@@ -217,7 +165,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		} catch (Exception e) {
 			model.addAttribute("error", true);
 			model.addAttribute("errorMessage", e.getMessage());
-			System.out.println("Error: " + e.getMessage());
+			System.err.println("Error: " + e.getMessage());
 			return "index";
 		}
 
@@ -254,8 +202,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 			sessionDir.delete();
 		}
 		sessionDir.mkdir();
-		System.out.println(request.getParameter("node-label"));
-		System.out.println(request.getParameter("joint-node"));
 
 		// copy output files to temporary folder, or generate output where needed and save in temporary folder
 		if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
@@ -302,6 +248,28 @@ public class GraspApplication extends SpringBootServletInitializer {
 				zout.closeEntry();
 			}
 		}
+	}
+
+	private String checkErrors(ASR asr) {
+		String message = null;
+		if ((asr.getData() == null || asr.getData().equalsIgnoreCase("") || asr.getData().equalsIgnoreCase("none"))
+				&& (asr.getSeqFile() == null || asr.getSeqFile().getOriginalFilename().equalsIgnoreCase("")) &&
+				(asr.getAlnFile() == null || asr.getAlnFile().getOriginalFilename().equalsIgnoreCase("")))
+			message = "No sequence or alignment file specified.";
+		else if ((asr.getSeqFile() != null && !asr.getSeqFile().getOriginalFilename().endsWith(".aln") &&
+				!asr.getSeqFile().getOriginalFilename().endsWith(".fa") && !asr.getSeqFile().getOriginalFilename().endsWith(".fasta")) ||
+				(asr.getAlnFile() != null && !asr.getAlnFile().getOriginalFilename().endsWith(".aln") &&
+						!asr.getAlnFile().getOriginalFilename().endsWith(".fa") && !asr.getAlnFile().getOriginalFilename().endsWith(".fasta")))
+			message = "Incorrect sequence or alignment format (requires fasta or clustal format .aln, .fa or .fasta).";
+		else if (((asr.getSeqFile() != null && !asr.getSeqFile().getOriginalFilename().equalsIgnoreCase("")) ||
+				(asr.getAlnFile() != null && !asr.getAlnFile().getOriginalFilename().equalsIgnoreCase(""))) &&
+				(asr.getTreeFile() == null || asr.getTreeFile().getOriginalFilename().equalsIgnoreCase("")))
+			message = "No phylogenetic tree file specified.";
+		else if (asr.getTreeFile() != null && !asr.getTreeFile().getOriginalFilename().endsWith(".nwk"))
+			message = "Incorrect phylogenetic tree format (requires newick format .nwk).";
+		else
+			message = "Error parsing files.";
+		return message;
 	}
 
 }

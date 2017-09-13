@@ -16,7 +16,7 @@
                             <div class="input-group col-xs-12 no-padding">
                                 <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Run joint reconstruction on the selected test dataset.">
                                     <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span id="selected-example">...</span> | <small>Example datasets...</small> <span class="caret"></span>
+                                        <small><span id="selected-example">...</span></small> | <small>Example datasets...</small> <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 <span id="cyp2u1-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
@@ -65,7 +65,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('label')}"><label class="control-label" for="label" th:errors="*{label}"></label></div>
                 </div>
                 <div class="form-group row col-sm-offset-1 col-sm-6">
                     <div id="check-align-div" class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction. Partial order graphs are used to align sequences (CITATION)." >
@@ -112,7 +111,6 @@
                                 }
                             });
                         </script>
-                        <div class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('seqFile')}" th:errors="*{seqFile}"></div>
                     </div>
                     <div class="form-group row col-xs-12">
                         <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
@@ -123,7 +121,6 @@
                             </label>
                             <span class="label label-default upload-file-info col-xs-12" id="upload-aln-info"></span>
                         </div>
-                        <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('alnFile')}"><label class="control-label" for="label" th:errors="*{alnFile}"></label></div>
                     </div>
                     <div class="form-group row col-xs-12">
                         <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
@@ -134,7 +131,6 @@
                             </label>
                             <span class="label label-default upload-file-info col-xs-12" id="upload-tree-info"></span>
                         </div>
-                        <div class="alert alert-danger col-xs-12" role="alert" th:if="${#fields.hasErrors('treeFile')}"><label class="control-label" for="label" th:errors="*{treeFile}"></label></div>
                     </div>
                 </div>
                 <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6" style="padding-left: 0px; padding-right:25px; ">
@@ -187,7 +183,6 @@
                     </script>
                 </div>
                 <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn">Perform reconstruction</button></div>
-                <div class="row col-sm-offset-1 col-sm-8 alert alert-warning disable" role="alert" id="warning"><label> This library may take some time to reconstruct... </label></div>
             </form>
         </div>
         </div>

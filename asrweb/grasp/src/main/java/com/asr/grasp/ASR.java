@@ -25,19 +25,19 @@ public class ASR {
     // ASR object to store marginal reconstruction of current node (if given)
     private ASRPOG asrMarginal = null;
 
-    private String sessionDir;
+    private String sessionDir = null;
 
     private String label = "Grasp";
 
     //@File(type="aln", message="File must be an alignment (*.aln)")
     private MultipartFile alnFile = null;
 
-    private String alnFilepath;
+    private String alnFilepath = null;
 
     //@File(type="nwk", message="File must be in newick format (*.nwk)")
-    private MultipartFile treeFile;
+    private MultipartFile treeFile = null;
 
-    private String treeFilepath;
+    private String treeFilepath = null;
 
     //@File(type="seq", message="File must be in fasta or clustal format (*.fa, *.fasta or *.aln)")
     private MultipartFile seqFile = null;

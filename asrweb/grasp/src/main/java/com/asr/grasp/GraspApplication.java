@@ -267,8 +267,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 			message = "No phylogenetic tree file specified.";
 		else if (asr.getTreeFile() != null && !asr.getTreeFile().getOriginalFilename().endsWith(".nwk"))
 			message = "Incorrect phylogenetic tree format (requires newick format .nwk).";
-		else
-			message = "Error parsing files.";
 		return message;
 	}
 

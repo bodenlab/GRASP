@@ -105,7 +105,8 @@ $("#mutant-btn").click(function () {
         if ($("#mutant-btn").attr("aria-pressed") === 'true') {
             set_draw_mutants(true);
             $('#mutant-input').fadeIn();
-            view_mutant_library($('#text-mutant').val());
+            set_mutant($('#text-mutant').val() - 0);
+            view_mutant_library();
         } else {
             $('#mutant-input').fadeOut();
             set_draw_mutants(false);
@@ -115,23 +116,27 @@ $("#mutant-btn").click(function () {
     });
 });
 $('#text-mutant').on('input', function () {
-    view_mutant_library($(this).val());
+    set_mutant($(this).val());
+    view_mutant_library();
 });
 $('#btn-mutant-up').on('click', function () {
     var old = parseInt($('#text-mutant').val());
     if (isNaN(old)) {
         $('#text-mutant').val(1);
-        view_mutant_library(1);
+        set_mutant(1);
+        view_mutant_library();
     } else {
         $('#text-mutant').val(old + 1);
-        view_mutant_library(old + 1);
+        set_mutant(old + 1);
+        view_mutant_library();
     }
 });
 $('#btn-mutant-down').on('click', function () {
     var old = parseInt($('#text-mutant').val());
     if (!isNaN(old) && old - 1 >= 0) {
         $('#text-mutant').val(old - 1);
-        view_mutant_library(old - 1);
+        set_mutant(old - 1);
+        view_mutant_library();
     }
 });
 

@@ -60,7 +60,10 @@
     <div th:replace="fragments/progress :: progress"></div>
 
     <!-- Tutorial Section  -->
-    <div th:replace="fragments/tutorial :: tutorial"></div>
+    <div class="col-xs-12 page-header">
+        <button id="tutorial-toggle" class="btn btn-default col-sm-12" data-target="#tutorial" data-toggle="collapse"><h3 id="Getting-Started" class="section-heading">Getting started with GRASP<a class="anchor-link" href="#Getting-Started"></a></h3> <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></button>
+        <div th:replace="fragments/tutorial :: tutorial"></div>
+    </div>
 
     <!-- About Section -->
     <div th:replace="fragments/about :: about"></div>

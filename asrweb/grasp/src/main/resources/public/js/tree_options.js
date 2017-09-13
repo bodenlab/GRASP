@@ -27,7 +27,7 @@ var perform_marginal = function(node_name, node_fill) {
             if ($("#mutant-btn").attr("aria-pressed") === 'true') {
                 set_draw_mutants(true);
                 $('#mutant-input').fadeIn();
-                view_mutant_library($('#text-mutant').val());
+                view_mutant_library();
             } else {
                 set_draw_mutants(false);
                 $('#mutant-input').fadeOut();

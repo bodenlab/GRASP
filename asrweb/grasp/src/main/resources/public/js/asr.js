@@ -55,10 +55,11 @@ var set_recon_label = function(label) {
 };
 
 var set_mutant = function(numMutants) {
+    console.log(numMutants);
     if (isNaN(numMutants)) {
         poags.options.mutants.count = 0;
     } else {
-        poags.options.mutants.count = numMutants;
+        poags.options.mutants.count = numMutants + 1;
     }
 };
 
@@ -73,14 +74,14 @@ var set_draw_mutants = function(flag) {
  * View the mutant library distribution instead of the full marginal distribution
  * num - number of mutants to consider
  */
-var view_mutant_library = function(num) {
-    set_mutant(num);
+var view_mutant_library = function() {
 
     // Get graph options to alter mutant library
     poags.retain_previous_position = true;
-    poags.options.mutants.count = num;
     poags.options.mutants.draw = true;
     generate_mutants();
+
+    console.log(poags.options.mutants.count);
 
     // Re-draw graph with mutants
     poags.groups.mini.selectAll("*").remove();

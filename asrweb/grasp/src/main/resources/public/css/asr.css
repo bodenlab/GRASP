@@ -24,6 +24,115 @@ h6 {
     font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+#home-img-div {
+    background: url(../images/home_page.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 66.64%;
+}
+
+#phylo-tree-img-div {
+    background: url(../images/phylo_tree.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
+#phylo-tree-right-click-img-div {
+    background: url(../images/phylo_tree_right_click.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 66.64%;
+}
+
+#dark-edge-img-div {
+    background: url(../images/dark_edge.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
+#thick-edge-img-div, #thick-edge-2-img-div {
+    background: url(../images/thick_edge.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
+#light-edge-img-div {
+    background: url(../images/light_edge.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
+#light-edge-img-div {
+    background: url(../images/dashed_edge.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
+#graph-view-img-div {
+    background: url(../images/graph_view.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 55%;
+}
+
+#msa-pie-chart-img-div {
+    background: url(../images/msa_pie_chart.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 30%;
+}
+
+#merged-graph-img-div {
+    background: url(../images/merged_graph.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 90%;
+}
+
+#graph-view-marginal-img-div {
+    background: url(../images/graph_view_marginal.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 55%;
+}
+
+#download-pane-img-div {
+    background: url(../images/download_pane.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 55%;
+}
+
+
 .topnav {
     font-size: 12px;
 }

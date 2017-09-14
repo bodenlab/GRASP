@@ -237,15 +237,15 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3>Technical information<a id="technical-info"></a></h3>
-                            <h4>What is the difference between joint and marginal reconstruction?</h4>
+                            <h2>Technical information<a id="technical-info"></a></h2>
+                            <h3>What is the difference between joint and marginal reconstruction?</h3>
                             <p>GRASP employs exact maximum likelihood inference; it distinguishes between two types of reconstructions:</p>
                             <p><strong>Joint</strong> -  GRASP infers the most probable combination of all ancestral states. The assignment of all ancestral states (across the whole phylogenetic tree) optimises a single objective (the state with the greatest <em>likelihood</em>). This will tell you which are the most probable ancestors, given the extant sequences and their phylogenetic relationships. The inference is valid for the whole tree, and it is practical to compare ancestors with one another as they represent snapshots in the same evolutionary history.</p>
                             <p><strong>Marginal</strong> - GRASP infers the probability distribution of each residue for a single, nominated ancestor. This inference will present you with the probability of amino acids at each position in the nominated ancestor, given extant sequences and their phylogenetic relationships. The inference "marginalises" all other ancestors, meaning that (a) each ancestor needs to be inferred separately, and (b) resulting distributions are not directly comparable; marginal reconstructions are based on the <em>same</em> input data, but allow for <em>different</em> versions of evolutionary histories along the <em>same</em> branches.</p>
-                            <h4>How are mutant libraries determined?</h4>
+                            <h3>How are mutant libraries determined?</h3>
                             <p>A marginal reconstruction allows the user to identify the positions that should be mutated with priority, to explore the space of probable ancestors.</p>
                             <p>Initially, the complexity of the mutant library is "1", suggesting for each position, only the most probable amino acid. At "2", a single mutation is allowed, at the position that improves the summed Kullback-Leibler divergence between the mutant distributions and the corresponding marginal distributions, across all sequence positions. For each increase in the level, another mutation is identified where an alternative amino acid is suggested. Note that another mutation could occur at a position that has been mutated previously or in a different position. Either way, the potential library will increase in complexity, i.e. the number of theoretically possible mutants.</p>
-                            <h4>What is bi-directional edge-parsimony?</h4>
+                            <h3>What is bi-directional edge-parsimony?</h3>
                             <p><em>What it is and why we use it.</em></p>
                         </div>
                     </div>
@@ -253,7 +253,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3>Advanced concepts/Example</h3>
+                            <h2>Advanced concepts/Example</h2>
                         </div>
                     </div>
                 </div>

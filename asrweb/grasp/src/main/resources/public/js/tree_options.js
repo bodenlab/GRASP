@@ -11,6 +11,7 @@ var perform_marginal = function(node_name, node_fill) {
         type : 'POST',
         data : {infer: inferType, node: selectedNode},
         success: function(data) {
+            $("#progress").addClass("disable");
             var json_str = data;
             graph_array = [];
             //add_new_poag(json_str, node_name, node_fill);
@@ -35,13 +36,14 @@ var perform_marginal = function(node_name, node_fill) {
             }
         }
     });
-    $("#progress").addClass("disable");
 };
 
 /*
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
 var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
+    $("#progress").removeClass("disable");
+
     if (reset_graphs == false && inferType == "marginal") {
         reset_graphs = true;
         selectedNode = node_name;
@@ -62,6 +64,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
         type : 'POST',
         data : {infer: inferType, node: node_name},
         success: function(data) {
+            $("#progress").addClass("disable");
             var json_str = data;
             drawMutants = false;
             //problem below, this only colours for the second poag, leaving the colour for 'poag1'
@@ -86,6 +89,5 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
             redraw_poags();
         }
     });
-    $("#progress").addClass("disable");
     redraw_poags();
 };

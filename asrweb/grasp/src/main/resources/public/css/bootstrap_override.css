@@ -84,6 +84,11 @@ text {
     margin: 0px;
 }
 
+.figure-caption {
+    padding: 1em;
+    color: #777;
+    font-size: 14px;
+}
 
 #btn-mutant-up {
     border-top-left-radius: 0px;

@@ -94,7 +94,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 			// performing reconstruction on test data
 			if (asr.getData() != null && !asr.getData().equalsIgnoreCase("none") && !asr.getData().equalsIgnoreCase("")) {
-				asr.setLabel(asr.getData());
 				File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".aln").toURI());
 				asr.setAlnFilepath(asr.getSessionDir() + asr.getData() + ".aln");
 				Files.copy(alnFile.toPath(), (new File(asr.getAlnFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);

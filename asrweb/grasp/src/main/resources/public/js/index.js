@@ -23,6 +23,7 @@ var poags = {
     max_x: 0,
     min_y: 1000,
     max_y: 0,
+    y_offset: 50,
     node_radius: 0, // radius of the nodes in the current view (will be updated on draw)
     // Current x coords visible in the window frame
     cur_x_max: 100,
@@ -45,7 +46,7 @@ var poags = {
         edges: {},
         raw: {},
         class_name: 'single-',
-        height: 400,
+        height: 250,
         margin: {left: 0, right: 0, top: 150, bottom: 0}
     },
     multi: {
@@ -527,7 +528,7 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     for (var n in nodes) {
         var node = nodes[n];
         var node_cx = poags.scale.x(node.x);
-        var node_cy = scale_y(node.y);
+        var node_cy = scale_y(node.y) + poags.y_offset;
         if (node.x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
             if (draw_legend) {
                 draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
@@ -1112,9 +1113,17 @@ var draw_mini_msa = function (poags) {
         // find node out edges
         var out_edge_count = 0;
         if (node_inferred != null) {
-            for (var e in poags.single.edges[poags.inferred_poag_name]) {
-                if (poags.single.edges[poags.inferred_poag_name][e].from.id == node_inferred.id) {
-                    out_edge_count++;
+            if (poags.merged.edges.length > 0) {
+                for (var e in poags.merged.edges) {
+                    if (poags.merged.edges[e].from.id == node_inferred.id) {
+                        out_edge_count++;
+                    }
+                }
+            } else {
+                for (var e in poags.single.edges[poags.inferred_poag_name]) {
+                    if (poags.single.edges[poags.inferred_poag_name][e].from.id == node_inferred.id) {
+                        out_edge_count++;
+                    }
                 }
             }
         }
@@ -1190,8 +1199,8 @@ var draw_edges = function (poags, edge, group, scale_y) {
     x_mid = x_start - ((x_start - x_end) / 2);
     x_diff = Math.abs(edge.from.x - edge.to.x);
 
-    y_start = scale_y(edge.from.y);
-    y_end = scale_y(edge.to.y);
+    y_start = scale_y(edge.from.y) + poags.y_offset;
+    y_end = scale_y(edge.to.y) + poags.y_offset;
     //y_next = scale_y(edge.next.y);
     y_mid = y_start - ((y_start - y_end) / 2);
 

@@ -27,7 +27,7 @@ public class ASR {
 
     private String sessionDir = null;
 
-    private String label = "Grasp";
+    private String label = "";
 
     //@File(type="aln", message="File must be an alignment (*.aln)")
     private MultipartFile alnFile = null;

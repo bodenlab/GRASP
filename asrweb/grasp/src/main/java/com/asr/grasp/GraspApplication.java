@@ -115,6 +115,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 				asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
 				asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
 			}
+
+			if (asr.getLabel() == "")
+				asr.setLabel("Grasp");
+
 			asr.runReconstruction();
 
 			model.addAttribute("label", asr.getLabel());

@@ -64,6 +64,7 @@
                     <p>Once reconstruction has been started, you may be alerted to problems with your data. Error and warning messages are generally displayed within a textbox under the main input screen. They include:</p>
                     <ul>
                         <li>Sequence names do not match the names of nodes in the phylogenetic tree. You will be notified of names that are unique for each file. GRASP will not guess what sequence that should be placed in the tree, so make sure the names agree in the two files. Some alignment programs will amend the names, which means you may need to edit them manually.</li>
+                        <li>Your sequences are composed of characters that are not recognised. The most common problem is the presence X. We recommend that you try to identify a higher quality sequence without unknown amino acids. GRASP will ignore sequences with unknown characters which could lead to complications when the phylogenetic tree make mention of them.</li>
                         <li>Files are not correctly formatted or not in any of the accepted file formats. See above for what they are and follow links for how they store their content.</li>
                         <li>Your files will take a long time to process, or are too large for the web server. Contact us to download and install a local, commandline tool that you can run on your own hardware. This will not have the graphical user interface, however.</li>
                     </ul>
@@ -222,8 +223,14 @@
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
                             <h3 id="vis-marg-nav">Graph visualisation - marginal reconstruction</h3>
-                            <p>A marginal reconstruction can be performed on individual nodes even if joint reconstruction was selected when initially performing ancestral sequence reconstruction. When a marginal reconstruction is selected for a primary node, the resulting graph will look similar to <a href="#graph-view-marginal-img">Figure 7</a>.</p>
-                            <p>While the edges still represent the same relationships (??), the primary node sequence will have pie charts similar to the MSA plot. This represents the distribution of amino acids at each position in the reconstructed sequence. More technical information about marginal reconstruction is provided <a href="#technical-info">here</a>.</p>
+                            <p>A marginal reconstruction can be performed on the root node from the loading page or any node selected in the
+                                phylogenetic tree on the results page.
+                                A marginal reconstruction will look similar to <a href="#graph-view-marginal-img">Figure 7</a>.
+                            </p>
+                            <p>The reconstruction of the primary node will be composed of pie charts similar to the MSA plot.
+                                This represents the distribution of amino acids at each position in the reconstructed sequence.
+                                More technical information about marginal reconstruction is provided <a href="#technical-info">here</a>.
+                            </p>
                             <a id="graph-view-marginal-img"></a>
                             <div class="col-xs-12" id="graph-view-marginal-img-div"></div>
                             <figcaption class="figure-caption">Figure 7. After marginal reconstruction, all extants, and the primary node are shown as graphs.
@@ -232,7 +239,15 @@
                             </figcaption>
                             <h4>Mutants</h4>
                             <p>Once a marginal reconstruction has been performed, it is possible to identify targets for mutational analysis. This is based on the idea that the reconstruction represents just one possible ancestor, and that others can be explored around it by mutating positions that are inferred to be in an ambivalent state.</p>
-                            <p>The user can select the level of complexity of the mutant library. The base case "1" means that all nodes map to the single, most probable amino acid. You will note by setting it to "1" all nodes become single-state. By increasing the level, alternative amino acids are added to positions that are more ambivalent; at higher levels of complexity, some positions are assigned two or more mutational targets. An arrow appears close to the location of the identified nodes. You will note that the ambivalent nodes are shown with more character states. More technical information is provided <a href="#technical-info">below</a>.</p>
+                            <p>The user can select the level of complexity of the mutant library.
+                                The base case "0" means that all nodes map to the single, most probable amino acid.
+                                You will note by setting it to "0" all nodes become single-state.
+                                By increasing the level, alternative amino acids are added to positions that are more ambivalent;
+                                at higher levels of complexity, some positions are assigned two or more mutational targets.
+                                An arrow appears close to the location of the identified nodes.
+                                You will note that the ambivalent nodes are shown with more character states.
+                                More technical information is provided <a href="#technical-info">below</a>.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -271,12 +286,18 @@
                         <div class="text_cell_render border-box-sizing rendered_html">
                             <h2 id="tech-info-nav">Technical information<a id="technical-info"></a></h2>
                             <h3 id="joint-marg-nav">What is the difference between joint and marginal reconstruction?</h3>
-                            <p>GRASP employs exact maximum likelihood inference; it distinguishes between two types of reconstructions:</p>
+                            <p>GRASP employs exact probabilistic inference; it distinguishes between two types of reconstructions:</p>
                             <p><strong>Joint</strong> - GRASP infers the most probable combination of all ancestral states. The assignment of all ancestral states (across the whole phylogenetic tree) optimises a single objective (the state with the greatest <em>likelihood</em>). This will tell you which are the most probable ancestors, given the extant sequences and their phylogenetic relationships. The inference is valid for the whole tree, and it is practical to compare ancestors with one another as they represent snapshots from the same evolutionary history.</p>
                             <p><strong>Marginal</strong> - GRASP infers the probability distribution of each residue for a single, nominated ancestor. This inference will present you with the probability of amino acids at each position in the nominated ancestor, given extant sequences and their phylogenetic relationships. The inference "marginalises" all other ancestors, meaning that (a) each ancestor needs to be inferred separately, and (b) resulting distributions are not directly comparable; marginal reconstructions are based on the <em>same</em> input data, but allow for <em>different</em> versions of evolutionary histories along the <em>same</em> branches.</p>
                             <h3 id="mutant-nav">How are mutant libraries determined?</h3>
                             <p>A marginal reconstruction allows the user to identify the positions that should be mutated with priority, to explore the space of probable ancestors.</p>
-                            <p>Initially, the complexity of the mutant library is "1", suggesting for each position, only the most probable amino acid. At "2", a single mutation is allowed, at the position that improves the summed Kullback-Leibler divergence between the mutant distributions and the corresponding marginal distributions, across all sequence positions. For each increase in the level, another mutation is identified where an alternative amino acid is suggested. Note that another mutation could occur at a position that has been mutated previously or in a different position. Either way, the potential library will increase in complexity, i.e. the number of theoretically possible mutants.</p>
+                            <p>Initially, the complexity of the mutant library is "0", suggesting for each position, only the most probable amino acid.
+                                At "1", a single mutation is allowed, at the position that improves the summed Kullback-Leibler divergence between the
+                                mutant distributions and the corresponding marginal distributions, across all sequence positions.
+                                For each increase in the level, another mutation is identified where an alternative amino acid is suggested.
+                                Note that another mutation could occur at a position that has been mutated previously or in a different position.
+                                Either way, the potential library will increase in complexity, i.e. the number of theoretically possible mutants.
+                            </p>
                             <h3 id="bi-pars-nav">What is bi-directional edge-parsimony?</h3>
                             <p>Edges represent optional paths through which sequences can be composed; ultimately, the collective of extant sequences when aligned determines the set of all possible paths; that set is the source from which we draw the path or paths for any ancestor. We are interested in identifying which edges that are best supported for an ancestor, given their phylogenetic relationships. For this we use the basic principle of maximum parsimony, where only the most parsimonuous edges are kept for each individual ancestor.</p>
                             <p>Maximum parsimony is applied to edges of a node; for each node, we separately process edges labelled by the nodes preceding it, and edges labelled by the nodes following it. An edge can therefore be supported in one direction but not the other. Uni-directional support is sufficient for GRASP to display it and maintain any paths to the nodes concerned; bi-directional support should be seen as much stronger endorsement though. We run maximum parsimony to identify <em>all</em> edges that achieve the best score when it is shared. This means that is many cases multiple paths through an ancestor can not be ruled out.</p>

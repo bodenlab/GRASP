@@ -78,7 +78,7 @@ h6 {
     padding-top: 40%;
 }
 
-#light-edge-img-div {
+#dashed-edge-img-div {
     background: url(../images/dashed_edge.png);
     background-size: contain;
     background-repeat: no-repeat;
@@ -132,6 +132,22 @@ h6 {
     padding-top: 55%;
 }
 
+.guide-nav {
+    position: fixed;
+    top: 285px;
+    right: 0px;
+    z-index: 1100;
+    overflow: scroll;
+}
+
+li.nav-item-2 a {
+    padding: 2px 25px;
+}
+
+.guide-nav li a {
+    color: #777;
+    font-size: 12px;
+}
 
 .topnav {
     font-size: 12px;

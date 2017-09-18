@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+
+    <title>GRASP Ancestral Sequence Reconstruction</title>
+
+    <!-- Custom Fonts -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/font-awesome.min.css}"></link>
+    <!--<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"></link>-->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-switch.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/asr.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/bootstrap_override.css}"></link>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
+    <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap-switch.min.js}"></script>
+    <!--<script type="text/javascript" th:src="@{/js/d3.tip.v0.6.3.js}"></script>-->
+    <script type="text/javascript" th:src="@{/js/colour_defs.js}"></script>
+    <script type="text/javascript" th:src="@{/js/index.js}"></script>
+    <script type="text/javascript" th:src="@{/js/actions.js}"></script>
+    <script type="text/javascript" th:src="@{/js/asr.js}"></script>
+    <script type="text/javascript" th:src="@{/js/tree_options.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree.js}"></script>
+</head>
+<body class="container-fluid">
+    <div th:replace="fragments/nav :: nav"></div>
+
+    <!-- Header -->
+    <div th:replace="fragments/header :: header"></div>
+
+    <!-- Page Content -->
+
+    <!-- Tutorial Section  -->
+    <div class="col-xs-12 page-header">
+        <div class="col-xs-2 col-xs-offset-10">
+        <ul id="guide-nav" class="guide-nav navbar-default nav flex-column">
+            <li class="nav-item"><a class="nav-link" data-target=".guide-nav-collapse" data-toggle="collapse"><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span></a></li>
+            <li class="nav-item guide-nav-collapse collapse" aria-expanded="true"><a class="nav-link active" href="#tutorial-div">Getting started</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#input-nav">Input data</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#help-nav">Help</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#job-name-nav">Job name</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#align-seq-nav">Sequence alignment</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#phylo-tree-nav">Phylogenetic tree</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#evol-model-nav">Evolutionary model</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#recon-type-nav">Reconstruction type</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#perform-recon-nav">Perform reconstruction</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#problems-nav">Problems</a></li>
+            <li class="nav-item guide-nav-collapse collapse" aria-expanded="true"><a class="nav-link" href="#results-nav">Results</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#results-phylo-nav">Phylogenetic tree</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#po-graph-nav">Partial-order graph</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#vis-joint-nav">Visualise joint reconstructions</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#vis-marg-nav">Visualise marginal reconstructions</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#download-nav">Download results</a></li>
+            <li class="nav-item guide-nav-collapse collapse" aria-expanded="true"><a class="nav-link" href="#tech-info-nav">Technical information</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#joint-marg-nav">Joint &amp; marginal reconstruction</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#mutant-nav">Mutant libraries</a></li>
+            <li class="nav-item-2 guide-nav-collapse collapse" aria-expanded="true"><a href="#bi-pars-nav">Bi-directional edge parsimony</a></li>
+            <li class="nav-item guide-nav-collapse collapse" aria-expanded="true"><a class="nav-link" href="#advanced-nav">Advanced concepts &amp; examples</a></li>
+            <li class="nav-item guide-nav-collapse collapse" aria-expanded="true"><a class="nav-link" href="#refs-nav">References</a></li>
+        </ul>
+        </div>
+        <!--<button id="tutorial-toggle" class="btn btn-default col-sm-12" data-target="#tutorial" data-toggle="collapse">-->
+        <h3 id="Getting-Started" class="section-heading">Getting started with GRASP</h3>
+        <!--</button>-->
+        <div th:replace="fragments/tutorial :: tutorial"></div>
+    </div>
+
+    <!-- About Section -->
+    <div th:replace="fragments/about :: about"></div>
+
+    <!-- Footer -->
+    <div th:replace="fragments/footer :: footer"></div>
+
+</body>
+
+</html>

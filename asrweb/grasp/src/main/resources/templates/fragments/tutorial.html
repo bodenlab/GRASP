@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="tutorial" class="panel panel-default collapse" aria-expanded="false" id="tutorial">
+<div th:fragment="tutorial" class="panel panel-default" aria-expanded="false" id="tutorial">
     <a id="tutorial-nav"></a>
     <div class="content-section-b" id="tutorial-div">
         <div class="container">
             <div class="row">
                 <div class="col-xs-12">
                     <p>GRASP infers ancestral proteins from homologous protein sequences. It efficiently determines character states, and the most supported insertions and deletions; GRASP presents all this as partial-order graphs using a visual interface, connected to a phylogenetic tree, with which the user can interact.</p>
-                    <h3>Input data</h3>
+                    <h3 id="input-data-nav">Input data</h3>
                     <p>GRASP requires only two input files and one parameter to run successfully. On GRASP's landing page, the two files you will require are a set of (aligned) sequences and the corresponding phylogenetic tree.</p>
                     <p>GRASP accepts the following file formats.</p>
                     <table class="table">
@@ -27,11 +27,11 @@
                         </tbody>
                     </table>
                     <p>To try GRASP out, on the landing page you are presented with the option of running test data (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>). This will automatically load an alignment file and tree file; you can then run joint (or marginal) reconstruction allowing you to explore the results provided by GRASP. As we proceed through this tutorial, we will refer to the results of this test data.</p>
-                    <h3>Help</h3>
+                    <h3 id="help-nav">Help</h3>
                     <p>If, at any stage, you require specific information about what you are seeing presented on the GRASP home or results page, you can hit the help button to switch on help boxes (see <a href="#home-img">(8)</a> in <a href="#home-img">Figure 1</a>).</p>
-                    <h3>Name your job</h3>
+                    <h3 id="job-name-nav">Name your job</h3>
                     <p>To allow you to keep track of your results, on the GRASP landing page you are able to provide a name for your job  (see <a href="#home-img">(2)</a> in <a href="#home-img">Figure 1</a>). This name will be used as an identifier in any saved output data.</p>
-                    <h3>Sequence alignment</h3>
+                    <h3 id="align-seq-nav">Sequence alignment</h3>
                     <p>Once you have a name, you can 'Select sequence alignment file..' (see <a href="#home-img">(3)</a> in <a href="#home-img">Figure 1</a>). Accepted alignment formats are noted in the table above.</p>
                     <h4>Align using GRASP</h4>
                     <p>If you do not have a set of aligned sequences, GRASP can align your sequences for you. To do this, first switch 'Align extant sequences' to 'Yes' (see <a href="#home-img">(3a)</a> in <a href="#home-img">Figure 1</a>) which will, in turn, allow submission of a sequence library file (see <a href="#home-img">(3b)</a> in <a href="#home-img">Figure 1</a>). Your input library of sequences should be in FASTA format.</p>
@@ -44,7 +44,7 @@
                         <li><a href="http://www.clustal.org/omega/">Clustal Omega</a></li>
                     </ul>
                     <p>We are currently working on a suite of tools that will perform advanced alignment and phylogenetic inference from only a set of homologous sequence; they will be available in GRASP once properly evaluated and benchmarked.</p>
-                    <h3>Phylogenetic tree</h3>
+                    <h3 id="phylo-tree-nav">Phylogenetic tree</h3>
                     <p>A phylogenetic tree must be provided for standard reconstruction using 'Select phylogenetic tree file...' (see <a href="#home-img">(4)</a> in <a href="#home-img">Figure 1</a>). Accepted tree formats are noted above.</p>
                     <p>Some of the alignment tools listed above can provide phylogenetic trees. Alternatively, some tools/services/packages for generating trees are listed below:</p>
                     <ul>
@@ -54,13 +54,13 @@
                         <li><a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">RAxML</a></li>
                         <li><a href="http://mrbayes.sourceforge.net">MrBayes</a></li>
                     </ul>
-                    <h3>Evolutionary model</h3>
+                    <h3 id="evol-model-nav">Evolutionary model</h3>
                     <p>GRASP can perform reconstruction based on a variety of evolutionary models which can be selected from the drop down menu 'Select other evolutionary model...' (see <a href="#home-img">(5)</a> in <a href="#home-img">Figure 1</a>). By default, JTT is used.</p>
-                    <h3>Type of reconstruction</h3>
+                    <h3 id="recon-type-nav">Type of reconstruction</h3>
                     <p>GRASP can perform both joint and marginal reconstructions. We suggest running joint reconstruction as the initial reconstruction (see <a href="#home-img">(6)</a> in <a href="#home-img">Figure 1</a>) as we have made marginal reconstruction available to be run on specific nodes in the results section of GRASP.</p>
-                    <h3>Perform reconstruction</h3>
+                    <h3 id="perform-recon-nav">Perform reconstruction</h3>
                     <p>Once test data has been loaded or user data provided, the reconstruction can be started (see <a href="#home-img">(7)</a> in <a href="#home-img">Figure 1</a>).</p>
-                    <h3>Problems</h3>
+                    <h3 id="problems-nav">Problems</h3>
                     <p>Once reconstruction has been started, you may be alerted to problems with your data. Error and warning messages are generally displayed within a textbox under the main input screen. They include:</p>
                     <ul>
                         <li>Sequence names do not match the names of nodes in the phylogenetic tree. You will be notified of names that are unique for each file. GRASP will not guess what sequence that should be placed in the tree, so make sure the names agree in the two files. Some alignment programs will amend the names, which means you may need to edit them manually.</li>
@@ -77,9 +77,9 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2>GRASP Results</h2>
+                            <h2 id="results-nav">GRASP Results</h2>
                             <p>The figures included in this section were generated by running the test data available on GRASP (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>).</p>
-                            <h3>Phylogenetic tree</h3>
+                            <h3 id="results-phylo-nav">Phylogenetic tree</h3>
                             <p><a id='phylogenetic_tree'></a></p>
                             <p>We provide the user with a visualisation of the phylogenetic tree that was provided for reconstruction. GRASP will number internal node labels from the root node (N0, N1, ...) using the principle of "depth first". By default, extant labels are displayed and the user is given the option to also display or hide node labels and branch lengths (see <a href="#phylo-tree-img">(1)</a>, <a href="#phylo-tree-img">(2)</a> &amp; <a href="#phylo-tree-img">(3)</a> in <a href="#phylo-tree-img">Figure 2</a>). The user can also switch between an additive tree type or a cladogram (see <a href="#phylo-tree-img">(4)</a> in <a href="#phylo-tree-img">Figure 2</a>). This tree can also be saved as a PNG image (see <a href="#phylo-tree-img">(5)</a> in <a href="#phylo-tree-img">Figure 2</a>).</p>
                             <p>Each node is coloured by evolutionary distance according to the legend on the left hand side (see <a href="#phylo-tree-img">(6)</a> in <a href="#home-img">Figure 1</a>). One node will always appear pink and be noted in the header above the tree. This is the node that is having its reconstruction displayed in the graph below the phylogenetic tree and is known as the <strong>primary node</strong>. By default, node N0 (the root node) is the <strong>primary node</strong> and will appear pink and be listed in the header.</p>
@@ -128,7 +128,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3>Partial-order graph</h3>
+                            <h3 id="po-graph-nav">Partial-order graph</h3>
                             <p>GRASP uses partial-order graphs to display information about ancestors. They are suited to this task as (a) sequence homology amongst members in a protein family (and by extension their ancestors) may not always map unambiguously to a single, linear ordering, and (b) unresolved insertions and deletions can be identified as alternative paths through the graph.</p>
                             <p>The way you should read a partial-order graph is from left-to-right, node-by-node, forming a putative biological sequence (N- to C-terminus) by following a single path. At a single node there may be multiple out-edges, of which you can only select one. The choice is key, however, as explained below.</p>
                             <h4>Edges in a partial-order graph and consensus paths</h4>
@@ -175,7 +175,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3>Graph visualisation - joint reconstruction</h3>
+                            <h3 id="vis-joint-nav">Graph visualisation - joint reconstruction</h3>
                             <p>After running reconstruction, you will be able to see a navigation bar (see <a href="#graph-view-img">(1)</a> in <a href="#graph-view-img">Figure 4</a>), a multiple sequence alignment graph (see <a href="#graph-view-img">(2)</a> in <a href="#graph-view-img">Figure 4</a>) and the primary node reconstruction (see <a href="#graph-view-img">(3)</a> in <a href="#graph-view-img">Figure 4</a>) underneath the phylogenetic tree.</p>
                             <a id="graph-view-img"></a>
                             <div class="col-xs-12" id="graph-view-img-div"></div>
@@ -210,8 +210,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3>Graph visualisation - marginal reconstruction</h3>
-                            <p><a id='marg_recon'></a></p>
+                            <h3 id="vis-marg-nav">Graph visualisation - marginal reconstruction</h3>
                             <p>A marginal reconstruction can be performed on individual nodes even if joint reconstruction was selected when initially performing ancestral sequence reconstruction. When a marginal reconstruction is selected for a primary node, the resulting graph will look similar to <a href="#graph-view-marginal-img">Figure 7</a>.</p>
                             <p>While the edges still represent the same relationships (??), the primary node sequence will have pie charts similar to the MSA plot. This represents the distribution of amino acids at each position in the reconstructed sequence. More technical information about marginal reconstruction is provided <a href="#technical-info">here</a>.</p>
                             <a id="graph-view-marginal-img"></a>
@@ -226,7 +225,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3>Downloading results</h3>
+                            <h3 id="download-nav">Downloading results</h3>
                             <p>You can download the results generated by GRASP, and input files, through the download pane (as shown below). The download pane can be opened by clicking the "Download Results" drop down button located below the graph visualisation area (see <a href="#download-pane-img">(1)</a> in <a href="#download-pane-img">Figure 8</a>).</p>
                             <a id="download-pane-img"></a>
                             <div class="col-xs-12" id="download-pane-img-div"></div>
@@ -234,10 +233,12 @@
                             <p>To download results, tick the boxes for each file you wish to download and then click the download button at the bottom of the pane.</p>
                             <p>On the left hand side of the download pane ('<strong>Phylogenetic Tree</strong>', see <a href="#download-pane-img">(2)</a> in <a href="#download-pane-img">Figure 8</a>) there is a single option to download the phylogenetic tree. If you provided a phylogenetic tree as input, the corresponding downloaded file will simply be the tree you provided but with internal/ancestral nodes labelled (N0, N1..etc.). Otherwise, it will be the guide tree that GRASP constructed for you (again, with internal/ancestral nodes labelled).</p>
                             <p>In the middle section ('<strong>Ancestral Graphs</strong>', see <a href="#download-pane-img">(3)</a> in <a href="#download-pane-img">Figure 8</a>) you will find options to download partial order graph representations of the following:</p>
-                            <ul><li>Full multiple sequence alignment.</li></ul>
-                            <ul><li>Marginal reconstruction for the currently selected primary node.</li></ul>
-                            <ul><li>Joint reconstruction of all ancestor sequences. <strong>Warning</strong> - This can take some time to calculate!</li></ul>
-                            <ul><li>Joint reconstruction for the currently selected primary node.</li></ul>
+                            <ul>
+                                <li>Full multiple sequence alignment.</li>
+                                <li>Marginal reconstruction for the currently selected primary node.</li>
+                                <li>Joint reconstruction of all ancestor sequences. <strong>Warning</strong> - This can take some time to calculate!</li>
+                                <li>Joint reconstruction for the currently selected primary node.</li>
+                            </ul>
                             <p>Since GRASP represents sequences as partial order graphs, these files are in the <a href="https://en.wikipedia.org/wiki/DOT_(graph_description_language">'.dot'</a> format. There are a number of programs that you can use to visualise '.dot' files, one of the more popular cross-platform options is <a href="http://www.graphviz.org">'Graphviz'</a>.</p>
                             <p>Finally, on the right hand side of the download pane ('<strong>Sequence Information</strong>', see <a href="#download-pane-img">(4)</a> in <a href="#download-pane-img">Figure 8</a>) you will find options to download information for the following:</p>
                             <ul>
@@ -254,15 +255,15 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2>Technical information<a id="technical-info"></a></h2>
-                            <h3>What is the difference between joint and marginal reconstruction?</h3>
+                            <h2 id="tech-info-nav">Technical information<a id="technical-info"></a></h2>
+                            <h3 id="joint-marg-nav">What is the difference between joint and marginal reconstruction?</h3>
                             <p>GRASP employs exact maximum likelihood inference; it distinguishes between two types of reconstructions:</p>
                             <p><strong>Joint</strong> - GRASP infers the most probable combination of all ancestral states. The assignment of all ancestral states (across the whole phylogenetic tree) optimises a single objective (the state with the greatest <em>likelihood</em>). This will tell you which are the most probable ancestors, given the extant sequences and their phylogenetic relationships. The inference is valid for the whole tree, and it is practical to compare ancestors with one another as they represent snapshots from the same evolutionary history.</p>
                             <p><strong>Marginal</strong> - GRASP infers the probability distribution of each residue for a single, nominated ancestor. This inference will present you with the probability of amino acids at each position in the nominated ancestor, given extant sequences and their phylogenetic relationships. The inference "marginalises" all other ancestors, meaning that (a) each ancestor needs to be inferred separately, and (b) resulting distributions are not directly comparable; marginal reconstructions are based on the <em>same</em> input data, but allow for <em>different</em> versions of evolutionary histories along the <em>same</em> branches.</p>
-                            <h3>How are mutant libraries determined?</h3>
+                            <h3 id="mutant-nav">How are mutant libraries determined?</h3>
                             <p>A marginal reconstruction allows the user to identify the positions that should be mutated with priority, to explore the space of probable ancestors.</p>
                             <p>Initially, the complexity of the mutant library is "1", suggesting for each position, only the most probable amino acid. At "2", a single mutation is allowed, at the position that improves the summed Kullback-Leibler divergence between the mutant distributions and the corresponding marginal distributions, across all sequence positions. For each increase in the level, another mutation is identified where an alternative amino acid is suggested. Note that another mutation could occur at a position that has been mutated previously or in a different position. Either way, the potential library will increase in complexity, i.e. the number of theoretically possible mutants.</p>
-                            <h3>What is bi-directional edge-parsimony?</h3>
+                            <h3 id="bi-pars-nav">What is bi-directional edge-parsimony?</h3>
                             <p>Edges represent optional paths through which sequences can be composed; ultimately, the collective of extant sequences when aligned determines the set of all possible paths; that set is the source from which we draw the path or paths for any ancestor. We are interested in identifying which edges that are best supported for an ancestor, given their phylogenetic relationships. For this we use the basic principle of maximum parsimony, where only the most parsimonuous edges are kept for each individual ancestor.</p>
                             <p>Maximum parsimony is applied to edges of a node; for each node, we separately process edges labelled by the nodes preceding it, and edges labelled by the nodes following it. An edge can therefore be supported in one direction but not the other. Uni-directional support is sufficient for GRASP to display it and maintain any paths to the nodes concerned; bi-directional support should be seen as much stronger endorsement though. We run maximum parsimony to identify <em>all</em> edges that achieve the best score when it is shared. This means that is many cases multiple paths through an ancestor can not be ruled out.</p>
                         </div>
@@ -271,7 +272,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2>Advanced concepts/Example</h2>
+                            <h2 id="advanced-nav">Advanced concepts/Example</h2>
                             <p>To be written.</p>
                         </div>
                     </div>
@@ -279,7 +280,7 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2>References</h2>
+                            <h2 id="refs-nav">References</h2>
                             <ol>
                                 <li>Afriat-Jurnou L, Jackson CJ and Tawfik DS. Reconstructing a Missing Link in the Evolution of a Recently Diverged Phosphotriesterase by Active-Site Loop Remodeling. <em>Biochemistry</em> 2012, 51, 6047−6055. <a href="http://pubs.acs.org/doi/abs/10.1021/bi300694t">DOI:10.1021/bi300694t</a></li>
                             </ol>

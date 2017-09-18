@@ -69,7 +69,8 @@
                     </ul>
                     <a id="home-img"></a>
                     <div class="col-xs-12" id="home-img-div"></div>
-                    <figcaption class="figure-caption">Figure 1. caption</figcaption>
+                    <figcaption class="figure-caption">Figure 1. The GRASP landing page with a form for (1) trying an example data set, (2) naming your data set, (3) selecting if sequences need to be aligned, and uploading them,
+                        (4) uploading a phylogenetic tree, (5) selecting evolutionary model, (6) opting initial reconstruction: joint or marginal, and (7) starting the analysis. </figcaption>
                 </div>
                 <div class="cell border-box-sizing text_cell rendered">
                    <div class="inner_cell"><div class="text_cell_render border-box-sizing rendered_html"><hr></hr></div></div>
@@ -85,7 +86,8 @@
                             <p>Each node is coloured by evolutionary distance according to the legend on the left hand side (see <a href="#phylo-tree-img">(6)</a> in <a href="#home-img">Figure 1</a>). One node will always appear pink and be noted in the header above the tree. This is the node that is having its reconstruction displayed in the graph below the phylogenetic tree and is known as the <strong>primary node</strong>. By default, node N0 (the root node) is the <strong>primary node</strong> and will appear pink and be listed in the header.</p>
                             <a id="phylo-tree-img"></a>
                             <div class="col-xs-12" id="phylo-tree-img-div"></div>
-                            <figcaption class="figure-caption">Figure 2. caption</figcaption>
+                            <figcaption class="figure-caption">Figure 2. The phylogenetic tree with options to (1) toggle names on extant nodes, (2) toggle names on internal/ancestral nodes, (3) toggle distances on branches,
+                                (4) toggle mode of tree: additive or cladogram, and (5) save the tree with names of internal nodes as annotated by GRASP. </figcaption>
                             <p>By hovering over nodes in the tree, the name will be revealed. By right clicking a node in the tree you will bring up a number of operations which can be performed on the node. Note that some operations may take some time to complete.</p>
                             <table class="table">
                                 <thead>
@@ -119,7 +121,7 @@
                             </table>
                             <div class="col-xs-8 col-xs-offset-2">
                                 <div class="col-xs-12" id="phylo-tree-right-click-img-div"></div>
-                                <figcaption class="figure-caption">Figure 3. caption</figcaption>
+                                <figcaption class="figure-caption">Figure 3. The pop-up menu of phylogenetic tree is activated by right-clicking on an internal node. </figcaption>
                             </div>
                             <div class="clearfix"></div>
                         </div>
@@ -179,7 +181,16 @@
                             <p>After running reconstruction, you will be able to see a navigation bar (see <a href="#graph-view-img">(1)</a> in <a href="#graph-view-img">Figure 4</a>), a multiple sequence alignment graph (see <a href="#graph-view-img">(2)</a> in <a href="#graph-view-img">Figure 4</a>) and the primary node reconstruction (see <a href="#graph-view-img">(3)</a> in <a href="#graph-view-img">Figure 4</a>) underneath the phylogenetic tree.</p>
                             <a id="graph-view-img"></a>
                             <div class="col-xs-12" id="graph-view-img-div"></div>
-                            <figcaption class="figure-caption">Figure 4. caption</figcaption>
+                            <figcaption class="figure-caption">Figure 4. The reconstruction results panel has multiple sub-panels to view and interact with results, including
+                                (1) a bar for viewing the overall variation (optional edges and insertion/deletions) found in the set of reconstructions,
+                                (2) a multiple sequence alignment graph,
+                                (3) a partial-order graph for the phylogenetic node selected as primary,
+                                (4) slider for selecting a section, and zooming in and out of the set of ancestors currently displayed,
+                                (5) save the graphs graphically,
+                                (6) select colours for amino acids as they appear in graphs,
+                                (7) opting to perform mutant library analysis (applies to marginal reconstructions only), and
+                                (8) reset.
+                            </figcaption>
                             <h4>Navigation bar</h4>
                             <p>The navigation bar has a blue box (see <a href="#graph-view-img">(4)</a> in <a href="#graph-view-img">Figure 4</a>) which can be expanded or collapsed and moved across the window to view different sections of the graphs. The region of the graph that you are viewing is within the blue box. Depending on which node is being viewed as the <strong>primary node</strong> (see <a href="#phylogenetic_tree">Phylogenetic tree</a>) you will see grey boxes and red circles across the navigation bar.</p>
                             <p><strong>Grey boxes</strong> represent variations in insertions and deletions of the ancestor at the primary node that can not be resolved definitively; they indicate the presence of two or more edges in the ancestor at the corresponding position, all supported by maximum parsimony.</p>
@@ -188,7 +199,7 @@
                             <p>The multiple sequence alignment is represented here as a partial order alignment graph which captures variation across all sequences. Each node in the graph is represented as a pie chart showing the distribution of amino acids at that position across all extant sequences. The most probable amino acid is shown using its one-letter code. When you hover your mouse over each node, a bar chart will display, showing the distribution in more detail, as seen in <a href="#msa-pie-chart-img">Figure 5</a>.</p>
                             <a id="msa-pie-chart-img"></a>
                             <div class="col-xs-12" id="msa-pie-chart-img-div"></div>
-                            <figcaption class="figure-caption">Figure 5. caption</figcaption>
+                            <figcaption class="figure-caption">Figure 5. The multiple sequence alignment graph shows the sequence composition of <i>all</i> extant sequences, and what insertion/deletions are implied, in terms of alternative paths over edges.</figcaption>
                             <p>The edges in the multiple sequence alignment graph represent the insertion and deletions of <em>all</em> extant sequences.</p>
                             <h4>Primary node reconstruction</h4>
                             <p>This graph displays the reconstructed partial-order graph of the primary node. More technical information of joint reconstruction is provided <a href="#technical-info">below</a>.</p>
@@ -198,7 +209,7 @@
                             <p>On addition to the aligned visualisation of reconstructions in the stack, a graphical representation of all the ancestral graphs in a "merged" format will appear at the bottom of the graph visualisation as seen in <a href="#merged-graph-img">Figure 6</a>. The character state of each individual graph is displayed as a slice in a pie graph of all the ancestral graphs. Note that the colour of the outline indicates the evolutionary distance to the root, just as the background of the panel where the graph is shown.</p>
                             <a id="merged-graph-img"></a>
                             <div class="col-xs-12" id="merged-graph-img-div"></div>
-                            <figcaption class="figure-caption">Figure 6. caption</figcaption>
+                            <figcaption class="figure-caption">Figure 6. After joint reconstruction, all extants, the primary node and all added ancestral nodes are shown as an aligned stack of graphs. The merged graph summarises the make-up of all displayed reconstructions. </figcaption>
                             <h4>Graph options</h4>
                             <p>Graphs can be saved as PNG images using the 'Save graphs' button (see <a href="#graph-view-img">(5)</a> in <a href="#graph-view-img">Figure 4</a>).</p>
                             <p>The amino acid colour scheme is, by default, set to Clustal (see <a href="#graph-view-img">(6)</a> in <a href="#graph-view-img">Figure 4</a>).</p>
@@ -216,7 +227,10 @@
                             <p>While the edges still represent the same relationships (??), the primary node sequence will have pie charts similar to the MSA plot. This represents the distribution of amino acids at each position in the reconstructed sequence. More technical information about marginal reconstruction is provided <a href="#technical-info">here</a>.</p>
                             <a id="graph-view-marginal-img"></a>
                             <div class="col-xs-12" id="graph-view-marginal-img-div"></div>
-                            <figcaption class="figure-caption">Figure 7. caption</figcaption>
+                            <figcaption class="figure-caption">Figure 7. After marginal reconstruction, all extants, and the primary node are shown as graphs.
+                                The graph for the primary node reflects the probability of each amino acid at each position.
+                                The ability to determine and view alternative mutants around ancestor is enabled.
+                            </figcaption>
                             <h4>Mutants</h4>
                             <p>Once a marginal reconstruction has been performed, it is possible to identify targets for mutational analysis. This is based on the idea that the reconstruction represents just one possible ancestor, and that others can be explored around it by mutating positions that are inferred to be in an ambivalent state.</p>
                             <p>The user can select the level of complexity of the mutant library. The base case "1" means that all nodes map to the single, most probable amino acid. You will note by setting it to "1" all nodes become single-state. By increasing the level, alternative amino acids are added to positions that are more ambivalent; at higher levels of complexity, some positions are assigned two or more mutational targets. An arrow appears close to the location of the identified nodes. You will note that the ambivalent nodes are shown with more character states. More technical information is provided <a href="#technical-info">below</a>.</p>
@@ -230,7 +244,7 @@
                             <p>You can download the results generated by GRASP, and input files, through the download pane (as shown below). The download pane can be opened by clicking the "Download Results" drop down button located below the graph visualisation area (see <a href="#download-pane-img">(1)</a> in <a href="#download-pane-img">Figure 8</a>).</p>
                             <a id="download-pane-img"></a>
                             <div class="col-xs-12" id="download-pane-img-div"></div>
-                            <figcaption class="figure-caption">Figure 8. caption</figcaption>
+                            <figcaption class="figure-caption">Figure 8. The download results section, with a form to (1) show download specific file options, and what those files may be including (2) the annotated phylogenetic tree, (3) reconstructions, and (4) probability distributions.</figcaption>
                             <p>To download results, tick the boxes for each file you wish to download and then click the download button at the bottom of the pane.</p>
                             <p>On the left hand side of the download pane ('<strong>Phylogenetic Tree</strong>', see <a href="#download-pane-img">(2)</a> in <a href="#download-pane-img">Figure 8</a>) there is a single option to download the phylogenetic tree. If you provided a phylogenetic tree as input, the corresponding downloaded file will simply be the tree you provided but with internal/ancestral nodes labelled (N0, N1..etc.). Otherwise, it will be the guide tree that GRASP constructed for you (again, with internal/ancestral nodes labelled).</p>
                             <p>In the middle section ('<strong>Ancestral Graphs</strong>', see <a href="#download-pane-img">(3)</a> in <a href="#download-pane-img">Figure 8</a>) you will find options to download partial order graph representations of the following:</p>

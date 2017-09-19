@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<div th:fragment="results" th:if="${results}">
+<div id="results-container" th:fragment="results">
     <a id="results-nav"></a>
     <div class="content-section-b">
         <div class="row">
@@ -88,7 +88,6 @@
         <script type="text/javascript" th:inline="javascript">
 
                                 /*<![CDATA[*/
-
 
                             if ($('.infer-label').text() === "joint") {
     $('#mutant-btn').prop("disabled", true);

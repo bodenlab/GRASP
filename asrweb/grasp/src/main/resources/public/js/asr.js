@@ -55,7 +55,6 @@ var set_recon_label = function(label) {
 };
 
 var set_mutant = function(numMutants) {
-    console.log(numMutants);
     if (isNaN(numMutants)) {
         poags.options.mutants.count = 0;
     } else {

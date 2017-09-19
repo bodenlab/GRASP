@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
@@ -34,12 +36,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+//	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 //	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-//	final String sessionPath = "/var/www/GRASP/";
+	final String sessionPath = "/var/www/GRASP/";
 
-	private ASR asr;
-
+	private ASR asr = null;
 
 	/**
 	 * Initialise the initial form in the index
@@ -53,12 +54,55 @@ public class GraspApplication extends SpringBootServletInitializer {
 	}
 
 	/**
+	 * Show results
+	 *
+	 * @return results html
+	 */
+	@RequestMapping(value = "/results", method = RequestMethod.GET)
+	public String showResults(Model model) {
+		if (asr.getLabel() == "")
+			asr.setLabel("Grasp");
+
+		try {
+			asr.runReconstruction();
+		} catch (Exception e) {
+			model.addAttribute("error", true);
+			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
+				String message = checkErrors(asr);
+				model.addAttribute("errorMessage", message);
+				System.err.println("Error: " + message);
+			} else {
+				model.addAttribute("errorMessage", e.getMessage());
+				System.err.println("Error: " + e.getMessage());
+			}
+			return "index";
+		}
+
+		model.addAttribute("label", asr.getLabel());
+
+		// add reconstructed newick string to send to javascript
+		model.addAttribute("tree", asr.getReconstructedNewickString());
+
+		// add msa and inferred ancestral graph
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
+
+		model.addAttribute("graph", graphs);
+
+		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
+		model.addAttribute("inferenceType", asr.getInferenceType());
+		model.addAttribute("results", true);
+
+		return "results";
+	}
+
+	/**
 	 * Show guide
 	 *
 	 * @return guide html
 	 */
 	@RequestMapping(value = "/guide", method = RequestMethod.GET)
-	public String showGuide() {
+	public String showGuide(Model model) {
+		model.addAttribute("results", asr != null);
 		return "guide";
 	}
 
@@ -148,7 +192,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("inferenceType", asr.getInferenceType());
 		model.addAttribute("results", true);
 
-		return "index";
+		return "results";
 	}
 
 	/**

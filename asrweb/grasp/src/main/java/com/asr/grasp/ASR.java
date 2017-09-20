@@ -19,6 +19,8 @@ import java.io.IOException;
 public class ASR {
     private int NUM_THREADS = 5;
 
+    private String sessionId = "";
+
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
     private ASRPOG asrJoint = null;
@@ -52,7 +54,9 @@ public class ASR {
 
     private String data = null; // example dataset to run, if applicable
 
-    public ASR() {}
+    public ASR() {
+        this.sessionId = "grasp" + System.currentTimeMillis();
+    }
 
     /*******************************************************************************************************************
      ****** Setters and getters for ASR attributes (forms, etc, automatically call these)
@@ -96,6 +100,7 @@ public class ASR {
     public String getModel() { return this.model; }
     public void setData(String data) { this.data = data; }
     public String getData() { return this.data; }
+    public String getSessionId() { return this.sessionId; }
 
     /*******************************************************************************************************************
      ****** ASR functional methods

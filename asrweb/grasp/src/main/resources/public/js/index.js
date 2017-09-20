@@ -793,6 +793,10 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge.reciprocated = edge.reciprocated;
         reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
+        if (edge.from == 34) {
+            console.log(edge);
+        }
+        reduced_edge.single = edge.single;
 
         if (inferred) {
             poags.single.edges[name].push(reduced_edge);
@@ -1250,7 +1254,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
             .attr("stroke-width", stroke_width)
             .attr("stroke", stroke)
             .attr("stroke-dasharray", function() {
-                if (edge.weight*phylo_options.tree.extents.length/100 <= 1) {
+                if (edge.single) {
                     return "3,3";
                 } else {
                     return "0,0";

@@ -34,11 +34,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 		SpringApplication.run(GraspApplication.class, args);
 	}
 
-	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-//	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
 //	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	final String sessionPath = "/var/www/GRASP/";
+//	final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr = null;
 
@@ -130,7 +129,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		// upload supplied files
 		try {
-			File sessionDir = new File(sessionPath + sessionId);
+			File sessionDir = new File(sessionPath + asr.getSessionId());
 			if (!sessionDir.exists())
 				sessionDir.mkdir();
 
@@ -228,6 +227,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		// add msa and inferred ancestral graph
 		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
+
+		System.out.println(infer + " " + node);
 
 		model.addAttribute("graph", graphs);
 		model.addAttribute("inferenceType", asr.getInferenceType());

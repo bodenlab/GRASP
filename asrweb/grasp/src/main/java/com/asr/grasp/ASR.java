@@ -120,7 +120,6 @@ public class ASR {
      * Run joint reconstruction using uploaded files and specified options
      */
     private void runReconstructionJoint() throws Exception {
-        System.out.println(model);
         asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, performAlignment, model, NUM_THREADS);
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
     }
@@ -176,7 +175,6 @@ public class ASR {
     }
 
     public void saveMSAAln(String filepath) throws IOException {
-        System.out.println(filepath + "_MSA");
         if (asrJoint != null)
             asrJoint.saveALN(filepath + "_MSA", "clustal");
         else

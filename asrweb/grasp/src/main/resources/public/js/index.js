@@ -793,9 +793,6 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge.reciprocated = edge.reciprocated;
         reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
-        if (edge.from == 34) {
-            console.log(edge);
-        }
         reduced_edge.single = edge.single;
 
         if (inferred) {

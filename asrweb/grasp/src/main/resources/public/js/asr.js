@@ -80,8 +80,6 @@ var view_mutant_library = function() {
     poags.options.mutants.draw = true;
     generate_mutants();
 
-    console.log(poags.options.mutants.count);
-
     // Re-draw graph with mutants
     poags.groups.mini.selectAll("*").remove();
     poags = setup_brush(poags);

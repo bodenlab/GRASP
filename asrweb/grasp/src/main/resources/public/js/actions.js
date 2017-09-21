@@ -294,7 +294,7 @@ function calculateLoad(cols, seqs){
     }
     var duration = cols * equationLookup[roundedSeqs][0] + equationLookup[roundedSeqs][1];
 
-    duration += 180;
+    // duration += 180;
 
     if (duration < 60) {
         return "should take less than a minute";

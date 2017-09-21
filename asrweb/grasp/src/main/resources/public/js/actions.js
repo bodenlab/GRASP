@@ -60,16 +60,242 @@ var update_scheme = function (scheme) {
     update_colour(scheme);
 }
 
+
+
 /**
  * ----------------------------------------------------------------------------
- *                      Display the loading screen
+ *                        Display the loading screen
  *
  * ----------------------------------------------------------------------------
  */
 
-
 function displayLoad() {
-    $("#progress").removeClass("disable");
+
+    if (document.getElementById("selected-example").textContent == 'None') {
+
+
+        if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+            alert('The File APIs are not fully supported in this browser.');
+            return;
+        }
+
+        input = document.getElementById('filealn');
+        if (!input) {
+        }
+        else if (!input.files) {
+            alert("This browser doesn't seem to support the `files` property of file inputs.");
+        }
+        else if (!input.files[0]) {
+        }
+        else {
+            file = input.files[0];
+            fr = new FileReader();
+            fr.onload = receivedFile;
+            fr.readAsText(file);
+        }
+
+
+        function receivedFile() {
+
+            // Check the number of seqs and positions
+            var seqs = getSeqCount(fr.result);
+            var pos = getPosCount(fr.result);
+
+            var time = calculateLoad(pos, seqs);
+            var progress = $("#progress");
+
+            progress.find(".center-el").html("This reconstruction  " + time);
+            progress.removeClass("disable");
+        }
+    }
+
+    else if (document.getElementById("selected-example").textContent == 'CYP2U1 (139)') {
+
+        progress.find(".center-el").html("This reconstruction should take around 2 minutes");
+        progress.removeClass("disable");
+
+    }
+
+    else if (document.getElementById("selected-example").textContent == 'Afriat-Jurnou et al. (29)') {
+
+        progress.find(".center-el").html("This reconstruction should take less than a minutes");
+        progress.removeClass("disable");
+
+    }
+
+    else if (document.getElementById("selected-example").textContent == 'Hudson et al. (234)') {
+
+        progress.find(".center-el").html("This reconstruction should take around 3 minutes");
+        progress.removeClass("disable");
+
+    }
+
+    else if (document.getElementById("selected-example").textContent == 'Clifton and Jackson (340)') {
+
+        progress.find(".center-el").html("This reconstruction should take around 3 minutes");
+        progress.removeClass("disable");
+
+    }
+
+
+
+}
+
+/**
+ * ----------------------------------------------------------------------------
+ *                      Calculate the number of sequences
+ *
+ * ----------------------------------------------------------------------------
+ */
+
+function getSeqCount(alnfile) {
+    var seqs = 0;
+
+    if (alnfile.startsWith("CLUSTAL")){
+        var lines = alnfile.split("\n");
+
+        lines.shift(); // Remove the header
+
+        // Count the number of sequences in a single section in the file
+        var i = lines.length; while (i--) {
+            if (lines[i].length > 0 ) {
+                seqs += 1;
+                if (lines[i-1].length == 0) {
+                    return seqs;
+                }
+            }
+        }
+
+        }
+
+    else {
+         seqs = alnfile.split('>').length-1;
+    }
+    return seqs;
+}
+
+/**
+ * ----------------------------------------------------------------------------
+ *                      Calculate the number of positions
+ *
+ * ----------------------------------------------------------------------------
+ */
+
+function getPosCount(alnfile){
+    var total = 0;
+
+    if (alnfile.startsWith("CLUSTAL")){
+
+        var lines = alnfile.split("\n");
+        lines.shift(); // Remove the header
+
+        var i = lines.length; while (i--) {
+            if (lines[i].length > 0) {
+                var split = lines[i].split(" ");
+
+                // Get the remainder sequence length from the final section
+                var remainder = split[split.length - 1];
+
+                // Get the identifier that occurs before the remainder sequence
+                var identifier = lines[i].split(remainder)[0];
+
+
+                // Identifier occurs in this many sections (besides the final one)
+                var re = new RegExp(identifier, 'g');
+                var sections = (alnfile.match(re) || []).length - 1;
+
+                // Positions are equal to (50 * num of sections) + length of remainder sequence
+                var total = sections * 50 + remainder.length;
+                return total
+            }
+        }
+
+    }
+
+    else {
+
+        // Isolate a single entry
+        var entry = alnfile.split(">");
+        var lines =entry[1].split("\n");
+        lines.shift();
+
+        // Make sure we have all the number of positions from the first entry
+        var total = 0;
+         var i = lines.length; while (i--) {
+            if (lines[i].length > 0) {
+                total += lines[i].length
+            }
+        }
+
+    }
+
+    return total;
+}
+
+
+/**
+ * ----------------------------------------------------------------------------
+ *                      Calculate the loading duration
+ *
+ * ----------------------------------------------------------------------------
+ */
+function calculateLoad(cols, seqs){
+    
+    var equationLookup = {
+        50: [0.0358, 0.4741],
+        100: [0.0645, 0.5637],
+        150: [0.1147, 0.6532],
+        200: [0.1635, 0.7479],
+        250: [0.2394, 0.8323],
+        300: [0.3028, 0.8586],
+        350: [0.4223, 1.0511],
+        400: [0.5327, 0.9666],
+        450: [0.727, 1.165],
+        500: [0.8805, 1.0664],
+        550: [1.0799, 1.3722],
+        600: [1.3218, 1.2047],
+        650: [1.6367, 1.3811],
+        700: [1.8567, 1.3268],
+        750: [2.231, 1.639],
+        800: [2.7039, 1.1248],
+        850: [3.0639, 1.6541],
+        900: [3.7598, 1.0558],
+        950: [4.1819, 2.1209],
+        1000: [4.7697, 1.8128]
+        };
+    alert('round')
+    alert (Math.round(seqs / 50))
+    var roundedSeqs = Math.round(seqs / 50) *50;
+    alert (roundedSeqs);
+
+    if (roundedSeqs > 1000) {
+        return "will take a long time to complete.";
+    }
+    var duration = cols * equationLookup[roundedSeqs][0] + equationLookup[roundedSeqs][1];
+
+    alert (duration);
+
+    if (duration < 60) {
+        return "should take less than a minute";
+    }
+    // Calculate the hours and minutes it will take
+    var hours = duration / 3600;
+    var absoluteHours = Math.floor(hours);
+    var absoluteMins = Math.floor((hours - absoluteHours) * 60);
+
+
+    // Format to only show the hours and minutes if we have values for them
+    var hoursFinal = absoluteHours > 0 ? absoluteHours  + " hours" : "";
+    var minsFinal = absoluteMins > 0 ? absoluteMins  + " minutes" : "";
+
+    // Format to remove plural if it isn't needed
+    hoursFinal = absoluteHours == 1 ? hoursFinal.slice(0, -1) : hoursFinal;
+    minsFinal = absoluteMins == 1 ? minsFinal.slice(0, -1): minsFinal;
+
+    // Tidy up the duration
+    var durationFinal = absoluteHours <= 0 || absoluteMins <= 0 ? "should take around " + hoursFinal + minsFinal : "should take around " + hoursFinal + " and " + minsFinal;
+    return durationFinal;
+
 }
 
 /**

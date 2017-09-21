@@ -34,8 +34,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	final String sessionId = "grasp" + Long.toString(System.currentTimeMillis());
 
-	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
-//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
+//	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 //	final String sessionPath = "/var/www/GRASP/";
 
 	private ASR asr;
@@ -270,13 +270,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 				!asr.getSeqFile().getOriginalFilename().endsWith(".fa") && !asr.getSeqFile().getOriginalFilename().endsWith(".fasta")) ||
 				(asr.getAlnFile() != null && !asr.getAlnFile().getOriginalFilename().endsWith(".aln") &&
 						!asr.getAlnFile().getOriginalFilename().endsWith(".fa") && !asr.getAlnFile().getOriginalFilename().endsWith(".fasta")))
-			message = "Incorrect sequence or alignment format (requires fasta or clustal format .aln, .fa or .fasta).";
+			message = "Incorrect sequence or alignment format (requires FASTA or Clustal format .aln, .fa or .fasta).";
 		else if (((asr.getSeqFile() != null && !asr.getSeqFile().getOriginalFilename().equalsIgnoreCase("")) ||
 				(asr.getAlnFile() != null && !asr.getAlnFile().getOriginalFilename().equalsIgnoreCase(""))) &&
 				(asr.getTreeFile() == null || asr.getTreeFile().getOriginalFilename().equalsIgnoreCase("")))
 			message = "No phylogenetic tree file specified.";
 		else if (asr.getTreeFile() != null && !asr.getTreeFile().getOriginalFilename().endsWith(".nwk"))
-			message = "Incorrect phylogenetic tree format (requires newick format .nwk).";
+			message = "Incorrect phylogenetic tree format (requires Newick format .nwk).";
 		return message;
 	}
 

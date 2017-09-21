@@ -187,6 +187,12 @@ li.nav-item-2 a {
     text-shadow: 2px 2px 3px rgba(0,0,0,0.6);
 }
 
+.disable-link {
+    pointer-events: none;
+    cursor:not-allowed;
+    color: #b3b3b3;
+}
+
 @media(max-width:767px) {
     .intro-message {
         padding-bottom: 15%;

@@ -85,7 +85,7 @@ text {
 }
 
 .figure-caption {
-    padding: 1em;
+    padding: 1em 1em 3em 1em;
     color: #777;
     font-size: 14px;
 }

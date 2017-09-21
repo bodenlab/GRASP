@@ -8,11 +8,8 @@
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-10 pad-top-bottom">
                     <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
-                        <input type="text" class="form-input col-xs-8" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
-                        <!--<span class="input-group-btn" data-toggle="popover" data-placement="top" title="Test data" data-content="Run joint reconstruction on test data (6 small toy sequences).">
-                            <button type="submit" name="test" class="btn btn-default"><small>Run test data</small></button>
-                        </span>-->
-                        <div class="form-group col-xs-4 no-padding">
+                        <input type="text" class="form-input col-xs-7" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
+                        <div class="form-group col-xs-5 no-padding">
                             <div class="input-group col-xs-12 no-padding">
                                 <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Run joint reconstruction on the selected test dataset.">
                                     <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -37,6 +34,8 @@
                                         }
                                         document.querySelector("#" + data + "-selected").classList.remove('disable');
                                         document.getElementById("selected-example").textContent = document.getElementById(data).textContent;
+                                        $('#label').val("");
+                                        set_recon_label("");
                                         $('#data').val(data);
                                         if (data == "none") {
                                             // enable sequence alignment and library inputs
@@ -50,7 +49,11 @@
                                             }
                                             $('#lbl-filetree').removeAttr('disabled');
                                             $('#filetree').removeAttr('disabled');
+                                            $('#label').focus();
                                         } else {
+                                            $("#label").val(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
+                                            set_recon_label(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
+                                            $('#label').focus();
                                             // disable sequence alignment and library inputs
                                             $("[id='check-align']").bootstrapSwitch('disabled',true);
                                             $('#lbl-filealn').attr('disabled', true);
@@ -59,6 +62,7 @@
                                             $('#fileseq').attr('disabled', true);
                                             $('#lbl-filetree').attr('disabled', true);
                                             $('#filetree').attr('disabled', true);
+                                            $('#submit-btn').focus();
                                         }
                                     };
                                     /*]]>*/
@@ -181,6 +185,11 @@
                                             $('#inferenceType').val("joint");
                                         }
                                     });
+
+                                    $(document).ready(function () {
+                                        $('#results-nav-link').addClass("disable-link");
+                                        $('#results-nav-link').css("color", "#b3b3b3");
+				                    });
                                     /*]]>*/
                     </script>
                 </div>

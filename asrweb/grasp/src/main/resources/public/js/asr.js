@@ -55,7 +55,6 @@ var set_recon_label = function(label) {
 };
 
 var set_mutant = function(numMutants) {
-    console.log(numMutants);
     if (isNaN(numMutants)) {
         poags.options.mutants.count = 0;
     } else {
@@ -80,8 +79,6 @@ var view_mutant_library = function() {
     poags.retain_previous_position = true;
     poags.options.mutants.draw = true;
     generate_mutants();
-
-    console.log(poags.options.mutants.count);
 
     // Re-draw graph with mutants
     poags.groups.mini.selectAll("*").remove();

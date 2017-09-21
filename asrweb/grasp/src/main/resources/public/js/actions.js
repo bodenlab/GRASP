@@ -71,7 +71,11 @@ var update_scheme = function (scheme) {
 
 function displayLoad() {
 
-    if (document.getElementById("selected-example").textContent == 'None') {
+    var data_val = $('#data').val();
+    var progress = $("#progress");
+
+
+    if (data_val == '') {
 
 
         if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
@@ -102,35 +106,34 @@ function displayLoad() {
             var pos = getPosCount(fr.result);
 
             var time = calculateLoad(pos, seqs);
-            var progress = $("#progress");
 
             progress.find(".center-el").html("This reconstruction  " + time);
             progress.removeClass("disable");
         }
     }
 
-    else if (document.getElementById("selected-example").textContent == 'CYP2U1 (139)') {
+    else if (data_val == 'cyp2u1') {
 
         progress.find(".center-el").html("This reconstruction should take around 2 minutes");
         progress.removeClass("disable");
 
     }
 
-    else if (document.getElementById("selected-example").textContent == 'Afriat-Jurnou et al. (29)') {
+    else if (data_val == 'tawfik') {
 
         progress.find(".center-el").html("This reconstruction should take less than a minutes");
         progress.removeClass("disable");
 
     }
 
-    else if (document.getElementById("selected-example").textContent == 'Hudson et al. (234)') {
+    else if (data_val == 'hudson') {
 
         progress.find(".center-el").html("This reconstruction should take around 3 minutes");
         progress.removeClass("disable");
 
     }
 
-    else if (document.getElementById("selected-example").textContent == 'Clifton and Jackson (340)') {
+    else if (data_val == 'clifton') {
 
         progress.find(".center-el").html("This reconstruction should take around 3 minutes");
         progress.removeClass("disable");
@@ -242,42 +245,62 @@ function getPosCount(alnfile){
 function calculateLoad(cols, seqs){
     
     var equationLookup = {
-        50: [0.0358, 0.4741],
-        100: [0.0645, 0.5637],
-        150: [0.1147, 0.6532],
-        200: [0.1635, 0.7479],
-        250: [0.2394, 0.8323],
-        300: [0.3028, 0.8586],
-        350: [0.4223, 1.0511],
-        400: [0.5327, 0.9666],
-        450: [0.727, 1.165],
-        500: [0.8805, 1.0664],
-        550: [1.0799, 1.3722],
-        600: [1.3218, 1.2047],
-        650: [1.6367, 1.3811],
-        700: [1.8567, 1.3268],
-        750: [2.231, 1.639],
-        800: [2.7039, 1.1248],
-        850: [3.0639, 1.6541],
-        900: [3.7598, 1.0558],
-        950: [4.1819, 2.1209],
-        1000: [4.7697, 1.8128]
+        50: [0.026, 0.5837],
+        100: [0.0459, 0.571],
+        150: [0.0541, 0.7508],
+        200: [0.057, 0.8592],
+        250: [0.0869, 0.9489],
+        300: [0.1007, 1.0234],
+        350: [0.1182, 1.1416],
+        400: [0.1326, 1.231],
+        450: [0.1767, 1.3241],
+        500: [0.1938, 1.3629],
+        550: [0.2164, 1.3867],
+        600: [0.2452, 1.6317],
+        650: [0.2663, 1.7163],
+        700: [0.3169, 1.6519],
+        750: [0.3478, 1.6888],
+        800: [0.3802, 1.7721],
+        850: [0.408, 1.8692],
+        900: [0.4483, 1.8735],
+        950: [0.4992, 1.8298],
+        1000: [0.5015, 1.8739],
+        1050: [0.5687, 2.049],
+        1100: [0.5949, 2.0125],
+        1150: [0.6117, 2.1396],
+        1200: [0.6649, 2.2141],
+        1250: [0.7476, 2.2473],
+        1300: [0.8157, 2.1142],
+        1350: [0.8511, 2.5876],
+        1400: [0.8813, 2.5365],
+        1450: [0.9258, 2.6836],
+        1500: [0.9659, 2.6281],
+        1550: [1.0345, 2.8551],
+        1600: [1.15, 2.677],
+        1650: [1.2227, 2.8075],
+        1700: [1.2596, 3.0951],
+        1750: [1.2847, 2.9437],
+        1800: [1.4992, 2.7857],
+        1850: [1.4381, 2.8916],
+        1900: [1.5504, 2.9737],
+        1950: [1.6132, 3.1269],
+        2000: [1.8725, 2.6262]
         };
-    alert('round')
-    alert (Math.round(seqs / 50))
-    var roundedSeqs = Math.round(seqs / 50) *50;
-    alert (roundedSeqs);
 
-    if (roundedSeqs > 1000) {
+    var roundedSeqs = Math.round(seqs / 50) *50;
+
+    if (roundedSeqs > 2000) {
         return "will take a long time to complete.";
     }
     var duration = cols * equationLookup[roundedSeqs][0] + equationLookup[roundedSeqs][1];
 
-    alert (duration);
+    duration += 180;
 
     if (duration < 60) {
         return "should take less than a minute";
     }
+
+
     // Calculate the hours and minutes it will take
     var hours = duration / 3600;
     var absoluteHours = Math.floor(hours);

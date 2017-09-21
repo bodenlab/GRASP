@@ -3,8 +3,8 @@
 ** Perform marginal reconstruction of the selected tree node
 */
 var perform_marginal = function(node_name, node_fill) {
-    displayLoad();
-    // $("#progress").removeClass("disable");
+    // displayLoad();
+    $("#progress").removeClass("disable");
     selectedNode = node_name;
     set_inf_type("marginal");
     $.ajax({
@@ -43,8 +43,8 @@ var perform_marginal = function(node_name, node_fill) {
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
 var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
-    // $("#progress").removeClass("disable");
-    displayLoad();
+    $("#progress").removeClass("disable");
+    // displayLoad();
 
     if (reset_graphs == false && inferType == "marginal") {
         reset_graphs = true;

@@ -907,7 +907,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
     // Make a node id based on name and node count
     // only assign on initial load
     if (initial) {
-        node.id = phylo_options.tree.node_count + "-" + node.name.split(".")[0];
+        node.id = phylo_options.tree.node_count + "-" + node.name.split(/[._-]+/)[0];
         node.collapsed = false;
         phylo_options.tree.node_dict = node;
         depth += 1;

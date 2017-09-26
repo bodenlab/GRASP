@@ -73,34 +73,25 @@ function displayLoad() {
 
     var data_val = $('#data').val();
     var progress = $("#progress");
-
-
+/*
     if (data_val == '') {
-
-
         if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
             alert('The File APIs are not fully supported in this browser.');
             return;
         }
-
         input = document.getElementById('filealn');
         if (!input) {
-        }
-        else if (!input.files) {
+        } else if (!input.files) {
             alert("This browser doesn't seem to support the `files` property of file inputs.");
-        }
-        else if (!input.files[0]) {
-        }
-        else {
+        } else if (!input.files[0]) {
+        } else {
             file = input.files[0];
             fr = new FileReader();
             fr.onload = receivedFile;
             fr.readAsText(file);
         }
 
-
         function receivedFile() {
-
             // Check the number of seqs and positions
             var seqs = getSeqCount(fr.result);
             var pos = getPosCount(fr.result);
@@ -110,38 +101,20 @@ function displayLoad() {
             progress.find(".center-el").html("This reconstruction  " + time);
             progress.removeClass("disable");
         }
-    }
-
-    else if (data_val == 'cyp2u1') {
-
+    } else if (data_val == 'cyp2u1') {
         progress.find(".center-el").html("This reconstruction should take around 2 minutes");
         progress.removeClass("disable");
-
-    }
-
-    else if (data_val == 'tawfik') {
-
+    } else if (data_val == 'tawfik') {
         progress.find(".center-el").html("This reconstruction should take less than a minutes");
         progress.removeClass("disable");
-
-    }
-
-    else if (data_val == 'hudson') {
-
+    } else if (data_val == 'hudson') {
         progress.find(".center-el").html("This reconstruction should take around 3 minutes");
         progress.removeClass("disable");
-
-    }
-
-    else if (data_val == 'clifton') {
-
+    } else if (data_val == 'clifton') {
         progress.find(".center-el").html("This reconstruction should take around 3 minutes");
         progress.removeClass("disable");
-
-    }
-
-
-
+    }*/
+    progress.removeClass("disable");
 }
 
 /**
@@ -160,7 +133,8 @@ function getSeqCount(alnfile) {
         lines.shift(); // Remove the header
 
         // Count the number of sequences in a single section in the file
-        var i = lines.length; while (i--) {
+        var i = lines.length;
+        while (i--) {
             if (lines[i].length > 0 ) {
                 seqs += 1;
                 if (lines[i-1].length == 0) {
@@ -168,10 +142,7 @@ function getSeqCount(alnfile) {
                 }
             }
         }
-
-        }
-
-    else {
+    } else {
          seqs = alnfile.split('>').length-1;
     }
     return seqs;
@@ -300,12 +271,10 @@ function calculateLoad(cols, seqs){
         return "should take less than a minute";
     }
 
-
     // Calculate the hours and minutes it will take
     var hours = duration / 3600;
     var absoluteHours = Math.floor(hours);
     var absoluteMins = Math.floor((hours - absoluteHours) * 60);
-
 
     // Format to only show the hours and minutes if we have values for them
     var hoursFinal = absoluteHours > 0 ? absoluteHours  + " hours" : "";

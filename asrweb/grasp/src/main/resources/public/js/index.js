@@ -106,6 +106,7 @@ var poag_options = {
         text_padding: 10,
     },
     display: {
+        draw_consensus: false, // show the thicker consensus lines
         view_node_ids: true,    // view the node IDs under the MSA nodes
         margin_between_single_multi: 80,
         no_colour: "#f6f2f7",
@@ -171,8 +172,8 @@ var poag_options = {
     /**************** Options for style of the edges between nodes **********************/
     edge: {
         y_curve_amount: 5,
-        stroke_width: 2,
-        consensus_stroke_width: 6,
+        stroke_width: 4,
+        consensus_stroke_width: 7,
         single_seq_dash: 5,
         stroke: "#BBB",
         consensus_stroke: "black",
@@ -1240,9 +1241,8 @@ var draw_edges = function (poags, edge, group, scale_y) {
     if (edge.reciprocated) {
         stroke = edge_opt.reciprocated_stroke;
     }
-    if (edge.consensus) {
+    if (edge.consensus && poags.options.display.draw_consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
-     //   stroke = edge_opt.consensus_stroke;
     }
     group.append("path")
             .attr("d", line_function(line_points))

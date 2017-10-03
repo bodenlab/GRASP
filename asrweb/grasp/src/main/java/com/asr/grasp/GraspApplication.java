@@ -1,6 +1,7 @@
 package com.asr.grasp;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.SessionScope;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,8 +23,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+
 @Controller
 @SpringBootApplication
+@SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
 	@Override
@@ -39,7 +43,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 //	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	final String sessionPath = "/var/www/GRASP/";
 
-	private ASR asr = null;
+	@Autowired
+	private ASR asr;
 
 	/**
 	 * Initialise the initial form in the index
@@ -48,7 +53,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String showForm(Model model) {
-		model.addAttribute("asrForm", new ASR());
+		model.addAttribute("asrForm", asr);
 		return "index";
 	}
 
@@ -59,6 +64,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/results", method = RequestMethod.GET)
 	public String showResults(Model model) {
+		System.out.println(model.toString());
 		if (asr.getLabel() == "")
 			asr.setLabel("Grasp");
 
@@ -101,7 +107,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/guide", method = RequestMethod.GET)
 	public String showGuide(Model model) {
-		model.addAttribute("results", asr != null);
+		model.addAttribute("results", asr.getLabel() != "");
 		return "guide";
 	}
 
@@ -162,9 +168,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			if (asr.getLabel() == "")
 				asr.setLabel("Grasp");
 
-			System.out.println("running recon...");
 			asr.runReconstruction();
-			System.out.println("done");
 
 			model.addAttribute("label", asr.getLabel());
 

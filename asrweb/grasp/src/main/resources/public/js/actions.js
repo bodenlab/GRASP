@@ -73,6 +73,8 @@ function displayLoad() {
 
     var data_val = $('#data').val();
     var progress = $("#progress");
+
+
 /*
     if (data_val == '') {
         if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
@@ -318,6 +320,24 @@ var reset_poag_stack = function () {
     poags = process_edges(poags, poags.single.raw.msa, poags.root_poag_name, true);
     poags = process_poag_data(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
     poags = process_edges(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
+    redraw_poags();
+}
+
+/**
+ * ----------------------------------------------------------------------------
+ *                      View the consensus sequence path
+ *
+ * ----------------------------------------------------------------------------
+*/
+var view_consensus = function () {
+    var button_text = document.getElementById('consensus-button').innerHTML.split(" | ")[1];
+    if (button_text == "ON") {
+        document.getElementById('consensus-button').innerHTML = "View consensus | OFF";
+        poags.options.display.draw_consensus = false;
+    } else {
+        document.getElementById('consensus-button').innerHTML = "View consensus | ON";
+        poags.options.display.draw_consensus = true;
+    }
     redraw_poags();
 }
 

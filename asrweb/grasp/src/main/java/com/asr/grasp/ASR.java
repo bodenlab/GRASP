@@ -3,6 +3,8 @@ package com.asr.grasp;
 import api.PartialOrderGraph;
 import dat.POGraph;
 import json.JSONObject;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
 import reconstruction.ASRPOG;
 import vis.POAGJson;
@@ -16,6 +18,8 @@ import java.io.IOException;
  *
  * Created by marnie on 11/4/17.
  */
+@Component
+@SessionScope
 public class ASR {
     private int NUM_THREADS = 5;
 
@@ -24,6 +28,7 @@ public class ASR {
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
     private ASRPOG asrJoint = null;
+
     // ASR object to store marginal reconstruction of current node (if given)
     private ASRPOG asrMarginal = null;
 
@@ -56,6 +61,10 @@ public class ASR {
 
     public ASR() {
         this.sessionId = "grasp" + System.currentTimeMillis();
+    }
+
+    public ASR(long id) {
+        this.sessionId = "grasp" + id;
     }
 
     /*******************************************************************************************************************

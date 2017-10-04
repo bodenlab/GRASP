@@ -103,8 +103,8 @@ public class ASR {
     public void setPerformAlignment(boolean performAlignment) { this.performAlignment = performAlignment; }
     public void setSessionDir(String dir) { this.sessionDir = dir; }
     public String getSessionDir() { return this.sessionDir; }
-    public void setMarginalNodeLabel(String node) { this.nodeLabel = node; }
-    public String getMarginalNodeLabel() { return this.nodeLabel; }
+    public void setNodeLabel(String node) { this.nodeLabel = node; }
+    public String getNodeLabel() { return this.nodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }
     public void setData(String data) { this.data = data; }

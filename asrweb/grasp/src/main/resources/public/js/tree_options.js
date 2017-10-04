@@ -61,6 +61,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
         }
     }
     set_inf_type("joint");
+    //url : window.location,
     $.ajax({
         url : window.location,
         type : 'POST',

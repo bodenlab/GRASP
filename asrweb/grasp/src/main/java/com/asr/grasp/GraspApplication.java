@@ -62,15 +62,16 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 *
 	 * @return results html
 	 */
-	@RequestMapping(value = "/results", method = RequestMethod.GET)
+/*	@RequestMapping(value = "/results", method = RequestMethod.GET)
 	public String showResults(Model model) {
-		System.out.println(model.toString());
+		System.out.println("results " + asr.getAlnFilepath() + " " + asr.getNodeLabel());
 		if (asr.getLabel() == "")
 			asr.setLabel("Grasp");
 
 		try {
 			asr.runReconstruction();
 		} catch (Exception e) {
+			model.addAttribute("asrForm", asr);
 			model.addAttribute("error", true);
 			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
 				String message = checkErrors(asr);
@@ -89,7 +90,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("tree", asr.getReconstructedNewickString());
 
 		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), asr.getNodeLabel() == null? "root" : asr.getNodeLabel()));
 
 		model.addAttribute("graph", graphs);
 
@@ -97,8 +98,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("inferenceType", asr.getInferenceType());
 		model.addAttribute("results", true);
 
-		return "results";
-	}
+		return "index";
+	}*/
 
 	/**
 	 * Show guide
@@ -141,15 +142,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
 
-			// performing reconstruction on test data
-			if (asr.getData() != null && !asr.getData().equalsIgnoreCase("none") && !asr.getData().equalsIgnoreCase("")) {
-				File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".aln").toURI());
-				asr.setAlnFilepath(asr.getSessionDir() + asr.getData() + ".aln");
-				Files.copy(alnFile.toPath(), (new File(asr.getAlnFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
-				File treeFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".nwk").toURI());
-				asr.setTreeFilepath(asr.getSessionDir() + asr.getData() + ".nwk");
-				Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
-			} else {
+			if (asr.getSeqFile() != null || asr.getAlnFile() != null) {
 				// aligning input data before performing reconstruction
 				if (asr.getSeqFile() != null) {
 					asr.getSeqFile().transferTo(new File(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename()));
@@ -163,6 +156,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 				}
 				asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
 				asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
+			} else {
+				// performing reconstruction on test data
+				File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".aln").toURI());
+				asr.setAlnFilepath(asr.getSessionDir() + asr.getData() + ".aln");
+				Files.copy(alnFile.toPath(), (new File(asr.getAlnFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
+				File treeFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".nwk").toURI());
+				asr.setTreeFilepath(asr.getSessionDir() + asr.getData() + ".nwk");
+				Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
 			}
 
 			if (asr.getLabel() == "")
@@ -197,7 +198,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("inferenceType", asr.getInferenceType());
 		model.addAttribute("results", true);
 
-		return "results";
+		return "index";
 	}
 
 	/**
@@ -215,10 +216,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("label", asr.getLabel());
 
 		asr.setInferenceType(infer);
+		asr.setNodeLabel(node);
 
 		try {
 			if (infer.equalsIgnoreCase("marginal"))
-				asr.setMarginalNodeLabel(node);
+				asr.setNodeLabel(node);
 
 			asr.runReconstruction();
 

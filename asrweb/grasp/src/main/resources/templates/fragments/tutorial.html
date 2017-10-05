@@ -26,9 +26,13 @@
                         </tr>
                         </tbody>
                     </table>
-                    <p>To try GRASP out, on the landing page you are presented with the option of running test data (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>). This will automatically load an alignment file and tree file; you can then run joint (or marginal) reconstruction allowing you to explore the results provided by GRASP. As we proceed through this tutorial, we will refer to the results of running the test data labelled 'Afriat-Jurnou et al. (29)'. Data sets are taken from publications listed at the bottom of this page</p>
+                    <p>To try GRASP out, on the landing page you are presented with the option of running test data (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>).
+                        This will automatically load an alignment file and tree file; you can then run joint (or marginal) reconstruction allowing you to explore the results provided by GRASP.
+                        As we proceed through this tutorial, we will refer to the results of running the test data labelled 'Afriat-Jurnou et al. (29)'.
+                        Data sets are taken from publications listed at the bottom of this page</p>
                     <h3>Help</h3>
-                    <p>If, at any stage, you require specific information about what you are seeing presented on the GRASP home or results page, you can hit the help button to switch on help boxes (see <a href="#home-img">(8)</a> in <a href="#home-img">Figure 1</a>).</p>
+                    <p>If, at any stage, you require specific information about what you are seeing presented on the GRASP home or results page,
+                        you can hit the help button to switch on help boxes (see <a href="#home-img">(8)</a> in <a href="#home-img">Figure 1</a>).</p>
                     <h3 id="job-name-nav">Name your job</h3>
                     <p>To allow you to keep track of your results, on the GRASP landing page you are able to provide a name for your job  (see <a href="#home-img">(2)</a> in <a href="#home-img">Figure 1</a>). This name will be used as an identifier in any saved output data.</p>
                     <h3 id="align-seq-nav">Sequence alignment</h3>
@@ -62,7 +66,8 @@
                     <h3 id="perform-recon-nav">Perform reconstruction</h3>
                     <p>Once test data has been loaded or user data provided, the reconstruction can be started (see <a href="#home-img">(7)</a> in <a href="#home-img">Figure 1</a>).</p>
                     <h3 id="problems-nav">Problems</h3>
-                    <p>Once reconstruction has been started, you may be alerted to problems with your data. Error and warning messages are generally displayed within a textbox under the main input screen. They include:</p>
+                    <p>Once reconstruction has been started, you may be alerted to problems with your data.
+                        Error and warning messages are generally displayed within a textbox under the main input screen. They include:</p>
                     <ul>
                         <li>Sequence names do not match the names of nodes in the phylogenetic tree. You will be notified of names that are unique for each file. GRASP will not guess what sequence that should be placed in the tree, so make sure the names agree in the two files. Some alignment programs will amend the names, which means you may need to edit them manually.</li>
                         <li>Your sequences are composed of characters that are not recognised. The most common problem is the presence of an X character. We recommend that you try to identify a higher quality sequence without unknown amino acids.</li>
@@ -133,41 +138,42 @@
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
                             <h3 id="po-graph-nav">Partial-order graph</h3>
-                            <p>GRASP uses partial-order graphs to display information about ancestors. They are suited to this task as (a) sequence homology amongst members in a protein family (and by extension their ancestors) may not always map unambiguously to a single, linear ordering, and (b) unresolved insertions and deletions can be identified as alternative paths through the graph.</p>
-                            <p>The way you should read a partial-order graph is from left-to-right, node-by-node, forming a putative biological sequence (N- to C-terminus) by following a single path. At a single node there may be multiple out-edges, of which you can only select one. The choice is key, however, as explained below.</p>
+                            <p>GRASP uses partial-order graphs to display information about ancestors. They are suited to this task as
+                                (a) sequence homology amongst members in a protein family (and by extension their ancestors) may not always map unambiguously to a single, linear ordering, and
+                                (b) unresolved insertions and deletions can be identified as alternative paths through the graph.</p>
+                            <p>The way you should read a partial-order graph is from left-to-right, node-by-node, forming a putative biological sequence (N- to C-terminus) by following a single path.
+                                At a single node there may be multiple out-edges, of which you can only select one. The choice is key, however, as explained below.</p>
                             <h4>Edges in a partial-order graph and consensus paths</h4>
                             <p><a id='edge_cons_paths'></a></p>
-                            <p>An edge represent a valid path to construct a full-length sequence. Ultimately, once homologous sections have been determined by alignment, the set of extant sequences exemplify possible paths that can be taken. GRASP infers what edges go <em>in</em> to, as well as what edges go <em>out</em> from a node, by maximum parsimony. We call this process bi-directional edge-parsimony, and it is based on the phylogenetic tree. You can find a more detailed explanation <a href="#technical-info">here</a>.</p>
-                            <p>GRASP identifies several different types of edges:</p>
+                            <p>An edge represents a valid path to construct a full-length sequence.
+                                Ultimately, once homologous sections have been determined by alignment, the set of extant sequences exemplify possible paths that can be taken.
+                                GRASP infers what edges go <em>in</em> to, as well as what edges go <em>out</em> from a node, by maximum parsimony.
+                                We call this process bi-directional edge-parsimony, and it is based on the phylogenetic tree.
+                                You can find a more detailed explanation <a href="#technical-info">here</a>.</p>
+                            <p>GRASP identifies edges for which there is qualified support, and makes a number of distinctions that are important to interpret sequences that you assemble through them:</p>
                             <ul>
                                 <li>
-                                    <p>Dark-coloured edges (thick and thin) are supported by bi-directional edge-parsimony; these links are strong candidates for how an ancestor can be assembled.<br></br></p>
-                                    <div class="col-xs-3 col-xs-offset-4">
-                                        <div class="col-xs-12" id="dark-edge-img-div"></div>
-                                        <div class="col-xs-12" id="thick-edge-img-div"></div>
-                                    </div>
-                                    <div class="clearfix"></div>
+                                    <p>Dark-coloured edges are fully supported by bi-directional edge-parsimony; these links are strong candidates for how an ancestor can be assembled.
+                                        They are not exclusive, multiple paths connecting different parts of a full-length sequence may be present.
+                                        Nor are they guaranteed to identify even a single full-length sequence.<br></br></p>
                                 </li>
                                 <li>
-                                    <p>Light-coloured edges are not supported by bi-directional, only by uni-directional edge-parsimony (either left- or right node, never both); these edges are weaker candidates but are kept to allow full-length ancestors to be formulated in the absence of the stronger option.</p>
-                                    <div class="col-xs-3 col-xs-offset-4">
-                                        <div class="col-xs-12" id="light-edge-img-div"></div>
-                                    </div>
-                                    <div class="clearfix"></div>
+                                    <p>Light-coloured edges are only by uni-directional edge-parsimony (that is, the path is maximally parsimonous reading the sequence from left to right, or from right to left, never both);
+                                        these edges are weaker candidates but are kept to allow full-length ancestors to be formulated in the absence of the stronger option.</p>
+                                </li>
+                                <div class="col-xs-8 col-xs-offset-2">
+                                    <div class="col-xs-12" id="dark-light-edges-img-div"></div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </ul>
+                            <p>GRASP also has access to the raw number of extant sequences on which the inference is based. This can be used to separate edges further:</p>
+                            <ul>
+                                <li>
+                                    <p>Dashed edges has only a single representative in the set of extant sequences; these should almost always be disregarded and are often the result of out-groups that have been used to build the phylogenetic tree.</p>
                                 </li>
                                 <li>
-                                    <p>Thick/bold edges represent a single, consensus traversal of the graph, giving preference to (a) bi-directional edge-parsimony support (edge is drawn dark) and (b) greater number of extant sequences following. (All alternative paths are drawn with a think outline.)</p>
-                                    <div class="col-xs-3 col-xs-offset-4">
-                                        <div class="col-xs-12" id="thick-edge-2-img-div"></div>
-                                    </div>
-                                    <div class="clearfix"></div>
-                                </li>
-                                <li>
-                                    <p>Dashed edges are supported by either bi- or uni-directional edge-parsimony but has only a single representative in the set of extant sequences; these should almost always be disregarded and are often the result of out-groups that have been used to build the phylogenetic tree.</p>
-                                    <div class="col-xs-3 col-xs-offset-4">
-                                        <div class="col-xs-12" id="dashed-edge-img-div"></div>
-                                    </div>
-                                    <div class="clearfix"></div>
+                                    <p>GRASP provides the option of displaying one <em>consensus</em> sequence. If this option is turned on,
+                                        thick/bold edges represent a single, consensus traversal of the graph, giving preference to (a) bi-directional edge-parsimony support (edge is drawn dark) and (b) greater number of extant sequences following, irrespective of their phylogenetic relationship. (All alternative paths are drawn with a thin outline.)</p>
                                 </li>
                             </ul>
                             <h4>Nodes in a partial-order graph</h4>
@@ -288,20 +294,34 @@
                             <h2 id="tech-info-nav">Technical information<a id="technical-info"></a></h2>
                             <h3 id="joint-marg-nav">What is the difference between joint and marginal reconstruction?</h3>
                             <p>GRASP employs exact probabilistic inference; it distinguishes between two types of reconstructions:</p>
-                            <p><strong>Joint</strong> - GRASP infers the most probable combination of all ancestral states. The assignment of all ancestral states (across the whole phylogenetic tree) optimises a single objective (the state with the greatest <em>likelihood</em>). This will tell you which are the most probable ancestors, given the extant sequences and their phylogenetic relationships. The inference is valid for the whole tree, and it is practical to compare ancestors with one another as they represent snapshots from the same evolutionary history.</p>
-                            <p><strong>Marginal</strong> - GRASP infers the probability distribution of each residue for a single, nominated ancestor. This inference will present you with the probability of amino acids at each position in the nominated ancestor, given extant sequences and their phylogenetic relationships. The inference "marginalises" all other ancestors, meaning that (a) each ancestor needs to be inferred separately, and (b) resulting distributions are not directly comparable; marginal reconstructions are based on the <em>same</em> input data, but allow for <em>different</em> versions of evolutionary histories along the <em>same</em> branches.</p>
+                            <p><strong>Joint</strong> - GRASP infers the most probable combination of all ancestral states. The assignment of all ancestral states (across the whole phylogenetic tree) optimises a single objective (the state with the greatest <em>likelihood</em>).
+                                This will tell you which are the most probable ancestors, given the extant sequences and their phylogenetic relationships.
+                                The inference is valid for the whole tree, and it is practical to compare ancestors with one another as they represent snapshots from the same evolutionary history.</p>
+                            <p><strong>Marginal</strong> - GRASP infers the probability distribution of each residue for a single, nominated ancestor.
+                                This inference will present you with the probability of amino acids at each position in the nominated ancestor, given extant sequences and their phylogenetic relationships.
+                                The inference "marginalises" all other ancestors, meaning that (a) each ancestor needs to be inferred separately, and (b) resulting distributions are not directly comparable;
+                                marginal reconstructions are based on the <em>same</em> input data, but allow for <em>different</em> versions of evolutionary histories along the <em>same</em> branches.</p>
                             <h3 id="mutant-nav">How are mutant libraries determined?</h3>
                             <p>A marginal reconstruction allows the user to identify the positions that should be mutated with priority, to explore the space of probable ancestors.</p>
                             <p>Initially, the complexity of the mutant library is "0", suggesting for each position, only the most probable amino acid.
-                                At "1", a single mutation is allowed, at the position that improves the summed Kullback-Leibler divergence between the
+                                At "1", a single mutation is allowed, at the position that best improves the summed Kullback-Leibler divergence between the
                                 mutant distributions and the corresponding marginal distributions, across all sequence positions.
                                 For each increase in the level, another mutation is identified where an alternative amino acid is suggested.
-                                Note that another mutation could occur at a position that has been mutated previously or in a different position.
-                                Either way, the potential library will increase in complexity, i.e. the number of theoretically possible mutants.
+                                Note that additional mutations could occur at a position that has been mutated previously or in a different position.
+                                Either way, the potential library will increase in complexity, i.e. increase the number of theoretically possible mutants.
                             </p>
                             <h3 id="bi-pars-nav">What is bi-directional edge-parsimony?</h3>
-                            <p>Edges represent optional paths through which sequences can be composed; ultimately, the collective of extant sequences when aligned determines the set of all possible paths; that set is the source from which we draw the path or paths for any ancestor. We are interested in identifying which edges that are best supported for an ancestor, given their phylogenetic relationships. For this we use the basic principle of maximum parsimony, where only the most parsimonuous edges are kept for each individual ancestor.</p>
-                            <p>Maximum parsimony is applied to edges of a node; for each node, we separately process edges labelled by the nodes preceding it, and edges labelled by the nodes following it. An edge can therefore be supported in one direction but not the other. Uni-directional support is sufficient for GRASP to display it and maintain any paths to the nodes concerned; bi-directional support should be seen as a much stronger endorsement though. We run maximum parsimony to identify <em>all</em> edges that achieve the best score when it is shared. This means that in many cases multiple paths through an ancestor can not be ruled out.</p>
+                            <p>Edges represent optional paths through which sequences can be composed;
+                                ultimately, the collective of extant sequences when aligned determines the set of all possible paths;
+                                that set is the source from which we draw the path or paths for any ancestor.
+                                We are interested in identifying which edges that are best supported for an ancestor, given their phylogenetic relationships.
+                                For this we use the basic principle of maximum parsimony, where only the most parsimonuous edges are kept for each individual ancestor.</p>
+                            <p>Maximum parsimony is applied to edges of a node; for each node, we separately process edges labelled by the nodes preceding it, and edges labelled by the nodes following it.
+                                An edge can therefore be supported in one direction but not the other.
+                                Uni-directional support is sufficient for GRASP to display an edge and maintain any paths to the nodes concerned;
+                                bi-directional support should be seen as a much stronger endorsement though.
+                                We run maximum parsimony to identify <em>all</em> edges that achieve the best score (the same score can be shared by multiple edge selections).
+                                This means that in many cases multiple paths through an ancestor can not be ruled out.</p>
                         </div>
                     </div>
                 </div>

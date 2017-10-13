@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.logging.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -29,6 +30,17 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
+	private final static boolean DEBUG = false;
+
+
+	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
+	private final static String sessionPath = "/var/www/GRASP/";
+	private static String logPath = "/var/log/tomcat8/";
+
+	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
+
+
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(GraspApplication.class);
@@ -36,12 +48,20 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GraspApplication.class, args);
+
+		try {
+			if (DEBUG)
+				logPath = sessionPath;
+			Handler fileHandler = new FileHandler(logPath + "grasp.log", 1024*1024, 10, true);
+			Formatter fileFormatter = new SimpleFormatter();
+			logger.addHandler(fileHandler);
+			fileHandler.setLevel(Level.ALL);
+			fileHandler.setFormatter(fileFormatter);
+		} catch (IOException e) {
+			;
+		}
 	}
 
-
-//	final String sessionPath = "/Users/marnie/Documents/WebSessions/";
-//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	final String sessionPath = "/var/www/GRASP/";
 
 	@Autowired
 	private ASR asr;
@@ -113,6 +133,19 @@ public class GraspApplication extends SpringBootServletInitializer {
 	}
 
 	/**
+	 * Show guide
+	 *
+	 * @return guide html
+	 */
+	@RequestMapping(value = "/error", method = RequestMethod.GET)
+	public String showError(Model model) {
+		model.addAttribute("error", true);
+		model.addAttribute("errorMessage", "Sorry! An unknown error occurred. Please check the error types in the guide and retry your reconstruction... ");
+		return "index";
+	}
+
+
+	/**
 	 * Submit the asr form (documenting input details, i.e. aln and tree file, etc)
 	 *
 	 * @param asrForm       ASR object
@@ -121,7 +154,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return index with results as attributes in the model
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = "submitAsr")
-	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model) throws Exception {
+	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
+
+		long start = System.currentTimeMillis();
+
 		this.asr = asrForm;
 
 		String errors = checkErrors(asr);
@@ -183,6 +219,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		} catch (Exception e) {
 			model.addAttribute("error", true);
+			logger.log(Level.SEVERE, "NEW, request_addr: " + request.getRemoteAddr() + " error: " + e.getMessage());
 			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
 				String message = checkErrors(asr);
 				model.addAttribute("errorMessage", message);
@@ -193,6 +230,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 			}
 			return "index";
 		}
+
+		long delta = System.currentTimeMillis() - start;
+		logger.log(Level.INFO, "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType() + ", num_seqs: " + asr.getNumberSequences() +
+				", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
+				", time_ms: " + delta);// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
+
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
 		model.addAttribute("inferenceType", asr.getInferenceType());
@@ -210,13 +253,17 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return graphs in JSON format
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node"})
-	public @ResponseBody String performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model) {
+	public @ResponseBody String performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model, HttpServletRequest request) {
+
+		long start = System.currentTimeMillis();
 
 		model.addAttribute("results", true);
 		model.addAttribute("label", asr.getLabel());
 
 		asr.setInferenceType(infer);
 		asr.setNodeLabel(node);
+
+		long delta = 0;
 
 		try {
 			if (infer.equalsIgnoreCase("marginal"))
@@ -227,6 +274,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			// add reconstructed newick string to send to javascript
 			model.addAttribute("tree", asr.getReconstructedNewickString());
 		} catch (Exception e) {
+			logger.log(Level.SEVERE, "SESS, request_addr: " + request.getRemoteAddr() + ", error: " + e.getMessage());
 			model.addAttribute("error", true);
 			model.addAttribute("errorMessage", e.getMessage());
 			System.err.println("Error: " + e.getMessage());
@@ -235,6 +283,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		// add msa and inferred ancestral graph
 		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
+		delta = System.currentTimeMillis() - start;
+
+		logger.log(Level.INFO, "SESS, request_addr: " + request.getRemoteAddr() + ", infer_type: " + infer + ", num_seqs: " + asr.getNumberSequences() +
+				", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
+				", time_ms: " + delta);// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
 
 		model.addAttribute("graph", graphs);
 		model.addAttribute("inferenceType", asr.getInferenceType());

@@ -59,6 +59,9 @@ public class ASR {
 
     private String data = null; // example dataset to run, if applicable
 
+    private POGraph msaGraph = null;
+    private PartialOrderGraph ancGraph = null;
+
     public ASR() {
         this.sessionId = "grasp" + System.currentTimeMillis();
     }
@@ -66,6 +69,7 @@ public class ASR {
     public ASR(long id) {
         this.sessionId = "grasp" + id;
     }
+
 
     /*******************************************************************************************************************
      ****** Setters and getters for ASR attributes (forms, etc, automatically call these)
@@ -110,6 +114,12 @@ public class ASR {
     public void setData(String data) { this.data = data; }
     public String getData() { return this.data; }
     public String getSessionId() { return this.sessionId; }
+
+    // Logging functions
+    public int getNumberSequences() { return asrJoint != null ? asrJoint.getMSAGraph().getSequences().size() : asrMarginal != null ? asrMarginal.getMSAGraph().getSequences().size() : 0;}
+    public int getNumberBases() { return asrJoint != null ? asrJoint.getMSAGraph().getNumNodes() : asrMarginal != null ? asrMarginal.getMSAGraph().getNumNodes() : 0; }
+    public int getNumberAncestors() { return asrJoint != null ? asrJoint.getAncestralDict().size() : asrMarginal != null ? asrMarginal.getAncestralDict().size() : 0; }
+    public int getNumberDeletedNodes() { return msaGraph == null || ancGraph == null ? -1 : msaGraph.getNumNodes() - ancGraph.getNodeIDs().length; };
 
     /*******************************************************************************************************************
      ****** ASR functional methods
@@ -258,12 +268,12 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getMSAGraphJSON() {
-        POGraph msa;
-        if (inferenceType.equalsIgnoreCase("joint"))
-            msa = asrJoint.getMSAGraph();
-        else
-            msa = asrMarginal.getMSAGraph();
-        POAGJson json = new POAGJson(new PartialOrderGraph(msa));
+        if (msaGraph == null)
+            if (inferenceType.equalsIgnoreCase("joint"))
+                msaGraph = asrJoint.getMSAGraph();
+            else
+                msaGraph = asrMarginal.getMSAGraph();
+        POAGJson json = new POAGJson(new PartialOrderGraph(msaGraph));
         return json.toJSON();
     }
 
@@ -275,12 +285,11 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getAncestralGraphJSON(String reconType, String nodeLabel) {
-        PartialOrderGraph graph;
         if (reconType.equalsIgnoreCase("joint"))
-            graph = asrJoint.getGraph(nodeLabel);
+            ancGraph = asrJoint.getGraph(nodeLabel);
         else
-            graph = asrMarginal.getGraph(nodeLabel);
-        POAGJson json = new POAGJson(graph);
+            ancGraph = asrMarginal.getGraph(nodeLabel);
+        POAGJson json = new POAGJson(ancGraph);
         // make sure node IDs line up with the correct positioning in the MSA graph
         return json.toJSON();
     }

@@ -30,14 +30,14 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-	private final static boolean DEBUG = false;
+	//private final static boolean DEBUG = false;
 
 
-	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
-	private static String logPath = "/var/log/tomcat8/";
+	//private final static String sessionPath = "/var/www/GRASP/";
 
+	//private static String logPath = "/var/log/tomcat8/";
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
 
@@ -49,7 +49,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public static void main(String[] args) {
 		SpringApplication.run(GraspApplication.class, args);
 
-		try {
+		/*try {
 			if (DEBUG)
 				logPath = sessionPath;
 			Handler fileHandler = new FileHandler(logPath + "grasp.log", 1024*1024, 10, true);
@@ -59,7 +59,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			fileHandler.setFormatter(fileFormatter);
 		} catch (IOException e) {
 			;
-		}
+		}*/
 	}
 
 

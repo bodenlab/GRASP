@@ -1,6 +1,8 @@
 package com.asr.grasp;
 
 import api.PartialOrderGraph;
+import dat.EnumSeq;
+import dat.Enumerable;
 import dat.POGraph;
 import json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -12,6 +14,7 @@ import vis.POAGJson;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * ASR API for integration in the Swing web form
@@ -51,7 +54,7 @@ public class ASR {
 
     private String inferenceType = "joint";
 
-    private String nodeLabel = null;
+    private String nodeLabel = "root";
 
     private boolean performAlignment = false;
 
@@ -59,8 +62,15 @@ public class ASR {
 
     private String data = null; // example dataset to run, if applicable
 
+    private int numAlnCols = 0;
+    private int numExtantSequences = 0;
+
     private POGraph msaGraph = null;
     private PartialOrderGraph ancGraph = null;
+    private boolean performedJoint = false;
+    private boolean performedMarginal = false;
+    private boolean firstPass = true;
+    private int prevProgress = 0;
 
     public ASR() {
         this.sessionId = "grasp" + System.currentTimeMillis();
@@ -111,12 +121,17 @@ public class ASR {
     public String getNodeLabel() { return this.nodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }
+
+
+    public void setPrevProgress(int progress) { this.prevProgress = progress; }
+    public int getPrevProgress() { return this.prevProgress; }
+    public void setFirstPass(boolean flag) { this.firstPass = flag; }
+    public boolean getFirstPass() { return this.firstPass; }
     public void setData(String data) { this.data = data; }
     public String getData() { return this.data; }
     public String getSessionId() { return this.sessionId; }
 
     // Logging functions
-    public int getNumberSequences() { return asrJoint != null ? asrJoint.getMSAGraph().getSequences().size() : asrMarginal != null ? asrMarginal.getMSAGraph().getSequences().size() : 0;}
     public int getNumberBases() { return asrJoint != null ? asrJoint.getMSAGraph().getNumNodes() : asrMarginal != null ? asrMarginal.getMSAGraph().getNumNodes() : 0; }
     public int getNumberAncestors() { return asrJoint != null ? asrJoint.getAncestralDict().size() : asrMarginal != null ? asrMarginal.getAncestralDict().size() : 0; }
     public int getNumberDeletedNodes() { return msaGraph == null || ancGraph == null ? -1 : msaGraph.getNumNodes() - ancGraph.getNodeIDs().length; };
@@ -125,22 +140,77 @@ public class ASR {
      ****** ASR functional methods
      ******************************************************************************************************************/
 
+
     /**
      * Run reconstruction using uploaded files and specified options
      */
     public void runReconstruction() throws Exception {
+        NUM_THREADS = getNumThreads();
         if (inferenceType.equalsIgnoreCase("marginal"))
             runReconstructionMarginal();
-        else if (asrJoint == null)
+        else if (!performedJoint || asrJoint == null)
             runReconstructionJoint();
+    }
+
+    public int getNumberAlnCols() throws IOException {
+        if (numAlnCols == 0) {
+            try {
+                BufferedReader aln_file = new BufferedReader(new FileReader(alnFilepath));
+                String line = aln_file.readLine();
+                List<EnumSeq.Gappy<Enumerable>> extantSequences;
+                if (line.startsWith("CLUSTAL")) {
+                    extantSequences = EnumSeq.Gappy.loadClustal(alnFilepath, Enumerable.aacid_ext);
+                } else if (line.startsWith(">")) {
+                    extantSequences = EnumSeq.Gappy.loadFasta(alnFilepath, Enumerable.aacid_ext, '-');
+                } else {
+                    throw new RuntimeException("Alignment should be in Clustal or Fasta format");
+                }
+                aln_file.close();
+                numAlnCols = extantSequences.get(0).length();
+                numExtantSequences = extantSequences.size();
+            } catch (NullPointerException e) {
+                return Integer.MAX_VALUE;
+            }
+        }
+        return numAlnCols;
+    }
+
+    public int getNumberSequences() throws IOException {
+        if (numExtantSequences == 0)
+            getNumberAlnCols();
+        return numExtantSequences;
     }
 
     /**
      * Run joint reconstruction using uploaded files and specified options
      */
     private void runReconstructionJoint() throws Exception {
-        asrJoint = new ASRPOG(alnFilepath, treeFilepath, true, performAlignment, model, NUM_THREADS);
+        if (asrJoint == null)
+            asrJoint = new ASRPOG(model, NUM_THREADS);
+        asrJoint.runReconstruction(null, treeFilepath, alnFilepath, true, performAlignment);
+
+        performedJoint = true;
         asrJoint.saveTree(sessionDir + label + "_recon.nwk");
+    }
+
+    /**
+     * Limit the number of threads based on the number of extant sequences (ie. number of ancestral nodes)
+     *
+     * @return
+     * @throws Exception
+     */
+    private int getNumThreads() throws Exception {
+        if (numExtantSequences == 0)
+            getNumberAlnCols();
+
+        if (numExtantSequences < 2000)
+            return NUM_THREADS;
+        else if (numExtantSequences < 6000)
+            return 3;
+        else if (numExtantSequences < 9000)
+            return 2;
+        else
+            return 1;
     }
 
     /**
@@ -148,9 +218,11 @@ public class ASR {
      */
     private void runReconstructionMarginal() throws Exception {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
-            asrMarginal = new ASRPOG(null, treeFilepath, alnFilepath, nodeLabel, performAlignment, model, NUM_THREADS);
+            asrMarginal = new ASRPOG(model, NUM_THREADS, nodeLabel);
         else
-            asrMarginal = new ASRPOG(alnFilepath, treeFilepath, false, performAlignment, model, NUM_THREADS);
+            asrMarginal = new ASRPOG(model, NUM_THREADS);
+        asrMarginal.runReconstruction(null, treeFilepath, alnFilepath, false, performAlignment);
+        performedMarginal = true;
         asrMarginal.saveTree(sessionDir + label + "_recon.nwk");
     }
 
@@ -182,21 +254,30 @@ public class ASR {
     }
 
     /**
+     * Get the number of threads used for reconstruction.
+     *
+     * @return number of threads
+     */
+    public int getNumberThreads() {
+        return NUM_THREADS;
+    }
+
+    /**
      * Save MSA graph
      *
      * @param filepath  filepath of where to save graph
      */
     public void saveMSA(String filepath) {
-        if (inferenceType.equalsIgnoreCase("joint"))
+        if (inferenceType.equalsIgnoreCase("joint") && performedJoint)
             asrJoint.saveMSAGraph(filepath);
-        else
+        else if (performedMarginal)
             asrMarginal.saveMSAGraph(filepath);
     }
 
     public void saveMSAAln(String filepath) throws IOException {
-        if (asrJoint != null)
+        if (performedJoint)
             asrJoint.saveALN(filepath + "_MSA", "clustal");
-        else
+        else if (performedMarginal)
             asrMarginal.saveALN(filepath + "_MSA", "clustal");
     }
 
@@ -208,9 +289,9 @@ public class ASR {
      * @param joint     flag: true, get from joint recon, false, get from marginal
      */
     public void saveAncestorGraph(String label, String filepath, boolean joint) {
-        if (joint && inferenceType.equalsIgnoreCase("joint"))
+        if (joint && inferenceType.equalsIgnoreCase("joint") && performedJoint)
             asrJoint.saveGraph(filepath + "joint_", label);
-        else if (!joint)
+        else if (!joint && performedMarginal)
             asrMarginal.saveGraph(filepath + "marginal_", label);
     }
 
@@ -220,7 +301,7 @@ public class ASR {
      * @param filepath  filepath of where to save ancestor graphs
      */
     public void saveAncestors(String filepath) {
-        if (asrJoint != null)
+        if (performedJoint)
             asrJoint.saveGraph(filepath + "joint_");
     }
 
@@ -231,7 +312,7 @@ public class ASR {
      * @throws IOException
      */
     public void saveConsensusMarginal(String filepath) throws IOException {
-        if (asrMarginal != null)
+        if (performedMarginal)
             asrMarginal.saveSupportedAncestors(filepath);
     }
 
@@ -243,9 +324,9 @@ public class ASR {
      * @throws IOException
      */
     public void saveMarginalDistribution(String filepath, String node) throws IOException {
-        if (asrMarginal != null && !node.equalsIgnoreCase("msa"))
+        if (performedMarginal && !node.equalsIgnoreCase("msa"))
             asrMarginal.saveDistrib(filepath + "/" + node);
-        else if (node.equalsIgnoreCase("msa"))
+        else if (performedJoint && node.equalsIgnoreCase("msa"))
             asrJoint.saveMSADistrib(filepath + "/" );
     }
 
@@ -256,11 +337,24 @@ public class ASR {
      * @throws IOException
      */
     public void saveConsensusJoint(String filepath, String label) throws IOException {
-        if (asrJoint != null)
+        if (performedJoint)
             if (label == null)
                 asrJoint.saveSupportedAncestors(filepath);
             else
                 asrJoint.saveSupportedAncestor(filepath, label);
+    }
+
+    public int getReconCurrentNodeId() {
+        try {
+            if (inferenceType.equalsIgnoreCase("joint") && asrJoint != null)
+                return asrJoint.getGraphReconNodeId();
+            else if (asrMarginal != null)
+                return asrMarginal.getGraphReconNodeId();
+            return -1;
+        } catch (NullPointerException e) {
+            // objects are still being parse
+            return 0;
+        }
     }
 
     /**
@@ -268,11 +362,12 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getMSAGraphJSON() {
-        if (msaGraph == null)
-            if (inferenceType.equalsIgnoreCase("joint"))
-                msaGraph = asrJoint.getMSAGraph();
-            else
-                msaGraph = asrMarginal.getMSAGraph();
+        if (performedJoint && inferenceType.equalsIgnoreCase("joint"))
+            msaGraph = asrJoint.getMSAGraph();
+        else if (performedMarginal)
+            msaGraph = asrMarginal.getMSAGraph();
+        else
+            return null;
         POAGJson json = new POAGJson(new PartialOrderGraph(msaGraph));
         return json.toJSON();
     }
@@ -285,10 +380,12 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getAncestralGraphJSON(String reconType, String nodeLabel) {
-        if (reconType.equalsIgnoreCase("joint"))
+        if (performedJoint && reconType.equalsIgnoreCase("joint"))
             ancGraph = asrJoint.getGraph(nodeLabel);
-        else
+        else if (performedMarginal)
             ancGraph = asrMarginal.getGraph(nodeLabel);
+        else
+            return null;
         POAGJson json = new POAGJson(ancGraph);
         // make sure node IDs line up with the correct positioning in the MSA graph
         return json.toJSON();

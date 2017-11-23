@@ -11,16 +11,16 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -33,6 +33,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	private final static String sessionPath = "/var/www/GRASP/";
+
+	private String status = "";
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -57,53 +59,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String showForm(Model model) {
-		model.addAttribute("asrForm", asr);
+		this.asr = new ASR();
+		model.addAttribute("asrForm", this.asr);
 		return "index";
 	}
-
-	/**
-	 * Show results
-	 *
-	 * @return results html
-	 */
-/*	@RequestMapping(value = "/results", method = RequestMethod.GET)
-	public String showResults(Model model) {
-		System.out.println("results " + asr.getAlnFilepath() + " " + asr.getNodeLabel());
-		if (asr.getLabel() == "")
-			asr.setLabel("Grasp");
-
-		try {
-			asr.runReconstruction();
-		} catch (Exception e) {
-			model.addAttribute("asrForm", asr);
-			model.addAttribute("error", true);
-			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
-				String message = checkErrors(asr);
-				model.addAttribute("errorMessage", message);
-				System.err.println("Error: " + message);
-			} else {
-				model.addAttribute("errorMessage", e.getMessage());
-				System.err.println("Error: " + e.getMessage());
-			}
-			return "index";
-		}
-
-		model.addAttribute("label", asr.getLabel());
-
-		// add reconstructed newick string to send to javascript
-		model.addAttribute("tree", asr.getReconstructedNewickString());
-
-		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), asr.getNodeLabel() == null? "root" : asr.getNodeLabel()));
-
-		model.addAttribute("graph", graphs);
-
-		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
-		model.addAttribute("inferenceType", asr.getInferenceType());
-		model.addAttribute("results", true);
-
-		return "index";
-	}*/
 
 	/**
 	 * Show guide
@@ -117,15 +76,82 @@ public class GraspApplication extends SpringBootServletInitializer {
 	}
 
 	/**
-	 * Show guide
+	 * Show error
 	 *
-	 * @return guide html
+	 * @return index html
 	 */
 	@RequestMapping(value = "/error", method = RequestMethod.GET)
 	public String showError(Model model) {
+		model.addAttribute("asrForm", asr);
 		model.addAttribute("error", true);
 		model.addAttribute("errorMessage", "Sorry! An unknown error occurred. Please check the error types in the guide and retry your reconstruction... ");
 		return "index";
+	}
+
+	/**
+	 * Show status of reconstruction while asynchronously performing analysis
+	 *
+	 * @return status of reconstruction
+	 */
+	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"request"})
+	public @ResponseBody String showStatus(@RequestParam("request") String request, Model model) throws IOException {
+
+		if (status.equalsIgnoreCase("done") || status.equalsIgnoreCase("error")) {
+			String stat = status;
+			asr.setFirstPass(true); // reset flag
+			asr.setPrevProgress(0);
+			status = "";
+			return stat;
+		}
+
+		// try to get current node ID
+		int progress = (100*asr.getReconCurrentNodeId())/asr.getNumberAlnCols();
+		if (asr.getFirstPass() && progress < asr.getPrevProgress())
+			asr.setFirstPass(false);
+
+		progress = asr.getFirstPass() ? progress/2 : 50 + progress/2;
+		if (progress > asr.getPrevProgress())
+			asr.setPrevProgress(progress);
+
+		return asr.getPrevProgress() + "%";
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.GET, params={"getrecon"})
+	public ModelAndView returnASR(Model model) {
+
+		model.addAttribute("label", asr.getLabel());
+
+		// add reconstructed newick string to send to javascript
+		model.addAttribute("tree", asr.getReconstructedNewickString());
+
+		// add msa and inferred ancestral graph
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), asr.getNodeLabel()));
+		model.addAttribute("graph", graphs);
+
+		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
+		model.addAttribute("inferenceType", asr.getInferenceType());
+		model.addAttribute("results", true);
+
+		return new ModelAndView("index");
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.POST, params={"getrecongraph"})
+	public @ResponseBody String returnASRGraph(@RequestParam("getrecongraph") String getrecongraph, Model model, HttpServletRequest request) {
+
+		model.addAttribute("label", asr.getLabel());
+
+		// add reconstructed newick string to send to javascript
+		model.addAttribute("tree", asr.getReconstructedNewickString());
+
+		// add msa and inferred ancestral graph
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(), asr.getNodeLabel()));
+		model.addAttribute("graph", graphs);
+
+		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
+		model.addAttribute("inferenceType", asr.getInferenceType());
+		model.addAttribute("results", true);
+
+		return graphs;
 	}
 
 
@@ -140,19 +166,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = "submitAsr")
 	public String performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
 
-		long start = System.currentTimeMillis();
-
 		this.asr = asrForm;
 
-		String errors = checkErrors(asr);
-		if (bindingResult.hasErrors() || errors != null) {
-			for (String err : bindingResult.getSuppressedFields())
-				System.err.println(err);
-			model.addAttribute("error", true);
-			model.addAttribute("errorMessage", errors);
-			System.err.println("Error: " + errors);
-			return "index";
-		}
+		logger.log(Level.INFO, "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
 
 		// upload supplied files
 		try {
@@ -189,21 +205,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 			if (asr.getLabel() == "")
 				asr.setLabel("Grasp");
 
-			asr.runReconstruction();
-
-			model.addAttribute("label", asr.getLabel());
-
-			// add reconstructed newick string to send to javascript
-			model.addAttribute("tree", asr.getReconstructedNewickString());
-
-			// add msa and inferred ancestral graph
-			String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getInferenceType(),"root"));
-
-			model.addAttribute("graph", graphs);
-
 		} catch (Exception e) {
 			model.addAttribute("error", true);
-			logger.log(Level.SEVERE, "NEW, request_addr: " + request.getRemoteAddr() + " error: " + e.getMessage());
+			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + e.getMessage());
 			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
 				String message = checkErrors(asr);
 				model.addAttribute("errorMessage", message);
@@ -215,17 +219,49 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return "index";
 		}
 
-		long delta = System.currentTimeMillis() - start;
-		logger.log(Level.INFO, "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType() + ", num_seqs: " + asr.getNumberSequences() +
-				", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
-				", time_ms: " + delta);// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
+		// run reconstruction
+		new Thread(() -> {
+			status = asyncRunReconstruction(model, request);
+		}, "ASR-" + System.nanoTime()).start();
 
+		return "processing";
+	}
 
-		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
-		model.addAttribute("inferenceType", asr.getInferenceType());
-		model.addAttribute("results", true);
+	/**
+	 * Asynchronously run the reconstruction analysis so that the browser won't time out on large jobs. The site will
+	 * poll the status every 1s.
+	 *
+	 * @param model
+	 * @param request
+	 * @return "done" indication
+	 */
+	public String asyncRunReconstruction(Model model, HttpServletRequest request){
 
-		return "index";
+		long start = System.currentTimeMillis();
+
+		// run reconstruction
+		try {
+			asr.runReconstruction();
+
+			long delta = System.currentTimeMillis() - start;
+			logger.log(Level.INFO, "SESS, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType() + ", num_seqs: " + asr.getNumberSequences() +
+					", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
+					", time_ms: " + delta + ", num_threads: " + asr.getNumberThreads());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
+		} catch (Exception e) {
+			model.addAttribute("error", true);
+			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + e.getMessage());
+			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
+				String message = checkErrors(asr);
+				model.addAttribute("errorMessage", message);
+				System.err.println("Error: " + message);
+			} else {
+				model.addAttribute("errorMessage", e.getMessage());
+				System.err.println("Error: " + e.getMessage());
+			}
+			return "error";
+		}
+
+		return "done";
 	}
 
 	/**
@@ -237,48 +273,17 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return graphs in JSON format
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node"})
-	public @ResponseBody String performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model, HttpServletRequest request) {
-
-		long start = System.currentTimeMillis();
-
-		model.addAttribute("results", true);
-		model.addAttribute("label", asr.getLabel());
+	public ModelAndView performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model, HttpServletRequest request) {
 
 		asr.setInferenceType(infer);
 		asr.setNodeLabel(node);
 
-		long delta = 0;
+		// run reconstruction
+		new Thread(() -> {
+			status = asyncRunReconstruction(model, request);
+		}, "ASR-" + System.nanoTime()).start();
 
-		try {
-			if (infer.equalsIgnoreCase("marginal"))
-				asr.setNodeLabel(node);
-
-			asr.runReconstruction();
-
-			// add reconstructed newick string to send to javascript
-			model.addAttribute("tree", asr.getReconstructedNewickString());
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "SESS, request_addr: " + request.getRemoteAddr() + ", error: " + e.getMessage());
-			model.addAttribute("error", true);
-			model.addAttribute("errorMessage", e.getMessage());
-			System.err.println("Error: " + e.getMessage());
-			return "index";
-		}
-
-		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(infer, node));
-		delta = System.currentTimeMillis() - start;
-
-		logger.log(Level.INFO, "SESS, request_addr: " + request.getRemoteAddr() + ", infer_type: " + infer + ", num_seqs: " + asr.getNumberSequences() +
-				", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
-				", time_ms: " + delta);// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
-
-		model.addAttribute("graph", graphs);
-		model.addAttribute("inferenceType", asr.getInferenceType());
-
-		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
-		return graphs;
-
+		return new ModelAndView("processing");
 	}
 
 	/**

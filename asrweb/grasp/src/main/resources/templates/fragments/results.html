@@ -10,7 +10,13 @@
                 <hr class="h-divider"></hr>
             </div>
         </div>
-
+        <div id="progress" class="se-pre-con disable">
+            <div class="center-el">
+                <div id="progress-status" class="row jumbotron jumbotron-fluid" style="height: 10em; padding-top: 4em; background: none; background-color: transparent;">
+                    <h2 class="col-xs-12 text-secondary"><small>please wait... </small><span id="status">0%</span></h2>
+                </div>
+            </div>
+        </div>
         <div id="results" class="container-fluid" >
             <button type="button" id="extant-text-toggle" class="btn btn-default" onclick="toggle_extant_text()">View extant labels | ON</button>
             <button type="button" id="node-text-toggle" class="btn btn-default" onclick="toggle_node_text()">View node labels | OFF</button>
@@ -142,6 +148,7 @@ $('#btn-mutant-down').on('click', function () {
 
 
 				$(document).ready(function () {
+				        $('#progress-status').hide();
 				    	var json_str = /*[[${graph}]]*/;
                         var label = /*[[${label}]]*/;
                         var inf = /*[[${inferenceType}]]*/;

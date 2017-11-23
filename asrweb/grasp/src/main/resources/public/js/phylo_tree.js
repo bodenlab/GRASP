@@ -1323,8 +1323,6 @@ var context_menu_action = function (call, node_fill, node_id) {
     } else {
         select_node(call.attr("id"));
         reset_poag_stack();
-        //refresh_tree();
-        //refresh_tree();
         perform_marginal(call.attr("id"), node_fill);
     }
 

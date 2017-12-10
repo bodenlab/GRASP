@@ -96,7 +96,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"request"})
 	public @ResponseBody String showStatus(@RequestParam("request") String request, Model model) throws IOException {
 
-		if (status.equalsIgnoreCase("done") || status.equalsIgnoreCase("error")) {
+		if (status.equalsIgnoreCase("done") || status.contains("error")) {
 			String stat = status;
 			asr.setFirstPass(true); // reset flag
 			asr.setPrevProgress(0);
@@ -207,15 +207,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		} catch (Exception e) {
 			model.addAttribute("error", true);
-			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + e.getMessage());
-			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
-				String message = checkErrors(asr);
-				model.addAttribute("errorMessage", message);
-				System.err.println("Error: " + message);
-			} else {
-				model.addAttribute("errorMessage", e.getMessage());
-				System.err.println("Error: " + e.getMessage());
-			}
+			String message = e.getMessage();
+			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + message);
+			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException"))
+				message = checkErrors(asr);
+			model.addAttribute("errorMessage", message);
+			System.err.println("Error: " + message);
 			return "index";
 		}
 
@@ -249,16 +246,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 					", time_ms: " + delta + ", num_threads: " + asr.getNumberThreads());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
 		} catch (Exception e) {
 			model.addAttribute("error", true);
-			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + e.getMessage());
-			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException")) {
-				String message = checkErrors(asr);
-				model.addAttribute("errorMessage", message);
-				System.err.println("Error: " + message);
-			} else {
-				model.addAttribute("errorMessage", e.getMessage());
-				System.err.println("Error: " + e.getMessage());
-			}
-			return "error";
+			String message = e.getMessage();
+			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + message);
+			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException"))
+				message = checkErrors(asr);
+			model.addAttribute("errorMessage", message);
+			System.err.println("Error: " + message);
+			return "error\t"+message;
 		}
 
 		return "done";

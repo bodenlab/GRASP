@@ -52,11 +52,13 @@ var perform_marginal = function(node_name, node_fill) {
                                 clearInterval(inter);
                                 $('#progress-status').fadeOut();
                                 $('#progress').addClass('disable');
-                            } else if (data == "error") {
+                            } else if (data.includes("error")) {
                                 clearInterval(inter);
                                 $('#progress-status').fadeOut();
                                 $('#progress').addClass('disable');
-                                window.location.replace(window.location.pathname.split("?")[0] + "error");
+                                $("#warning").attr('style', "display: block;");
+                                $("#warning-text").text(data.split("\t")[1]);
+                               // window.location.replace(window.location.pathname.split("?")[0] + "error");
                             } else {
                                 $("#status").text(data);
                             }
@@ -134,11 +136,13 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
                             clearInterval(inter);
                             $('#progress-status').fadeOut();
                             $('#progress').addClass('disable');
-                        } else if (data == "error") {
+                        } else if (data.includes("error")) {
                             clearInterval(inter);
                             $('#progress-status').fadeOut();
                             $('#progress').addClass('disable');
-                            window.location.replace(window.location.pathname.split("?")[0] + "error");
+                            $("#warning").attr('style', "display: block;");
+                            $("#warning-text").text(data.split("\t")[1]);
+                            //window.location.replace(window.location.pathname.split("?")[0] + "error");
                         } else {
                             $("#status").text(data);
                         }

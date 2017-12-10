@@ -53,6 +53,10 @@
         </div>
     </div>
 </div>
+<div id="recon-error-div" class="content-section-a container-fluid invisible">
+    <div class="alert alert-danger alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><p id="recon-error"></p></div>
+    <div class="alert alert-warning alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><p> For more detail about how to resolve errors please check the <a href="/guide#errors-nav">error information</a> in the guide and try your reconstruction again...</p></div>
+</div>
 
 <script type="text/javascript">
     // ajax to poll spring for updates on the analysis....
@@ -68,9 +72,11 @@
                         clearInterval(stat);
                         $("#status").text(" finishing up...");
                         window.location.replace(window.location.pathname.split("?")[0] + "?getrecon=");
-                    } else if (data == "error") {
+                    } else if (data.includes("error")) {
                         clearInterval(stat);
-                        window.location.replace(window.location.pathname.split("?")[0] + "error");
+                        $("#recon-error-div").removeClass("invisible");
+                        $("#progress").addClass("invisible");
+                        $("#recon-error").text(data.split("\t")[1]);
                     } else {
                         $("#status").text(data);
                     }
@@ -78,7 +84,6 @@
             });
         }, 1000);
 	});
-
 </script>
 
 <!-- About Section -->

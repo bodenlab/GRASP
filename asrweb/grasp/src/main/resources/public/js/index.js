@@ -1749,6 +1749,24 @@ scale_y_graph = function (options, y) {
     return (y * options.y_size) + options.y_start;
 }
 
+function create_hover_area(node, options, graph_group) {
+
+    graph_group.append("rect")
+        .attr("class", function () {
+            return "hoverArea";
+        })
+        .attr("x", function () {
+            return options.offset_graph_width+30;
+        }) //Need to determine algorithm for determining this
+        .attr("width", (options.size))
+        .attr("y", function () {
+            return options.offset_graph_height;
+        })
+        .attr("height", function () {
+            return options.graph_height*3;
+        })
+        .attr("fill", "transparent");
+}
 
 /**
  * Creating the graphs
@@ -1757,23 +1775,46 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
     //var node_cx = scale_x_graph(options, node.x);
     //var node_cy = scale_y_graph(options, node.y) - options.graph_height / 2;
     options.metabolite_count++;
+    var x_pos = node_cx + options.offset_graph_width;
+    var y_pos = node_cy + options.offset_graph_height;
     var num_bars = options.max_bar_count;
     var hover_on = options.hover;
     var graph_group = group.append("g")
             .attr("class", "graph")
+            .attr("x", node_cx + options.offset_graph_width)
+            .attr("y", node_cy + options.offset_graph_height)
             .attr('transform', 'translate(' + (node_cx + options.offset_graph_width) + "," + (node_cy + options.offset_graph_height) + ")")
             .attr("opacity", 0)
+            .attr("pointer-events", "all")
             .on("mouseover", function () {
                 if (hover_on) {
-                    d3.select(this).attr("opacity", 1);
+                    this.parentNode.appendChild(this);
+
+                    d3.select(this)
+                        .transition()
+                        .duration(500)
+                        .attr("transform", "translate("+ x_pos +", "+ (y_pos - 60) +")")
+                        .attr("opacity", 1);
                 }
+                // if (hover_on) {
+                //     d3.select(this).attr("opacity", 1);
+                // }
             })
             .on("mouseout", function () {
                 if (hover_on) {
-                    d3.select(this).attr("opacity", 0);
+                    this.parentNode.appendChild(this);
+
+                    d3.select(this)
+                        .transition()
+                        .delay(200)
+                        .duration(500)
+                        .attr("transform", "translate("+ x_pos +", "+ y_pos +")")
+                        .attr("opacity", 0);
+
                 }
             });
 
+    create_hover_area(node, options, graph_group);
     create_outer_circle(node, options, graph_group);
     create_rect(node, options, graph_group);
     create_axis(node, options, graph_group);

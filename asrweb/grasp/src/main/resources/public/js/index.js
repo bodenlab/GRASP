@@ -47,7 +47,7 @@ var poags = {
         raw: {},
         class_name: 'single-',
         height: 250,
-        margin: {left: 0, right: 0, top: 150, bottom: 0}
+        margin: {left: 0, right: 0, top: 200, bottom: 0}
     },
     multi: {
         names: [],
@@ -56,7 +56,7 @@ var poags = {
         raw: {},
         class_name: 'multi-',
         height: 250,
-        margin: {left: 0, right: 0, top: 150, bottom: 0}
+        margin: {left: 0, right: 0, top: 200, bottom: 0}
     },
     merged: {
         names: ['Merged'],
@@ -65,7 +65,7 @@ var poags = {
         raw: {},
         class_name: 'merged-',
         height: 250,
-        margin: {left: 0, right: 0, top: 150, bottom: 0}
+        margin: {left: 0, right: 0, top: 200, bottom: 0}
     },
 };
 
@@ -121,7 +121,7 @@ var poag_options = {
         /******** Options for Sizing *****************************************/
         height: 2000,
         width: 2000, // Default width gets overridden
-        margin: {top: 100, left: 200, bottom: 0, right: 10},
+        margin: {top: 140, left: 200, bottom: 0, right: 10},
         poagColours: {},
         /*********** End of sizing options **********************************/
         background_colour: "white",
@@ -208,7 +208,7 @@ var poag_options = {
         graph_outer_circle_radius: 85,
         graphs: new Array(),
         size: 80,
-        offset_graph_width: -35,
+        offset_graph_width: -25,
         offset_graph_height: -40,
         width: 80,
         div_factor: 1,
@@ -1624,7 +1624,7 @@ setup_graph_overlay = function (options, graph_group) {
 
 function create_outer_circle(node, options, graph_group) {
     var circle = graph_group.append("circle")
-            .attr("class", "outside" + node.name)
+            .attr("class", "outside" + node.name + " movable")
             .attr("id", function () {
                 return "node-" + node;
             })
@@ -1642,15 +1642,17 @@ function create_rect(node, options, graph_group) {
 
     graph_group.append("rect")
             .attr("class", function () {
-                return "outline";
+                return "outline movable";
             })
             .attr("x", function () {
-                return options.offset_graph_width;
+                return options.offset_graph_width-15;
             }) //Need to determine algorithm for determining this
             .attr("width", (options.size * 2) + options.offset_graph_width)
             .attr("y", function () {
                 return options.offset_graph_height;
             })
+            .attr("rx", options.graph_height/3)
+            .attr("ry", options.graph_height/3)
             .attr("height", function () {
                 return options.graph_height - (2 * options.offset_graph_height);
             })
@@ -1659,7 +1661,7 @@ function create_rect(node, options, graph_group) {
 
 function create_axis(node, options, graph_group) {
     var axisgroup = graph_group.append("g")
-            .attr("class", "y axis")
+            .attr("class", "y axis movable")
             .attr("transform", function () {
                 w = 0;
                 return "translate(" + w + ",0)";
@@ -1696,7 +1698,7 @@ function create_bars(node, options, graph_group) {
         var bar_info = bars[bar];
         graph_group.append("rect")
                 .attr("class", function () {
-                    return "bar2";
+                    return "bar2 movable";
                 })
                 .attr("x", function () {
                     return outer_padding + padding_x + (bar * (size / num_bars)); /* where to place it */
@@ -1712,7 +1714,7 @@ function create_bars(node, options, graph_group) {
                 .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
 
         graph_group.append("text")
-                .attr("class", "y axis")
+                .attr("class", "y axis movable")
                 .attr("x", function () {
                     return (2 * padding_x) + bar * (options.size / num_bars);
                 }) //Need to determine algorithm for determining this
@@ -1749,23 +1751,51 @@ scale_y_graph = function (options, y) {
     return (y * options.y_size) + options.y_start;
 }
 
+/**
+ * Create area that will be hoverable
+ */
+
 function create_hover_area(node, options, graph_group) {
 
-    graph_group.append("rect")
+    graph_group.append("circle")
         .attr("class", function () {
             return "hoverArea";
         })
-        .attr("x", function () {
-            return options.offset_graph_width+30;
-        }) //Need to determine algorithm for determining this
-        .attr("width", (options.size))
-        .attr("y", function () {
-            return options.offset_graph_height;
+        .attr("cx", options.size / 2 - 12)
+        .attr("cy", options.size / 2 - 2)
+        .attr("r", options.graph_outer_circle_radius*0.3)
+        // .attr("height", function () {
+        //     return options.graph_height*2.75;
+        // })
+        .attr("fill", "teal")
+        .attr("opacity", 0)
+        .attr("pointer-events", "fill");
+}
+
+/**
+ * Create indicator pointing graph to appropriate node
+ */
+
+function create_pointer_line(node, options, graph_group) {
+
+    var lineData = [{"x": (options.offset_graph_width), "y": 110},
+                    {"x": (options.offset_graph_width+50), "y": 140},
+                    {"x": (options.offset_graph_width+105), "y": 110}];
+
+    var lineFunction = d3.svg.line()
+                        .x(function(d) { return d.x; })
+                        .y(function(d) { return d.y; })
+                        .interpolate("linear");
+
+    graph_group.append("path")
+        .attr("class", function () {
+            return "line movable";
         })
-        .attr("height", function () {
-            return options.graph_height*3;
-        })
-        .attr("fill", "transparent");
+        .attr("d", lineFunction(lineData))
+        .attr("stroke", "black")
+        .style("stroke-dasharray", ("3, 3"))
+        .attr("stroke-width", 2)
+        .attr("fill", "none");
 }
 
 /**
@@ -1781,20 +1811,28 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
     var hover_on = options.hover;
     var graph_group = group.append("g")
             .attr("class", "graph")
-            .attr("x", node_cx + options.offset_graph_width)
-            .attr("y", node_cy + options.offset_graph_height)
-            .attr('transform', 'translate(' + (node_cx + options.offset_graph_width) + "," + (node_cy + options.offset_graph_height) + ")")
+            .attr("x", x_pos)
+            .attr("y", y_pos)
+            .attr('transform', 'translate(' + x_pos + "," + y_pos + ")")
             .attr("opacity", 0)
-            .attr("pointer-events", "all")
+            .attr("pointer-events", "none")
             .on("mouseover", function () {
                 if (hover_on) {
                     this.parentNode.appendChild(this);
-
+                    console.log("Mouse entered")
                     d3.select(this)
                         .transition()
                         .duration(500)
-                        .attr("transform", "translate("+ x_pos +", "+ (y_pos - 60) +")")
-                        .attr("opacity", 1);
+                        .attr("transform", "translate("+x_pos+", "+(y_pos-100)+")")
+                        .attr("opacity", 1)
+                        .attr("end", function(){
+                            console.log("transition finished")
+                            d3.select(this).select(".hoverArea")
+                                .attr("transform", "translate(0, "+(y_pos+100)+")")
+                                .attr("opacity", 0);
+
+                        });
+
                 }
                 // if (hover_on) {
                 //     d3.select(this).attr("opacity", 1);
@@ -1803,14 +1841,20 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
             .on("mouseout", function () {
                 if (hover_on) {
                     this.parentNode.appendChild(this);
+                    console.log("Mouse exit")
 
                     d3.select(this)
                         .transition()
-                        .delay(200)
+                        .delay(500)
                         .duration(500)
-                        .attr("transform", "translate("+ x_pos +", "+ y_pos +")")
-                        .attr("opacity", 0);
-
+                        .attr("transform", "translate("+x_pos+", "+y_pos+")")
+                        .attr("opacity", 0)
+                        .each("end", function(){
+                            console.log("Mouseover transition finished")
+                            d3.select(this).select(".hoverArea")
+                                .attr("transform", "translate(0, "+(y_pos)+")")
+                                .attr("opacity", 0);
+                        });
                 }
             });
 
@@ -1819,6 +1863,7 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
     create_rect(node, options, graph_group);
     create_axis(node, options, graph_group);
     create_bars(node, options, graph_group);
+    create_pointer_line(node, options, graph_group);
     return graph_group;
 }
 

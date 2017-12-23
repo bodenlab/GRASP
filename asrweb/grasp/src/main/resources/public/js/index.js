@@ -1615,11 +1615,18 @@ setup_graph_overlay = function (options, graph_group) {
             .scale(y)
             .orient("left")
             .ticks(2);
+
+    var modalyAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .ticks(5);
+
     //options.svg_overlay = svg;
     options.x = x;
     options.y = y;
     options.xAxis = xAxis;
     options.yAxis = yAxis;
+    options.modalyAxis = modalyAxis
 }
 
 function create_outer_circle(node, options, graph_group) {
@@ -1674,6 +1681,21 @@ function create_axis(node, options, graph_group) {
             .text(node.name);
 }
 
+function create_modal_axis(node, options, modal_group) {
+    var axisgroup = modal_group.append("g")
+        .attr("class", "y axis movable")
+        .attr("transform", function () {
+            w = 0;
+            return "translate(" + w + ",0)";
+        })
+        .call(options.modalyAxis)
+        .append("text")
+        .attr("y", -10)
+        .attr("x", options.offset_graph_width + 20)
+        .attr("dy", ".71em")
+        .text(node.name);
+}
+
 function create_bars(node, options, graph_group) {
     var num_bars = Object.keys(node.graph.bars).length; //options.max_bar_count;
     var size = options.size;
@@ -1713,6 +1735,7 @@ function create_bars(node, options, graph_group) {
                 })
                 .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
 
+
         graph_group.append("text")
                 .attr("class", "y axis movable")
                 .attr("x", function () {
@@ -1720,6 +1743,63 @@ function create_bars(node, options, graph_group) {
                 }) //Need to determine algorithm for determining this
                 .attr("y", options.graph_height + 10)
                 .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
+
+    }
+}
+
+/**
+ * create bar for graph that appears in the modal
+
+ */
+
+function create_modal_bars(node, options, modal_group) {
+    var num_bars = Object.keys(node.graph.bars).length; //options.max_bar_count;
+    var size = options.size*2;
+    var y = options.y;
+    var padding_x = 2;
+    var outer_padding = 1;
+
+    // Just to make it look nicer if there is only one bar
+    if (num_bars == 1) {
+        padding_x = size/6.0;
+    }
+
+    var bars = [];
+    for (var bar in node.graph.bars) {
+        var bar_info = node.graph.bars[bar];
+        if (bar_info.value > poag_options.graph.hist_bar_thresh) {
+            bars.push(node.graph.bars[bar]);
+        }
+    }
+    num_bars = Object.keys(bars).length;
+    for (var bar in bars) {
+        var bar_info = bars[bar];
+        modal_group.append("rect")
+            .attr("class", function () {
+                return "bar2 movable";
+            })
+            .attr("x", function () {
+                return outer_padding + padding_x + (bar * (size / num_bars)); /* where to place it */
+            }) //Need to determine algoritm for determining this
+            .attr("width", (size / num_bars) - (3 * padding_x) - outer_padding/2)
+            .attr("y", function () {
+                return y(bar_info.value/100.0);
+            })
+            .attr("height", function () {
+                // As the number is out of 100 need to modulate it
+                return options.graph_height - y(bar_info.value/100.0);
+            })
+            .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
+
+
+        modal_group.append("text")
+            .attr("class", "y axis movable")
+            .attr("x", function () {
+                return (padding_x) + bar * (size / num_bars);
+            }) //Need to determine algorithm for determining this
+            .attr("y", options.graph_height + 10)
+            .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
+
     }
 }
 
@@ -1758,8 +1838,11 @@ scale_y_graph = function (options, y) {
 function create_hover_area(node, options, graph_group) {
 
     graph_group.append("circle")
+        .attr("type", "button")
+        .attr("data-toggle", "modal")
+        .attr("data-target", "#resultsModal")
         .attr("class", function () {
-            return "hoverArea";
+            return "hoverArea btn btn-primary";
         })
         .attr("cx", options.size / 2 - 12)
         .attr("cy", options.size / 2 - 2)
@@ -1798,6 +1881,19 @@ function create_pointer_line(node, options, graph_group) {
         .attr("fill", "none");
 }
 
+
+/**
+ * helper function to create global unique identifiers
+ * @returns {*}
+ */
+function guid() {
+    function _p8(s) {
+        var p = (Math.random().toString(16)+"000000000").substr(2,8);
+        return s ? "-" + p.substr(0,4) + "-" + p.substr(4,4) : p ;
+    }
+    return _p8() + _p8(true) + _p8(true) + _p8();
+}
+
 /**
  * Creating the graphs
  */
@@ -1809,24 +1905,24 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
     var y_pos = node_cy + options.offset_graph_height;
     var num_bars = options.max_bar_count;
     var hover_on = options.hover;
+
     var graph_group = group.append("g")
-            .attr("class", "graph")
-            .attr("x", x_pos)
-            .attr("y", y_pos)
+            .attr("id", guid())
+            .attr("class", "graph modal-body")
             .attr('transform', 'translate(' + x_pos + "," + y_pos + ")")
             .attr("opacity", 0)
             .attr("pointer-events", "none")
             .on("mouseover", function () {
                 if (hover_on) {
                     this.parentNode.appendChild(this);
-                    console.log("Mouse entered")
+
                     d3.select(this)
                         .transition()
-                        .duration(500)
+                        .duration(300)
                         .attr("transform", "translate("+x_pos+", "+(y_pos-100)+")")
                         .attr("opacity", 1)
                         .attr("end", function(){
-                            console.log("transition finished")
+
                             d3.select(this).select(".hoverArea")
                                 .attr("transform", "translate(0, "+(y_pos+100)+")")
                                 .attr("opacity", 0);
@@ -1841,22 +1937,65 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
             .on("mouseout", function () {
                 if (hover_on) {
                     this.parentNode.appendChild(this);
-                    console.log("Mouse exit")
 
                     d3.select(this)
                         .transition()
                         .delay(500)
-                        .duration(500)
+                        .duration(300)
                         .attr("transform", "translate("+x_pos+", "+y_pos+")")
                         .attr("opacity", 0)
                         .each("end", function(){
-                            console.log("Mouseover transition finished")
+
                             d3.select(this).select(".hoverArea")
                                 .attr("transform", "translate(0, "+(y_pos)+")")
                                 .attr("opacity", 0);
                         });
                 }
+            })
+            .on("click", function(d, i){
+                if (hover_on) {
+                    this.parentNode.appendChild(this);
+
+                    var margin = {top: 20, right: 20, bottom: 30, left: 80};
+                    var thisGroup = d3.select(this);
+                    var groupId = d3.select(thisGroup).node().attr("id");
+
+
+                    d3.selectAll("#usedModal").remove();
+                    var modal_container = d3.select("#modalGraph")
+                        .append("svg")
+                        .attr("id", "usedModal")
+                        .attr("width", 400)
+                        .attr("height", 200)
+                        .style("display", "block")
+                        .style("margin", "auto");
+
+                    var modal_group = modal_container.append("g")
+                        .attr("opacity", 1)
+                        .attr("x", 50)
+                        .attr("y", 50)
+                        .attr("transform", "translate(100, 50)scale(1.5)");
+
+                    create_modal_axis(node, options, modal_group);
+                    create_modal_bars(node, options, modal_group);
+
+                    d3.select(this)
+                        .transition()
+                        .delay(500)
+                        .duration(300)
+                        .attr("transform", "translate("+x_pos+", "+y_pos+")")
+                        .attr("opacity", 0)
+                        .each("end", function(){
+
+                            d3.select(this).select(".hoverArea")
+                                .attr("transform", "translate(0, "+(y_pos)+")")
+                                .attr("opacity", 0);
+                        });
+                    return modal_group
+
+                }
             });
+
 
     create_hover_area(node, options, graph_group);
     create_outer_circle(node, options, graph_group);

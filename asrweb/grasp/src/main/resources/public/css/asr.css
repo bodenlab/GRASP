@@ -24,6 +24,13 @@ h6 {
     font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+    stroke-width: 0.5px;
+}
+
 #home-img-div {
     background: url(../images/home_page.png);
     background-size: contain;

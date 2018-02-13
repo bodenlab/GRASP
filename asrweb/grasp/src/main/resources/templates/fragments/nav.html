@@ -12,6 +12,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand topnav" href="#">GRASP<span id="recon-label"></span> <span class="node-label"></span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></a>
+                <a class="navbar-brand hidden" id="save-link" title="Save reconstruction" href="/save"><span class="glyphicon glyphicon-floppy-disk text-primary glyph-lg"></span></a>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <p hidden="hidden" id="results-nav-flag" th:text="${results}"></p>
@@ -21,20 +22,34 @@
                     <li class="nav-item"><a class="nav-link" href="/guide">Guide</a></li>
                     <li class="nav-item"><a class="nav-link" id="about-link" href="#about-nav">About</a></li>
                     <li class="nav-item"><div th:replace="fragments/help :: help"></div></li>
+                    <li class="nav-item"><a class="hidden" href="/account" id="account-link"></a></li>
+                    <li class="nav-item"><a class="nav-link" id="login-link" href="/login">Login</a></li>
                 </ul>
             </div>
-            <script type="text/javascript">
-                                    /*<![CDATA[*/
+            <script type="text/javascript" th:inline="javascript">
+
+                                /*<![CDATA[*/
+
                                     $(document).ready(function () {
                                         var results = $('#results-nav-flag').text();
-                                        console.log("results: " + results);
-                                        console.log("flag: " + (results == 'true'));
                                         if (results == 'true') {
 				                            $('#results-nav-link').removeClass("disable-link");
 				                            $('#results-nav-link').css("color", "#777");
+				                            $('#save-link').removeClass("hidden");
                                         } else {
                                             $('#results-nav-link').addClass("disable-link");
                                             $('#results-nav-link').css("color", "#b3b3b3");
+				                            $('#save-link').addClass("hidden");
+                                        }
+
+                                        var username = /*[[${username}]]*/ ;
+                                        console.log(username);
+                                        if (username != null) {
+                                            $('#account-link').text(username);
+                                            $('#account-link').css("color", "#333");
+                                            $('#account-link').css("font-weight", "bold");
+                                            $('#login-link').text("Logout");
+                                            $('#account-link').removeClass("hidden");
                                         }
 				                    });
 

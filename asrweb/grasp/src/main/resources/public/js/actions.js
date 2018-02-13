@@ -6,7 +6,7 @@
  *  ------------------------------------------------------------------
  */
 
-var run_asr_app = function(json_str, recon, label, inf) {
+var run_asr_app = function(json_str, recon, label, inf, node) {
 
     /**
      * Run POAG setup
@@ -30,6 +30,7 @@ var run_asr_app = function(json_str, recon, label, inf) {
     set_inf_type(inf);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
+    phylo_options.tree.selected_node.name = node;
     refresh_tree(); // to set height properly
     selectedNode = phylo_options.tree.selected_node.name;
     refresh_elements();
@@ -40,6 +41,7 @@ var run_asr_app = function(json_str, recon, label, inf) {
     poags.options.name_to_merged_id[phylo_options.tree.selected_node.name.split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
     redraw_poags();
     poags.retain_previous_position = true;
+    refresh_elements();
 }
 
 

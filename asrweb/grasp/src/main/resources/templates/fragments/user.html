@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="user">
+    <div class="content-section-a">
+        <div class="container">
+            <h2 class="col-sm-10 col-sm-offset-2"><span th:text="*{user.username}"></span></h2>
+        </div>
+    </div>
+    <div class="content-section-b ">
+        <div class="container">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Label</th>
+                <th scope="col">Model</th>
+                <th scope="col">Number of Threads</th>
+                <th scope="col">Inference Type</th>
+                <th scope="col">Ancestral Node</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="recon : *{reconstructions}">
+                <td th:text="${recon.label}"></td>
+                <td th:text="${recon.model}"></td>
+                <td th:text="${{recon.numThreads}}"></td>
+                <td th:text="${recon.inferenceType}"></td>
+                <td th:text="${recon.node}"></td>
+                <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
+                <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    <script type="text/javascript" th:inline="javascript">
+
+                                /*<![CDATA[*/
+
+				$(document).ready(function () {
+				        username = /*[[${user.username}]]*/;
+                        $('#account-link').text(username);
+                        $('#account-link').css("color", "#333");
+                        $('#account-link').css("font-weight", "bold");
+                        $('#login-link').text("Logout");
+                        $('#account-link').removeClass("hidden");
+
+				});
+                                /*]]>*/
+    </script>
+</div>
+</body>
+</html>

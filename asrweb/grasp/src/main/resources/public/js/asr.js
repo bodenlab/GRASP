@@ -18,7 +18,7 @@ var refresh_elements = function() {
 };
 
 var refresh_labels = function() {
-    var label = selectedNode.split("_")[0];
+    var label = poags.inferred_poag_name;
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
         nodeLabels[i].textContent = label;

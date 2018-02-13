@@ -6,7 +6,7 @@
     <div class="content-section-b">
         <div class="row">
             <div id="heading">
-                <h2><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
+                <h2 class="col-sm-9"><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
                 <hr class="h-divider"></hr>
             </div>
         </div>
@@ -153,7 +153,8 @@ $('#btn-mutant-down').on('click', function () {
                         var label = /*[[${label}]]*/;
                         var inf = /*[[${inferenceType}]]*/;
                         var recon = /*[[${tree}]]*/;
-					    run_asr_app(json_str, recon, label, inf);
+                        var node = /*[[${node}]]*/;
+					    run_asr_app(json_str, recon, label, inf, node);
 				});
                                 /*]]>*/
                     </script>

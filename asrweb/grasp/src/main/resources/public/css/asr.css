@@ -31,6 +31,10 @@ h6 {
     stroke-width: 0.5px;
 }
 
+.glyph-lg {
+    font-size: 20px;
+}
+
 #home-img-div {
     background: url(../images/home_page.png);
     background-size: contain;

@@ -424,21 +424,21 @@ var redraw_poags = function () {
     group.selectAll("path.poag").remove();
     group.selectAll("circle.poag").remove();
     group.selectAll("text.poag").remove();
-    group.selectAll("rect.poag").remove();
+    group.selectAll("rect").remove();
     group.selectAll("defs.poag").remove();
     var group = poags.merged_group;
     group.selectAll("g.graph").remove();
     group.selectAll("path.poag").remove();
     group.selectAll("circle.poag").remove();
     group.selectAll("text.poag").remove();
-    group.selectAll("rect.poag").remove();
+    group.selectAll("rect").remove();
     group.selectAll("defs.poag").remove();
     var group = poags.group;
     group.selectAll("g.graph").remove();
     group.selectAll("path.poag").remove();
     group.selectAll("circle.poag").remove();
     group.selectAll("text.poag").remove();
-    group.selectAll("rect.poag").remove();
+    group.selectAll("rect").remove();
     group.selectAll("defs.poag").remove();
     poags = draw_all_poags(poags);
 }
@@ -535,26 +535,30 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                 draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
                 draw_legend = false;
             }
-            var radius = draw_nodes(poags, node, group, node_cx, node_cy);
+            if (node.label == 'initial' || node.label == 'final') {
+                draw_terminus(poags, group, node_cx, node_cy);
+            } else {
+                var radius = draw_nodes(poags, node, group, node_cx, node_cy);
 
-            if (poag_name == poags.root_poag_name || node.type == 'marginal' || poagPi) {
-                draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
-                // if it is a merged node, we want to draw a layered Pie chart
-                // so we set poagPi to false and re draw a smaller pie chart with
-                // the proper colours.
-                if (poagPi) {
-                    draw_pie(poags, node, group, radius, false, node_cx, node_cy);
-                }
-                // check whether to display a graph
-                var count = 0;
-                for (var b in node.graph.bars) {
-                    if (node.graph.bars[b].value > poag_options.graph.hist_bar_thresh) {
-                        count++;
+                if (poag_name == poags.root_poag_name || node.type == 'marginal' || poagPi) {
+                    draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
+                    // if it is a merged node, we want to draw a layered Pie chart
+                    // so we set poagPi to false and re draw a smaller pie chart with
+                    // the proper colours.
+                    if (poagPi) {
+                        draw_pie(poags, node, group, radius, false, node_cx, node_cy);
                     }
-                }
-                if (count > 1) {
-                    var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
-                    poag_options.graph.graphs.push(graph_node);
+                    // check whether to display a graph
+                    var count = 0;
+                    for (var b in node.graph.bars) {
+                        if (node.graph.bars[b].value > poag_options.graph.hist_bar_thresh) {
+                            count++;
+                        }
+                    }
+                    if (count > 1) {
+                        var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
+                        poag_options.graph.graphs.push(graph_node);
+                    }
                 }
             }
         }
@@ -1023,6 +1027,16 @@ var setup_poag_svg = function (poags) {
  */
 
 
+var draw_terminus = function (poags, group, node_cx, node_cy) {
+    group.append("rect")
+        .attr("x", node_cx)
+        .attr("y", node_cy - node_cy/2)
+        .attr("width", poags.options.edge.consensus_stroke_width)
+        .attr("height", node_cy)
+        .attr("fill", poags.options.edge.consensus_stroke)
+        .attr("opacity", poags.options.edge.opacity);
+}
+
 /**
  * Draws the nodes.
  *
@@ -1376,6 +1390,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
             .text(node.name);
 
 }
+
 
 /**
  * Draws a pie chart on a node.

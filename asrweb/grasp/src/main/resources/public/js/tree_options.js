@@ -94,7 +94,7 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
     $.ajax({
         url : window.location.pathname.split("?")[0],
         type : 'POST',
-        data : {infer: inferType, node: node_name},
+        data : {infer: inferType, node: node_name, addgraph: reset_graphs==false},
         success: function(data) {
             var inter = setInterval(function() {
                 $.ajax({
@@ -111,8 +111,6 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
                                 success: function(data) {
                                     var json_str = data;
                                     drawMutants = false;
-                                    //problem below, this only colours for the second poag, leaving the colour for 'poag1'
-                                    //undefined, hence why it comes up black for the fused nodes -> I may have fixed this
                                     if (reset_graphs) {
                                                 graph_array = [];
                                                 merged_graphs = [];

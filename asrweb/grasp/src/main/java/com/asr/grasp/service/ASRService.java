@@ -129,6 +129,13 @@ public class ASRService {
             asrMarginal.saveALN(filepath + "_MSA", "clustal");
     }
 
+    public void saveTree(String filepath) throws IOException {
+        if (performedJoint)
+            asrJoint.saveTree(filepath);
+        else if (performedMarginal)
+            asrMarginal.saveTree(filepath);
+    }
+
     /**
      * Save ancestor graph
      *
@@ -161,7 +168,7 @@ public class ASRService {
      */
     public void saveConsensusMarginal(String filepath) throws IOException {
         if (performedMarginal)
-            asrMarginal.saveSupportedAncestors(filepath);
+            asrMarginal.saveSupportedAncestors(filepath, false);
     }
 
     /**
@@ -187,9 +194,9 @@ public class ASRService {
     public void saveConsensusJoint(String filepath, String label) throws IOException {
         if (performedJoint)
             if (label == null)
-                asrJoint.saveSupportedAncestors(filepath);
+                asrJoint.saveSupportedAncestors(filepath, true);
             else
-                asrJoint.saveSupportedAncestor(filepath, label);
+                asrJoint.saveSupportedAncestor(filepath, label, false);
     }
 
     public int getReconCurrentNodeId(String type) {

@@ -29,6 +29,7 @@ public class ASR {
     private String label = "";
     private String inferenceType = "joint";
     private String nodeLabel = "root";
+    private String workingNodeLabel = "root";
     private String model = "JTT";
 
     private MultipartFile alnFile = null;
@@ -99,6 +100,8 @@ public class ASR {
     public void setPerformAlignment(boolean performAlignment) { this.performAlignment = performAlignment; }
     public void setNodeLabel(String node) { this.nodeLabel = node; }
     public String getNodeLabel() { return this.nodeLabel; }
+    public void setWorkingNodeLabel(String node) { this.workingNodeLabel = node; }
+    public String getWorkingNodeLabel() { return this.workingNodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }
 
@@ -322,6 +325,10 @@ public class ASR {
      */
     public void saveAncestorGraph(String label, String filepath, boolean joint) {
         asrService.saveAncestorGraph(label, filepath, joint);
+    }
+
+    public void saveTree(String filepath) throws IOException {
+        asrService.saveTree(filepath);
     }
 
     /**

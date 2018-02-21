@@ -304,7 +304,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		mav.addObject("tree", asr.getReconstructedNewickString());
 
 		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getNodeLabel()));
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
 		mav.addObject("graph", graphs);
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -325,7 +325,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("tree", asr.getReconstructedNewickString());
 
 		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON( asr.getNodeLabel()));
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON( asr.getWorkingNodeLabel()));
 		model.addAttribute("graph", graphs);
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -456,12 +456,15 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @param model com model
 	 * @return graphs in JSON format
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node"})
-	public ModelAndView performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, Model model, HttpServletRequest request) {
+	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node", "addgraph"})
+	public ModelAndView performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, @RequestParam("addgraph") Boolean addGraph, Model model, HttpServletRequest request) {
 
 		ModelAndView mav = new ModelAndView("processing");
 		asr.setInferenceType(infer);
-		asr.setNodeLabel(node);
+		asr.setWorkingNodeLabel(node);
+		System.out.println(addGraph);
+		if (!addGraph)
+			asr.setNodeLabel(node);
 
 		// run reconstruction
 		new Thread(() -> {
@@ -486,6 +489,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
 
 		// create temporary folder to send output as zipped files
+		if (asr.getSessionDir() == null) {
+			File sessionDir = new File(sessionPath + asr.getSessionId());
+			if (!sessionDir.exists())
+				sessionDir.mkdir();
+			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
+		}
+
 		String tempDir = asr.getSessionDir() + "/GRASP_" + asr.getLabel();
 		File sessionDir = new File(tempDir);
 		if (sessionDir.exists()) {
@@ -495,10 +505,16 @@ public class GraspApplication extends SpringBootServletInitializer {
 		}
 		sessionDir.mkdir();
 
+
 		// copy output files to temporary folder, or generate output where needed and save in temporary folder
-		if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on"))
-			Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName())).toPath(),
+		if (request.getParameter("check-recon-tree") != null && request.getParameter("check-recon-tree").equalsIgnoreCase("on")) {
+			File nwkFile = new File(asr.getSessionDir() + asr.getReconstructedTreeFileName());
+			if (nwkFile.exists())
+				Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName())).toPath(),
 					(new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(), StandardCopyOption.REPLACE_EXISTING);
+			else
+				asr.saveTree((new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath().toString());
+		}
 		if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa").equalsIgnoreCase("on"))
 			asr.saveMSA(tempDir + "/");
 		if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))

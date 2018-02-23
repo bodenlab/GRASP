@@ -28,8 +28,8 @@ public class ASR {
 
     private String label = "";
     private String inferenceType = "joint";
-    private String nodeLabel = "root";
-    private String workingNodeLabel = "root";
+    private String nodeLabel = null;
+    private String workingNodeLabel = null;
     private String model = "JTT";
 
     private MultipartFile alnFile = null;
@@ -98,10 +98,20 @@ public class ASR {
     public void setInferenceType(String infType) { this.inferenceType = infType; }
     public boolean getPerformAlignment() { return this.performAlignment; }
     public void setPerformAlignment(boolean performAlignment) { this.performAlignment = performAlignment; }
-    public void setNodeLabel(String node) { this.nodeLabel = node; }
-    public String getNodeLabel() { return this.nodeLabel; }
-    public void setWorkingNodeLabel(String node) { this.workingNodeLabel = node; }
-    public String getWorkingNodeLabel() { return this.workingNodeLabel; }
+    public void setNodeLabel(String node) {
+        this.nodeLabel = node; }
+    public String getNodeLabel() {
+        if (nodeLabel == null)
+            nodeLabel = asrService.getRootTreeLabel();
+        return this.nodeLabel;
+    }
+    public void setWorkingNodeLabel(String node) {
+        this.workingNodeLabel = node;
+    }
+    public String getWorkingNodeLabel() {
+        if (workingNodeLabel == null)
+            workingNodeLabel = asrService.getRootTreeLabel();
+        return this.workingNodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }
 
@@ -129,7 +139,7 @@ public class ASR {
         return numAncestors;
     }
     public int getNumberDeletedNodes() {
-        return asrService.getNumDeletedNodes(inferenceType, nodeLabel);
+        return asrService.getNumDeletedNodes(inferenceType, workingNodeLabel);
     }
 
     /*******************************************************************************************************************

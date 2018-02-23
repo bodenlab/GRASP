@@ -34,6 +34,8 @@ public class ASRService {
     private boolean performedJoint = false;
     private boolean performedMarginal = false;
 
+    private String rootLabel = null;
+
     public ASRService() {
         this.sessionId = "grasp" + System.currentTimeMillis();
     }
@@ -84,6 +86,15 @@ public class ASRService {
             performedMarginal = runReconstructionMarginal(tree, seqs, model, node);
         else if (asrJoint == null || asrJoint.getAncestralInferences().isEmpty())
             performedJoint = runReconstructionJoint(tree, seqs, model);
+        System.out.println(asrJoint.getReconstructedNewick());
+        System.out.println(node);
+        if (rootLabel == null || rootLabel.equalsIgnoreCase("root"))
+            if (asrJoint != null)
+                rootLabel = asrJoint.getRootLabel();
+            else if (asrMarginal != null)
+                rootLabel = asrMarginal.getRootLabel();
+            else
+                rootLabel = "root";
     }
 
     /**
@@ -212,6 +223,10 @@ public class ASRService {
         }
     }
 
+    public String getRootTreeLabel() {
+        return rootLabel;
+    }
+
     /**
      * Get the JSON representation of the sequence alignment graph
      * @return  graph JSON object
@@ -236,6 +251,9 @@ public class ASRService {
      * @return  graph JSON object
      */
     public JSONObject getAncestralGraphJSON(String type, String nodeLabel) {
+        if (nodeLabel == null)
+            nodeLabel = rootLabel;
+        System.out.println(nodeLabel);
         if (performedJoint && type.equalsIgnoreCase("joint"))
             ancGraph = asrJoint.getGraph(nodeLabel);
         else if (performedMarginal)
@@ -274,12 +292,17 @@ public class ASRService {
     }
 
     public int getNumDeletedNodes(String infType, String node) {
+        if (node == null)
+            node = rootLabel;
         POGraph msa = msaGraph;
         if (msa == null)
             if (asrJoint != null)
                 msa = asrJoint.getMSAGraph();
             else if (asrMarginal != null)
                 msa = asrMarginal.getMSAGraph();
+        for (String a : asrJoint.getAncestralInferences().keySet())
+            System.out.println(a);
+        System.out.println(node);
         if (asrJoint != null && infType.equalsIgnoreCase("joint"))
             return msa.getNumNodes() - asrJoint.getGraph(node).getNodeIDs().length;
         if (asrMarginal != null && infType.equalsIgnoreCase("marginal"))

@@ -11,7 +11,7 @@ var perform_marginal = function(node_name, node_fill) {
         $.ajax({
             url : window.location.pathname.split("?")[0],
             type : 'POST',
-            data : {infer: inferType, node: selectedNode},
+            data : {infer: inferType, node: selectedNode, addgraph: false},
             success: function(data) {
                 var inter = setInterval(function() {
                     $.ajax({

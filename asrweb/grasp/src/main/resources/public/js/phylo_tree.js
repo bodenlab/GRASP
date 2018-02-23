@@ -260,15 +260,15 @@ var draw_phylo_circle = function (group, node, n) {
             if (node.extent) {
                 return options.extent_fill;
             }
+            console.log(node.name);
+            console.log(phylo_options.tree.selected_node.name);
             if (node.name === phylo_options.tree.selected_node.name) {
                 return options.select_colour;
             }
             if (node.root_node) {
                 return options.root_node_fill;
             }
-            else {
-                return phylo_options.legend.colour_scale(node.y);
-            } 
+            return phylo_options.legend.colour_scale(node.y);
         })  
         .attr("stroke", function(d) {
             if (node.name === phylo_options.tree.selected_node.name) {

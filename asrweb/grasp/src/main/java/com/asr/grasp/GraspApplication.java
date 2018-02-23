@@ -296,6 +296,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, params={"getrecon"})
 	public ModelAndView returnASR(Model model) {
+
 		ModelAndView mav = new ModelAndView("index");
 
 		mav.addObject("label", asr.getLabel());
@@ -422,7 +423,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @param request
 	 * @return "done" indication
 	 */
-	public String asyncRunReconstruction(Model model, HttpServletRequest request){
+	public String asyncRunReconstruction(Model model, HttpServletRequest request) {
 
 		long start = System.currentTimeMillis();
 
@@ -433,8 +434,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 			long delta = System.currentTimeMillis() - start;
 			logger.log(Level.INFO, "SESS, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType() + ", num_seqs: " + asr.getNumberSequences() +
 					", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
-					", time_ms: " + delta + ", num_threads: " + asr.getNumberThreads());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
+					", time_ms: " + delta + ", num_threads: " + asr.getNumberThreads());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));*/
 		} catch (Exception e) {
+			e.printStackTrace();
 			model.addAttribute("error", true);
 			String message = e.getMessage();
 			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + message);
@@ -444,7 +446,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 			System.err.println("Error: " + message);
 			return "error\t"+message;
 		}
-
 		return "done";
 	}
 
@@ -462,7 +463,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 		ModelAndView mav = new ModelAndView("processing");
 		asr.setInferenceType(infer);
 		asr.setWorkingNodeLabel(node);
-		System.out.println(addGraph);
 		if (!addGraph)
 			asr.setNodeLabel(node);
 

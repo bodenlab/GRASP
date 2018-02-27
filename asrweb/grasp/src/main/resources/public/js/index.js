@@ -1387,7 +1387,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
             .attr("stroke", function () {
                 return getNodeTextColour(poags.options.display.colours[(node.label)]);
             })
-            .text(node.name);
+            .text(node.name.split("_")[0]);
 
 }
 

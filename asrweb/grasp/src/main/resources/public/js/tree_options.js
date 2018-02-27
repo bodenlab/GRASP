@@ -35,7 +35,7 @@ var perform_marginal = function(node_name, node_fill) {
                                         // Add the colours of the POAG assigned by name and merged_id
                                         poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
                                         poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
-                                        setup_poags(json_str, true, false, false, node_name.split("_")[0]);
+                                        setup_poags(json_str, true, false, false, node_name);
                                         redraw_poags();
                                         refresh_elements();
                                         if ($("#mutant-btn").attr("aria-pressed") === 'true') {
@@ -121,9 +121,9 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
                                     poags.options.names_to_colour[node_name.split("_")[0]] = node_fill;
                                     if (reset_graphs) {
                                         selectedNode = node_name;
-                                        setup_poags(json_str, true, false, false, node_name.split("_")[0]);
+                                        setup_poags(json_str, true, false, false, node_name);
                                     } else {
-                                        setup_poags(json_str, false, false, false, node_name.split("_")[0]);
+                                        setup_poags(json_str, false, false, false, node_name);
                                         var new_graph = fuse_multipleGraphs(graph_array);
                                         setup_poags(new_graph, false, false, true, 'Merged');
                                     }

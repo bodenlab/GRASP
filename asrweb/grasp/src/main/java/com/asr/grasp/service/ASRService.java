@@ -80,14 +80,12 @@ public class ASRService {
     /**
      * Run reconstruction using saved data and specified options
      */
-    public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs) {
+    public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs) throws InterruptedException {
         NUM_THREADS = numThreads;
         if (type.equalsIgnoreCase("marginal"))
             performedMarginal = runReconstructionMarginal(tree, seqs, model, node);
         else if (asrJoint == null || asrJoint.getAncestralInferences().isEmpty())
             performedJoint = runReconstructionJoint(tree, seqs, model);
-        System.out.println(asrJoint.getReconstructedNewick());
-        System.out.println(node);
         if (rootLabel == null || rootLabel.equalsIgnoreCase("root"))
             if (asrJoint != null)
                 rootLabel = asrJoint.getRootLabel();
@@ -100,7 +98,7 @@ public class ASRService {
     /**
      * Run joint reconstruction using saved data and specified options
      */
-    private boolean runReconstructionJoint(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model) {
+    private boolean runReconstructionJoint(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model) throws InterruptedException {
         if (asrJoint == null)
             asrJoint = new ASRPOG(model, NUM_THREADS);
         if (asrJoint.getAncestralInferences() == null || asrJoint.getAncestralInferences().isEmpty())
@@ -112,7 +110,7 @@ public class ASRService {
     /**
      * Run marginal reconstruction using saved data and specified options
      */
-    private boolean runReconstructionMarginal(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String nodeLabel) {
+    private boolean runReconstructionMarginal(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String nodeLabel) throws InterruptedException {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
             asrMarginal = new ASRPOG(model, NUM_THREADS, nodeLabel);
         else
@@ -210,6 +208,11 @@ public class ASRService {
                 asrJoint.saveSupportedAncestor(filepath, label, false);
     }
 
+    public void saveConsensusJoint(String filepath, String[] labels) throws IOException {
+        if (performedJoint)
+            asrJoint.saveSupportedAncestors(filepath, labels, true);
+    }
+
     public int getReconCurrentNodeId(String type) {
         try {
             if (type.equalsIgnoreCase("joint") && asrJoint != null)
@@ -253,7 +256,6 @@ public class ASRService {
     public JSONObject getAncestralGraphJSON(String type, String nodeLabel) {
         if (nodeLabel == null)
             nodeLabel = rootLabel;
-        System.out.println(nodeLabel);
         if (performedJoint && type.equalsIgnoreCase("joint"))
             ancGraph = asrJoint.getGraph(nodeLabel);
         else if (performedMarginal)
@@ -263,6 +265,10 @@ public class ASRService {
         POAGJson json = new POAGJson(ancGraph);
         // make sure node IDs line up with the correct positioning in the MSA graph
         return json.toJSON();
+    }
+
+    public boolean performedRecon() {
+        return performedMarginal || performedJoint;
     }
 
     public String getReconstructedNewick() {
@@ -300,9 +306,6 @@ public class ASRService {
                 msa = asrJoint.getMSAGraph();
             else if (asrMarginal != null)
                 msa = asrMarginal.getMSAGraph();
-        for (String a : asrJoint.getAncestralInferences().keySet())
-            System.out.println(a);
-        System.out.println(node);
         if (asrJoint != null && infType.equalsIgnoreCase("joint"))
             return msa.getNumNodes() - asrJoint.getGraph(node).getNodeIDs().length;
         if (asrMarginal != null && infType.equalsIgnoreCase("marginal"))

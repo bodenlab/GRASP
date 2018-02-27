@@ -57,6 +57,8 @@ public class ASR {
     private int numExtantSequences = 0;
     private int numBases = 0;
 
+    private boolean finishedRecon = false;
+
     private boolean firstPass = true;
     private int prevProgress = 0;
 
@@ -155,7 +157,7 @@ public class ASR {
     /**
      * Run reconstruction using uploaded files and specified options
      */
-    public void runReconstruction() throws IOException {
+    public void runReconstruction() throws IOException, InterruptedException {
         NUM_THREADS = getNumThreads();
         if (numAlnCols == 0)
             numAlnCols = getNumberAlnCols();
@@ -208,6 +210,11 @@ public class ASR {
             getNumberAlnCols();
         return numExtantSequences;
     }
+
+    public boolean performedRecon() {
+        return asrService.performedRecon();
+    }
+
 
     public void setMSA(String msa){
         this.msa = msa;
@@ -350,6 +357,11 @@ public class ASR {
         asrService.saveAllAncestors(filepath);
     }
 
+    public void saveAncestors(String filepath, String[] labels) {
+        for (String a : labels)
+            asrService.saveAncestorGraph(a, filepath, true);
+    }
+
     /**
      * Save consensus sequence of marginal node
      *
@@ -379,6 +391,10 @@ public class ASR {
      */
     public void saveConsensusJoint(String filepath, String label) throws IOException {
         asrService.saveConsensusJoint(filepath, label);
+    }
+
+    public void saveConsensusJoint(String filepath, String[] labels) throws IOException {
+        asrService.saveConsensusJoint(filepath, labels);
     }
 
     public int getReconCurrentNodeId() {

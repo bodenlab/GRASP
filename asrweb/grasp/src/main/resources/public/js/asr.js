@@ -21,12 +21,12 @@ var refresh_labels = function() {
     var label = poags.inferred_poag_name;
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i].textContent = label;
+        nodeLabels[i].textContent = label.split("_")[0];
         nodeLabels[i].value = label;
     }
     nodeLabels = document.querySelectorAll(".full-node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i].textContent = selectedNode;
+        nodeLabels[i].textContent = selectedNode.split("_")[0];
         nodeLabels[i].value = selectedNode;
     }
     var reconLabels = document.querySelectorAll(".infer-label");

@@ -4,6 +4,7 @@ import com.asr.grasp.service.IReconstructionService;
 import com.asr.grasp.service.IUserService;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
+import json.JSONArray;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -41,9 +42,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	private final static String sessionPath = "/var/www/GRASP/";
 
-	private String status = "";
+	//private String status = "";
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
+
+	private ASRThread recon = null;
 
 	@Autowired
 	private IUserService service;
@@ -107,6 +110,18 @@ public class GraspApplication extends SpringBootServletInitializer {
 		mav.addObject("reconstructions", loggedInUser.getReconstructions());
 		mav.addObject("username", loggedInUser.getUsername());
 		return mav;
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"cancel"})
+	public ModelAndView cancelRecon(WebRequest request, Model model) {
+		if (recon != null)
+			recon.interrupt();
+
+		if (asr.performedRecon())
+			return returnASR(model);
+
+		return showForm(model);
+
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"delete", "id"})
@@ -274,11 +289,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"request"})
 	public @ResponseBody String showStatus(@RequestParam("request") String request, Model model) throws Exception {
 
-		if (status.equalsIgnoreCase("done") || status.contains("error")) {
+		String status = recon.getStatus();
+
+		if (status != null && (status.equalsIgnoreCase("done") || status.contains("error"))) {
 			String stat = status;
 			asr.setFirstPass(true); // reset flag
 			asr.setPrevProgress(0);
-			status = "";
+			//status = "";
 			return stat;
 		}
 
@@ -326,7 +343,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("tree", asr.getReconstructedNewickString());
 
 		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON( asr.getWorkingNodeLabel()));
+		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
 		model.addAttribute("graph", graphs);
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -405,48 +422,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 		}
 
 		// run reconstruction
-		new Thread(() -> {
-			status = asyncRunReconstruction(model, request);
-		}, "ASR-" + System.nanoTime()).start();
+		recon = new ASRThread(asr, asr.getInferenceType(), asr.getNodeLabel(), false, logger);
 
 		ModelAndView mav = new ModelAndView("processing");
 		mav.addObject("user", loggedInUser);
 		mav.addObject("username", loggedInUser.getUsername());
 		return mav;
-	}
-
-	/**
-	 * Asynchronously run the reconstruction analysis so that the browser won't time out on large jobs. The site will
-	 * poll the status every 1s.
-	 *
-	 * @param model
-	 * @param request
-	 * @return "done" indication
-	 */
-	public String asyncRunReconstruction(Model model, HttpServletRequest request) {
-
-		long start = System.currentTimeMillis();
-
-		// run reconstruction
-		try {
-			asr.runReconstruction();
-
-			long delta = System.currentTimeMillis() - start;
-			logger.log(Level.INFO, "SESS, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType() + ", num_seqs: " + asr.getNumberSequences() +
-					", num_bases: " + asr.getNumberBases() + ", num_ancestors: " + asr.getNumberAncestors() + ", num_deleted: " + asr.getNumberDeletedNodes() +
-					", time_ms: " + delta + ", num_threads: " + asr.getNumberThreads());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));*/
-		} catch (Exception e) {
-			e.printStackTrace();
-			model.addAttribute("error", true);
-			String message = e.getMessage();
-			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + message);
-			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException"))
-				message = checkErrors(asr);
-			model.addAttribute("errorMessage", message);
-			System.err.println("Error: " + message);
-			return "error\t"+message;
-		}
-		return "done";
 	}
 
 	/**
@@ -461,15 +442,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, @RequestParam("addgraph") Boolean addGraph, Model model, HttpServletRequest request) {
 
 		ModelAndView mav = new ModelAndView("processing");
-		asr.setInferenceType(infer);
-		asr.setWorkingNodeLabel(node);
-		if (!addGraph)
-			asr.setNodeLabel(node);
 
 		// run reconstruction
-		new Thread(() -> {
-			status = asyncRunReconstruction(model, request);
-		}, "ASR-" + System.nanoTime()).start();
+		recon = new ASRThread(asr, infer, node, addGraph, logger);
 
 		mav.addObject("username",  loggedInUser.getUsername());
 		return mav;
@@ -484,6 +459,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = "download", produces = "application/zip")
 	public void showForm(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		JSONArray graphs = new JSONArray(request.getParameter("graphs-input"));
+		String[] ancs = new String[graphs.length()];
+		for (int i = 0; i < graphs.length(); i++)
+			ancs[i] = graphs.getString(i);
 
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
@@ -522,7 +501,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on"))
 			asr.saveMarginalDistribution(tempDir, request.getParameter("marg-node"));
 		if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
-			asr.saveAncestors(tempDir + "/");
+			asr.saveAncestors(tempDir + "/", ancs);
 		if (request.getParameter("check-pog-joint-single") != null && request.getParameter("check-pog-joint-single").equalsIgnoreCase("on"))
 			asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
 		if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
@@ -532,7 +511,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
 			asr.saveMarginalDistribution(tempDir + "/", "msa");
 		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
-			asr.saveConsensusJoint(tempDir + "/ancestors_consensus", null);
+			asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
 		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
 			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
 

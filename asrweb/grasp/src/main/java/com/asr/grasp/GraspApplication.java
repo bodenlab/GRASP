@@ -288,6 +288,20 @@ public class GraspApplication extends SpringBootServletInitializer {
 	}
 
 	/**
+	 * Show max likelihood info
+	 *
+	 * @return guide html
+	 */
+	@RequestMapping(value = "/ml", method = RequestMethod.GET)
+	public ModelAndView showMlInfo(Model model) {
+		ModelAndView mav = new ModelAndView("ml");
+		mav.addObject("results", asr.getLabel() != "");
+		mav.addObject("user", loggedInUser);
+		mav.addObject("username", loggedInUser.getUsername());
+		return mav;
+	}
+
+	/**
 	 * Save reconstruction
 	 *
 	 * @return account html

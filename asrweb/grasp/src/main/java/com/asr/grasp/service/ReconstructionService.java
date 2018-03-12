@@ -47,4 +47,10 @@ public class ReconstructionService implements IReconstructionService {
     public Reconstruction getReconstruction(Long id) {
         return reconRepository.getOne(id);
     }
+
+    @Override
+    public void saveReconstruction(Reconstruction recon) {
+        if (!reconRepository.exists(recon.getId()))
+            reconRepository.save(recon);
+    }
 }

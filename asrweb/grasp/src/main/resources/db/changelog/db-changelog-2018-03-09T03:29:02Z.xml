@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet author="marnie (generated)" id="1520566144652-1">
+        <createTable tableName="User_sharedReconstructionIDs">
+            <column name="User_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sharedReconstructionIDs" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="marnie (generated)" id="1520566144652-2">
+        <addForeignKeyConstraint baseColumnNames="User_id" baseTableName="User_sharedReconstructionIDs" constraintName="FK_1efq5x9967nksh8nmpace9vpd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user"/>
+    </changeSet>
+    <changeSet author="marnie (generated)" id="1520566144652-3">
+        <dropColumn columnName="PASSWORD_MATCH" tableName="USER"/>
+    </changeSet>
+</databaseChangeLog>

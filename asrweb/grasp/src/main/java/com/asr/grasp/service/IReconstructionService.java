@@ -7,5 +7,5 @@ public interface IReconstructionService {
 
     User saveNewReconstruction(Reconstruction reconstruction, User account) ;
     Reconstruction getReconstruction(Long id) ;
-
+    void saveReconstruction(Reconstruction recon) ;
 }

@@ -4,35 +4,104 @@
 <div th:fragment="user">
     <div class="content-section-a">
         <div class="container">
-            <h2 class="col-sm-10 col-sm-offset-2"><span th:text="*{user.username}"></span></h2>
+            <h2 class=""><span th:text="*{user.username}"></span></h2>
         </div>
     </div>
     <div class="content-section-b ">
         <div class="container">
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th scope="col">Label</th>
-                <th scope="col">Model</th>
-                <th scope="col">Number of Threads</th>
-                <th scope="col">Inference Type</th>
-                <th scope="col">Ancestral Node</th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="recon : *{reconstructions}">
-                <td th:text="${recon.label}"></td>
-                <td th:text="${recon.model}"></td>
-                <td th:text="${{recon.numThreads}}"></td>
-                <td th:text="${recon.inferenceType}"></td>
-                <td th:text="${recon.node}"></td>
-                <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
-                <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
-            </tr>
-            </tbody>
-        </table>
+            <div id="recon-success" class="alert alert-success hidden" role="alert">
+                Successfully <span id="recon-edit-type"></span> reconstruction!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="recon-warning" class="alert alert-warning hidden" role="alert">
+                You can only save up to <span id="num-recons"></span> reconstructions. If you would still like to save this reconstruction, please delete a reconstruction below.
+            </div>
+            <div id="recon-error" class="alert alert-danger hidden" role="alert">
+                User <span id="share-user"></span> does not exist. Share unsuccessful.
+            </div>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Label</th>
+                    <th scope="col">Model</th>
+                    <th scope="col">Number of Threads</th>
+                    <th scope="col">Inference Type</th>
+                    <th scope="col">Ancestral Node</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="recon : *{reconstructions}">
+                        <td th:text="${recon.label}"></td>
+                        <td th:text="${recon.model}"></td>
+                        <td th:text="${{recon.numThreads}}"></td>
+                        <td th:text="${recon.inferenceType}"></td>
+                        <td th:text="${recon.node}"></td>
+                        <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
+                        <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
+                        <td><a th:onclick="${'updateReconId(' + recon.id + ');'}" href="" data-toggle="modal" data-target="#share-user-modal" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 class="pad-top-bottom">Shared Reconstructions</h3>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Label</th>
+                    <th scope="col">Model</th>
+                    <th scope="col">Number of Threads</th>
+                    <th scope="col">Inference Type</th>
+                    <th scope="col">Ancestral Node</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="recon : *{sharedreconstructions}">
+                    <td th:text="${recon.label}"></td>
+                    <td th:text="${recon.model}"></td>
+                    <td th:text="${{recon.numThreads}}"></td>
+                    <td th:text="${recon.inferenceType}"></td>
+                    <td th:text="${recon.node}"></td>
+                    <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
+                    <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
+                    <td><a th:href="@{/(share='t',id=${recon.id})}" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal fade" id="share-user-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Please enter a user to share the reconstruction with
+                        <div class="container">
+                            <div class="form-group">&nbsp;</div>
+                            <form name="registerForm" th:action="@{/(share='t')}" th:object="${share}" method="POST" enctype="utf8">
+                                <div class="form-group row">
+                                    <label for="recon-share-username">Username</label>
+                                    <input id="recon-share-username" placeholder="Username" th:field="*{username}" />
+                                </div>
+                                <div class="form-group row">
+                                    <input id="recon-share-id" class="hidden" th:field="*{reconID}" />
+                                </div>
+                                <div class="form-group row">
+                                    <a type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</a>
+                                    <button type="submit" class="btn btn-primary col-sm-5">Share</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script type="text/javascript" th:inline="javascript">
@@ -46,8 +115,28 @@
                         $('#account-link').css("font-weight", "bold");
                         $('#login-link').text("Logout");
                         $('#account-link').removeClass("hidden");
-
+                        var warning = /*[[${warning}]]*/;
+                        var type = /*[[${type}]]*/;
+                        var error = /*[[${error}]]*/;
+                        if (type != null) {
+                            $('#recon-edit-type').text(type);
+                            $('#recon-success').removeClass("hidden");
+                        }
+                        if (warning != null){
+                            $('#num-recons').text(warning);
+                            $('#recon-warning').removeClass("hidden");
+                        }
+                        if (error != null){
+                            $('#share-user').text(error);
+                            $('#recon-error').removeClass("hidden");
+                        }
 				});
+
+				var updateReconId = function(id) {
+				    $('#recon-share-id').val(id);
+				};
+
+
                                 /*]]>*/
     </script>
 </div>

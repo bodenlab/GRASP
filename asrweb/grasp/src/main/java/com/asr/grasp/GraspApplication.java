@@ -38,15 +38,16 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
+	//private final static String sessionPath = "/var/www/GRASP/";
 
-	//private String status = "";
+	private final int MAX_RECONS = 5;
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
 	private ASRThread recon = null;
+
 
 	@Autowired
 	private IUserService service;
@@ -107,7 +108,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView showAccount(WebRequest request, Model model) {
 		ModelAndView mav = new ModelAndView("account");
 		mav.addObject("user", loggedInUser);
-		mav.addObject("reconstructions", loggedInUser.getReconstructions());
+		mav.addObject("share", new ShareObject());
+		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
+		mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
 		mav.addObject("username", loggedInUser.getUsername());
 		return mav;
 	}
@@ -127,10 +130,45 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"delete", "id"})
 	public ModelAndView deleteRecon(@RequestParam("delete") String delete, @RequestParam("id") Long id, WebRequest webrequest, Model model) {
 		ModelAndView mav = new ModelAndView("account");
-		loggedInUser = service.removeReconstruction(loggedInUser, id);
+		loggedInUser = service.removeReconstruction(loggedInUser, id); // TODO, add in if in shared list...
 		mav.addObject("user", loggedInUser);
-		mav.addObject("reconstructions", loggedInUser.getReconstructions());
+		mav.addObject("share", new ShareObject());
+		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
+		mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
 		mav.addObject("username", loggedInUser.getUsername());
+		mav.addObject("type", "deleted");
+		if (currentRecon != null) {
+			loggedInUser = reconstructionService.saveNewReconstruction(currentRecon, loggedInUser);
+			mav.addObject("type", "saved");
+		}
+		currentRecon = null;
+		mav.addObject("warning", null);
+		return mav;
+	}
+
+	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"share"})
+	public ModelAndView shareRecon(@RequestParam("share") String share, @ModelAttribute("share") ShareObject user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+		ModelAndView mav = new ModelAndView("account");
+		mav.addObject("user", loggedInUser);
+		mav.addObject("share", new ShareObject());
+		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
+		mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
+		mav.addObject("username", loggedInUser.getUsername());
+
+		// check if user exists
+		if (service.userExist(user.getUsername())) {
+			User u = service.getUser(user.getUsername());
+			Reconstruction recon = reconstructionService.getReconstruction(user.getReconID());
+			u.addSharedReconstruction(recon);
+			recon.addUser(u);
+			reconstructionService.saveReconstruction(recon);
+			service.saveUser(u);
+			mav.addObject("type", "shared");
+		} else {
+			mav.addObject("error", user);
+		}
+		mav.addObject("warning", null);
+
 		return mav;
 	}
 
@@ -179,13 +217,29 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return new ModelAndView("login");
 		User registered = getUserAccount(user);
 
-		if (currentRecon != null)
-			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
-		currentRecon = null;
-
 		ModelAndView mav = new ModelAndView("account");
+
+		if (currentRecon != null) {
+			if (registered.getNonSharedReconstructions().size() == MAX_RECONS) {
+				mav.addObject("warning", MAX_RECONS);
+				mav.addObject("type", null);
+			} else {
+				registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
+				mav.addObject("type", "saved");
+				currentRecon = null;
+			}
+		}
+
 		mav.addObject("user", registered);
-		mav.addObject("reconstructions", registered.getReconstructions());
+		mav.addObject("share", new ShareObject());
+		mav.addObject("reconstructions", registered.getNonSharedReconstructions());
+		mav.addObject("sharedreconstructions", service.getSharedReconstructions(registered));
+
+		System.out.println(registered.getUsername());
+		for (Reconstruction r : registered.getNonSharedReconstructions())
+			System.out.println("r: " + r.getId());
+		for (Reconstruction r : service.getSharedReconstructions(registered))
+			System.out.println("s: " + r.getId());
 		loggedInUser = registered;
 		return mav;
 	}
@@ -205,7 +259,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		ModelAndView mav = new ModelAndView("account");
 		mav.addObject("user", registered);
-		mav.addObject("reconstructions", registered.getReconstructions());
+		mav.addObject("share", new ShareObject());
+		mav.addObject("reconstructions", registered.getNonSharedReconstructions());
 		loggedInUser = registered;
 		return mav;
 	}
@@ -225,9 +280,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/guide", method = RequestMethod.GET)
 	public ModelAndView showGuide(Model model) {
-		model.addAttribute("results", asr.getLabel() != "");
-		model.addAttribute("username",  loggedInUser.getUsername());
-		return new ModelAndView("guide");
+		ModelAndView mav = new ModelAndView("guide");
+		mav.addObject("results", asr.getLabel() != "");
+		mav.addObject("user", loggedInUser);
+		mav.addObject("username", loggedInUser.getUsername());
+		return mav;
 	}
 
 	/**
@@ -250,6 +307,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		recon.setSequences(asr.getSequences());
 		recon.setAncestor(asr.getAncestralGraphJSON(asr.getNodeLabel()).toString());
 
+		// if a user is not logged in, prompt to login
 		if (loggedInUser.getUsername() == null || loggedInUser.getUsername() == "") {
 			currentRecon = recon;
 			ModelAndView mav = new ModelAndView("login");
@@ -257,12 +315,29 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return mav;
 		}
 
+		// if the user already has N reconstructions saved, prompt to delete some
+		if (loggedInUser.getNonSharedReconstructions().size() == MAX_RECONS) {
+			currentRecon = recon;
+			ModelAndView mav = new ModelAndView("account");
+			mav.addObject("user", loggedInUser);
+			mav.addObject("share", new ShareObject());
+			mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
+			mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
+			mav.addObject("username", loggedInUser.getUsername());
+			mav.addObject("warning", MAX_RECONS);
+			mav.addObject("type", null);
+			return mav;
+		}
+
 		loggedInUser = reconstructionService.saveNewReconstruction(recon, loggedInUser);
 
 		ModelAndView mav = new ModelAndView("account");
 		mav.addObject("user", loggedInUser);
-		mav.addObject("reconstructions", loggedInUser.getReconstructions());
+		mav.addObject("share", new ShareObject());
+		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
+		mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
 		mav.addObject("username", loggedInUser.getUsername());
+		mav.addObject("type", "saved");
 		return mav;
 	}
 
@@ -295,7 +370,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 			String stat = status;
 			asr.setFirstPass(true); // reset flag
 			asr.setPrevProgress(0);
-			//status = "";
 			return stat;
 		}
 

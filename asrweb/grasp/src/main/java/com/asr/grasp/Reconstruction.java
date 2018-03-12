@@ -144,15 +144,19 @@ public class Reconstruction {
         return this.node;
     }
 
-    public void setUsers(Set<User> users){
-        this.users = users;
+    public void setUsers(Set<User> userset){
+        this.users = userset;
     }
 
     public void addUser(User user) {
         if (!users.contains(user))
             users.add(user);
-        if (!user.getReconstructions().contains(this))
+        if (!user.getAllReconstructions().contains(this))
             user.addReconstruction(this);
+    }
+
+    public void removeUser(User user) {
+        users.remove(user);
     }
 
     public Set<User> getUsers() {

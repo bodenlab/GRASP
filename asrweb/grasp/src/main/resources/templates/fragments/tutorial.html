@@ -136,7 +136,7 @@
                         <tr>
                             <td class="col-md-6">
                                 <ul>
-                                    <li><strong>Extant node names must be unique - &lt;...&gt; is duplicated.</strong></li>
+                                    <li><strong>Extant node names must be unique - lt;...gt; is duplicated.</strong></li>
                                     <li><strong>Sequence names must be unique - &lt;...&gt; - is duplicated.</strong></li>
                                     <li><strong>The sequence names in the provided alignment must all have a match.</strong></li>
                                 </ul></td>
@@ -443,8 +443,376 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2 id="advanced-nav">Advanced concepts/Example</h2>
-                            <p>To be written.</p>
+                            <h2 id="advanced-nav">Advanced: Machine Learning and GRASP</h2>
+                            <p>
+                                GRASP uses the principle of maximum likelihood to infer ancestral character states from a set of extant sequences \(S\),
+                                with their evolutionary relationships described by a <i>phylogenetic tree</i> \(T^*\) and an <i>evolutionary model</i>.
+                                Each extant sequence is a series of observed character states, arranged so that <i>homologous</i> sections are distinguished.
+                                The input to a reconstruction tool typically takes the form of a multiple sequence alignment which highlights homology,
+                                and a phylogenetic tree, with one leaf node for each sequence.
+                                There is an assortment of evolutionary models, but this is usually a less emphasized, secondary consideration.
+                            </p>
+                            <p>
+                                It is important to note that a phylogenetic tree represents the trace of (substitutions between) character states for homologous positions.
+                                There is a distinct possibility that some extant sequences miss an observable character state; this is marked by a
+                                <i>gap</i> character in a multiple sequence alignment, and is explained by either a deletion of that character at a
+                                preceding point in time subsequent to an ancestor, or by an insertion exclusive to other extant sequences subsequent
+                                to their last common ancestor.
+                            </p>
+                            <p>
+                                GRASP deals with this in two steps:
+                            <ol type="1">
+                                <li>
+                                    for each position \(v \in V\) which has observable character state contributed by one or more extant sequences, a <i>character trace tree</i> \(T_v\) is a constructed from
+                                    pruning the original phylogenetic tree \(T^*\); this tree will contain only nodes (extant and ancestral) for which a character state should be inferred,
+                                    i.e. where only substitution events need to be considered; deletions terminate the tree and the root of the tree is an insertion.
+                                </li>
+                                <li>
+                                    the position-specific character trace trees need to be linked to maintain the relationships between ancestral nodes so that ancestral sequences can be assembled following inference.
+                                </li>
+                            </ol>
+                            Neither step above is trivial but handled in GRASP by a form of maximum parsimony and via the use of partial order graphs, respectively.
+                            </p>
+                            <h3 id="inference-nav">Inference of character state</h3>
+                            <p>
+                                The upshot of the first step above is that each leaf node in character trace trees is <i>always</i> assigned a character state that originate from a shared ancestor.
+                                We assume that inference of ancestral character states can proceed for each position \(v\) independently; hence, we only need to consider
+                                substitution events between the nodes in \(T_v\), over the time durations attached to each node-to-node branch.
+                            </p>
+                            <p>
+                                Each character trace tree \(T_v\) is a <i>probabilistic graphical model</i> that specifies a set of nodes and directed edges between them. Nodes have a one-to-one relationship with <i>random variables</i>. A sub-set of random variables \(X_1, X_2, ..., X_{|S_v|}\) represent the character state
+                                of all sequences \(S_v \subseteq S\) that have an observable state for position \(v\), and another sub-set \(Y_1, Y_2, ..., Y_{|S_v|-1}\) represent the states in ancestral sequences; \(Y_{|S_v|-1}\) is a special case in that it represents the root of the tree.
+                                For both observable and ancestral variables the index uniquely corresponds to a leaf node or a parent node in \(T_v\), respectively.
+                            </p>
+                            <p>
+                                To complete the definition of the probabilistic graphical model based on \(T_v\), we define a function that identifies the edges of the graph. \(pa_v\) returns the parent variable of the variable in its argument.
+                                (\(Y_{|S_v|-1}\) is a special case, which we deal with separately below.)
+                                Additionally, we define a function \(ti_v\) that for any variable in its argument returns the time of evolution associated with the branch between it and its parent in \(T_v\).
+                            </p>
+                            <p>
+                                With the exception of the root, all nodes in the probabilistic graphical model is a conditional probability
+                                \(
+                                P(X_i|pa_v(X_i),ti_v(X_i))
+                                \) or
+                                \(
+                                P(Y_j|pa_v(Y_j),ti_v(Y_j))
+                                \),
+                                for \(i \in \{1, 2, ..., |S_v|\}\) and \(j \in \{1, 2, ..., |S_v|-2\}\);
+                                each conditional probability is determined by the distances on the branches in \(T_v\) pointing to the observed sequence \(i\) or ancestral sequence \(j\), respectively, from its
+                                closest ancestor.
+                                The matrix of conditional probabilities is \(e^{Q(t)}\) where \(Q\) is the instantaneous rate matrix given by the evolutionary model, and \(t\) is the time of evolution.
+                            </p>
+                            <p>
+                                Finally, the root of the tree is a probability
+                                \(
+                                P(Y_{|S_v|-1})
+                                \)
+                                The probability distribution is the base frequencies of character states \(F\) given by the evolutionary model.
+                            </p>
+                            <p>
+                                Inference of the joint ancestral state is then defined by
+                                \[
+                                P(Y_1, Y_2, ..., Y_{|S_v|-1}|X_1, X_2, ..., X_{|S_v|}) \propto \nonumber
+                                \prod_i P(X_i | pa_v(X_i), ti_v(X_i))
+                                \prod_j P(Y_j | pa_v(Y_j), ti_v(Y_j))
+                                P(Y_{|S_v|-1})
+                                \]
+                            </p>
+                            <p>
+                                GRASP's implementation uses <i>variable elimination</i>, which decomposes the inference into an efficient series of products given the hierarchical topology of the tree; it determines the ancestral state across all
+                                non-observed variables with the highest <i>joint probability</i>. From the above, GRASP is also capable of inferring the <i>marginal probability distribution</i> at a given node \(k \in \{1, 2, ..., |S_v|-1\}\) by summing
+                                out all other non-observed variables.
+                            </p>
+                            <p>
+                                All inferences in GRASP are exact (not approximated).
+                            </p>
+
+                            <h3 id="evol-nav">Evolutionary model and substitution probabilities</h3>
+                            An evolutionary model provides us with two types of information: (1) the base frequencies or equilibrium probabilities of each character state, \(F\),
+                            and (2) an instantaneous rate matrix \(Q\), which in turn can be used to determine the substitution probabilities of any character state given any other, over any given time duration.
+                            <p>
+                                The base frequencies (transposed) for Le and Gasquel (LG) are
+                                \[
+                                \begin{matrix}
+                                A &amp;amp; R &amp;amp; N &amp;amp; D &amp;amp; C &amp;amp; Q &amp;amp; E &amp;amp; G &amp;amp; H &amp;amp; I &amp;amp; L &amp;amp; K &amp;amp; M &amp;amp; F &amp;amp; P &amp;amp; S &amp;amp; T &amp;amp; W &amp;amp; Y &amp;amp; V \\
+                                0.079 &amp;amp; 0.056 &amp;amp; 0.042 &amp;amp; 0.053 &amp;amp; 0.013 &amp;amp; 0.041 &amp;amp; 0.072 &amp;amp; 0.057 &amp;amp; 0.022 &amp;amp; 0.062 &amp;amp; 0.099 &amp;amp; 0.065 &amp;amp; 0.023 &amp;amp; 0.042 &amp;amp; 0.044 &amp;amp; 0.062 &amp;amp; 0.053 &amp;amp; 0.012 &amp;amp; 0.034 &amp;amp; 0.069
+                                \end{matrix}
+                                \]
+                                The rate matrix for the same model is
+                                \[
+                                \begin{matrix}
+                                &amp;amp; A &amp;amp; R &amp;amp; N &amp;amp; D &amp;amp; C &amp; Q &amp; E &amp; G &amp; H &amp; I &amp; L &amp; K &amp; M &amp; F &amp; P &amp; S &amp; T &amp; W &amp; Y &amp; V \\
+                                A &amp; -1.09 &amp; 0.02 &amp; 0.01 &amp; 0.02 &amp; 0.03 &amp; 0.04 &amp; 0.07 &amp; 0.12 &amp; 0.01 &amp; 0.01 &amp; 0.04 &amp; 0.03 &amp; 0.03 &amp; 0.01 &amp; 0.05 &amp; 0.29 &amp; 0.11 &amp; 0.00 &amp; 0.01 &amp; 0.18  \\
+                                R &amp; 0.03 &amp; -0.88 &amp; 0.03 &amp; 0.01 &amp; 0.01 &amp; 0.11 &amp; 0.03 &amp; 0.02 &amp; 0.05 &amp; 0.01 &amp; 0.03 &amp; 0.41 &amp; 0.01 &amp; 0.00 &amp; 0.01 &amp; 0.05 &amp; 0.03 &amp; 0.01 &amp; 0.01 &amp; 0.01  \\
+                                N &amp; 0.02 &amp; 0.04 &amp; -1.19 &amp; 0.27 &amp; 0.01 &amp; 0.07 &amp; 0.04 &amp; 0.08 &amp; 0.10 &amp; 0.01 &amp; 0.01 &amp; 0.14 &amp; 0.01 &amp; 0.00 &amp; 0.01 &amp; 0.25 &amp; 0.11 &amp; 0.00 &amp; 0.02 &amp; 0.01  \\
+                                D &amp; 0.03 &amp; 0.01 &amp; 0.21 &amp; -0.86 &amp; 0.00 &amp; 0.02 &amp; 0.38 &amp; 0.05 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.02 &amp; 0.08 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.00  \\
+                                C &amp; 0.20 &amp; 0.03 &amp; 0.02 &amp; 0.00 &amp; -0.87 &amp; 0.00 &amp; 0.00 &amp; 0.03 &amp; 0.01 &amp; 0.02 &amp; 0.06 &amp; 0.00 &amp; 0.02 &amp; 0.05 &amp; 0.00 &amp; 0.17 &amp; 0.06 &amp; 0.01 &amp; 0.04 &amp; 0.14  \\
+                                Q &amp; 0.08 &amp; 0.16 &amp; 0.07 &amp; 0.03 &amp; 0.00 &amp; -1.25 &amp; 0.30 &amp; 0.02 &amp; 0.11 &amp; 0.00 &amp; 0.06 &amp; 0.21 &amp; 0.04 &amp; 0.00 &amp; 0.03 &amp; 0.07 &amp; 0.06 &amp; 0.00 &amp; 0.01 &amp; 0.01  \\
+                                E &amp; 0.08 &amp; 0.02 &amp; 0.02 &amp; 0.28 &amp; 0.00 &amp; 0.17 &amp; -0.84 &amp; 0.02 &amp; 0.01 &amp; 0.00 &amp; 0.01 &amp; 0.12 &amp; 0.00 &amp; 0.00 &amp; 0.02 &amp; 0.04 &amp; 0.03 &amp; 0.00 &amp; 0.00 &amp; 0.02  \\
+                                G &amp; 0.16 &amp; 0.02 &amp; 0.06 &amp; 0.04 &amp; 0.01 &amp; 0.01 &amp; 0.02 &amp; -0.50 &amp; 0.01 &amp; 0.00 &amp; 0.00 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.01 &amp; 0.11 &amp; 0.01 &amp; 0.00 &amp; 0.00 &amp; 0.01  \\
+                                H &amp; 0.03 &amp; 0.14 &amp; 0.19 &amp; 0.05 &amp; 0.01 &amp; 0.20 &amp; 0.03 &amp; 0.02 &amp; -1.09 &amp; 0.01 &amp; 0.04 &amp; 0.05 &amp; 0.01 &amp; 0.03 &amp; 0.02 &amp; 0.06 &amp; 0.03 &amp; 0.01 &amp; 0.18 &amp; 0.01  \\
+                                I &amp; 0.01 &amp; 0.01 &amp; 0.01 &amp; 0.00 &amp; 0.00 &amp; 0.00 &amp; 0.00 &amp; 0.00 &amp; 0.00 &amp; -1.41 &amp; 0.41 &amp; 0.01 &amp; 0.10 &amp; 0.05 &amp; 0.00 &amp; 0.00 &amp; 0.06 &amp; 0.00 &amp; 0.01 &amp; 0.74  \\
+                                L &amp; 0.03 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.01 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.01 &amp; 0.26 &amp; -0.79 &amp; 0.01 &amp; 0.14 &amp; 0.11 &amp; 0.01 &amp; 0.01 &amp; 0.02 &amp; 0.01 &amp; 0.01 &amp; 0.12  \\
+                                K &amp; 0.04 &amp; 0.35 &amp; 0.09 &amp; 0.02 &amp; 0.00 &amp; 0.13 &amp; 0.13 &amp; 0.02 &amp; 0.02 &amp; 0.01 &amp; 0.01 &amp; -0.98 &amp; 0.02 &amp; 0.00 &amp; 0.02 &amp; 0.05 &amp; 0.06 &amp; 0.00 &amp; 0.00 &amp; 0.01  \\
+                                M &amp; 0.09 &amp; 0.03 &amp; 0.02 &amp; 0.00 &amp; 0.01 &amp; 0.07 &amp; 0.01 &amp; 0.01 &amp; 0.01 &amp; 0.27 &amp; 0.63 &amp; 0.04 &amp; -1.54 &amp; 0.08 &amp; 0.00 &amp; 0.02 &amp; 0.11 &amp; 0.01 &amp; 0.02 &amp; 0.13  \\
+                                F &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.00 &amp; 0.01 &amp; 0.00 &amp; 0.00 &amp; 0.01 &amp; 0.02 &amp; 0.07 &amp; 0.26 &amp; 0.00 &amp; 0.04 &amp; -0.81 &amp; 0.00 &amp; 0.02 &amp; 0.01 &amp; 0.03 &amp; 0.27 &amp; 0.05  \\
+                                P &amp; 0.09 &amp; 0.02 &amp; 0.01 &amp; 0.02 &amp; 0.00 &amp; 0.03 &amp; 0.03 &amp; 0.01 &amp; 0.01 &amp; 0.00 &amp; 0.02 &amp; 0.03 &amp; 0.00 &amp; 0.00 &amp; -0.42 &amp; 0.08 &amp; 0.03 &amp; 0.00 &amp; 0.00 &amp; 0.02  \\
+                                S &amp; 0.37 &amp; 0.05 &amp; 0.17 &amp; 0.07 &amp; 0.04 &amp; 0.05 &amp; 0.04 &amp; 0.10 &amp; 0.02 &amp; 0.00 &amp; 0.02 &amp; 0.05 &amp; 0.01 &amp; 0.02 &amp; 0.06 &amp; -1.43 &amp; 0.34 &amp; 0.00 &amp; 0.01 &amp; 0.01  \\
+                                T &amp; 0.17 &amp; 0.03 &amp; 0.08 &amp; 0.02 &amp; 0.01 &amp; 0.04 &amp; 0.04 &amp; 0.01 &amp; 0.01 &amp; 0.06 &amp; 0.03 &amp; 0.07 &amp; 0.05 &amp; 0.01 &amp; 0.03 &amp; 0.40 &amp; -1.23 &amp; 0.00 &amp; 0.01 &amp; 0.15  \\
+                                W &amp; 0.01 &amp; 0.03 &amp; 0.00 &amp; 0.00 &amp; 0.01 &amp; 0.01 &amp; 0.01 &amp; 0.02 &amp; 0.01 &amp; 0.01 &amp; 0.06 &amp; 0.00 &amp; 0.02 &amp; 0.10 &amp; 0.00 &amp; 0.02 &amp; 0.01 &amp; -0.44 &amp; 0.11 &amp; 0.01  \\
+                                Y &amp; 0.02 &amp; 0.02 &amp; 0.03 &amp; 0.01 &amp; 0.02 &amp; 0.01 &amp; 0.01 &amp; 0.00 &amp; 0.12 &amp; 0.01 &amp; 0.03 &amp; 0.01 &amp; 0.01 &amp; 0.33 &amp; 0.00 &amp; 0.02 &amp; 0.01 &amp; 0.04 &amp; -0.71 &amp; 0.02  \\
+                                V &amp; 0.20 &amp; 0.01 &amp; 0.00 &amp; 0.00 &amp; 0.03 &amp; 0.01 &amp; 0.02 &amp; 0.00 &amp; 0.00 &amp; 0.66 &amp; 0.17 &amp; 0.01 &amp; 0.04 &amp; 0.03 &amp; 0.01 &amp; 0.01 &amp; 0.12 &amp; 0.00 &amp; 0.01 &amp; -1.34
+                                \end{matrix}
+                                \]
+                                Read as row = source of substitution, column = target of substitution.
+                            </p>
+
+                            <p>
+                                We use matrix exponentiation to determine the substitution probability matrix when \(t=0.1\).
+                                This contains all possible substitution probabilities \(P(X=column|Y=row,t=0.1)\).
+                                \[
+                                \begin{matrix}
+                                &amp; A     &amp;    R  &amp;    N  &amp;    D &amp;    C &amp;    Q &amp;    E &amp; ... \\
+                                A &amp; 0.898 &amp; 0.002 &amp; 0.001 &amp; 0.002 &amp; 0.003 &amp; 0.004 &amp; 0.007 &amp; ...  \\
+                                R &amp; 0.003 &amp; 0.916 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.011 &amp; 0.003 &amp; ...  \\
+                                N &amp; 0.003 &amp; 0.004 &amp; 0.889 &amp; 0.025 &amp; 0.001 &amp; 0.006 &amp; 0.004 &amp; ...  \\
+                                D &amp; 0.003 &amp; 0.001 &amp; 0.019 &amp; 0.918 &amp; 0.000 &amp; 0.002 &amp; 0.035 &amp; ...  \\
+                                C &amp; 0.018 &amp; 0.003 &amp; 0.002 &amp; 0.000 &amp; 0.917 &amp; 0.000 &amp; 0.000 &amp; ...  \\
+                                Q &amp; 0.007 &amp; 0.015 &amp; 0.007 &amp; 0.003 &amp; 0.000 &amp; 0.883 &amp; 0.027 &amp; ...  \\
+                                E &amp; 0.008 &amp; 0.002 &amp; 0.002 &amp; 0.026 &amp; 0.000 &amp; 0.015 &amp; 0.920 &amp; ...  \\
+                                ... &amp; ... \\
+                                \end{matrix}
+                                \]
+                            </p>
+
+                            <p>
+                                Same operation applies to determine the substitution probabilities for \(t=0.01\).
+                                \[
+                                \begin{matrix}
+                                &amp; A       &amp;    R  &amp;    N  &amp;    D  &amp;    C  &amp;    Q  &amp;    E  &amp; ... \\
+                                A &amp; 0.989 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; ...  \\
+                                R &amp; 0.001 &amp; 0.990 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; ...  \\
+                                N &amp; 0.000 &amp; 0.000 &amp; 0.986 &amp; 0.003 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; ...  \\
+                                D &amp; 0.001 &amp; 0.000 &amp; 0.002 &amp; 0.990 &amp; 0.000 &amp; 0.000 &amp; 0.004 &amp; ...  \\
+                                C &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.995 &amp; 0.000 &amp; 0.000 &amp; ...  \\
+                                Q &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.986 &amp; 0.003 &amp; ...  \\
+                                E &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.004 &amp; 0.000 &amp; 0.002 &amp; 0.988 &amp; ...  \\
+                                ... &amp; ... \\
+                                \end{matrix}
+                                \]
+                            </p>
+
+                            <h3 id="example-nav">Example</h3>
+                            <p>
+                                Here's a worked example. Below is a phylogenetic tree with four extant sequences; the tree shows how they are related via three ancestors. The evolutionary distances (in time) are indicated on the branches.
+                            </p>
+                            <a id="tutorial4-nwk-img"></a>
+                            <div class="col-xs-12" id="tutorial-4-nwk-img-div"></div>
+
+                            <p>
+                                The sequences are provided in the form of a multiple sequence alignment, which we will refer to below; each column corresponds to an index 0-18.
+                            </p>
+                            <a id="tutorial4-aln-img"></a>
+                            <div class="col-xs-12" id="tutorial-4-aln-img-div"></div>
+                            <p>
+                                As an aside, internally GRASP maps the multiple sequence alignment to a partial order alignment graph (POAG).
+                                There are a few alignment programs that operate on and produce this data structure directly; GRASP is able to do this too if the user provides the sequences un-aligned.
+                            </p>
+                            <a id="GRASP-MSA-img"></a>
+                            <div class="col-xs-12" id="GRASP-MSA-img-div"></div>
+                            <p>
+                                We can determine a character trace tree for each index based on the original phylogenetic tree.
+                                This involves determining which of the nodes that is the root node and which nodes that terminate the tree.
+                                As indicated earlier, this is a separate optimisation problem that GRASP performs using a variant of maximum parsimony. We do not discuss it here.
+                                Below we show the resulting character trace tree for index 17.
+                                This is identical to the original phylogenetic tree because there should be a character state at the ultimate ancestor and there are no deletion events that would remove that position in any of the extant sequences.
+                                Note that we have not yet assigned character states to the ancestral nodes--that is the problem we are going to look at next.
+                            </p>
+                            <a id="tutorial4-pos17-nwk-img"></a>
+                            <div class="col-xs-12" id="tutorial-4-pos17-nwk-img-div"></div>
+                            <p>
+                                Here is the character trace tree for index 6.
+                            </p>
+                            <a id="tutorial4-pos6-nwk-img"></a>
+                            <div class="col-xs-12" id="tutorial-4-pos6-nwk-img-div"></div>
+                            <p>
+                                Ancestral sequence reconstruction typically operates independently on each index. Let's first look at index 6.
+                            </p>
+                            <p>
+                                The trace tree for index 6 is a probabilistic graphical model with four variables: \(N0, N1, rno3a18, mmus3a57\), two of which are instantiated \(rno3a18={\tt E}, mmus3a57={\tt D}\). The key expression we wish to evaluate is
+                                \[
+                                P(N0, N1 | rno3a18={\tt E}, mmus3a57={\tt D}) \propto \nonumber \\
+                                P(N0) \cdot \\
+                                P(N1 | N0, t=0.01) \cdot \\
+                                P(rno3a18={\tt E} | N0, t=0.07) \cdot \\
+                                P(mmus3a57={\tt D} | N1, t=0.07)
+                                \]
+                                To determine the most probable instantiation of \(N0\) and \(N1\), we can simply record the result of the above expression for each.
+                                This will require us to lookup each substitution probability as determined by the model for a specified evolutionary distance (in time).
+                                Substitution matrices for a few relevant time points are provided at the end of this page--please use them to manually gauge the probabilities of ancestral states.
+                                \[
+                                P(N0={\tt A}, N1={\tt A} | rno3a18={\tt E}, mmus3a57={\tt D}) \propto 0.079 \cdot 0.989 \cdot 0.005 \cdot 0.001 \approx 0.000 \\
+                                ... \\
+                                P(N0={\tt D}, N1={\tt D} | a18={\tt E}, a57={\tt D}) = 0.00122945\\
+                                P(N0={\tt D}, N1={\tt E} | a18={\tt E}, a57={\tt D}) = 0.00000009\\
+                                P(N0={\tt E}, N1={\tt D} | a18={\tt E}, a57={\tt D}) = 0.00017545\\
+                                P(N0={\tt E}, N1={\tt E} | a18={\tt E}, a57={\tt D}) = 0.00123152\\
+                                \]
+                                Almost all products are very close to zero; we can optionally normalise so that each possibility sums to 1, to make them probabilities. (This is optional, since we are primarily interested in the combination with the greatest product.)
+                            </p>
+                            <p>
+                                Of all \(20 \cdot 20 = 20^2 = 400 \) possibilities, intuitively those involving the character states \(\tt E\) and \(\tt D\) would be in contention.
+                                \[
+                                P(N0={\tt E}, N1={\tt E} | a18={\tt E}, a57={\tt D}) = 0.466\\
+                                P(N0={\tt E}, N1={\tt D} | a18={\tt E}, a57={\tt D}) = 0.066\\
+                                P(N0={\tt D}, N1={\tt E} | a18={\tt E}, a57={\tt D}) = 0.000\\
+                                P(N0={\tt D}, N1={\tt D} | a18={\tt E}, a57={\tt D}) = 0.465\\
+                                \]
+                            </p>
+                            <p>
+                                Imagine for a moment if \(t=0.1\) on the branch between N0 and N1, i.e. replace with \(P(N1 | N0, t=0.1)\);
+                                with a longer duration between the evolutionary events there is more opportunity for mutations to occur and the ancestral states will reflect that.
+                                \[
+                                P(N0={\tt E}, N1={\tt E} | a18={\tt E}, a57={\tt D}) = 0.290\\
+                                P(N0={\tt E}, N1={\tt D} | a18={\tt E}, a57={\tt D}) = 0.414\\
+                                P(N0={\tt D}, N1={\tt E} | a18={\tt E}, a57={\tt D}) = 0.000\\
+                                P(N0={\tt D}, N1={\tt D} | a18={\tt E}, a57={\tt D}) = 0.289\\
+                                \]
+                            </p>
+                            <p>
+                                The trace tree for index 17 is a little messier since we now have seven variables:
+                                \(N0, N1, N2, rno3a18, mmus3a57, mmus3a26, mmus3a59\), four of which are instantiated \(rno3a18={\tt N}, mmus3a57={\tt D}, mmus3a25={\tt E}, mmus3a59={\tt E}\).
+                                The key expression we wish to evaluate is
+                                \[
+                                P(N0, N1, N2 | rno3a18={\tt N}, mmus3a57={\tt D}, mmus3a25={\tt E}, mmus3a59={\tt E}) \propto \nonumber \\
+                                P(N0)\\
+                                P(N1 | N0, t=0.01) \cdot \\
+                                P(rno3a18={\tt N} | N0, t=0.07) \cdot \\
+                                P(mmus3a57={\tt D} | N1, t=0.07) \cdot \\
+                                P(N2 | N1, t=0.02) \cdot \\
+                                P(mmus3a25={\tt E} | N2, t=0.01) \cdot \\
+                                P(mmus3a59={\tt E} | N2, t=0.02)
+                                \]
+                                For index 17 we are after the most probable instantiation of \(N0\), \(N1\) and \(N2\); that means, \(20 \cdot 20 \cdot 20 = 20^3 = 8000\) combinations.
+                                Again we can loop through all of them, look up substitution probabilities, and perform the product.
+                            </p>
+                            <p>
+                                We have only discussed what defines the most probable joint state in theory.
+                                In practice, there are a number of considerations that will influence the time and space complexity.
+                                <a href="https://github.com/bodenlab/bnkit">bnkit</a> is a Bayesian network modelling framework written in Java which is used by GRASP.
+                                If you are interested in understanding how it can be used to perform character state inference, the example above is coded in the package
+                                <tt>bn.ctmc.SubstNode</tt>.
+                            </p>
+
+                            <h3 id="pog-anc-nav">Partial order graphs with character states at ancestral nodes</h3>
+
+                            <p>
+                                Once inference has been done for each character trace tree, assigning a character state to each ancestral node,
+                                GRASP pieces all of them together to form the following POAGs for the ancestral nodes \(N0, N1\) and \(N2\), respectively.
+                                In the process (record keeping on the grand scale) it is possible to distinguish between edges of a couple of different types, highlighted in the colour below.
+                                Dark grey means that bi-directional edge parsimony (described elsewhere) has deemed the edge to be fully optimal.
+                                The user can select a single, consensus path through the POAG, which is displayed with a thicker outline.
+                            </p>
+                            <a id="GRASP-POAGs-img"></a>
+                            <div class="col-xs-12" id="GRASP-POAGs-img-div"></div>
+
+                            <h4>Susbtitution matrices</h4>
+                            <h5>\(t=0.01\)</h5>
+                            \begin{matrix}
+                            &amp;     A &amp;     R &amp;     N &amp;     D &amp;     C &amp;     Q &amp;     E &amp;     G &amp;     H &amp;     I &amp;     L &amp;     K &amp;     M &amp;     F &amp;     P &amp;     S &amp;     T &amp;     W &amp;     Y &amp;     V \\
+                            A &amp; 0.989 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.003 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 \\
+                            R &amp; 0.000 &amp; 0.991 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.004 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            N &amp; 0.000 &amp; 0.000 &amp; 0.988 &amp; 0.003 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            D &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.991 &amp; 0.000 &amp; 0.000 &amp; 0.004 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            C &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.991 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            Q &amp; 0.001 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.988 &amp; 0.003 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            E &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.000 &amp; 0.002 &amp; 0.992 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            G &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.995 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            H &amp; 0.000 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.989 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 \\
+                            I &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.986 &amp; 0.004 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.007 \\
+                            L &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.992 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            K &amp; 0.000 &amp; 0.004 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.990 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            M &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.006 &amp; 0.000 &amp; 0.985 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            F &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.992 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.000 \\
+                            P &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.996 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            S &amp; 0.004 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.986 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            T &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.004 &amp; 0.988 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            W &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.996 &amp; 0.001 &amp; 0.000 \\
+                            Y &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.993 &amp; 0.000 \\
+                            V &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.007 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.987 \\
+                            \end{matrix}
+                            <h5>\(t=0.02\)</h5>
+                            \begin{matrix}
+                            &amp;     A &amp;     R &amp;     N &amp;     D &amp;     C &amp;     Q &amp;     E &amp;     G &amp;     H &amp;     I &amp;     L &amp;     K &amp;     M &amp;     F &amp;     P &amp;     S &amp;     T &amp;     W &amp;     Y &amp;     V \\
+                            A &amp; 0.978 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.006 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.003 \\
+                            R &amp; 0.001 &amp; 0.983 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.008 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            N &amp; 0.000 &amp; 0.001 &amp; 0.977 &amp; 0.005 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.005 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            D &amp; 0.001 &amp; 0.000 &amp; 0.004 &amp; 0.983 &amp; 0.000 &amp; 0.000 &amp; 0.007 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            C &amp; 0.004 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.983 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.003 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.003 \\
+                            Q &amp; 0.002 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.975 &amp; 0.006 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.004 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            E &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.005 &amp; 0.000 &amp; 0.003 &amp; 0.983 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            G &amp; 0.003 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.990 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            H &amp; 0.001 &amp; 0.003 &amp; 0.004 &amp; 0.001 &amp; 0.000 &amp; 0.004 &amp; 0.001 &amp; 0.000 &amp; 0.978 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.004 &amp; 0.000 \\
+                            I &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.972 &amp; 0.008 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.014 \\
+                            L &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.005 &amp; 0.984 &amp; 0.000 &amp; 0.003 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 \\
+                            K &amp; 0.001 &amp; 0.007 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.981 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            M &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.005 &amp; 0.012 &amp; 0.001 &amp; 0.970 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.003 \\
+                            F &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.005 &amp; 0.000 &amp; 0.001 &amp; 0.984 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.005 &amp; 0.001 \\
+                            P &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.992 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            S &amp; 0.007 &amp; 0.001 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.972 &amp; 0.007 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            T &amp; 0.003 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.008 &amp; 0.976 &amp; 0.000 &amp; 0.000 &amp; 0.003 \\
+                            W &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.991 &amp; 0.002 &amp; 0.000 \\
+                            Y &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.007 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.986 &amp; 0.000 \\
+                            V &amp; 0.004 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.013 &amp; 0.003 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.974 \\
+                            \end{matrix}
+                            <h5>\(t=0.07\)</h5>
+                            \begin{matrix}
+                            &amp;     A &amp;     R &amp;     N &amp;     D &amp;     C &amp;     Q &amp;     E &amp;     G &amp;     H &amp;     I &amp;     L &amp;     K &amp;     M &amp;     F &amp;     P &amp;     S &amp;     T &amp;     W &amp;     Y &amp;     V \\
+                            A &amp; 0.927 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.003 &amp; 0.005 &amp; 0.008 &amp; 0.001 &amp; 0.001 &amp; 0.003 &amp; 0.002 &amp; 0.002 &amp; 0.001 &amp; 0.004 &amp; 0.019 &amp; 0.008 &amp; 0.000 &amp; 0.001 &amp; 0.011 \\
+                            R &amp; 0.002 &amp; 0.940 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.008 &amp; 0.002 &amp; 0.002 &amp; 0.004 &amp; 0.001 &amp; 0.002 &amp; 0.027 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.004 &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.001 \\
+                            N &amp; 0.002 &amp; 0.003 &amp; 0.921 &amp; 0.018 &amp; 0.000 &amp; 0.005 &amp; 0.003 &amp; 0.006 &amp; 0.007 &amp; 0.001 &amp; 0.001 &amp; 0.009 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.016 &amp; 0.007 &amp; 0.000 &amp; 0.001 &amp; 0.000 \\
+                            D &amp; 0.002 &amp; 0.001 &amp; 0.014 &amp; 0.942 &amp; 0.000 &amp; 0.002 &amp; 0.025 &amp; 0.003 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.005 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            C &amp; 0.013 &amp; 0.002 &amp; 0.002 &amp; 0.000 &amp; 0.941 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.002 &amp; 0.004 &amp; 0.000 &amp; 0.001 &amp; 0.003 &amp; 0.000 &amp; 0.011 &amp; 0.004 &amp; 0.001 &amp; 0.003 &amp; 0.009 \\
+                            Q &amp; 0.005 &amp; 0.010 &amp; 0.005 &amp; 0.002 &amp; 0.000 &amp; 0.917 &amp; 0.019 &amp; 0.001 &amp; 0.007 &amp; 0.000 &amp; 0.004 &amp; 0.014 &amp; 0.002 &amp; 0.000 &amp; 0.002 &amp; 0.005 &amp; 0.004 &amp; 0.000 &amp; 0.001 &amp; 0.001 \\
+                            E &amp; 0.006 &amp; 0.002 &amp; 0.002 &amp; 0.018 &amp; 0.000 &amp; 0.011 &amp; 0.943 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.008 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.003 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            G &amp; 0.011 &amp; 0.002 &amp; 0.004 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.965 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.007 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            H &amp; 0.002 &amp; 0.009 &amp; 0.012 &amp; 0.003 &amp; 0.001 &amp; 0.013 &amp; 0.002 &amp; 0.001 &amp; 0.926 &amp; 0.001 &amp; 0.002 &amp; 0.003 &amp; 0.001 &amp; 0.002 &amp; 0.002 &amp; 0.004 &amp; 0.002 &amp; 0.001 &amp; 0.012 &amp; 0.001 \\
+                            I &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.907 &amp; 0.027 &amp; 0.001 &amp; 0.006 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.004 &amp; 0.000 &amp; 0.001 &amp; 0.047 \\
+                            L &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.017 &amp; 0.947 &amp; 0.001 &amp; 0.009 &amp; 0.007 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.008 \\
+                            K &amp; 0.003 &amp; 0.023 &amp; 0.006 &amp; 0.001 &amp; 0.000 &amp; 0.009 &amp; 0.009 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.934 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.003 &amp; 0.004 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            M &amp; 0.006 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.004 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.017 &amp; 0.041 &amp; 0.003 &amp; 0.898 &amp; 0.005 &amp; 0.000 &amp; 0.002 &amp; 0.007 &amp; 0.001 &amp; 0.001 &amp; 0.009 \\
+                            F &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.005 &amp; 0.017 &amp; 0.000 &amp; 0.003 &amp; 0.945 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.018 &amp; 0.003 \\
+                            P &amp; 0.006 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.002 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.002 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.971 &amp; 0.005 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            S &amp; 0.024 &amp; 0.003 &amp; 0.011 &amp; 0.004 &amp; 0.002 &amp; 0.003 &amp; 0.003 &amp; 0.007 &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.004 &amp; 0.906 &amp; 0.022 &amp; 0.000 &amp; 0.001 &amp; 0.001 \\
+                            T &amp; 0.011 &amp; 0.002 &amp; 0.006 &amp; 0.002 &amp; 0.001 &amp; 0.003 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.004 &amp; 0.002 &amp; 0.005 &amp; 0.003 &amp; 0.001 &amp; 0.002 &amp; 0.025 &amp; 0.918 &amp; 0.000 &amp; 0.001 &amp; 0.010 \\
+                            W &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.004 &amp; 0.000 &amp; 0.001 &amp; 0.007 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.970 &amp; 0.007 &amp; 0.001 \\
+                            Y &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.008 &amp; 0.001 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.022 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.003 &amp; 0.951 &amp; 0.001 \\
+                            V &amp; 0.013 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.042 &amp; 0.012 &amp; 0.001 &amp; 0.003 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.008 &amp; 0.000 &amp; 0.001 &amp; 0.912 \\
+                            \end{matrix}
+                            <h5>\(t=0.1\)</h5>
+                            \begin{matrix}
+                            &amp;     A &amp;     R &amp;     N &amp;     D &amp;     C &amp;     Q &amp;     E &amp;     G &amp;     H &amp;     I &amp;     L &amp;     K &amp;     M &amp;     F &amp;     P &amp;     S &amp;     T &amp;     W &amp;     Y &amp;     V \\
+                            A &amp; 0.898 &amp; 0.002 &amp; 0.001 &amp; 0.002 &amp; 0.003 &amp; 0.004 &amp; 0.007 &amp; 0.011 &amp; 0.001 &amp; 0.001 &amp; 0.004 &amp; 0.003 &amp; 0.002 &amp; 0.001 &amp; 0.005 &amp; 0.026 &amp; 0.011 &amp; 0.000 &amp; 0.001 &amp; 0.016 \\
+                            R &amp; 0.003 &amp; 0.916 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.011 &amp; 0.003 &amp; 0.002 &amp; 0.005 &amp; 0.001 &amp; 0.003 &amp; 0.037 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.005 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.001 \\
+                            N &amp; 0.003 &amp; 0.004 &amp; 0.889 &amp; 0.025 &amp; 0.001 &amp; 0.006 &amp; 0.004 &amp; 0.008 &amp; 0.009 &amp; 0.001 &amp; 0.001 &amp; 0.013 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.022 &amp; 0.010 &amp; 0.000 &amp; 0.002 &amp; 0.001 \\
+                            D &amp; 0.003 &amp; 0.001 &amp; 0.019 &amp; 0.918 &amp; 0.000 &amp; 0.002 &amp; 0.035 &amp; 0.005 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.007 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 \\
+                            C &amp; 0.018 &amp; 0.003 &amp; 0.002 &amp; 0.000 &amp; 0.917 &amp; 0.000 &amp; 0.000 &amp; 0.003 &amp; 0.001 &amp; 0.002 &amp; 0.006 &amp; 0.000 &amp; 0.002 &amp; 0.004 &amp; 0.000 &amp; 0.016 &amp; 0.006 &amp; 0.001 &amp; 0.004 &amp; 0.012 \\
+                            Q &amp; 0.007 &amp; 0.015 &amp; 0.007 &amp; 0.003 &amp; 0.000 &amp; 0.883 &amp; 0.027 &amp; 0.002 &amp; 0.010 &amp; 0.001 &amp; 0.005 &amp; 0.019 &amp; 0.003 &amp; 0.000 &amp; 0.003 &amp; 0.007 &amp; 0.005 &amp; 0.000 &amp; 0.001 &amp; 0.002 \\
+                            E &amp; 0.008 &amp; 0.002 &amp; 0.002 &amp; 0.026 &amp; 0.000 &amp; 0.015 &amp; 0.920 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.011 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.004 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.002 \\
+                            G &amp; 0.015 &amp; 0.002 &amp; 0.006 &amp; 0.004 &amp; 0.001 &amp; 0.001 &amp; 0.003 &amp; 0.951 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.010 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            H &amp; 0.003 &amp; 0.013 &amp; 0.017 &amp; 0.005 &amp; 0.001 &amp; 0.018 &amp; 0.003 &amp; 0.002 &amp; 0.897 &amp; 0.001 &amp; 0.004 &amp; 0.005 &amp; 0.001 &amp; 0.003 &amp; 0.002 &amp; 0.006 &amp; 0.003 &amp; 0.001 &amp; 0.017 &amp; 0.001 \\
+                            I &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.871 &amp; 0.038 &amp; 0.001 &amp; 0.009 &amp; 0.005 &amp; 0.000 &amp; 0.001 &amp; 0.005 &amp; 0.000 &amp; 0.001 &amp; 0.065 \\
+                            L &amp; 0.003 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.001 &amp; 0.024 &amp; 0.925 &amp; 0.001 &amp; 0.013 &amp; 0.010 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.012 \\
+                            K &amp; 0.004 &amp; 0.032 &amp; 0.008 &amp; 0.002 &amp; 0.000 &amp; 0.012 &amp; 0.012 &amp; 0.002 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.908 &amp; 0.001 &amp; 0.000 &amp; 0.002 &amp; 0.005 &amp; 0.006 &amp; 0.000 &amp; 0.000 &amp; 0.001 \\
+                            M &amp; 0.008 &amp; 0.003 &amp; 0.002 &amp; 0.000 &amp; 0.001 &amp; 0.006 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.024 &amp; 0.056 &amp; 0.004 &amp; 0.858 &amp; 0.007 &amp; 0.001 &amp; 0.002 &amp; 0.010 &amp; 0.001 &amp; 0.002 &amp; 0.013 \\
+                            F &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.002 &amp; 0.007 &amp; 0.024 &amp; 0.000 &amp; 0.004 &amp; 0.923 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.003 &amp; 0.025 &amp; 0.005 \\
+                            P &amp; 0.009 &amp; 0.002 &amp; 0.001 &amp; 0.002 &amp; 0.000 &amp; 0.002 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.002 &amp; 0.002 &amp; 0.000 &amp; 0.000 &amp; 0.959 &amp; 0.008 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.002 \\
+                            S &amp; 0.033 &amp; 0.005 &amp; 0.015 &amp; 0.006 &amp; 0.003 &amp; 0.005 &amp; 0.004 &amp; 0.009 &amp; 0.002 &amp; 0.001 &amp; 0.002 &amp; 0.005 &amp; 0.001 &amp; 0.001 &amp; 0.006 &amp; 0.868 &amp; 0.031 &amp; 0.000 &amp; 0.001 &amp; 0.001 \\
+                            T &amp; 0.016 &amp; 0.003 &amp; 0.008 &amp; 0.002 &amp; 0.001 &amp; 0.004 &amp; 0.004 &amp; 0.001 &amp; 0.001 &amp; 0.006 &amp; 0.003 &amp; 0.007 &amp; 0.004 &amp; 0.001 &amp; 0.003 &amp; 0.035 &amp; 0.885 &amp; 0.000 &amp; 0.001 &amp; 0.014 \\
+                            W &amp; 0.001 &amp; 0.003 &amp; 0.000 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.006 &amp; 0.000 &amp; 0.002 &amp; 0.010 &amp; 0.000 &amp; 0.001 &amp; 0.001 &amp; 0.957 &amp; 0.010 &amp; 0.001 \\
+                            Y &amp; 0.002 &amp; 0.002 &amp; 0.002 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.001 &amp; 0.000 &amp; 0.011 &amp; 0.002 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.031 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.004 &amp; 0.932 &amp; 0.002 \\
+                            V &amp; 0.018 &amp; 0.001 &amp; 0.000 &amp; 0.000 &amp; 0.002 &amp; 0.001 &amp; 0.002 &amp; 0.001 &amp; 0.000 &amp; 0.058 &amp; 0.017 &amp; 0.001 &amp; 0.004 &amp; 0.003 &amp; 0.001 &amp; 0.001 &amp; 0.011 &amp; 0.000 &amp; 0.001 &amp; 0.878 \\
+                            \end{matrix}
                         </div>
                     </div>
                 </div>

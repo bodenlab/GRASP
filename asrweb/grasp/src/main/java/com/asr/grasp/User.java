@@ -18,6 +18,7 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Transient
     private String passwordMatch;
 
     @ManyToMany(cascade = {
@@ -29,6 +30,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "recon_id")
     )
     private Set<Reconstruction> reconstructions = new HashSet<>();
+
+    @Column(name = "shared")
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Long> sharedReconstructionIDs = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -63,8 +68,18 @@ public class User {
         this.passwordMatch = passwordMatch;
     }
 
-    public Set<Reconstruction> getReconstructions() {
-        return this.reconstructions;
+    public Set<Reconstruction> getAllReconstructions() { return this.reconstructions; }
+
+    public Set<Reconstruction> getNonSharedReconstructions() {
+        Set<Reconstruction> recons = new HashSet<>();
+        for (Reconstruction r : this.reconstructions)
+            if (!sharedReconstructionIDs.contains(r.getId()))
+                recons.add(r);
+        return recons;
+    }
+
+    public Set<Long> getSharedReconstructions() {
+        return this.sharedReconstructionIDs;
     }
 
     public void setReconstructions(Set<Reconstruction> reconstructions){
@@ -74,12 +89,22 @@ public class User {
     public void addReconstruction(Reconstruction reconstruction) {
         if (!reconstructions.contains(reconstruction))
             reconstructions.add(reconstruction);
-        if (!reconstruction.getUsers().contains(this))
-            reconstruction.getUsers().add(this);
+        reconstruction.addUser(this);
+    }
+
+    public void addSharedReconstruction(Reconstruction reconstruction) {
+        if (!sharedReconstructionIDs.contains(reconstruction.getId()))
+            sharedReconstructionIDs.add(reconstruction.getId());
+        reconstruction.addUser(this);
+    }
+
+    public void removeSharedReconstruction(Reconstruction reconstruction) {
+        sharedReconstructionIDs.remove(reconstruction.getId());
+        reconstruction.removeUser(this);
     }
 
     public void removeReconstruction(Reconstruction reconstruction) {
         reconstructions.remove(reconstruction);
-        reconstruction.getUsers().remove(this);
+        reconstruction.removeUser(this);
     }
 }

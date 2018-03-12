@@ -35,6 +35,55 @@ h6 {
     font-size: 20px;
 }
 
+#tutorial-4-nwk-img-div {
+    background: url(../images/tutorial4.nwk.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 45%;
+}
+#tutorial-4-aln-img-div {
+    background: url(../images/tutorial4.aln.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 32%;
+}
+#GRASP-MSA-img-div {
+    background: url(../images/GRASP_MSA.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 15%;
+}
+#tutorial-4-pos17-nwk-img-div {
+    background: url(../images/tutorial4_pos17.nwk.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 50%;
+}
+#tutorial-4-pos6-nwk-img-div {
+    background: url(../images/tutorial4_pos6.nwk.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 35%;
+}
+#GRASP-POAGs-img-div {
+     background: url(../images/GRASP_POAGs.png);
+     background-size: contain;
+     background-repeat: no-repeat;
+     width: 100%;
+     height: 0;
+     padding-top: 45%;
+ }
+
 #home-img-div {
     background: url(../images/home_page.png);
     background-size: contain;

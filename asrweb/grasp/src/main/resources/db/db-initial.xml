@@ -87,4 +87,7 @@
         </preConditions>
         <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="USER_RECON" constraintName="FKHRXAB0WSUXIEHL09Q9B1N9T4I" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="ID" referencedTableName="USER"/>
     </changeSet>
+
+    <include file="db/changelog/db-changelog-2018-03-09T03:29:02Z.xml"/>
+    <include file="db/changelog/db-changelog-2018-03-09T04:49:17Z.xml"/>
 </databaseChangeLog>

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -43,14 +44,31 @@ public class UserService implements IUserService {
         return (user != null);
     }
 
+    public User getUser(String username) {
+        return repository.findByUsername(username);
+    }
+
+    public void saveUser(User account) {
+        if (!repository.exists(account.getId()))
+            repository.save(account);
+    }
+
+    public List<Reconstruction> getSharedReconstructions(User user) {
+        List<Reconstruction> shared = new ArrayList<>();
+        for (Long reconId : user.getSharedReconstructions())
+            shared.add(reconRepository.getOne(reconId));
+        return shared;
+    }
+
     @Override
     public User removeReconstruction(User account, Long id) {
         User user = repository.findByUsername(account.getUsername());
-        Reconstruction recon = reconRepository.findOne(id);
+        Reconstruction recon = reconRepository.getOne(id);
         user.removeReconstruction(recon);
-        recon.getUsers().remove(user);
-        if (!recon.getUsers().isEmpty())
-            reconRepository.save(recon);
+        recon.removeUser(user);
+        //reconRepository.save(recon); // TODO: test
+        if (recon.getUsers().isEmpty())
+            reconRepository.delete(recon);
         return repository.save(user);
     }
 }

@@ -67,7 +67,9 @@
                     <p>Once test data has been loaded or user data provided, the reconstruction can be started (see <a href="#home-img">(7)</a> in <a href="#home-img">Figure 1</a>).</p>
 
                     <a id="home-img"></a>
-                    <div class="col-xs-12" id="home-img-div"></div>
+                    <div class="col-xs-12">
+                        <div class="img" id="home-img-div"></div>
+                    </div>
                     <figcaption class="figure-caption">Figure 1. The GRASP landing page with a form for (1) trying an example data set, (2) naming your data set, (3) selecting if sequences need to be aligned, and uploading them,
                         (4) uploading a phylogenetic tree, (5) selecting evolutionary model, (6) opting initial reconstruction: joint or marginal, and (7) starting the analysis. </figcaption>
                 </div>
@@ -187,7 +189,9 @@
                             <p>The results page shows an interactive version of the phylogenetic tree that was provided for reconstruction. GRASP will number internal phylogenetic node labels from the root node (N0, N1, ...) using the principle of "depth first". By default, extant labels are displayed and the user is given the option to also display or hide node labels and branch lengths (see <a href="#phylo-tree-img">(1)</a>, <a href="#phylo-tree-img">(2)</a> &amp; <a href="#phylo-tree-img">(3)</a> in <a href="#phylo-tree-img">Figure 2</a>). The user can also switch between an additive tree type or a cladogram (see <a href="#phylo-tree-img">(4)</a> in <a href="#phylo-tree-img">Figure 2</a>). This tree can also be saved as a PNG image (see <a href="#phylo-tree-img">(5)</a> in <a href="#phylo-tree-img">Figure 2</a>).</p>
                             <p>Each node is coloured by evolutionary distance according to the legend on the left hand side (see <a href="#phylo-tree-img">(6)</a> in <a href="#home-img">Figure 1</a>). One node will always appear pink and be noted in the header above the tree. This is the node that is having its reconstruction displayed in the graph below the phylogenetic tree and is known as the <strong>primary node</strong>. By default, node N0 (the root node) is the <strong>primary node</strong> and will appear pink and be listed in the header.</p>
                             <a id="phylo-tree-img"></a>
-                            <div class="col-xs-12" id="phylo-tree-img-div"></div>
+                            <div class="col-xs-12">
+                                <div class="img" id="phylo-tree-img-div"></div>
+                            </div>
                             <figcaption class="figure-caption">Figure 2. The phylogenetic tree with options to
                                 (1) toggle names on extant nodes,
                                 (2) toggle names on internal/ancestral nodes,
@@ -230,7 +234,9 @@
                                 </tbody>
                             </table>
                             <div class="col-xs-8 col-xs-offset-2">
-                                <div class="col-xs-12" id="phylo-tree-right-click-img-div"></div>
+                                <div class="col-xs-12">
+                                    <div class="img" id="phylo-tree-right-click-img-div"></div>
+                                </div>
                                 <figcaption class="figure-caption">Figure 3. The pop-up menu of the phylogenetic tree is activated by right-clicking on an internal node. </figcaption>
                             </div>
                             <div class="clearfix"></div>
@@ -266,8 +272,8 @@
                                     <p>A light-coloured edge is maximally parsimonious when only one of the nodes it joins is considered.
                                         These edges are weaker candidates but are kept to allow full-length ancestors to be formulated in the absence of the stronger option above.</p>
                                 </li>
-                                <div class="col-xs-8 col-xs-offset-2">
-                                    <div class="col-xs-12" id="dark-light-edges-img-div"></div>
+                                <div class="col-xs-12">
+                                    <div class="img" id="dark-light-edges-img-div"></div>
                                 </div>
                                 <div class="clearfix"></div>
                             </ul>
@@ -292,7 +298,9 @@
                             <h3 id="vis-joint-nav">Graph visualisation - joint reconstruction</h3>
                             <p>After running reconstruction, you will be able to see a navigation bar (see <a href="#graph-view-img">(1)</a> in <a href="#graph-view-img">Figure 4</a>), a multiple sequence alignment graph (see <a href="#graph-view-img">(2)</a> in <a href="#graph-view-img">Figure 4</a>) and the primary node reconstruction (see <a href="#graph-view-img">(3)</a> in <a href="#graph-view-img">Figure 4</a>) underneath the phylogenetic tree.</p>
                             <a id="graph-view-img"></a>
-                            <div class="col-xs-12" id="graph-view-img-div"></div>
+                            <div class="col-xs-12">
+                                <div class="img" id="graph-view-img-div"></div>
+                            </div>
                             <figcaption class="figure-caption">Figure 4. The reconstruction results panel has multiple sub-panels to view and interact with results, including
                                 (1) a bar for viewing the overall variation (optional edges and insertion/deletions) found in the set of reconstructions,
                                 (2) a multiple sequence alignment graph,
@@ -310,7 +318,9 @@
                             <h4>Multiple sequence alignment</h4>
                             <p>The multiple sequence alignment is represented here as a partial-order alignment graph which captures variation across all sequences. Each node in the graph is represented as a pie chart showing the distribution of amino acids at that position across all extant sequences. The most probable amino acid is shown using its one-letter code. When you hover your mouse over each node, a bar chart will display, showing the distribution in more detail, as seen in <a href="#msa-pie-chart-img">Figure 5</a>.</p>
                             <a id="msa-pie-chart-img"></a>
-                            <div class="col-xs-12" id="msa-pie-chart-img-div"></div>
+                            <div class="col-xs-12">
+                                <div class="img" id="msa-pie-chart-img-div"></div>
+                            </div>
                             <figcaption class="figure-caption">Figure 5. The multiple sequence alignment graph shows the sequence composition of <i>all</i> extant sequences, and what insertion/deletions are implied, in terms of alternative paths over edges.</figcaption>
                             <p>The edges in the multiple sequence alignment graph represent the insertion and deletions of <em>all</em> extant sequences.</p>
                             <h4>Primary node reconstruction</h4>
@@ -320,7 +330,9 @@
                             <p>When the 'Add joint reconstruction' option is selected for a node in the phylogenetic tree, its reconstructed sequence will be added below the sequence of the primary node (boxed with a blue shade that indicates the evolutionary distance of the phylogenetic node it is taken from to the root). We refer to this as the "stack" and you can keep adding joint reconstructions to it; this allows for comparisons between ancestral states at different phylogenetic nodes.</p>
                             <p>On addition to the aligned visualisation of reconstructions in the stack, a graphical representation of all the ancestral graphs in a "merged" format will appear at the bottom of the graph visualisation as seen in <a href="#merged-graph-img">Figure 6</a>. The character state of each individual graph is displayed as a slice in a pie graph of all the ancestral graphs. Note that the colour of the outline indicates the evolutionary distance to the root, just as the background of the panel where the graph is shown.</p>
                             <a id="merged-graph-img"></a>
-                            <div class="col-xs-12" id="merged-graph-img-div"></div>
+                            <div class="col-xs-12">
+                                <div class="img" id="merged-graph-img-div"></div>
+                            </div>
                             <figcaption class="figure-caption">Figure 6. After joint reconstruction, all extants, the primary node and all added ancestral nodes are shown as an aligned stack of graphs. The merged graph summarises the make-up of all displayed reconstructions. </figcaption>
                             <h4>Graph options</h4>
                             <p>Graphs can be saved as PNG images using the 'Save graphs' button (see <a href="#graph-view-img">(5)</a> in <a href="#graph-view-img">Figure 4</a>).</p>
@@ -343,7 +355,9 @@
                                 More technical information about marginal reconstruction is provided <a href="#technical-info">here</a>.
                             </p>
                             <a id="graph-view-marginal-img"></a>
-                            <div class="col-xs-12" id="graph-view-marginal-img-div"></div>
+                            <div class="col-xs-12">
+                                <div class="img" id="graph-view-marginal-img-div"></div>
+                            </div>
                             <figcaption class="figure-caption">Figure 7. After marginal reconstruction, all extants, and the primary node are shown as graphs.
                                 The graph for the primary node reflects the probability of each amino acid at each position.
                                 The ability to determine and view alternative mutants around an ancestor is enabled.
@@ -368,7 +382,9 @@
                             <h3 id="download-nav">Downloading results</h3>
                             <p>You can download the results generated by GRASP, and input files, through the download pane (as shown below). The download pane can be opened by clicking the "Download Results" drop down button located below the graph visualisation area (see <a href="#download-pane-img">(1)</a> in <a href="#download-pane-img">Figure 8</a>).</p>
                             <a id="download-pane-img"></a>
-                            <div class="col-xs-12" id="download-pane-img-div"></div>
+                            <div class="col-xs-12">
+                                <div class="img" id="download-pane-img-div"></div>
+                            </div>
                             <figcaption class="figure-caption">Figure 8. The download results section, with a form to (1) show download specific file options, and what those files may be including (2) the annotated phylogenetic tree, (3) reconstructions, and (4) probability distributions and consensus sequences.</figcaption>
                             <p>To download results, tick the boxes for each file you wish to download and then click the download button at the bottom of the pane.</p>
                             <p>On the left hand side of the download pane ('<strong>Phylogenetic Tree</strong>', see <a href="#download-pane-img">(2)</a> in <a href="#download-pane-img">Figure 8</a>) there is a single option to download the phylogenetic tree. The corresponding downloaded file will simply be the tree you provided but with internal/ancestral nodes labelled (N0, N1..etc.).</p>
@@ -400,7 +416,7 @@
                             <p>GRASP employs exact probabilistic inference; it distinguishes between two types of reconstructions:</p>
                             <p><strong>Joint</strong> - GRASP infers the most probable combination of all ancestral states.
                                 The assignment of all ancestral states (across the whole phylogenetic tree) optimises a single objective
-                                (the joint state with the greatest <em>likelihood</em>).
+                                (the joint state with the greatest <em><a href="/ml">likelihood</a></em>).
                                 This will tell you which are the most probable ancestors, given the extant sequences and their phylogenetic relationships.
                                 The inference is valid for the whole tree, and it is practical to compare ancestors with one another as they represent
                                 snapshots from the same evolutionary history.</p>

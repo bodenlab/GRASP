@@ -35,21 +35,25 @@ h6 {
     font-size: 20px;
 }
 
+.img {
+    margin: auto;
+}
+
 #tutorial-4-nwk-img-div {
     background: url(../images/tutorial4.nwk.png);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 100%;
+    width: 50%;
     height: 0;
-    padding-top: 45%;
+    padding-top: 23%;
 }
 #tutorial-4-aln-img-div {
     background: url(../images/tutorial4.aln.png);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 100%;
+    width: 40%;
     height: 0;
-    padding-top: 32%;
+    padding-top: 10%;
 }
 #GRASP-MSA-img-div {
     background: url(../images/GRASP_MSA.png);
@@ -57,23 +61,23 @@ h6 {
     background-repeat: no-repeat;
     width: 100%;
     height: 0;
-    padding-top: 15%;
+    padding-top: 12%;
 }
 #tutorial-4-pos17-nwk-img-div {
     background: url(../images/tutorial4_pos17.nwk.png);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 100%;
+    width: 50%;
     height: 0;
-    padding-top: 50%;
+    padding-top: 23%;
 }
 #tutorial-4-pos6-nwk-img-div {
     background: url(../images/tutorial4_pos6.nwk.png);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 100%;
+    width: 50%;
     height: 0;
-    padding-top: 35%;
+    padding-top: 18%;
 }
 #GRASP-POAGs-img-div {
      background: url(../images/GRASP_POAGs.png);
@@ -81,7 +85,7 @@ h6 {
      background-repeat: no-repeat;
      width: 100%;
      height: 0;
-     padding-top: 45%;
+     padding-top: 43%;
  }
 
 #home-img-div {
@@ -106,18 +110,18 @@ h6 {
     background: url(../images/phylo_tree_right_click.png);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 100%;
+    width: 80%;
     height: 0;
-    padding-top: 66.64%;
+    padding-top: 55%;
 }
 
 #dark-light-edges-img-div {
     background: url(../images/dark_light_edges.png);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 100%;
+    width: 50%;
     height: 0;
-    padding-top: 40%;
+    padding-top: 20%;
 }
 #dark-edge-img-div {
     background: url(../images/dark_edge.png);

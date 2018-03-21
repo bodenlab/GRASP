@@ -64,9 +64,10 @@ public class UserService implements IUserService {
     public User removeReconstruction(User account, Long id) {
         User user = repository.findByUsername(account.getUsername());
         Reconstruction recon = reconRepository.getOne(id);
-        user.removeReconstruction(recon);
-        recon.removeUser(user);
-        //reconRepository.save(recon); // TODO: test
+        if (user.getSharedReconstructions().contains(recon.getId()))
+            user.removeSharedReconstruction(recon);
+        else
+            user.removeReconstruction(recon);
         if (recon.getUsers().isEmpty())
             reconRepository.delete(recon);
         return repository.save(user);

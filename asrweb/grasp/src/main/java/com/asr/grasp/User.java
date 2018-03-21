@@ -100,6 +100,7 @@ public class User {
 
     public void removeSharedReconstruction(Reconstruction reconstruction) {
         sharedReconstructionIDs.remove(reconstruction.getId());
+        reconstructions.remove(reconstruction);
         reconstruction.removeUser(this);
     }
 

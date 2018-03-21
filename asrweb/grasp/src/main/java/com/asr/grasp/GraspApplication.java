@@ -38,9 +38,9 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
+	//private final static String sessionPath = "/var/www/GRASP/";
 
 	private final int MAX_RECONS = 5;
 
@@ -130,7 +130,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"delete", "id"})
 	public ModelAndView deleteRecon(@RequestParam("delete") String delete, @RequestParam("id") Long id, WebRequest webrequest, Model model) {
 		ModelAndView mav = new ModelAndView("account");
-		loggedInUser = service.removeReconstruction(loggedInUser, id); // TODO, add in if in shared list...
+		loggedInUser = service.removeReconstruction(loggedInUser, id);
 		mav.addObject("user", loggedInUser);
 		mav.addObject("share", new ShareObject());
 		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());

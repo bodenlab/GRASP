@@ -38,8 +38,8 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
-	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
+//	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	//private final static String sessionPath = "/var/www/GRASP/";
 
 	private final int MAX_RECONS = 5;

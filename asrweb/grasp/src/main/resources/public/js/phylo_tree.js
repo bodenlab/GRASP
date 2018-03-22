@@ -16,6 +16,9 @@ var phylo_options = {
     tree: {
         longest_distance_from_root_to_extent: 0,
         extant_label_height: 200,
+        extent_label_height: 200,
+        initial_node_num: 150,
+        expand_node_num: 25,
         collapse_under: [],
         selected_node: null,
         collapsed_selection: null,
@@ -93,14 +96,13 @@ var phylo_options = {
 /**
  * The context menu, has the names for the events that a user can perform.
  */
-var menu = contextMenu().items('View marginal reconstruction', 'View joint reconstruction', 'Add joint reconstruction', 'Collapse subtree', 'Expand subtree');
+var menu = contextMenu().items('View marginal reconstruction', 'View joint reconstruction', 'Add joint reconstruction', 'Collapse subtree', 'Expand subtree', 'Expand subtree and collapse others');
 
 
 /**
  * Makes the tree scale
  */
 var make_tree_scale = function (phylo_options) {
-    // console.log('make tree scale')
     var additive = phylo_options.tree.additive;
 
     var max_y = phylo_options.tree.max_depth;
@@ -176,7 +178,6 @@ function linspace(start, end, n) {
  *
  */
 var setup_phylo_svg = function (phylo_options) {
-    // console.log('setup phylo svg')
     var tree_div = phylo_options.svg_info.div_id;
 
     var options = phylo_options.svg_info;
@@ -392,7 +393,6 @@ var draw_phylo_text = function (group, node, n) {
             } else {
                 return node.name.split("_")[0];
 
-                // return node.name.split("_")[0] + "\nExtra Info";
             }
         });
 }
@@ -473,11 +473,6 @@ var draw_phylo_nodes = function (phylo_options, initial) {
             draw_phylo_circle(group, node, n);
         }
 
-        // else {
-        //     toggle_node_text();
-        //
-        // }
-
     }
 }
 
@@ -489,7 +484,6 @@ var draw_phylo_nodes = function (phylo_options, initial) {
  *      node_selected: d3 node object, contains styling and coords etc.
  */
 var on_node_mouseover = function (node_selected) {
-    // console.log('mousey')
     var options = phylo_options.style;
     var id = node_selected.attr("id").split("fill-")[1];
     var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
@@ -679,7 +673,6 @@ var draw_phylo_branches = function (phylo_options, initial) {
  * from the root so we don't get overlapping tree branches.
  */
 var make_depth_array = function (phylo_options) {
-    // console.log('make depth array')
     var depth = 0;
     var depth_array = [];
     var depth_size = phylo_options.tree.longest_distance_from_root_to_extent / (phylo_options.tree.max_depth / 2);
@@ -694,8 +687,6 @@ var make_depth_array = function (phylo_options) {
 }
 
 var set_phylo_params = function (tree_div, tree_string) {
-    // console.log('set phylo params')
-    // console.log(phylo_options.tree)
     phylo_options.svg_info.div_id = tree_div;
     phylo_options.svg_info.width = '100%';//window.innerWidth - 200;
     phylo_options.tree_string = tree_string;
@@ -717,9 +708,6 @@ var clear_svg = function () {
  */
 var run_phylo_tree = function () {
     // Make sure the group has no children
-
-    console.log('run phylo tree')
-
 
     var group = phylo_options.svg.append("g")
         .attr("transform", "translate(" + phylo_options.svg_info.margin.left + "," + phylo_options.svg_info.margin.top + ")");
@@ -792,150 +780,100 @@ var run_phylo_tree = function () {
         phylo_options.tree.selected_node = nodes[0]; // set root node as selected (initial)
     }
 
-
-    // Collapsing a test node
-    // test_node = phylo_options.tree.root.children[0]
-    //
-    // test_node.terminated = true;
-    // set_children_collapsed(test_node);
-    // test_node.collapsed = false;
-
-
-    // phylo_options.tree.collapse_under.push(test_node);
-    // console.log(test_node)
-
     // Draw the branches and the nodes
     draw_phylo_branches(phylo_options, true);
     draw_phylo_nodes(phylo_options, true);
 
+    // Add the taxon information to the leaf nodes
+    get_taxon_ids(tree_json);
+    get_taxonomy(phylo_options.tree.root);
 
-    // for (node in phylo_options.tree.all_nodes){
-    //     if (phylo_options.tree.all_nodes[node].extent){
-    //         get_taxonomy(phylo_options.tree.all_nodes[node])
-    //     }
-    //
-    //
-    // }
+    console.log("here are the extents");
+    for (x in phylo_options.tree.extents) {
+        console.log(phylo_options.tree.extents);
+        console.log(phylo_options.tree.extents[x])
 
-    // for (node in tree_json){
-    //     console.log(node)
-    //     console.log(tree_json[node])
-    // }
+    }
 
-//     console.log('ALL DONE')
-//
-//     for (node in phylo_options.tree.all_nodes){
-//         console.log(phylo_options.tree.all_nodes[node])
-//     }
-//
-//
-//
-//
-//
-// }
+    assign_num_children(phylo_options.tree.root);
 
-    // get_taxonomy(tree_json)
-
-
-    // get_taxon_ids(tree_json)
-    // get_taxonomy(phylo_options.tree.root)
-    // inorder(phylo_options.tree.root)
-    // inorder_right(phylo_options.tree.root)
-    // console.log('doing post order from left')
-    //
-    // postorder(phylo_options.tree.root)
-    // console.log('doing post order from right')
-    //
-    // postorder_right(phylo_options.tree.root)
-
-
-    assign_num_children(phylo_options.tree.root)
-
-    collapse_subtree(phylo_options.tree.root, 4)
-    console.log('here is the original collapse under list')
-    console.log (phylo_options.tree.collapse_under)
-
-
-
+    collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 }
 
-var get_boundary_nodes = function(node, num_expanded){
-    left_nodes = level_order_traversal(node, "left")
-    right_nodes = level_order_traversal(node, "right")
-    concat_list = concatenate_node_lists(left_nodes, right_nodes)
-    collapse_list = concat_list.splice(0, num_expanded - 1)
-
-    return collapse_list
-}
-
+/**
+ *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
+ */
 var collapse_subtree = function(node, num_expanded){
 
-    collapse_list = get_boundary_nodes(node, num_expanded)
+
+    collapse_list = get_boundary_nodes(node, num_expanded) // get the list of nodes to collapse under
     inorder_collapse(node, collapse_list)
     refresh_tree()
 }
 
-var expand_subtree = function(node, num_expanded) {
-    console.log('here is the collapse under list in middle')
-    console.log (phylo_options.tree.collapse_under)
-    collapse_list = get_boundary_nodes(node, num_expanded)
+/**
+ * Get the list of nodes that we should collapse under in order to give num_expanded leaves or collapsed nodes
+ */
 
-    inorder_expand(node, collapse_list)
-    refresh_tree()
-    redraw_phylo_tree()
-    console.log('here is the collapse under list nows')
-    console.log (phylo_options.tree.collapse_under)
+var get_boundary_nodes = function(node, num_expanded){
+    var left_nodes = level_order_traversal(node, "left"); // perform level order in left direction
+    var right_nodes = level_order_traversal(node, "right") ;// perform level order in right direction
+    var combine_list = combine_node_lists(left_nodes, right_nodes); // combine the two lists to give balanced list
+    var collapse_list = combine_list.splice(0, num_expanded - 1); // split the full list to give the actual list of nodes needed
 
-
+    return collapse_list
 }
 
-var inorder_expand = function(node, collapse_list){
-    console.log('doing inorder expand')
-    console.log(collapse_list)
+
+
+
+/**
+ * Perform a level order traversal of the tree favouring a given direction
+ */
+
+var level_order_traversal = function(node, direction) {
+    node_order = [];
     if (node != null) {
-        if (node.children != undefined) {
-            console.log('I am at this node')
-            console.log(node.name)
 
+        queue = [];
+        queue.push(node)
 
-            if (!(collapse_list.indexOf(node.name) > -1)){
+        while (queue.length > 0) {
+            node = queue.pop();
 
+            if (node.children != undefined && !node.extent) {
+                node_order.push(node.name)
 
+                if (direction == 'left') {
 
+                    queue.push(node.children[1])
+                    queue.push(node.children[0])
 
-
-                phylo_options.tree.collapse_under.push(node.name);
-
-
-
-            }
-
-            else {
-                console.log('I will expand this node')
-                console.log(node.name)
-
-                node.collapsed = false;
-                node.terminate = false;
-                var ind = phylo_options.tree.collapse_under.indexOf(node);
-                if (ind == -1) {
-                    return;
                 }
-                phylo_options.tree.collapse_under.splice(ind,1);
 
 
-                inorder_expand(node.children[0], collapse_list)
-                inorder_expand(node.children[1], collapse_list)
+                else if (direction == 'right'){
+                    queue.push(node.children[0])
+                    queue.push(node.children[1])
+
+                }
 
             }
 
-        }
 
+            if (node.children == undefined){
+
+            }
+        }
     }
 
-
+    return node_order
 
 }
 
+/**
+ * Iterate through tree from node, collapsing any nodes not in collapse_list
+ */
 
 var inorder_collapse = function(node, collapse_list){
 
@@ -943,9 +881,9 @@ var inorder_collapse = function(node, collapse_list){
         if (node.children != undefined) {
             // If this node isn't in the expand list
 
-            if (!(collapse_list.indexOf(node.name) > -1)){
-                phylo_options.tree.collapse_under.push(node);
+            if (collapse_list.indexOf(node.name) == -1){
                 set_children_collapsed(node)
+                phylo_options.tree.collapse_under.push(node);
 
             }
 
@@ -960,50 +898,139 @@ var inorder_collapse = function(node, collapse_list){
 
 }
 
-var concatenate_node_lists = function (list1, list2){
+
+/**
+ * Iterate through tree from node, expanding any nodes in collapse list
+ */
+var inorder_expand = function(node, collapse_list){
+
+
+    if (node != null) {
+        if (node.children != undefined) {
+
+            if (!(collapse_list.indexOf(node.name) > -1) && node.children!= undefined){
+
+                phylo_options.tree.collapse_under.push(node.name);
+
+            }
+
+            else {
+
+
+                node.collapsed = false;
+                node.terminate = false;
+
+                var ind = phylo_options.tree.collapse_under.indexOf(node);
+                if (ind != -1)
+                    phylo_options.tree.collapse_under.splice(ind,1);
+
+
+                inorder_expand(node.children[0], collapse_list)
+                inorder_expand(node.children[1], collapse_list)
+
+            }
+
+        }
+
+    }
+}
+
+/**
+ * Combine two lists together index by index, ignoring duplicates
+ */
+
+var combine_node_lists = function (list1, list2){
 
     var master_set = new Set()
-    var concatenate_list = []
+    var combine_list = []
 
     for (var i = 0; i < list1.length; i++){
         if (!master_set.has(list1[i])) {
-            concatenate_list.push(list1[i])
+            combine_list.push(list1[i])
             master_set.add(list1[i])
         }
 
         if (!master_set.has(list2[i])) {
-            concatenate_list.push(list2[i])
+            combine_list.push(list2[i])
             master_set.add(list2[i])
         }
 
     }
 
 
-    return concatenate_list
+    return combine_list
 
 
 
 }
 
+
+
+/**
+ * Expand under a certain node while collapsing all the other nodes
+ */
+
+var expand_and_collapse_others = function(node){
+    var parent_list = []
+    var expand_list = get_parents_to_root(node, parent_list);
+
+    inorder_collapse(phylo_options.tree.root, expand_list)
+    var ind = phylo_options.tree.collapse_under.indexOf(node);
+    if (ind == -1) {
+        return;
+    }
+    phylo_options.tree.collapse_under.splice(ind,1);
+    set_children_un_collapsed(node);
+    node.terminated = false;
+    node.collapsed = false;
+
+    collapse_subtree(node, phylo_options.tree.expand_node_num)
+    refresh_tree()
+
+}
+
+
+
+/**
+ * Get a list of the nodes leading to the root from a certain node
+ */
+
+var get_parents_to_root = function(node, parent_list){
+
+    // if we're at the root
+    if (node.parent == undefined) {
+    }
+    else{
+        parent_list.push(node.parent.name)
+        get_parents_to_root(node.parent, parent_list)
+
+    }
+
+    return parent_list
+
+
+
+}
+
+/**
+ * Annotate the extant sequences with their taxonomic ids
+ * */
+
 var get_taxon_ids = function (node) {
 
-    console.log('here are the extents')
-
-    console.log(phylo_options.tree.extents)
-
-    extant_names = ""
+    var extent_names = ""
 
     for (i in phylo_options.tree.extents){
-        extant_names += phylo_options.tree.extents[i].name + ","
+        extent_names += phylo_options.tree.extents[i].name + ","
     }
 
     // Remove the final comma
-    extant_names = extant_names.substring(0, extant_names.length - 1)
+    extent_names = extent_names.substring(0, extent_names.length - 1)
 
-    urlAll= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
+    url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extent_names +"&retmode=xml&rettype=docsum";
 
     var promise = $.ajax({
-        url: urlAll,
+        url: url,
         type: 'POST',
         headers: {
             'Content-Type': 'text/plain'
@@ -1014,31 +1041,21 @@ var get_taxon_ids = function (node) {
 
             if (speciesData != null) {
 
-
-
                 for (i in phylo_options.tree.extents) {
-
-                    // path = " (//TaxId[.//text()='" + node.name + "']/../LineageEx/Taxon/Rank[.//text()='species']/../ScientificName)[1]";
                     path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extents[i].name + "')]/../Item[@Name='TaxId']/text()";
-                    // console.log(path)
-                    // console.log("Looking for node name that is")
-                    // console.log(phylo_options.tree.extents[i].name)
-
 
                     var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
                     try {
                         var thisNode = node.iterateNext();
                         while (thisNode) {
-                            // console.log('Here is the content')
-                            console.log(thisNode.textContent);
-                            phylo_options.tree.extents[i].taxon_id = thisNode.textContent
+                            phylo_options.tree.extents[i].taxon_id = thisNode.textContent;
 
                             thisNode = node.iterateNext();
                         }
 
                     } catch (e) {
-                        console.log("error")
+
                         console.log(e)
                     }
                 }
@@ -1047,8 +1064,6 @@ var get_taxon_ids = function (node) {
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             if (errorThrown == "Bad Request") {
-                // response = XMLHttpRequest.responseText
-                // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
 
             }
 
@@ -1063,7 +1078,7 @@ var get_taxon_ids = function (node) {
 }
 
 var get_taxonomy = function (node) {
-    taxon_ids = ""
+    taxon_ids = "";
 
     for (i in phylo_options.tree.extents){
         taxon_ids += phylo_options.tree.extents[i].taxon_id + ","
@@ -1073,14 +1088,11 @@ var get_taxonomy = function (node) {
     taxon_ids = taxon_ids.substring(0, taxon_ids.length - 1)
     ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
 
-    console.log('taxon ids')
-    console.log(taxon_ids)
-    urlAll = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
 
-    console.log(urlAll)
 
     var promise = $.ajax({
-        url: urlAll,
+        url: url,
         type: 'POST',
         headers: {
             'Content-Type': 'text/plain'
@@ -1096,23 +1108,33 @@ var get_taxonomy = function (node) {
                     for (rank in ranks) {
 
 
-                        path = " (//TaxId[.//text()='" + phylo_options.tree.extents[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName)[1]";
-                        // path = "*/DocSum/Item[@Name='TaxId']/text()";
-                        // console.log(path)
-
+                        path = " //TaxId[.//text()='" + phylo_options.tree.extents[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName[1]";
                         var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
                         try {
                             var thisNode = node.iterateNext();
                             while (thisNode) {
-                                console.log('Here is the content')
-                                console.log(rank)
-                                console.log(thisNode.textContent);
-                                phylo_options.tree.extents[i].taxonomy[ranks[rank]] = thisNode.textContent
+                                // If taxonomy dict already exists add to it
+                                if ("taxonomy" in phylo_options.tree.extents[i]){
+
+                                    phylo_options.tree.extents[i].taxonomy[ranks[rank]] = thisNode.textContent;
+                                }
+                                // Create a new taxonomy dict and annotate it with the available taxonomic ranks
+                                else{
+                                    phylo_options.tree.extents[i].taxonomy = {};
+                                    for (rank in ranks){
+                                        phylo_options.tree.extents[i].taxonomy[rank] == "";
+                                    }
+
+                                    phylo_options.tree.extents[i].taxonomy[ranks[rank]] = thisNode.textContent;
+                                }
+
                                 thisNode = node.iterateNext();
+
                             }
 
                         } catch (e) {
+                            console.log(e)
                         }
                     }
                 }
@@ -1134,136 +1156,6 @@ var get_taxonomy = function (node) {
 
 }
 
-var inorder = function(node){
-
-    console.log('doing in order order from left')
-    if (node != null) {
-        if (node.children != undefined) {
-            inorder(node.children[0])
-            console.log(node.name)
-            inorder(node.children[1])
-
-
-
-        }
-
-        if (node.children == undefined) {
-
-
-        }
-    }
-
-}
-
-var inorder_right = function(node){
-
-    console.log('doing in order order from right')
-    if (node != null) {
-        if (node.children != undefined) {
-            inorder_right(node.children[1])
-            console.log(node.name)
-            inorder_right(node.children[0])
-
-
-
-        }
-
-        if (node.children == undefined) {
-
-
-        }
-    }
-
-}
-
-
-var postorder = function (node) {
-    if (node != null) {
-        if (node.children != undefined ) {
-            postorder(node.children[0])
-            postorder(node.children[1])
-            console.log(node.name)
-            node.taxonomy = node.children[0].taxonomy + node.children[1].taxonomy
-            // console.log(node.taxonomy)
-
-
-        }
-
-        if (node.children == undefined) {
-
-
-        }
-    }
-}
-
-var postorder_right = function (node) {
-    if (node != null) {
-        if (node.children != undefined) {
-            postorder_right(node.children[1])
-            postorder_right(node.children[0])
-
-            console.log(node.name)
-            node.taxonomy = node.children[0].taxonomy + node.children[1].taxonomy
-            // console.log(node.taxonomy)
-
-
-        }
-
-        if (node.children == undefined) {
-
-
-        }
-    }
-}
-
-var level_order_traversal = function(node, direction) {
-    node_order = [];
-    if (node != null) {
-        // if (node.children != undefined) {
-
-
-        queue = []
-        queue.push(node)
-
-        while (queue.length > 0) {
-            // console.log(queue[0].name)
-            // console.log(queue[0])
-            node = queue.pop();
-
-            // console.log(node)
-            // console.log(node.children)
-            if (node.children != undefined && !node.extent) {
-                node_order.push(node.name)
-                // console.log("node is")
-                // console.log(node.name)
-                // console.log(phylo_options.tree.node_dict[node.id])
-
-                if (direction == 'left') {
-                    queue.push(node.children[1])
-                    queue.push(node.children[0])
-
-                }
-
-                else if (direction == 'right'){
-                    queue.push(node.children[0])
-                    queue.push(node.children[1])
-
-                }
-
-
-
-            }
-
-            if (node.children == undefined){
-
-            }
-        }
-    }
-
-    return node_order
-
-}
-
 
 
 
@@ -1271,7 +1163,6 @@ var level_order_traversal = function(node, direction) {
  *  Redraw the tree structure stored in phylo_options.tree
  */
 var redraw_phylo_tree = function() {
-    // console.log('redraw')
     var options = phylo_options;
     var root = phylo_options.tree.root;
 
@@ -1411,7 +1302,6 @@ var assign_leaf_x_coords = function (node, phylo_options) {
  * Helper that makes a cut down node.
  */
 var make_child = function (node, left, id) {
-    // console.log('make child')
     var child = {};
     child.id = node.id;
     child.left = left;
@@ -1446,22 +1336,16 @@ var make_child = function (node, left, id) {
  * one branch stops early on.
  */
 var get_distance_from_root = function (node, depth, phylo_options, initial) {
-    // console.log('get distance from root')
     // Make a node id based on name and node count
     // only assign on initial load
     if (initial) {
         node.id = phylo_options.tree.node_count + "-" + node.name.split(/[._-]+/)[0];
-        // console.log('the node here is ')
-        // console.log(node)
-        // console.log(node.id)
-        // console.log(node.name)
         node.collapsed = false;
         phylo_options.tree.node_dict = node;
         depth += 1;
         phylo_options.tree.node_count += 1;
     }
     if (node.children == undefined) {
-        // console.log('here in children undefined')
         // Check if this is the longest branch
         if (node.distance_from_root > phylo_options.tree.longest_distance_from_root_to_extent) {
             phylo_options.tree.longest_distance_from_root_to_extent = node.distance_from_root;
@@ -1474,7 +1358,6 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
         if (initial) {
             phylo_options.tree.extents.push(node);
         }
-        // console.log(phylo_options.tree)
         return;
     }
     // Otherwise we need to calculate the cumulative branch lengths
@@ -1507,8 +1390,6 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
  *
  */
 var assign_num_children = function (node) {
-    console.log('num children')
-    console.log(node)
     if (node.children != undefined) {
         var left_child_count = node.children[0].max_children + 2;
         var right_child_count = node.children[1].max_children + 2;
@@ -1539,9 +1420,6 @@ var assign_num_children = function (node) {
  * Recur one more time and add all the children.
  **/
 var add_children_nodes = function (node, initial) {
-
-    // console.log('add children nodes')
-
     if (node.children != undefined) {
         for (var n in node.children) {
             if (n == 0) {
@@ -1610,7 +1488,6 @@ var add_children_nodes = function (node, initial) {
  *          rather than an additive tree.
  */
 var assign_node_coords = function (node, depth) {
-    // console.log('assign node coords')
     var additive = phylo_options.tree.additive;
     var node_instep = phylo_options.tree.node_instep;
 
@@ -1661,7 +1538,6 @@ var assign_node_coords = function (node, depth) {
  *      under: Apache2 license
  */
 var parse_newick = function (s) {
-    // console.log('parse newick')
     var ancestors = [];
     var tree = {};
     var tokens = s.split(/\s*(;|\(|\)|,|:)\s*/);
@@ -1858,24 +1734,19 @@ var context_menu_action = function (call, node_fill, node_id) {
         d3.select("#fill-" + node_id).attr("stroke", phylo_options.style.stacked_colour);
         displayJointGraph(call.attr("id"), node_fill, false);
     } else if (call_type == "Expand subtree") {
-        console.log('here is the collapse under list before middle')
-        console.log (phylo_options.tree.collapse_under)
-
         var node = phylo_options.tree.node_dict[node_id];
-        // expand_subtree(node, 4)
-        set_children_un_collapsed(node);
-        node.terminated = false;
-        phylo_options.tree.collapsed_selection = node;
+
         var ind = phylo_options.tree.collapse_under.indexOf(node);
         if (ind == -1) {
             return;
         }
         phylo_options.tree.collapse_under.splice(ind,1);
-        collapse_subtree(node, 4)
-        refresh_tree();
+        set_children_un_collapsed(node);
+        node.terminated = false;
+        collapse_subtree(node, phylo_options.tree.expand_node_num)
+        refresh_tree()
 
 
-        refresh_tree();
 
 
     } else if (call_type == "Collapse subtree") {
@@ -1883,12 +1754,21 @@ var context_menu_action = function (call, node_fill, node_id) {
         if (phylo_options.tree.collapse_under.indexOf(node) > -1) {
             return; // already collapsed
         }
-        node.terminated = true;
         set_children_collapsed(node);
+        node.terminated = true;
+
+
         node.collapsed = false;
         phylo_options.tree.collapse_under.push(node);
-        refresh_tree();
-    } else {
+        refresh_tree()
+    } else if (call_type == "Expand subtree and collapse others") {
+        var node = phylo_options.tree.node_dict[node_id];
+
+        expand_and_collapse_others(node)
+    }
+
+
+    else {
         select_node(call.attr("id"));
         reset_poag_stack();
         perform_marginal(call.attr("id"), node_fill);
@@ -1912,6 +1792,14 @@ var show_expand_collapse_node = function (node) {
  */
 var set_children_collapsed = function (node) {
     node.collapsed = true;
+    node.terminated = false;
+
+    // Remove all nodes from the collapse under array
+    var ind = phylo_options.tree.collapse_under.indexOf(node);
+    if (ind != -1) {
+        phylo_options.tree.collapse_under.splice(ind,1);
+    }
+
     for (var n in node.children) {
         set_children_collapsed(node.children[n]);
     }
@@ -2011,7 +1899,6 @@ var assign_depth_from_y = function (num, arr) {
  *          the contour and mod.
  */
 var setup = function (node, depth) {
-    // console.log('setup')
     node.depth = depth;
     node.mod = 0;
     node.raw_x = 0;

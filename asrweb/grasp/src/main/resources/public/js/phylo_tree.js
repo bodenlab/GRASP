@@ -310,10 +310,10 @@ var draw_phylo_circle = function (group, node, n) {
             }
         })
         .attr("opacity",function() {
-            if (node.extent || node.terminated) {
-                return 0;
-            } else if (phylo_options.tree.collapsed_selection != null && node.id == phylo_options.tree.collapsed_selection.id) {
+            if (phylo_options.tree.collapsed_selection != null && node.id == phylo_options.tree.collapsed_selection.id) {
                 return 0.2;
+            } else if (node.extent || node.terminated) {
+                return 0;
             } else {
                 return options.opacity;
             }
@@ -640,7 +640,14 @@ var toggle_extant_text = function() {
     }
 }
 
-
+var expand_all_nodes = function() {
+    phylo_options.tree.collapse_under = [];
+    phylo_options.tree.collapsed_selection = null;
+    set_children_un_terminated(phylo_options.tree.root);
+    collapse_subtree(phylo_options.tree.root, phylo_options.tree.root.num_extants);
+    redraw_phylo_tree();
+    refresh_tree();
+}
 
 /**
  * Draws the branches of the phylo tree
@@ -1728,7 +1735,7 @@ var context_menu_action = function (call, node_fill, node_id) {
         displayJointGraph(call.attr("id"), node_fill, false);
     } else if (call_type == "Expand subtree") {
         var node = phylo_options.tree.node_dict[node_id];
-
+        phylo_options.tree.collapsed_selection = node;
         var ind = phylo_options.tree.collapse_under.indexOf(node);
         if (ind == -1) {
             return;
@@ -1736,11 +1743,8 @@ var context_menu_action = function (call, node_fill, node_id) {
         phylo_options.tree.collapse_under.splice(ind,1);
         set_children_un_collapsed(node);
         node.terminated = false;
-        collapse_subtree(node, phylo_options.tree.expand_node_num)
-        refresh_tree()
-
-
-
+        collapse_subtree(node, phylo_options.tree.expand_node_num);
+        refresh_tree();
 
     } else if (call_type == "Collapse subtree") {
         var node = phylo_options.tree.node_dict[node_id];
@@ -1749,19 +1753,15 @@ var context_menu_action = function (call, node_fill, node_id) {
         }
         set_children_collapsed(node);
         node.terminated = true;
-
-
+        phylo_options.tree.collapsed_selection = node;
         node.collapsed = false;
         phylo_options.tree.collapse_under.push(node);
         refresh_tree()
     } else if (call_type == "Expand subtree and collapse others") {
         var node = phylo_options.tree.node_dict[node_id];
-
-        expand_and_collapse_others(node)
-    }
-
-
-    else {
+        phylo_options.tree.collapsed_selection = node;
+        expand_and_collapse_others(node);
+    } else {
         select_node(call.attr("id"));
         reset_poag_stack();
         perform_marginal(call.attr("id"), node_fill);
@@ -1808,6 +1808,14 @@ var set_children_un_collapsed = function (node) {
             return;
         }
         set_children_un_collapsed(node.children[n]);
+    }
+}
+
+var set_children_un_terminated = function(node) {
+    node.terminated = false;
+    node.collapsed = false;
+    for (var n in node.children) {
+        set_children_un_terminated(node.children[n]);
     }
 }
 

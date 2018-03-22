@@ -14,9 +14,9 @@ var phylo_options = {
         number_aixs_ticks: 10,
     },
     tree: {
-        longest_distance_from_root_to_extent: 0,
+        longest_distance_from_root_to_extant: 0,
         extant_label_height: 200,
-        extent_label_height: 200,
+        extant_label_height: 200,
         initial_node_num: 150,
         expand_node_num: 25,
         collapse_under: [],
@@ -25,7 +25,7 @@ var phylo_options = {
         all_nodes: new Array(),
         all_branches: new Array(),
         node_depth_dict: {}, // keeps track of the depth of each node
-        extents: new Array(),
+        extants: new Array(),
         min_x: 0,
         additive: true, // Whether or not we want to display the branches as additive
         node_instep: 0,
@@ -107,7 +107,7 @@ var make_tree_scale = function (phylo_options) {
 
     var max_y = phylo_options.tree.max_depth;
     if (additive) {
-        max_y = phylo_options.tree.longest_distance_from_root_to_extent;
+        max_y = phylo_options.tree.longest_distance_from_root_to_extant;
     }
 
     var y_scale = d3.scale.linear()
@@ -194,9 +194,9 @@ var setup_phylo_svg = function (phylo_options) {
 }
 
 var resize_phylo_height = function() {
-    for (var e in phylo_options.tree.extents) {
-        if (phylo_options.tree.extents[e].name.length*7 > phylo_options.tree.extant_label_height) {
-            phylo_options.tree.extant_label_height = phylo_options.tree.extents[e].name.length*7;
+    for (var e in phylo_options.tree.extants) {
+        if (phylo_options.tree.extants[e].name.length*7 > phylo_options.tree.extant_label_height) {
+            phylo_options.tree.extant_label_height = phylo_options.tree.extants[e].name.length*7;
         }
     }
     phylo_options.svg.attr("height", phylo_options.svg_info.height + phylo_options.tree.extant_label_height);
@@ -468,7 +468,7 @@ var draw_phylo_nodes = function (phylo_options, initial) {
             // Add the node label
             draw_phylo_text(group, node, n);
 
-            // Add the node which has the colour for extents and the
+            // Add the node which has the colour for extants and the
             // function for hover
             draw_phylo_circle(group, node, n);
         }
@@ -675,9 +675,9 @@ var draw_phylo_branches = function (phylo_options, initial) {
 var make_depth_array = function (phylo_options) {
     var depth = 0;
     var depth_array = [];
-    var depth_size = phylo_options.tree.longest_distance_from_root_to_extent / (phylo_options.tree.max_depth / 2);
+    var depth_size = phylo_options.tree.longest_distance_from_root_to_extant / (phylo_options.tree.max_depth / 2);
 
-    while (depth < phylo_options.tree.longest_distance_from_root_to_extent) {
+    while (depth < phylo_options.tree.longest_distance_from_root_to_extant) {
         depth_array.push(depth);
         depth += depth_size;
     }
@@ -787,13 +787,6 @@ var run_phylo_tree = function () {
     // Add the taxon information to the leaf nodes
     get_taxon_ids(tree_json);
     get_taxonomy(phylo_options.tree.root);
-
-    console.log("here are the extents");
-    for (x in phylo_options.tree.extents) {
-        console.log(phylo_options.tree.extents);
-        console.log(phylo_options.tree.extents[x])
-
-    }
 
     assign_num_children(phylo_options.tree.root);
 
@@ -1018,16 +1011,16 @@ var get_parents_to_root = function(node, parent_list){
 
 var get_taxon_ids = function (node) {
 
-    var extent_names = ""
+    var extant_names = ""
 
-    for (i in phylo_options.tree.extents){
-        extent_names += phylo_options.tree.extents[i].name + ","
+    for (i in phylo_options.tree.extants){
+        extant_names += phylo_options.tree.extants[i].name + ","
     }
 
     // Remove the final comma
-    extent_names = extent_names.substring(0, extent_names.length - 1)
+    extant_names = extant_names.substring(0, extant_names.length - 1)
 
-    url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extent_names +"&retmode=xml&rettype=docsum";
+    url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
 
     var promise = $.ajax({
         url: url,
@@ -1041,15 +1034,15 @@ var get_taxon_ids = function (node) {
 
             if (speciesData != null) {
 
-                for (i in phylo_options.tree.extents) {
-                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extents[i].name + "')]/../Item[@Name='TaxId']/text()";
+                for (i in phylo_options.tree.extants) {
+                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name + "')]/../Item[@Name='TaxId']/text()";
 
                     var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
                     try {
                         var thisNode = node.iterateNext();
                         while (thisNode) {
-                            phylo_options.tree.extents[i].taxon_id = thisNode.textContent;
+                            phylo_options.tree.extants[i].taxon_id = thisNode.textContent;
 
                             thisNode = node.iterateNext();
                         }
@@ -1080,8 +1073,8 @@ var get_taxon_ids = function (node) {
 var get_taxonomy = function (node) {
     taxon_ids = "";
 
-    for (i in phylo_options.tree.extents){
-        taxon_ids += phylo_options.tree.extents[i].taxon_id + ","
+    for (i in phylo_options.tree.extants){
+        taxon_ids += phylo_options.tree.extants[i].taxon_id + ","
     }
 
     // Remove the final comma
@@ -1103,30 +1096,30 @@ var get_taxonomy = function (node) {
 
             if (speciesData != null) {
 
-                for (i in phylo_options.tree.extents) {
+                for (i in phylo_options.tree.extants) {
 
                     for (rank in ranks) {
 
 
-                        path = " //TaxId[.//text()='" + phylo_options.tree.extents[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName[1]";
+                        path = " //TaxId[.//text()='" + phylo_options.tree.extants[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName[1]";
                         var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
                         try {
                             var thisNode = node.iterateNext();
                             while (thisNode) {
                                 // If taxonomy dict already exists add to it
-                                if ("taxonomy" in phylo_options.tree.extents[i]){
+                                if ("taxonomy" in phylo_options.tree.extants[i]){
 
-                                    phylo_options.tree.extents[i].taxonomy[ranks[rank]] = thisNode.textContent;
+                                    phylo_options.tree.extants[i].taxonomy[ranks[rank]] = thisNode.textContent;
                                 }
                                 // Create a new taxonomy dict and annotate it with the available taxonomic ranks
                                 else{
-                                    phylo_options.tree.extents[i].taxonomy = {};
+                                    phylo_options.tree.extants[i].taxonomy = {};
                                     for (rank in ranks){
-                                        phylo_options.tree.extents[i].taxonomy[rank] == "";
+                                        phylo_options.tree.extants[i].taxonomy[rank] == "";
                                     }
 
-                                    phylo_options.tree.extents[i].taxonomy[ranks[rank]] = thisNode.textContent;
+                                    phylo_options.tree.extants[i].taxonomy[ranks[rank]] = thisNode.textContent;
                                 }
 
                                 thisNode = node.iterateNext();
@@ -1262,7 +1255,7 @@ var assign_extant_count = function(node) {
 /**
  * Assigns the x coords of leafs/terminating nodes.
  *
- * Leaf is used to define either a left node, i.e. extent or
+ * Leaf is used to define either a left node, i.e. extant or
  * a terminating node (i.e. we are not displaying the children
  * of that node).
  */
@@ -1329,7 +1322,7 @@ var make_child = function (node, left, id) {
  * and keeping track of the longest branch.
  *
  * During this function we will also make the reverse relationship ->
- * i.e. keep track of each nodes parent and also store the extents.
+ * i.e. keep track of each nodes parent and also store the extants.
  *
  * This way we will be able to assign coords to x based on how many children
  * a node has and ensure the tree continues to look somewhat balenced even if
@@ -1347,8 +1340,8 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
     }
     if (node.children == undefined) {
         // Check if this is the longest branch
-        if (node.distance_from_root > phylo_options.tree.longest_distance_from_root_to_extent) {
-            phylo_options.tree.longest_distance_from_root_to_extent = node.distance_from_root;
+        if (node.distance_from_root > phylo_options.tree.longest_distance_from_root_to_extant) {
+            phylo_options.tree.longest_distance_from_root_to_extant = node.distance_from_root;
         }
         if (depth > phylo_options.tree.max_depth) {
             phylo_options.tree.max_depth = depth;
@@ -1356,7 +1349,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
         // Set the max children of the node to be 0.
         node.max_children = 1;
         if (initial) {
-            phylo_options.tree.extents.push(node);
+            phylo_options.tree.extants.push(node);
         }
         return;
     }
@@ -1371,7 +1364,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
         node.children[n].parent_node = node;
 
         // Add to a dictionary of nodes.
-        // Will use this when traversing from the extents up to the parent.
+        // Will use this when traversing from the extants up to the parent.
         //phylo_options.node_dict[node.id] = node;
 
         get_distance_from_root(node.children[n], depth, phylo_options, initial);
@@ -1381,7 +1374,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
 
 /**
  *
- * Traverse the tree from the extents (i.e. leaf nodes and
+ * Traverse the tree from the extants (i.e. leaf nodes and
  * assign the number of children below).
  *
  * Assign the node to have the max number of children,

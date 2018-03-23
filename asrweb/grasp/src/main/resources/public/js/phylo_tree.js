@@ -681,10 +681,14 @@ var search_tree = function(search) {
             }
         }
         extant.contains_search = found;
-        // if extant contains a search term, then iterate up the tree to indicate to all ancestral nodes that a child
-        // contains the search term (this will be used when nodes are collapsed)
-        if (found) {
-            found_in_any = true;
+    }
+    // if extant contains a search term, then iterate up the tree to indicate to all ancestral nodes that a child
+    // contains the search term (this will be used when nodes are collapsed)
+    // update parents to show if children contains search terms
+    set_all_contains_search(phylo_options.tree.root, false);
+    for (var n in phylo_options.tree.extants) {
+        var extant = phylo_options.tree.extants[n];
+        if (extant.contains_search) {
             var parent = extant.parent_node;
             // only search until constains_search is true (may have been set from a different extant)
             while (parent != undefined && (parent.contains_search == undefined || !parent.contains_search)) {
@@ -693,16 +697,12 @@ var search_tree = function(search) {
             }
         }
     }
-    // if not found in any extants, make sure all parents are set to false as well
-    if (!found_in_any) {
-        set_all_contains_search(phylo_options.tree.root, false);
-    }
     refresh_tree();
 }
 
 var set_all_contains_search = function(node, flag) {
-    node.contains_search = flag;
     if (node.children != undefined) {
+        node.contains_search = flag;
         for (var n in node.children) {
             set_all_contains_search(node.children[n], flag);
         }

@@ -76,6 +76,7 @@ var phylo_options = {
         font_family: "Varela Round, sans-serif",
         font_size: "10px",
         font_colour: "#24232d",
+        search_colour: "#EA78F5",
 
         // ---------------- Context menu style ----//
         contextmenu_fill: "#F0F8FF",
@@ -88,7 +89,7 @@ var phylo_options = {
         select_colour: "#EA78F5",
         stacked_colour: "#EA78F5",           // colour for when a node appears in the poag stack
         collapsed_colour: "black",           // colour for when a node is collapsed
-        collapsed_symbol: "triangle-up",   // symbol of tree node when sub-tree is collapsed
+        collapsed_symbol: "triangle-up",     // symbol of tree node when sub-tree is collapsed
     }
 }
 
@@ -248,7 +249,13 @@ var draw_phylo_circle = function (group, node, n) {
         .attr("name", node.name)
         .attr("font-family", options.font_family)
         .attr("font-size", options.font_size)
-        .attr("fill", options.font_colour)
+        .attr("fill", function () {
+            if (node.contains_search) {
+                return options.search_colour;
+            } else {
+                return options.font_colour;
+            }
+        })
         .attr("text-anchor", "middle")
         .attr("opacity", function () {
             if (!node.collapsed && node.terminated) {
@@ -371,7 +378,13 @@ var draw_phylo_text = function (group, node, n) {
         .attr("name", node.name)
         .attr("font-family", options.font_family)
         .attr("font-size", options.font_size)
-        .attr("fill", options.font_colour)
+        .attr("fill", function () {
+            if (node.contains_search) {
+                return options.search_colour;
+            } else {
+                return options.font_colour;
+            }
+        })
         .attr("text-anchor", function() {
             if (node.extent) {
                 return "start";
@@ -647,6 +660,53 @@ var expand_all_nodes = function() {
     collapse_subtree(phylo_options.tree.root, phylo_options.tree.root.num_extants);
     redraw_phylo_tree();
     refresh_tree();
+}
+
+var search_tree = function(search) {
+    var terms = search.split("*"); // wildcard '*'
+    var found_in_any = false; // keep track of if found in ANY extants (for populating parent nodes)
+    for (var n in phylo_options.tree.extants) {
+        var extant = phylo_options.tree.extants[n];
+        var found = false;
+        if (search != "") {
+            var ind = 0;
+            for (var s in terms) {
+                if (extant.name.substring(ind, extant.name.length).includes(terms[s])) {
+                    ind = extant.name.indexOf(terms[s]) + terms[s].length-1;
+                    found = true;
+                } else {
+                    found = false;
+                    break;
+                }
+            }
+        }
+        extant.contains_search = found;
+        // if extant contains a search term, then iterate up the tree to indicate to all ancestral nodes that a child
+        // contains the search term (this will be used when nodes are collapsed)
+        if (found) {
+            found_in_any = true;
+            var parent = extant.parent_node;
+            // only search until constains_search is true (may have been set from a different extant)
+            while (parent != undefined && (parent.contains_search == undefined || !parent.contains_search)) {
+                parent.contains_search = true;
+                parent = parent.parent_node;
+            }
+        }
+    }
+    // if not found in any extants, make sure all parents are set to false as well
+    if (!found_in_any) {
+        set_all_contains_search(phylo_options.tree.root, false);
+    }
+    refresh_tree();
+}
+
+var set_all_contains_search = function(node, flag) {
+    node.contains_search = flag;
+    if (node.children != undefined) {
+        for (var n in node.children) {
+            set_all_contains_search(node.children[n], flag);
+        }
+    }
 }
 
 /**
@@ -1311,6 +1371,7 @@ var make_child = function (node, left, id) {
     child.num_extants = node.num_extants;
     child.collapsed = node.collapsed;
     child.terminated = node.terminated;
+    child.contains_search = node.contains_search;
     if (node.children == undefined) {
         child.extent = true;
     } else {

@@ -700,6 +700,12 @@ var search_tree = function(search) {
     refresh_tree();
 }
 
+/**
+ * Set all parent nodes to specified flag
+ *
+ * @param node
+ * @param flag
+ */
 var set_all_contains_search = function(node, flag) {
     if (node.children != undefined) {
         node.contains_search = flag;

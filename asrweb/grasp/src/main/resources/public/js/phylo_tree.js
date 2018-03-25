@@ -859,7 +859,6 @@ var run_phylo_tree = function () {
 
     // Add the taxon information to the leaf nodes
     get_taxon_ids(tree_json);
-    get_taxonomy(phylo_options.tree.root);
 
     assign_num_children(phylo_options.tree.root);
 
@@ -1080,7 +1079,7 @@ var get_parents_to_root = function(node, parent_list){
 
 /**
  * Annotate the extant sequences with their taxonomic ids
- * */
+ */
 
 var get_taxon_ids = function (node) {
 
@@ -1101,7 +1100,7 @@ var get_taxon_ids = function (node) {
         headers: {
             'Content-Type': 'text/plain'
         },
-        async: false,
+        async: true,
 
         success: function (speciesData) {
 
@@ -1127,6 +1126,8 @@ var get_taxon_ids = function (node) {
                 }
             }
 
+            get_taxonomy(phylo_options.tree.root);
+
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             if (errorThrown == "Bad Request") {
@@ -1142,7 +1143,9 @@ var get_taxon_ids = function (node) {
 
 
 }
-
+/**
+ * Annotate the extant sequences with their taxonomic ids
+ */
 var get_taxonomy = function (node) {
     taxon_ids = "";
 

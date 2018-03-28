@@ -242,6 +242,7 @@ var draw_phylo_circle = function (group, node, n) {
             }
         });
 
+    // Extant % under collapsed nodes
     var x = node.x;
     var y = node.y + 20;
     group.append("text")
@@ -269,6 +270,40 @@ var draw_phylo_circle = function (group, node, n) {
             return "(" + node.num_extants + ")";
         });
 
+    // Taxonomy under collapsed nodes
+    var x = node.x;
+    var y = node.y + 30;
+    var deg = 90;
+    group.append("text")
+        .attr("id", "text-tax-" + node.id)
+        .attr("name", node.name)
+        .attr("font-family", options.font_family)
+        .attr("font-size", options.font_size)
+        .attr("font-style", "italic")
+        .attr("fill", function () {
+            if (node.contains_search) {
+                return options.search_colour;
+            } else {
+                return options.font_colour;
+            }
+        })
+        .attr("text-anchor", "start")
+        .attr("opacity", function () {
+            if (!node.collapsed && node.terminated) {
+                return 1;
+            } else {
+                return 0;
+            }
+        })
+        .attr("transform", "translate(" + x + "," + y + ") rotate(" + deg + ") translate(2,2)")
+        .text(function() {
+            if (node.common_rank === undefined) {
+                return "";
+            }
+            return node.common_rank.charAt(0).toUpperCase() + node.common_rank.slice(1) + ": " + node.common_taxonomy;
+        });
+
+    // Node
     group.append("circle")
         .attr("id", "fill-" + node.id)
         .attr("name", node.name)
@@ -393,7 +428,7 @@ var draw_phylo_text = function (group, node, n) {
             }
         })
         .attr("opacity", function () {
-            if (node.extent || (phylo_options.tree.collapsed_selection != null && node.id == phylo_options.tree.collapsed_selection.id)) {
+            if (node.extent || node.terminated || (phylo_options.tree.collapsed_selection != null && node.id == phylo_options.tree.collapsed_selection.id)) {
                 return 1;
             } else {
                 return 0;
@@ -405,7 +440,6 @@ var draw_phylo_text = function (group, node, n) {
                 return node.name;
             } else {
                 return node.name.split("_")[0];
-
             }
         });
 }
@@ -869,8 +903,6 @@ var run_phylo_tree = function () {
  *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
  */
 var collapse_subtree = function(node, num_expanded){
-
-
     collapse_list = get_boundary_nodes(node, num_expanded) // get the list of nodes to collapse under
     inorder_collapse(node, collapse_list)
     refresh_tree()
@@ -889,8 +921,130 @@ var get_boundary_nodes = function(node, num_expanded){
     return collapse_list
 }
 
+/**
+ * Get the most common taxonomy labels for each ancestral node by counting all unique extant taxonomy labels
+ * and ranking based on highest number
+ */
+var get_common_taxon = function(node) {
+    if (node.children == undefined) {
+        return;
+    }
+
+    var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
+
+    var taxonomy = {};
+    for (var rank in ranks) {
+        taxonomy[ranks[rank]] = {};
+    }
+    for (var n in node.children) {
+        var child = node.children[n];
+        if (child.taxonomy == undefined) {
+            get_common_taxon(child);
+        }
+        for (var rank in ranks) {
+            var tax = taxonomy[ranks[rank]];
+            var child_labels = {};
+            if (!(child.children == undefined)) {
+                for (var r in child.taxonomy[ranks[rank]]) {
+                    child_labels[r] = child.taxonomy[ranks[rank]][r];
+                }
+            } else {
+                child_labels[child.taxonomy[ranks[rank]]] = 1;
+            }
+            for (var label in child_labels) {
+                var count = child_labels[label];
+                if (tax[label] == undefined) {
+                    tax[label] = 0;
+                }
+                tax[label] += count;
+            }
+        }
+    }
 
 
+    var common_tax = null;
+    var common_rank = null;
+
+    for (var r in ranks) {
+        var common_t = null;
+        var common_r = null;
+        var differ = false;
+        for (var c in node.children) {
+            child = node.children[c];
+            var c_tax = child.taxonomy;
+            var tax = c_tax[ranks[r]];
+            if (tax !== undefined && child.children !== undefined) {
+                tax = Object.keys(c_tax[ranks[r]]);
+                if (tax.length === 1) {
+                    tax = tax[0];
+                }
+            }
+            if (tax === undefined || tax === "undefined") {
+                differ = true;
+                break;
+            }
+            if (common_t === null) {
+                common_t = tax;
+                common_r = r;
+            } else if ((!(tax instanceof Array) && common_t !== tax) ||
+                ((common_t instanceof Array) && !is_intersect(tax, common_t)) || !tax.includes(common_t)) {
+                differ = true;
+                break;
+            }
+        }
+        if (!differ && common_r !== null) {
+            common_tax = common_t;
+            common_rank = common_r;
+        } else if (differ && common_r !== null) {
+            break;
+        }
+    }
+
+    var common = {};
+    if (common_rank === null) {
+        common.common_rank = null;
+    } else {
+        common.common_rank = ranks[common_rank];
+    }
+    common.common_taxonomy = common_tax;
+    common.differ_rank = ranks[common_r];
+    node.common_taxonomy = common;
+    node.taxonomy = taxonomy;
+
+    // update node for drawing
+    set_common_tax_node(node);
+}
+
+var set_common_tax_node = function(node) {
+    for (var n in phylo_options.tree.all_nodes) {
+        var phylo_node = phylo_options.tree.all_nodes[n];
+        if (phylo_node.id === node.id) {
+            phylo_node.common_rank = node.common_taxonomy.common_rank;
+            phylo_node.common_taxonomy = node.common_taxonomy.common_taxonomy;
+            return;
+        }
+    }
+}
+
+/**
+ * Returns if there exists values that intersect arr1 and arr2
+ *
+ * @param arr1
+ * @param arr2
+ */
+var is_intersect = function(arr1, arr2) {
+   for (var a1 in arr1) {
+       if (arr2.includes(a1)) {
+           return true;
+       }
+   }
+   for (var a2 in arr2) {
+       if (arr1.includes(a2)) {
+           return true;
+       }
+   }
+   return false;
+}
 
 /**
  * Perform a level order traversal of the tree favouring a given direction
@@ -1115,7 +1269,7 @@ var get_taxon_ids = function (node) {
                         var thisNode = node.iterateNext();
                         while (thisNode) {
                             phylo_options.tree.extants[i].taxon_id = thisNode.textContent;
-
+                            console.log(phylo_options.tree.extants[i]);
                             thisNode = node.iterateNext();
                         }
 
@@ -1125,7 +1279,7 @@ var get_taxon_ids = function (node) {
                     }
                 }
             }
-
+            console.log("done");
             get_taxonomy(phylo_options.tree.root);
 
         },
@@ -1172,9 +1326,9 @@ var get_taxonomy = function (node) {
 
             if (speciesData != null) {
 
-                for (i in phylo_options.tree.extants) {
+                for (var i in phylo_options.tree.extants) {
 
-                    for (rank in ranks) {
+                    for (var rank in ranks) {
 
 
                         path = " //TaxId[.//text()='" + phylo_options.tree.extants[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName[1]";
@@ -1207,6 +1361,10 @@ var get_taxonomy = function (node) {
                         }
                     }
                 }
+
+                // assign topmost common taxon information for internal nodes
+                get_common_taxon(phylo_options.tree.root);
+                refresh_tree();
             }
 
         },
@@ -1314,10 +1472,10 @@ var assign_extant_count = function(node) {
     if (node.children !== undefined) {
         for (var n in node.children) {
             var child = node.children[n];
-            if (child.num_extants == undefined) {
+            if (child.num_extants === undefined) {
                 assign_extant_count(child);
             }
-            if (child.num_extants == 0) {
+            if (child.num_extants === 0) {
                 num_extants += 1;
             } else {
                 num_extants += child.num_extants;
@@ -1381,7 +1539,14 @@ var make_child = function (node, left, id) {
     child.collapsed = node.collapsed;
     child.terminated = node.terminated;
     child.contains_search = node.contains_search;
-    if (node.children == undefined) {
+    if (node.common_taxonomy === undefined) {
+        child.common_rank = undefined;
+        child.common_taxonomy = undefined;
+    } else {
+        child.common_rank = node.common_taxonomy.common_rank;
+        child.common_taxonomy = node.common_taxonomy.common_taxonomy;
+    }
+    if (node.children === undefined) {
         child.extent = true;
     } else {
         child.extent = false;

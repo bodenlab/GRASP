@@ -1523,7 +1523,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .text(function() {
                     var spacing = Math.floor((poags.cur_x_max - poags.cur_x_min)/10);
                     if (poags.node_radius > 2*options.node.min_radius || node.id % spacing == 0) {
-                        return node.id;
+                        return node.id + 1;
                     }
                     return "";
                 });

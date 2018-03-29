@@ -11,11 +11,10 @@ var phylo_options = {
         margin: {top: 50, left: 50, bottom: 50, right: 150},
         stroke: "#AEB6BF",
         stroke_width: "1px",
-        number_aixs_ticks: 10,
+        number_aixs_ticks: 10
     },
     tree: {
         longest_distance_from_root_to_extant: 0,
-        extant_label_height: 200,
         extant_label_height: 200,
         initial_node_num: 150,
         expand_node_num: 25,
@@ -23,6 +22,7 @@ var phylo_options = {
         selected_node: null,
         collapsed_selection: null,
         all_nodes: new Array(),
+        all_nodes_taxonomy: new Array(),
         all_branches: new Array(),
         node_depth_dict: {}, // keeps track of the depth of each node
         extants: new Array(),
@@ -40,7 +40,7 @@ var phylo_options = {
         height: 100,
         top_colour: "#3C6AC4",
         bottom_colour: "#F7FBFF",
-        colours: ["#3C6AC4", "#F7FBFF"],
+        colours: ["#3C6AC4", "#F7FBFF"]
     },
 
     // Options for node style
@@ -361,6 +361,8 @@ var draw_phylo_circle = function (group, node, n) {
             }
         })
         .attr("stroke-width", options.stroke_width)
+        .attr("data-toggle", "modal")
+        .attr("data-target", "#resultsTreeModal")
         .on("mouseover", function() {
             var node_selected = d3.select(this);
             // call function to update components
@@ -380,8 +382,180 @@ var draw_phylo_circle = function (group, node, n) {
             if (!node.extent){
                 menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, node_fill, node_id);
             }
+        })
+        .on("click", function(){
+            this.parentNode.appendChild(this);
+
+            d3.selectAll("#usedTreeModal").remove();
+            d3.selectAll("#text-modal-tax-label").remove();
+
+            d3.select("#modalTreeHeader").append("text")
+                .attr("id", "text-modal-tax-label")
+                .attr("name", node.name)
+                .attr("font-family", options.font_family)
+                .attr("font-size", options.font_size)
+                .attr("fill", "black")
+                .attr("text-anchor", "start")
+                .attr("opacity", 1)
+                .attr("transform", "translate(0,20)")
+                .text(function() {
+                    if (node.extent) {
+                        return node.name;
+                    } else {
+                        return node.name.split("_")[0];
+                    }
+                });
+
+            var modal_container = d3.select("#modalTree")
+                .append("svg")
+                .attr("id", "usedTreeModal")
+                .attr("width", 500)
+                .attr("height", 400)
+                .style("display", "block")
+                .style("margin", "auto");
+
+            var modal_group = modal_container.append("g")
+                .attr("opacity", 1);
+                //.attr("transform", "translate(100, 50)scale(1.5)");
+
+            add_taxonomy_modal_info(node, modal_group, options);
+
         });
 
+}
+
+var add_taxonomy_modal_info = function(node, group, options) {
+
+    var x = 0;
+    var y = 20;
+
+    if (node.common_rank === undefined && !node.extent) {
+        group.append("text")
+            .attr("id", "text-modal-tax-" + node.id)
+            .attr("name", node.name)
+            .attr("font-family", options.font_family)
+            .attr("font-size", options.font_size)
+            .attr("fill", "black")
+            .attr("text-anchor", "start")
+            .attr("opacity", 1)
+            .attr("transform", "translate(" + x + "," + y + ")")
+            .text(function() {
+                return "No taxonomic information available.";
+            });
+        return;
+    }
+
+    var node_info = phylo_options.tree.node_dict[node.id];
+    var tax_info = node_info.taxonomy;
+
+    var counter = 0;
+    var padding = 20;
+    for (var rank in tax_info) {
+        var tax = tax_info[rank];
+        if (node.extent || rank !== node_info.common_taxonomy.differ_rank) {
+            if (!node.extent) {
+                tax = Object.keys(tax_info[rank])[0];
+            }
+            if (tax !== "undefined" && tax !== undefined) {
+                // Add taxonomy text info
+                var y_text = y + counter*padding;
+                group.append("text")
+                    .attr("id", "text-modal-tax-" + node.id + "-" + counter)
+                    .attr("name", node.name)
+                    .attr("font-family", options.font_family)
+                    .attr("font-size", options.font_size)
+                    .attr("fill", "black")
+                    .attr("text-anchor", "start")
+                    .attr("opacity", 1)
+                    .attr("transform", "translate(" + x + "," + y_text + ")")
+                    .text(function() {
+                        return rank.charAt(0).toUpperCase() + rank.slice(1) + ": " + tax;
+                    });
+                counter++;
+            }
+        } else {
+            // Draw histogram of the different taxonomic rank
+            // #extants in rank
+            var y_text = y + counter*padding;
+            var rank_differ = node_info.common_taxonomy.differ_rank;
+            group.append("text")
+                .attr("id", "text-modal-tax-" + node.id + "-" + counter)
+                .attr("name", node.name)
+                .attr("font-family", options.font_family)
+                .attr("font-size", options.font_size)
+                .attr("fill", "black")
+                .attr("text-anchor", "start")
+                .attr("opacity", 1)
+                .attr("transform", "translate(" + x + "," + y_text + ")")
+                .text(function() {
+                    return rank_differ.charAt(0).toUpperCase() + rank_differ.slice(1) + ": ";
+                });
+            tax = tax_info[rank_differ];
+            draw_histogram_taxonomy(node, tax, group, options, 0, y_text);
+            return;
+        }
+    }
+}
+
+var draw_histogram_taxonomy = function(node, taxonomy, group, options, x, y) {
+    var num_cols = Object.keys(taxonomy).length;
+    // TODO: limit to N taxonomic ranks
+
+    var col_width = 20;
+    var rect_height = 100;
+
+    var hist_svg = group.append("svg")
+        .attr("id", "tax_hist_svg");
+
+    var count = 0;
+
+    for (var tax in taxonomy) {
+        var height = rect_height*(taxonomy[tax]/phylo_options.tree.node_dict[node.id].num_extants);
+        var x_t = x + count*col_width;
+        var y_t = y + rect_height - height;
+        hist_svg.append("rect")
+            .attr("id", "rect-tax-" + count)
+            .attr("class", function () {
+                return "bar2 movable";
+            })
+            .attr("x", x_t)
+            .attr("y", y_t)
+            .attr("width", col_width)
+            .attr("height", height)
+            .attr("fill", "grey");
+
+        // add number of extants above rectangle
+        var x_t_r = x_t + col_width/4;
+        var y_t_r = y + rect_height + 2;
+        var y_t_l = y_t - 5;
+        hist_svg.append("text")
+            .attr("id", "text-tax-num-" + count)
+            .attr("font-family", options.font_family)
+            .attr("font-size",10)
+            .attr("fill", "black")
+            .attr("text-anchor", "start")
+            .attr("opacity", 0.7)
+            .attr("transform", "translate(" + x_t_r + "," + y_t_l + ")")
+            .text(function() {
+                return taxonomy[tax];
+            });
+
+
+        // add label under rectangle
+        hist_svg.append("text")
+            .attr("id", "text-tax-label-" + count)
+            .attr("font-family", options.font_family)
+            .attr("font-size", options.font_size)
+            .attr("fill", "black")
+            .attr("text-anchor", "start")
+            .attr("opacity", 1)
+            .attr("transform", "translate(" + x_t_r + "," + y_t_r + ") rotate(90)")
+            .text(function() {
+                return tax;
+            });
+
+        count++;
+    }
 }
 
 /**
@@ -705,7 +879,7 @@ var search_tree = function(search) {
         if (search != "") {
             var ind = 0;
             for (var s in terms) {
-                if (extant.name.substring(ind, extant.name.length).includes(terms[s])) {
+                if (extant.name.substring(ind, extant.name.length).toLowerCase().includes(terms[s].toLowerCase())) {
                     ind = extant.name.indexOf(terms[s]) + terms[s].length-1;
                     found = true;
                 } else {
@@ -808,6 +982,7 @@ var clear_svg = function () {
     group.selectAll("text").remove();
     group.selectAll("rect").remove();
     group.selectAll("circle").remove();
+
 }
 
 /**
@@ -1430,6 +1605,7 @@ var redraw_phylo_tree = function() {
     assign_node_coords(root, 0);
 
     // re-populate all_nodes and all_branches for drawing
+    phylo_options.tree.all_nodes_taxonomy = [];
     phylo_options.tree.all_branches = [];
     phylo_options.tree.all_nodes = [];
     phylo_options.tree.all_nodes.push(make_child(root, false, phylo_options.tree.all_nodes.length));

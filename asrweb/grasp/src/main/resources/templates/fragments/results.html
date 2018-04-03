@@ -19,6 +19,26 @@
             </div>
         </div>
         <div id="results" class="container-fluid" >
+
+            <div id="taxonomy-info-alert" class="alert alert-info" role="alert">
+                <p>Attempting to get taxonomic information from NCBI...</p>
+            </div>
+            <div id="taxonomy-success-alert" class="alert alert-success alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <p>Success! Left-click on phylogenetic nodes to see taxonomic information.</p>
+            </div>
+            <div id="taxonomy-failed-alert" class="alert alert-danger alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <p>Could not find taxonomic information.</p>
+                <hr></hr>
+                <p>Add NCBI identifiers as an initial tag to each extant label, separated by a "|" symbol.</p>
+                <p>e.g. "XP_005287999.1|Chordata_Testu...." etc  </p>
+            </div>
+
             <div class="col-xs-12">
                 <div>
                     <button type="button" id="extant-text-toggle" class="btn btn-default col-xs-2" onclick="toggle_extant_text()">View extant labels | ON</button>

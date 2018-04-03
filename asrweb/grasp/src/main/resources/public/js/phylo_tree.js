@@ -16,7 +16,7 @@ var phylo_options = {
     tree: {
         longest_distance_from_root_to_extant: 0,
         extant_label_height: 200,
-        initial_node_num: 150,
+        initial_node_num: 100,
         expand_node_num: 25,
         collapse_under: [],
         selected_node: null,
@@ -24,7 +24,7 @@ var phylo_options = {
         all_nodes: new Array(),
         all_nodes_taxonomy: new Array(),
         all_branches: new Array(),
-        node_depth_dict: {}, // keeps track of the depth of each node
+        nodes_sorted: [], // keeps track of sorted nodes (based on increasing evolutionary distance)
         extants: new Array(),
         min_x: 0,
         additive: true, // Whether or not we want to display the branches as additive
@@ -865,7 +865,7 @@ var expand_all_nodes = function() {
     phylo_options.tree.collapse_under = [];
     phylo_options.tree.collapsed_selection = null;
     set_children_un_terminated(phylo_options.tree.root);
-    collapse_subtree(phylo_options.tree.root, phylo_options.tree.root.num_extants);
+    collapse_subtree(phylo_options.tree.root, phylo_options.tree.all_nodes.length-1);
     redraw_phylo_tree();
     refresh_tree();
 }
@@ -1047,8 +1047,8 @@ var run_phylo_tree = function () {
     tree_json.x = phylo_options.x_scale(tree_json.raw_x);
     tree_json.parent_y = 0;
 
-    phylo_options.tree.node_depth_dict[1] = [];
-    phylo_options.tree.node_depth_dict[1].push(tree_json);
+    //phylo_options.tree.node_depth_dict[1] = [];
+    //phylo_options.tree.node_depth_dict[1].push(tree_json);
 
     phylo_options.tree.all_nodes.push(make_child(tree_json, false, phylo_options.tree.all_nodes.length));
     phylo_options.tree.node_dict[tree_json.id] = tree_json;
@@ -1078,71 +1078,104 @@ var run_phylo_tree = function () {
  *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
  */
 var collapse_subtree = function(node, num_expanded){
-    var collapse_list = get_boundary_nodes(node, num_expanded) // get the list of nodes to collapse under
-    inorder_collapse(node, collapse_list)
+
+
+    var threshold = get_collapse_threshold(node, num_expanded);
+
+    // search through children until evolutionary distance is crossed and collapse under this
+    collapse_above_threshold(node, threshold);
+
+    // OLD METHOD:
+    //var collapse_list = get_boundary_nodes(node, num_expanded) // get the list of nodes to collapse under
+    //inorder_collapse(node, collapse_list)
+
     refresh_tree()
-}
+};
 
-/**
- * Get the list of nodes that we should collapse under in order to give num_expanded leaves or collapsed nodes
- */
-
-var get_boundary_nodes = function(node, num_expanded){
-    var left_nodes = level_order_traversal(node, "left"); // perform level order in left direction
-    var right_nodes = level_order_traversal(node, "right") ;// perform level order in right direction
-    var combine_list = combine_node_lists(left_nodes, right_nodes); // combine the two lists to give balanced list
-    var collapse_list = combine_list.splice(0, num_expanded - 1); // split the full list to give the actual list of nodes needed
-
-    return collapse_list;
-}
-
-/**
- * Perform a level order traversal of the tree favouring a given direction
- */
-
-var level_order_traversal = function(node, direction) {
-    var node_order = [];
-    if (node != null) {
-
-        var queue = [];
-        queue.push(node)
-
-        while (queue.length > 0) {
-            node = queue.pop();
-
-            if (node.children != undefined && !node.extent) {
-                node_order.push(node.name)
-
-                if (direction == 'left') {
-
-                    for (var c in node.children) {
-                        var n = node.children.length - c - 1;
-                        queue.push(node.children[n]);
-                    }
-                    //queue.push(node.children[1])
-                    //queue.push(node.children[0])
-
-                } else if (direction == 'right'){
-
-                    for (var c in node.children) {
-                        queue.push(node.children[c]);
-                    }
-                    //queue.push(node.children[0])
-                    //queue.push(node.children[1])
-
-                }
-
-            }
-
-            // TODO: ?
-            if (node.children == undefined){
-
-            }
+var collapse_above_threshold = function(node, threshold) {
+    var all_children_above = true;
+    for (var c in node.children) {
+        if (node.children[c].distance_from_root < threshold) {
+            all_children_above = false;
         }
     }
+    if (all_children_above && node.children !== undefined) {
+        set_children_collapsed(node);
+        phylo_options.tree.collapse_under.push(node);
+    } else {
+        for (var c in node.children){
+            collapse_above_threshold(node.children[c], threshold);
+        }
+    }
+};
 
-    return node_order
+/**
+ * Find the evolutionary distance-based threshold for collapsing nodes.
+ * @param node
+ * @param num_expanded
+ */
+var get_collapse_threshold = function(node, num_expanded) {
+    var nodes = [];
+    // populate nodes list of all child nodes of current node
+    nodes = populate_node_list(node, nodes);
 
+    nodes = quicksort_evol_dist(nodes, 0, nodes.length - 1);
+
+    if (num_expanded >= nodes.length) {
+        return nodes[nodes.length-1].distance_from_root;
+    }
+
+    // ensure this node does not get set to collapse
+    for (var c in node.children) {
+        if (node.children[c].distance_from_root > nodes[num_expanded].distance_from_root) {
+            return node.children[c].distance_from_root;
+        }
+    }
+    return nodes[num_expanded].distance_from_root;
+};
+
+var populate_node_list = function(node, nodes) {
+    nodes.push(node);
+    for (var c in node.children) {
+        nodes = populate_node_list(node.children[c], nodes);
+    }
+    return nodes;
+}
+
+
+var quicksort_evol_dist = function(list, left, right) {
+
+    var pivot;
+    if (left < right) {
+        pivot = right;
+        var index = partition(list, pivot, left, right);
+
+        // sort left and right sides of the list
+        quicksort_evol_dist(list, left, index - 1);
+        quicksort_evol_dist(list, index + 1, right);
+    }
+
+    return list;
+}
+
+var partition = function(list, pivot, left, right) {
+    var pivot_value = list[pivot];
+    var index = left;
+
+    for (var i = left; i < right; i++) {
+        if (list[i].distance_from_root < pivot_value.distance_from_root) {
+            swap(list, i, index);
+            index++;
+        }
+    }
+    swap(list, right, index);
+    return index;
+}
+
+var swap = function(list, i, j) {
+    var tmp = list[i];
+    list[i] = list[j];
+    list[j] = tmp;
 }
 
 /**
@@ -1162,72 +1195,11 @@ var inorder_collapse = function(node, collapse_list){
                 for (var c in node.children) {
                     inorder_collapse(node.children[c], collapse_list);
                 }
-                //inorder_collapse(node.children[0], collapse_list)
-                //inorder_collapse(node.children[1], collapse_list)
             }
 
         }
     }
 
-}
-
-
-/**
- * Iterate through tree from node, expanding any nodes in collapse list
- */
-var inorder_expand = function(node, collapse_list){
-
-
-    if (node != null) {
-        if (node.children != undefined) {
-
-            if (!(collapse_list.indexOf(node.name) > -1) && node.children!= undefined){
-                phylo_options.tree.collapse_under.push(node.name);
-            } else {
-
-
-                node.collapsed = false;
-                node.terminate = false;
-
-                var ind = phylo_options.tree.collapse_under.indexOf(node);
-                if (ind != -1)
-                    phylo_options.tree.collapse_under.splice(ind,1);
-
-                for (var c in node.children) {
-                    inorder_expand(node.children[c], collapse_list);
-                }
-                //inorder_expand(node.children[0], collapse_list)
-                //inorder_expand(node.children[1], collapse_list)
-
-            }
-
-        }
-
-    }
-}
-
-/**
- * Combine two lists together index by index, ignoring duplicates
- */
-
-var combine_node_lists = function (list1, list2){
-
-    var master_set = new Set();
-    var combine_list = [];
-
-    for (var i = 0; i < list1.length; i++){
-        if (!master_set.has(list1[i])) {
-            combine_list.push(list1[i]);
-            master_set.add(list1[i]);
-        }
-
-        if (!master_set.has(list2[i])) {
-            combine_list.push(list2[i]);
-            master_set.add(list2[i]);
-        }
-
-    }
-    return combine_list;
 }
 
 
@@ -1379,6 +1351,11 @@ var set_common_tax_node = function(node) {
         if (phylo_node.id === node.id) {
             phylo_node.common_rank = node.common_taxonomy.common_rank;
             phylo_node.common_taxonomy = node.common_taxonomy.common_taxonomy;
+
+            // add common_taxonomy to poags info for name labelling
+            poags.taxonomy[node.name.split("_")[0]] = node.common_taxonomy.common_rank.charAt(0).toUpperCase() +
+                node.common_taxonomy.common_rank.slice(1) + ": " + node.common_taxonomy.common_taxonomy;
+
             return;
         }
     }
@@ -1442,7 +1419,7 @@ var get_taxon_ids = function (node) {
                         var thisNode = node.iterateNext();
                         while (thisNode) {
                             phylo_options.tree.extants[i].taxon_id = thisNode.textContent;
-                            console.log(phylo_options.tree.extants[i]);
+                            //console.log(phylo_options.tree.extants[i]);
                             thisNode = node.iterateNext();
                         }
 
@@ -1457,6 +1434,8 @@ var get_taxon_ids = function (node) {
 
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $('#taxonomy-info-alert').addClass("hidden");
+            $('#taxonomy-failed-alert').removeClass("hidden");
             if (errorThrown == "Bad Request") {
 
             }
@@ -1538,10 +1517,15 @@ var get_taxonomy = function (node) {
                 // assign topmost common taxon information for internal nodes
                 get_common_taxon(phylo_options.tree.root);
                 refresh_tree();
+                $('#taxonomy-info-alert').addClass("hidden");
+                $('#taxonomy-success-alert').removeClass("hidden");
+                redraw_poags();
             }
 
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $('#taxonomy-failed-alert').removeClass("hidden");
+            $('#taxonomy-info-alert').addClass("hidden");
             if (errorThrown == "Bad Request") {
                 // response = XMLHttpRequest.responseText
                 // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
@@ -2178,6 +2162,7 @@ var context_menu_action = function (call, node_fill, node_id) {
 
 }
 
+/*
 var show_expand_collapse_node = function (node) {
     for (var n in phylo_options.tree.node_dict) {
         if (n.id != node.id) {
@@ -2186,7 +2171,7 @@ var show_expand_collapse_node = function (node) {
     }
     node.attr("r", options.hover_radius);
     node.attr("opacity", 0.2);
-}
+}*/
 
 /**
  *  Sets all the children of a node to be collapsed.
@@ -2195,6 +2180,9 @@ var show_expand_collapse_node = function (node) {
 var set_children_collapsed = function (node) {
     node.collapsed = true;
     node.terminated = false;
+    //if (node.parent_node !== undefined) {
+    //    node.parent_node.terminated = true;
+    //}
 
     // Remove all nodes from the collapse under array
     var ind = phylo_options.tree.collapse_under.indexOf(node);

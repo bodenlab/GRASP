@@ -67,6 +67,7 @@ var poags = {
         height: 250,
         margin: {left: 0, right: 0, top: 200, bottom: 0}
     },
+    taxonomy: {}
 };
 
 var graph_array = [];
@@ -1373,6 +1374,10 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
                 .attr("fill", colour);
     }
 
+    var tax = poags.taxonomy[node.name];
+    if (tax === undefined) {
+        tax = "";
+    }
     group.append("text")
             .attr("class", "poag")
             .attr("id", "rtext-" + node.unique_id)
@@ -1387,7 +1392,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
             .attr("stroke", function () {
                 return getNodeTextColour(poags.options.display.colours[(node.label)]);
             })
-            .text(node.name.split("_")[0]);
+            .text(node.name.split("_")[0] + " " + tax);
 
 }
 

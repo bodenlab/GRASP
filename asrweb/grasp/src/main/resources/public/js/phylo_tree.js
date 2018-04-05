@@ -602,7 +602,7 @@ var draw_phylo_text = function (group, node, n) {
             }
         })
         .attr("opacity", function () {
-            if (node.extent || node.terminated || (phylo_options.tree.collapsed_selection != null && node.id == phylo_options.tree.collapsed_selection.id)) {
+            if (node.extent || (phylo_options.tree.collapsed_selection != null && node.id == phylo_options.tree.collapsed_selection.id)) {
                 return 1;
             } else {
                 return 0;
@@ -1085,17 +1085,13 @@ var collapse_subtree = function(node, num_expanded){
     // search through children until evolutionary distance is crossed and collapse under this
     collapse_above_threshold(node, threshold);
 
-    // OLD METHOD:
-    //var collapse_list = get_boundary_nodes(node, num_expanded) // get the list of nodes to collapse under
-    //inorder_collapse(node, collapse_list)
-
     refresh_tree()
 };
 
 var collapse_above_threshold = function(node, threshold) {
     var all_children_above = true;
     for (var c in node.children) {
-        if (node.children[c].distance_from_root < threshold) {
+        if (node.children[c].distance_from_root <= threshold) {
             all_children_above = false;
         }
     }

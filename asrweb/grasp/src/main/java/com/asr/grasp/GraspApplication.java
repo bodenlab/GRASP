@@ -42,7 +42,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	private final static String sessionPath = "/var/www/GRASP/";
 
-	private final int MAX_RECONS = 5;
+	private final int MAX_RECONS = 20; // maximum number of reconstructions that a user can save
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 

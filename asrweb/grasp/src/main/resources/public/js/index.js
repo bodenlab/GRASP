@@ -520,10 +520,18 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     var draw_legend = true;
     var colour = poags.options.names_to_colour[poag_name];
 
+    // draw all not reciprocated edges first
     for (var e in edges) {
         var edge = edges[e];
-        if (edge.from.x >= poags.cur_x_min - 1 && edge.to.x <= poags.cur_x_max + 1) {
+        if (!edge.reciprocated && edge.from.x >= poags.cur_x_min - 1 && edge.to.x <= poags.cur_x_max + 1) {
             draw_edges(poags, edge, group, scale_y);
+        }
+    }
+    // draw all reciprocated edges so that they are drawn on top of uni-directional ones
+    for (var e in edges) {
+        var edge = edges[e];
+        if (edge.reciprocated && edge.from.x >= poags.cur_x_min - 1 && edge.to.x <= poags.cur_x_max + 1) {
+           draw_edges(poags, edge, group, scale_y);
         }
     }
 

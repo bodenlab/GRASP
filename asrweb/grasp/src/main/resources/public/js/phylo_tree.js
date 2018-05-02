@@ -297,7 +297,7 @@ var draw_phylo_circle = function (group, node, n) {
         })
         .attr("transform", "translate(" + x + "," + y + ") rotate(" + deg + ") translate(2,2)")
         .text(function() {
-            if (node.common_rank === undefined) {
+            if (node.common_rank === null || node.common_rank === undefined) {
                 return "";
             }
             return node.common_rank.charAt(0).toUpperCase() + node.common_rank.slice(1) + ": " + node.common_taxonomy;
@@ -1267,26 +1267,30 @@ var get_common_taxon = function(node) {
         if (child.taxonomy == undefined) {
             get_common_taxon(child);
         }
-        for (var rank in ranks) {
-            var tax = taxonomy[ranks[rank]];
-            var child_labels = {};
-            if (!(child.children == undefined)) {
-                for (var r in child.taxonomy[ranks[rank]]) {
-                    child_labels[r] = child.taxonomy[ranks[rank]][r];
+
+        if (child.taxonomy != undefined && child.taxonomy != null) {
+
+
+            for (var rank in ranks) {
+                var tax = taxonomy[ranks[rank]];
+                var child_labels = {};
+                if (!(child.children == undefined)) {
+                    for (var r in child.taxonomy[ranks[rank]]) {
+                        child_labels[r] = child.taxonomy[ranks[rank]][r];
+                    }
+                } else {
+                    child_labels[child.taxonomy[ranks[rank]]] = 1;
                 }
-            } else {
-                child_labels[child.taxonomy[ranks[rank]]] = 1;
-            }
-            for (var label in child_labels) {
-                var count = child_labels[label];
-                if (tax[label] == undefined) {
-                    tax[label] = 0;
+                for (var label in child_labels) {
+                    var count = child_labels[label];
+                    if (tax[label] == undefined) {
+                        tax[label] = 0;
+                    }
+                    tax[label] += count;
                 }
-                tax[label] += count;
             }
         }
     }
-
 
     var common_tax = null;
     var common_rank = null;
@@ -1298,24 +1302,26 @@ var get_common_taxon = function(node) {
         for (var c in node.children) {
             child = node.children[c];
             var c_tax = child.taxonomy;
-            var tax = c_tax[ranks[r]];
-            if (tax !== undefined && child.children !== undefined) {
-                tax = Object.keys(c_tax[ranks[r]]);
-                if (tax.length === 1) {
-                    tax = tax[0];
+            if (c_tax != undefined && c_tax != null) {
+                var tax = c_tax[ranks[r]];
+                if (tax !== undefined && child.children !== undefined) {
+                    tax = Object.keys(c_tax[ranks[r]]);
+                    if (tax.length === 1) {
+                        tax = tax[0];
+                    }
                 }
-            }
-            if (tax === undefined || tax === "undefined") {
-                differ = true;
-                break;
-            }
-            if (common_t === null) {
-                common_t = tax;
-                common_r = r;
-            } else if ((!(tax instanceof Array) && common_t !== tax) ||
-                ((common_t instanceof Array) && !is_intersect(tax, common_t)) || !tax.includes(common_t)) {
-                differ = true;
-                break;
+                if (tax === undefined || tax === "undefined") {
+                    differ = true;
+                    break;
+                }
+                if (common_t === null) {
+                    common_t = tax;
+                    common_r = r;
+                } else if ((!(tax instanceof Array) && common_t !== tax) ||
+                    ((common_t instanceof Array) && !is_intersect(tax, common_t)) || !tax.includes(common_t)) {
+                    differ = true;
+                    break;
+                }
             }
         }
         if (!differ && common_r !== null) {
@@ -1349,8 +1355,10 @@ var set_common_tax_node = function(node) {
             phylo_node.common_taxonomy = node.common_taxonomy.common_taxonomy;
 
             // add common_taxonomy to poags info for name labelling
-            poags.taxonomy[node.name.split("_")[0]] = node.common_taxonomy.common_rank.charAt(0).toUpperCase() +
-                node.common_taxonomy.common_rank.slice(1) + ": " + node.common_taxonomy.common_taxonomy;
+            if (phylo_node.common_taxonomy != undefined) {
+                poags.taxonomy[node.name.split("_")[0]] = node.common_taxonomy.common_rank.charAt(0).toUpperCase() +
+                    node.common_taxonomy.common_rank.slice(1) + ": " + node.common_taxonomy.common_taxonomy;
+            }
 
             return;
         }

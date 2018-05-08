@@ -38,11 +38,9 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
 //		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
-
-	//private final int MAX_RECONS = 20; // maximum number of reconstructions that a user can save
+	//private final static String sessionPath = "/var/www/GRASP/";
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -179,6 +177,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView loadRecon(@RequestParam("load") String load, @RequestParam("id") Long id, WebRequest webrequest, Model model) {
 
 		Reconstruction recon = reconstructionService.getReconstruction(id);
+		reconstructionService.updateReconstruction(recon);
+
 		asr = new ASR();
 		asr.setLabel(recon.getLabel());
 		asr.setInferenceType(recon.getInferenceType());
@@ -549,8 +549,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public void showForm(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		JSONArray graphs = new JSONArray(request.getParameter("graphs-input"));
 		String[] ancs = new String[graphs.length()];
-		for (int i = 0; i < graphs.length(); i++)
+		for (int i = 0; i < graphs.length(); i++) {
 			ancs[i] = graphs.getString(i);
+			System.out.println(ancs[i]);
+		}
 
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
@@ -596,12 +598,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 			asr.saveConsensusMarginal(tempDir + "/" + request.getParameter("marg-node") + "_consensus");
 		if (request.getParameter("check-seq-joint-single") != null && request.getParameter("check-seq-joint-single").equalsIgnoreCase("on"))
 			asr.saveConsensusJoint(tempDir + "/" + request.getParameter("joint-node") + "_consensus", request.getParameter("joint-node"));
-		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
-			asr.saveMarginalDistribution(tempDir + "/", "msa");
+//		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
+//			asr.saveMarginalDistribution(tempDir + "/", "msa");
 		if (request.getParameter("check-seq-joint") != null && request.getParameter("check-seq-joint").equalsIgnoreCase("on"))
 			asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
-		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
-			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
+//		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
+//			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
 
 		// send output folder to client
 		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());

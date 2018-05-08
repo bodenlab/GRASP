@@ -537,9 +537,10 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
 
     for (var n in nodes) {
         var node = nodes[n];
-        var node_cx = poags.scale.x(node.x);
+        var node_x = node.x + 1;
+        var node_cx = poags.scale.x(node_x);
         var node_cy = scale_y(node.y) + poags.y_offset;
-        if (node.x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
+        if (node_x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
             if (draw_legend) {
                 draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
                 draw_legend = false;
@@ -1132,7 +1133,7 @@ var draw_mini_msa = function (poags) {
             }
         }
         var line_y = (y_scale(node.y) + (y_scale(node.y + 1)) / 2);
-        var line_x = x_scale(node.x);
+        var line_x = x_scale(node.x + 1);
         line_points.push(combine_points(line_x, line_y));
 
         // find node out edges
@@ -1219,8 +1220,8 @@ var draw_edges = function (poags, edge, group, scale_y) {
     var y_len = edge_opt.y_curve_amount;
 
     var line_points = new Array();
-    x_start = scale_x(edge.from.x);
-    x_end = scale_x(edge.to.x);
+    x_start = scale_x(edge.from.x + 1);
+    x_end = scale_x(edge.to.x + 1);
     x_mid = x_start - ((x_start - x_end) / 2);
     x_diff = Math.abs(edge.from.x - edge.to.x);
 
@@ -1335,7 +1336,7 @@ combine_points = function (x_var, y_var) {
  */
 var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, colour) {
     var rect_opt = poags.options.legend_rect;
-    var node_cx = poags.scale.x(node.x);
+    var node_cx = poags.scale.x(node.x + 1);
     var node_cy = scale_y(node.y);
     //var width = poags.scale.x(node_end.x) - node_cx;
     // TODO need to update the height to be based on the height
@@ -1706,7 +1707,7 @@ function create_axis(node, options, graph_group) {
             .attr("y", -10)
             .attr("x", options.offset_graph_width + 25)
             .attr("dy", ".71em")
-            .text(node.name);
+            .text(node.name + "   ID: " + (node.id + 1));
 }
 
 function create_modal_axis(node, options, modal_group) {
@@ -1721,7 +1722,7 @@ function create_modal_axis(node, options, modal_group) {
         .attr("y", -10)
         .attr("x", options.offset_graph_width + 20)
         .attr("dy", ".71em")
-        .text(node.name);
+        .text(node.name + "   ID: " + (node.id + 1));
 }
 
 function create_bars(node, options, graph_group) {

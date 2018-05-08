@@ -17,7 +17,7 @@ import java.util.List;
 @Transactional
 public class ReconstructionService implements IReconstructionService {
 
-    final private int NUM_MONTHS_OLD = 6; // threshold for deleting reconstructions
+    final private int NUM_MONTHS_OLD = 1; // threshold for deleting reconstructions
 
     @Autowired
     private UserRepository repository;
@@ -62,6 +62,11 @@ public class ReconstructionService implements IReconstructionService {
     public void saveReconstruction(Reconstruction recon) {
         if (!reconRepository.exists(recon.getId()))
             reconRepository.save(recon);
+    }
+
+    @Override
+    public int getLiveTime() {
+        return NUM_MONTHS_OLD;
     }
 
     @Override

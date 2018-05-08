@@ -42,7 +42,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
 	//private final static String sessionPath = "/var/www/GRASP/";
 
-	private final int MAX_RECONS = 20; // maximum number of reconstructions that a user can save
+	//private final int MAX_RECONS = 20; // maximum number of reconstructions that a user can save
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -224,14 +224,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 		ModelAndView mav = new ModelAndView("account");
 
 		if (currentRecon != null) {
-			if (registered.getNonSharedReconstructions().size() == MAX_RECONS) {
-				mav.addObject("warning", MAX_RECONS);
-				mav.addObject("type", null);
-			} else {
+			//if (registered.getNonSharedReconstructions().size() == MAX_RECONS) {
+				mav.addObject("warning", reconstructionService.getLiveTime());
+			//	mav.addObject("type", null);
+			//} else {
 				registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
 				mav.addObject("type", "saved");
 				currentRecon = null;
-			}
+			//}
 		}
 
 		mav.addObject("user", registered);
@@ -329,7 +329,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		}
 
 		// if the user already has N reconstructions saved, prompt to delete some
-		if (loggedInUser.getNonSharedReconstructions().size() == MAX_RECONS) {
+		/*if (loggedInUser.getNonSharedReconstructions().size() == MAX_RECONS) {
 			currentRecon = recon;
 			ModelAndView mav = new ModelAndView("account");
 			mav.addObject("user", loggedInUser);
@@ -340,13 +340,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 			mav.addObject("warning", MAX_RECONS);
 			mav.addObject("type", null);
 			return mav;
-		}
+		}*/
 
 		loggedInUser = reconstructionService.saveNewReconstruction(recon, loggedInUser);
 
 		ModelAndView mav = new ModelAndView("account");
 		mav.addObject("user", loggedInUser);
 		mav.addObject("share", new ShareObject());
+		mav.addObject("warning", reconstructionService.getLiveTime());
 		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
 		mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
 		mav.addObject("username", loggedInUser.getUsername());

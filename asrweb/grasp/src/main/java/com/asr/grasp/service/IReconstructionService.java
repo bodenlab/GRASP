@@ -11,4 +11,5 @@ public interface IReconstructionService {
     void updateReconstruction(Reconstruction recon) ;
     void removeReconstruction(Reconstruction recon) ;
     void checkObseleteReconstructions() ;
+    int getLiveTime() ;
 }

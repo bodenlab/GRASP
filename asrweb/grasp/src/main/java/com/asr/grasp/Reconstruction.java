@@ -162,8 +162,6 @@ public class Reconstruction {
     public void addUser(User user) {
         if (!users.contains(user))
             users.add(user);
-        for (User u : users)
-            System.out.println(label + " : " + u.getUsername());
         if (!user.getAllReconstructions().contains(this))
             user.addReconstruction(this);
     }

@@ -38,9 +38,9 @@ import java.util.zip.ZipOutputStream;
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-	//final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
+	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
 	//	final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
+	//private final static String sessionPath = "/var/www/GRASP/";
 
 	private final int MAX_RECONS = 20; // maximum number of reconstructions that a user can save
 
@@ -106,6 +106,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	@RequestMapping(value = "/account", method = RequestMethod.GET)
 	public ModelAndView showAccount(WebRequest request, Model model) {
+		reconstructionService.checkObseleteReconstructions();
 		ModelAndView mav = new ModelAndView("account");
 		mav.addObject("user", loggedInUser);
 		mav.addObject("share", new ShareObject());
@@ -159,10 +160,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (service.userExist(user.getUsername())) {
 			User u = service.getUser(user.getUsername());
 			Reconstruction recon = reconstructionService.getReconstruction(user.getReconID());
-			u.addSharedReconstruction(recon);
-			recon.addUser(u);
-			reconstructionService.saveReconstruction(recon);
-			service.saveUser(u);
+			if (!u.getSharedReconstructions().contains(recon)) {
+				u.addSharedReconstruction(recon);
+				recon.addUser(u);
+				reconstructionService.saveReconstruction(recon);
+				service.saveUser(u);
+			}
 			mav.addObject("type", "shared");
 		} else {
 			mav.addObject("error", user.getUsername());
@@ -217,6 +220,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return new ModelAndView("login");
 		User registered = getUserAccount(user);
 
+		reconstructionService.checkObseleteReconstructions();
 		ModelAndView mav = new ModelAndView("account");
 
 		if (currentRecon != null) {
@@ -235,11 +239,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 		mav.addObject("reconstructions", registered.getNonSharedReconstructions());
 		mav.addObject("sharedreconstructions", service.getSharedReconstructions(registered));
 
-		System.out.println(registered.getUsername());
-		for (Reconstruction r : registered.getNonSharedReconstructions())
-			System.out.println("r: " + r.getId());
-		for (Reconstruction r : service.getSharedReconstructions(registered))
-			System.out.println("s: " + r.getId());
 		loggedInUser = registered;
 		return mav;
 	}

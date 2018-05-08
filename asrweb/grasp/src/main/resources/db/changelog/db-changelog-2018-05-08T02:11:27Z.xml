@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
-    <changeSet author="marnie (generated)" id="1520570959639-1">
+    <changeSet author="marnie (generated)" id="1525745489769-1">
+        <addColumn tableName="reconstruction">
+            <column name="date" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="marnie (generated)" id="1525745489769-2">
         <dropForeignKeyConstraint baseTableName="USER_SHARED_RECONSTRUCTIONIDS" constraintName="FKQSWMTWM9X69JKUJC7OUX77BTI"/>
     </changeSet>
-    <changeSet author="marnie (generated)" id="1520570959639-2">
+    <changeSet author="marnie (generated)" id="1525745489769-3">
         <dropTable tableName="USER_SHARED_RECONSTRUCTIONIDS"/>
     </changeSet>
 </databaseChangeLog>

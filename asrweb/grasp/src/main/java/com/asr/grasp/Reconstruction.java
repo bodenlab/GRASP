@@ -51,6 +51,9 @@ public class Reconstruction {
     @Column(name = "node")
     private String node;
 
+    @Column(name = "date")
+    private Long date;
+
     @ManyToMany(mappedBy = "reconstructions")
     private Set<User> users = new HashSet<>();
 
@@ -144,6 +147,14 @@ public class Reconstruction {
         return this.node;
     }
 
+    public void setDate(Long date) {
+        this.date = date;
+    }
+
+    public Long getDate() {
+        return this.date;
+    }
+
     public void setUsers(Set<User> userset){
         this.users = userset;
     }
@@ -151,6 +162,8 @@ public class Reconstruction {
     public void addUser(User user) {
         if (!users.contains(user))
             users.add(user);
+        for (User u : users)
+            System.out.println(label + " : " + u.getUsername());
         if (!user.getAllReconstructions().contains(this))
             user.addReconstruction(this);
     }

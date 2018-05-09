@@ -25,6 +25,7 @@ var poags = {
     max_y: 0,
     y_offset: 50,
     node_radius: 0, // radius of the nodes in the current view (will be updated on draw)
+    page_width: 0,
     // Current x coords visible in the window frame
     cur_x_max: 100,
     cur_x_min: 0,
@@ -395,6 +396,7 @@ var refresh_svg_content = function () {
  */
 var redraw_poags = function () {
     var extent = poags.brush.extent();
+    var prev_max = poags.cur_x_max;
     if (extent[0] == extent[1]) {
         var diff = poags.cur_x_max - poags.cur_x_min;
         if ((extent[0] + diff/2) > poags.max_x) {
@@ -410,6 +412,16 @@ var redraw_poags = function () {
     } else {
         poags.cur_x_min = extent[0];
         poags.cur_x_max = extent[1];
+    }
+    // if the extent hasn't changed, the screen has been re-sized, so automatically increase/decrease how many nodes are shown
+    // based on screen size difference
+    if (prev_max === poags.cur_x_max) {
+        var resize_diff = $(window).width() - poags.page_width;
+        var num_nodes = resize_diff/(4*poags.node_radius);
+        poags.cur_x_max = prev_max + num_nodes;
+        if (poags.cur_x_max < poags.options.display.num_start_nodes) {
+            poags.cur_x_max = poags.options.display.num_start_nodes;
+        }
     }
     poags.brush.extent([poags.cur_x_min, poags.cur_x_max]);
     poags = update_x_scale(poags);
@@ -523,14 +535,14 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     // draw all not reciprocated edges first
     for (var e in edges) {
         var edge = edges[e];
-        if (!edge.reciprocated && edge.from.x >= poags.cur_x_min - 1 && edge.to.x <= poags.cur_x_max + 1) {
+        if (!edge.reciprocated && ((edge.to.x > poags.cur_x_min - 1 && edge.to.x < poags.cur_x_max + 1) || (edge.from.x < poags.cur_x_max + 1 && edge.from.x > poags.cur_x_min - 1))) {
             draw_edges(poags, edge, group, scale_y);
         }
     }
     // draw all reciprocated edges so that they are drawn on top of uni-directional ones
     for (var e in edges) {
         var edge = edges[e];
-        if (edge.reciprocated && edge.from.x >= poags.cur_x_min - 1 && edge.to.x <= poags.cur_x_max + 1) {
+        if (edge.reciprocated && ((edge.to.x > poags.cur_x_min - 1 && edge.to.x < poags.cur_x_max + 1) || (edge.from.x < poags.cur_x_max + 1 && edge.from.x > poags.cur_x_min - 1))) {
            draw_edges(poags, edge, group, scale_y);
         }
     }
@@ -538,36 +550,38 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     for (var n in nodes) {
         var node = nodes[n];
         var node_x = node.x + 1;
-        var node_cx = poags.scale.x(node_x);
-        var node_cy = scale_y(node.y) + poags.y_offset;
-        if (node_x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
-            if (draw_legend) {
-                draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
-                draw_legend = false;
-            }
-            if (node.label == 'initial' || node.label == 'final') {
-                draw_terminus(poags, group, node_cx, node_cy);
-            } else {
-                var radius = draw_nodes(poags, node, group, node_cx, node_cy);
+        if (node_x >= poags.cur_x_min - 2 && node_x <= poags.cur_x_max + 2) {
+            var node_cx = poags.scale.x(node_x);
+            var node_cy = scale_y(node.y) + poags.y_offset;
+            if (node_x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
+                if (draw_legend) {
+                    draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
+                    draw_legend = false;
+                }
+                if (node.label == 'initial' || node.label == 'final') {
+                    draw_terminus(poags, group, node_cx, node_cy);
+                } else {
+                    var radius = draw_nodes(poags, node, group, node_cx, node_cy);
 
-                if (poag_name == poags.root_poag_name || node.type == 'marginal' || poagPi) {
-                    draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
-                    // if it is a merged node, we want to draw a layered Pie chart
-                    // so we set poagPi to false and re draw a smaller pie chart with
-                    // the proper colours.
-                    if (poagPi) {
-                        draw_pie(poags, node, group, radius, false, node_cx, node_cy);
-                    }
-                    // check whether to display a graph
-                    var count = 0;
-                    for (var b in node.graph.bars) {
-                        if (node.graph.bars[b].value > poag_options.graph.hist_bar_thresh) {
-                            count++;
+                    if (poag_name == poags.root_poag_name || node.type == 'marginal' || poagPi) {
+                        draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
+                        // if it is a merged node, we want to draw a layered Pie chart
+                        // so we set poagPi to false and re draw a smaller pie chart with
+                        // the proper colours.
+                        if (poagPi) {
+                            draw_pie(poags, node, group, radius, false, node_cx, node_cy);
                         }
-                    }
-                    if (count > 1) {
-                        var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
-                        poag_options.graph.graphs.push(graph_node);
+                        // check whether to display a graph
+                        var count = 0;
+                        for (var b in node.graph.bars) {
+                            if (node.graph.bars[b].value > poag_options.graph.hist_bar_thresh) {
+                                count++;
+                            }
+                        }
+                        if (count > 1) {
+                            var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
+                            poag_options.graph.graphs.push(graph_node);
+                        }
                     }
                 }
             }
@@ -1205,6 +1219,7 @@ var draw_mini_msa = function (poags) {
 
 }
 
+
 /**
  * Draws the edges.
  *
@@ -1220,18 +1235,20 @@ var draw_edges = function (poags, edge, group, scale_y) {
     var y_len = edge_opt.y_curve_amount;
 
     var line_points = new Array();
-    x_start = scale_x(edge.from.x + 1);
-    x_end = scale_x(edge.to.x + 1);
-    x_mid = x_start - ((x_start - x_end) / 2);
-    x_diff = Math.abs(edge.from.x - edge.to.x);
+    var x_start = scale_x(edge.from.x + 1);
+    var x_end = scale_x(edge.to.x + 1);
+    var x_mid = x_start - ((x_start - x_end) / 2);
 
-    y_start = scale_y(edge.from.y) + poags.y_offset;
-    y_end = scale_y(edge.to.y) + poags.y_offset;
-    //y_next = scale_y(edge.next.y);
-    y_mid = y_start - ((y_start - y_end) / 2);
+    var x_diff = Math.abs(edge.from.x - edge.to.x);
+
+    var y_start = scale_y(edge.from.y) + poags.y_offset;
+    var y_end = scale_y(edge.to.y) + poags.y_offset;
 
     // If y start and y end are the same we want a nice curve
     var y_jump_buffer = same_level_buffer * x_diff + poags.node_radius + 10;
+    if (y_jump_buffer > poags.single.height) {
+        y_jump_buffer = poags.single.height;
+    }
 
     line_points.push(combine_points(x_start, y_start));
 

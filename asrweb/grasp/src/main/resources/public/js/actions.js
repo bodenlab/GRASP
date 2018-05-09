@@ -15,6 +15,7 @@ var run_asr_app = function(json_str, recon, label, inf, node) {
     poags.options = poag_options;
     poags.options.data.raw_svg_id = "poag-all"; // HTML representation
     poags.options.data.target = "#poag-all"; // D3 representation
+    poags.page_width = $(window).width();
 
     /**
      * Add inferred graph to the graph array so that when more graphs

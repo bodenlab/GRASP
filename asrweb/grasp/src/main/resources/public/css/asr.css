@@ -293,6 +293,15 @@ img {
     width: 100%;
 }
 
+*[id]:before {
+     display: block;
+     content: " ";
+     margin-top: -75px;
+     height: 75px;
+     visibility: hidden;
+ }
+
+
 .network-name {
     text-transform: uppercase;
     font-size: 12px;
@@ -383,3 +392,4 @@ footer {
 p.copyright {
     margin: 5px 0 0;
 }
+

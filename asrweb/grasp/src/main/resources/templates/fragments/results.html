@@ -6,6 +6,8 @@
     <div class="content-section-b">
         <div class="row">
             <div id="heading">
+                <div><a class="guide-link row col-sm-8 col-sm-offset-4 pad-top-bottom" href="/guide"> Read the guide to understand how to use GRASP and how to interpret the results</a></div>
+
                 <h2 class="col-sm-9"><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
                 <hr class="h-divider"></hr>
             </div>
@@ -28,6 +30,21 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
                 <p>Success! Left-click on phylogenetic nodes to see taxonomic information.</p>
+            </div>
+            <div id="taxonomy-warning-alert" class="alert alert-warning alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <p>Not all of your extant sequences could be automatically mapped to either NCBI or UniProt identifiers.</p>
+                <hr></hr>
+                <p>Taxonomic information in tree represents the sequences which could be mapped</p>
+            </div>
+            <div id="obsolete-warning-alert" class="alert alert-warning alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <p>Warning: Your alignment file contains obsolete sequences</p>
+                <hr></hr>
             </div>
             <div id="taxonomy-failed-alert" class="alert alert-danger alert-dismissible hidden" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">

@@ -53,14 +53,24 @@ var populate_search_node_list = function (nodes) {
     for (var n in nodes) {
         var lbl = nodes[n].id.split("-")[1];
         var els = lbl.split("N");
-        console.log(Number(els[1]) + " " + isNaN(Number(els[1])));
-        if (els.length > 1 && !isNaN(Number(els[1]))) {
+        if (lbl[0] == 'N' && els.length > 1 && !isNaN(Number(els[1]))) {
             // add to list
-            $('<li/>').text(lbl)
-                .appendTo(ul);
+            var li = $('<li/>');
+            var a = $('<a/>');
+            a.text(lbl);
+            a.click(function() {
+                console.log(this.text);
+                var name = this.text;
+                // find the node and set visibility of the hover circle
+                var node = $("[id^=fill][id$='"+name+"']");
+                on_node_mouseover(node);
+            });
+            a.appendTo(li);
+            li.appendTo(ul);
         }
     }
 }
+
 
 /**
  *  ------------------------------------------------------------------------

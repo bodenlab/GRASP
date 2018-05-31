@@ -39,6 +39,15 @@ h6 {
     margin: auto;
 }
 
+.step {
+    padding-top: 1em;
+}
+
+.question {
+    color: #2FA1B5;
+    font-weight: bold;
+}
+
 #tutorial-4-nwk-img-div {
     background: url(../images/tutorial4.nwk.png);
     background-size: contain;

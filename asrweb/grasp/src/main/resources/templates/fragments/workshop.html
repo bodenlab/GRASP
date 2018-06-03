@@ -20,7 +20,7 @@
                             <p>Download the executable file for your operating system from the MAFFT website and install using the prompts.</p>
                             <h5>RAxML for Mac/Linux</h5>
                             <ol>
-                                <li>Download the source files from GitHub, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
+                                <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
                                 <li>Navigate into the standard-RAxML directory using 'cd standard-RAxML'</li>
                                 <li>Make the files by running 'make -f Makefile.PTHREADS.gcc'</li>
                                 <li>Remove all output files that were created by running make 'rm *.o'</li>
@@ -82,7 +82,7 @@
                         <h3>Infer ancestral sequences</h3>
                         <div class="step">
                             <h4>6. Perform the reconstruction using GRASP</h4>
-                            <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a></p>
+                            <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
                             <p>GRASP may indicate that some of the sequences are obselete.</p>
                             <p>Note down any obselete sequences and remove these from the original extant sequence file.</p>
                             <p>Perform the alignment and tree inference steps with the modified file (Steps 1-2).</p>
@@ -114,24 +114,25 @@
                             <h4>8. Explore insertions and deletions</h4>
                             <p>Insertion or deletion events are indicated by a red circle in the navigation bar. When we look at the ancestral POG, we will see a missing node.</p>
                             <p class="question">Which ancestors have many insertion or deletion events when compared to the alignment? SOME QUESTION ABOUT WHAT DOES THIS MEAN OR SOMETHING?</p>
-                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG, looking out for the red circles.</em></p>
+                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG; inspect the regions where there are red circles on the navigation line.</em></p>
                             <p>Insertion or deletion events can also be indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
                             This means that groups of characters have been inferred to be parsimonious. The darker paths are more certain than the lighter paths; however, both should be considered.</p>
                             <p class="question">Which ancestors have a lot of variability in the potential sequence content when compared to the alignment? SOME QUESTION ABOUT WHAT THIS MEANS .....</p>
-                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG, looking out for the grey boxes.</em></p>
+                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG; inspect the regions where there are grey boxes on the navigation line.</em></p>
                         </div>
                         <div class="step">
                             <h4>9. Find a .... particular class/family using the search function?</h4>
+
+                            14. Look at the 2U1 ancestor and Fish ancestor (Note that currently the fish insertion isn't quite right) M: ?? (I don't know which the fish is?)
                         </div>
                         <div class="step">
                             <h4>10. Download a consensus sequence</h4>
                         </div>
                     </div>
-
-                    14. Look at the 2U1 ancestor and Fish ancestor (Note that currently the fish insertion isn't quite right) M: ?? (I don't know which the fish is?)
-
-                    <h3>Bring your own sequences...</h3>
-
+                    <div class="step">
+                        <h3>Bring your own sequences</h3>
+                        <p class="step">Repeat Steps 1-10 using your own sequence library.</p>
+                    </div>
                 </div>
             </div>
             <div class="cell border-box-sizing text_cell rendered">

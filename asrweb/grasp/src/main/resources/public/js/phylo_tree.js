@@ -871,7 +871,7 @@ var expand_all_nodes = function() {
     refresh_tree();
 }
 
-var search_tree = function(search, clear) {
+var search_tree = function(search, clear, exact) {
     var terms = search.split("*"); // wildcard '*'
     var found_in_any = false; // keep track of if found in ANY extants (for populating parent nodes)
     for (var n in phylo_options.tree.extants) {
@@ -880,7 +880,8 @@ var search_tree = function(search, clear) {
         if (search != "") {
             var ind = 0;
             for (var s in terms) {
-                if (extant.name.substring(ind, extant.name.length).toLowerCase().includes(terms[s].toLowerCase())) {
+                if ((!exact && extant.name.substring(ind, extant.name.length).toLowerCase().includes(terms[s].toLowerCase()))
+                    || (exact && extant.name == search)){
                     ind = extant.name.indexOf(terms[s]) + terms[s].length-1;
                     found = true;
                 } else {
@@ -890,7 +891,8 @@ var search_tree = function(search, clear) {
                         for (var rank in ranks) {
                             var tax = extant.taxonomy[ranks[rank]];
                             if (tax !== undefined && tax !== null) {
-                                if (tax.substring(ind, tax.length).toLowerCase().includes(terms[s].toLowerCase())) {
+                                if ((!exact && tax.substring(ind, tax.length).toLowerCase().includes(terms[s].toLowerCase()))
+                                    || (exact && tax == search)) {
                                     ind = tax.indexOf(terms[s]) + terms[s].length-1;
                                     found = true;
                                     break;

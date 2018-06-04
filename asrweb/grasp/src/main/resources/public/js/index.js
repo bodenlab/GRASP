@@ -1306,13 +1306,13 @@ var draw_edges = function (poags, edge, group, scale_y) {
                 $(this).attr("stroke-width", stroke_width*2)
                 $(this).attr("opacity", 1)
                 for (var s in edge.sequences){
-                    search_tree(edge.sequences[s], false);
+                    search_tree(edge.sequences[s], false, true);
                 }
             })
             .on("mouseout", function() {
                 $(this).attr("stroke-width", stroke_width)
                 $(this).attr("opacity", edge_opt.opacity)
-                search_tree("", true); // clear tree
+                search_tree("", true, true); // clear tree
             });
     
 //    

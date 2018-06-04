@@ -870,7 +870,7 @@ var expand_all_nodes = function() {
     refresh_tree();
 }
 
-var search_tree = function(search) {
+var search_tree = function(search, clear) {
     var terms = search.split("*"); // wildcard '*'
     var found_in_any = false; // keep track of if found in ANY extants (for populating parent nodes)
     for (var n in phylo_options.tree.extants) {
@@ -906,7 +906,9 @@ var search_tree = function(search) {
                 }
             }
         }
-        extant.contains_search = found;
+        if (clear === true || found === true || extant.contains_search == undefined) {
+            extant.contains_search = found;
+        }
     }
     // if extant contains a search term, then iterate up the tree to indicate to all ancestral nodes that a child
     // contains the search term (this will be used when nodes are collapsed)

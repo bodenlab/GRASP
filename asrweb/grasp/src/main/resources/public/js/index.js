@@ -174,8 +174,8 @@ var poag_options = {
     /**************** Options for style of the edges between nodes **********************/
     edge: {
         y_curve_amount: 5,
-        stroke_width: 4,
-        consensus_stroke_width: 7,
+        stroke_width: 5,
+        consensus_stroke_width: 8,
         single_seq_dash: 5,
         stroke: "#BBB",
         consensus_stroke: "black",
@@ -823,6 +823,7 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge.weight = edge.weight;
         reduced_edge.name = name;
         reduced_edge.single = edge.single;
+        reduced_edge.sequences = edge.sequences;
 
         if (inferred) {
             poags.single.edges[name].push(reduced_edge);
@@ -1300,7 +1301,19 @@ var draw_edges = function (poags, edge, group, scale_y) {
             })
             .attr("opacity", edge_opt.opacity)
             .attr("fill", "none")
-            .attr("marker-mid", "url(#triangle-end)");
+            .attr("marker-mid", "url(#triangle-end)")
+            .on("mouseover", function() {
+                $(this).attr("stroke-width", stroke_width*2)
+                $(this).attr("opacity", 1)
+                for (var s in edge.sequences){
+                    search_tree(edge.sequences[s], false);
+                }
+            })
+            .on("mouseout", function() {
+                $(this).attr("stroke-width", stroke_width)
+                $(this).attr("opacity", edge_opt.opacity)
+                search_tree("", true); // clear tree
+            });
     
 //    
 //    group.append("circle")
@@ -1324,6 +1337,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
 //            .attr("fill", poags.options.display.colours[edge.label]);
 
 }
+
 
 /**
  * Creates an interpolation between the points to

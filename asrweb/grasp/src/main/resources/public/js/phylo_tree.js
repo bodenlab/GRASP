@@ -884,7 +884,25 @@ var search_tree = function(search) {
                     ind = extant.name.indexOf(terms[s]) + terms[s].length-1;
                     found = true;
                 } else {
-                    found = false;
+                    if (extant.taxonomy !== undefined && extant.taxonomy !== null) {
+                        var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
+
+                        for (var rank in ranks) {
+                            var tax = extant.taxonomy[ranks[rank]];
+                            if (tax !== undefined && tax !== null) {
+                                if (tax.substring(ind, tax.length).toLowerCase().includes(terms[s].toLowerCase())) {
+                                    ind = tax.indexOf(terms[s]) + terms[s].length-1;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        found = false;
+                        break;
+                    }
+                }
+                if (found) {
                     break;
                 }
             }

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="workshop" class="panel panel-default" aria-expanded="false" id="workshop">
+    <div class="content-section-b" id="workshop-div">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h3>Required Software</h3>
+                    <p>
+                        MAFFT<br></br>
+                        RAxML
+                    </p>
+                    <h3>Pre-requisites</h3>
+                        <div class="step">
+                            <h4>Install required software</h4>
+                            <p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and RAxML (<a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">https://sco.h-its.org/exelixis/web/software/raxml/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
+                                If you do not have these already, install the software to your machine using the instructions found on the websites for your operating system.</p>
+                            <h5>MAFFT</h5>
+                            <p>Download the executable file for your operating system from the MAFFT website and install using the prompts.</p>
+                            <h5>RAxML for Mac/Linux</h5>
+                            <ol>
+                                <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
+                                <li>Navigate into the standard-RAxML directory using 'cd standard-RAxML'</li>
+                                <li>Make the files by running 'make -f Makefile.PTHREADS.gcc'</li>
+                                <li>Remove all output files that were created by running make 'rm *.o'</li>
+                            </ol>
+                        </div>
+                        <div class="step">
+                            <h4>Download the extant sequence library</h4>
+                            <p>The sequences we will be reconstructing are from the CYP2U1 family and can be found <a href="/download-tutorial-files">here</a>.</p>
+                        </div>
+                    <div class="step">
+                    <h3>Curate an alignment and infer a tree</h3>
+                    <div class="step">
+                        <h4>1. Align the extant sequences</h4>
+                        <p>Align the sequences together using the default MAFFT settings.<br></br>
+                        In the console of your terminal window, type the following command in the same directory where you placed the downloaded tutorial .fasta file:</p>
+                        <p>mafft "GRASPTutorial.fasta" > "GRASPTutorial.aln"</p>
+                        <p>This will align the sequences and save them to GRASPTutorial.aln in the same directory. </p>
+                    </div>
+                    <div class="step">
+                        <h4>2. Infer a tree using RAxML</h4>
+                        <p>To infer a maximum likelihood tree using RAxML, type the following command in terminal from within the directory where you installed RAxML:
+                        <br></br><em>Note: you will need to copy the input file (GRASPTutorial.aln) into the RAxML directory.</em></p>
+                        <p>raxmlHPC -m PROTGAMMAIJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</p>
+                        <p class="col-xs-4">-m PROTGAMMAIJTT</p>
+                        <p class="col-xs-8">PROTGAMMAIJTT specifies to optimise substitution rates, use a GAMMA model of rate heterogeneity, estimate the proportion of invariable sites and
+                            use the JTT amino acid substitution matrix.</p>
+                        <p class="col-xs-4">-p 23456</p>
+                        <p class="col-xs-8">Random number seed for parsimony inference.</p>
+                        <p class="col-xs-4">-n GRASPTutorial.nwk</p>
+                        <p class="col-xs-8">Name of the output file.</p>
+                        <p class="col-xs-4">-s GRASPTutorial.aln</p>
+                        <p class="col-xs-8">Name of the input alignment file.</p>
+                        <p>When finished (approximately 2 minutes, depending on your machine) you will see some summary information output to the console.
+                        This will also tell you where the output file has been saved.</p>
+                    </div>
+                    <div class="step">
+                        <h4>3. Inspect the alignment and tree</h4>
+                        <p>Using an alignment viewer (such as <a href="http://www.jalview.org/Download">Jalview</a> or <a href="http://ormbunkar.se/aliview/">Aliview</a>) and a
+                        tree viewer (such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a>), inspect the resulting alignment and inferred tree (e.g. .../RAxML_result.GRASPTutorial.nwk).</p>
+                        <p class="question">Do any sequences look out of place? Note the sequence/s down.</p>
+                    </div>
+                    <div class="step">
+                        <h4>4. Perform quality control on input data</h4>
+                        <p>Remove the erroneous sequence/s from the input fasta file.</p>
+                        <p>Perform the alignment and tree inference steps with the modified file (Steps 1-2).</p>
+                        <p>Inspect the new alignment and inferred tree (Step 3). </p>
+                        <p class="question">Do any sequences look out of place? You might not see any obvious erroneous sequences in the tree, but some sequences may appear to have local misalignments and have several large internal deletions, despite appearing to align well overall. Note the sequence/s down and repeat this step.</p>
+                    </div>
+                    <div class="step">
+                        <h4>5. Export tree for inference </h4>
+                        <p>Once you are happy with the alignment, using FigTree, re-root the tree on NP_000766.2 cytochrome P450 2J2 [Homo sapiens] sequence.</p>
+                        <p>Export the tree in FigTree as a Newick string: File > Export Trees... and select Newick from the menu.</p>
+                        <p><em>Note: Since FigTree surrounds the labels with quotation marks, the labels will not match those in the alignment file and will cause an error
+                            when attempting to run the reconstruction.</em></p>
+                        <p>Open the tree file in a text editor and remove all single quotation marks from the labels.</p>
+                    </div>
+                    </div>
+                    <div class="step">
+                        <h3>Infer ancestral sequences</h3>
+                        <div class="step">
+                            <h4>6. Perform the reconstruction using GRASP</h4>
+                            <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
+                            <p>GRASP may indicate that some of the sequences are obselete.</p>
+                            <p>Note down any obselete sequences and remove these from the original extant sequence file.</p>
+                            <p>Perform the alignment and tree inference steps with the modified file (Steps 1-2).</p>
+                            <p>Repeat Step 6 with the new alignment and tree files. </p>
+                        </div>
+                        <div class="step">
+                            <h4>7. Inspect the reconstructed sequences</h4>
+                            <p>Explore GRASP:</p>
+                            <p class="col-xs-4">Left-click on tree nodes</p>
+                            <p class="col-xs-8">This will show any taxonomic information (if available) of the selected ancestor.
+                            At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
+                            Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
+                                nodes in the tree) show the full available taxonomic information for that extant.
+                            <em>Note: taxonomic information will only be displayed if the input sequences are labelled with the NCBI identifier first,
+                            separated by a '|' symbol or ' ' (as in this tutorial).</em></p>
+                            <p class="col-xs-4">Right-click on tree nodes</p>
+                            <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
+                            From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
+                            reconstruction graph that will be displayed below the current joint reconstruction. See <a href="http://grasp.scmb.uq.edu.au/guide#results-phylo-nav">the guide</a> for more details.</p>
+                            <p class="col-xs-4">Inspect the reconstructed ancestral POG</p>
+                            <p class="col-xs-8">At the bottom of the page you will see at least two partial order graphs. The top graph is the alignment graph (POAG), and the bottom
+                            graph/s are the reconstructed ancestor graphs (POGs). Hovering over the graph nodes will display a popup showing a histogram of the characters in the
+                            alignment POAG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
+                            <br></br><br></br>
+                            We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the POAG.</p>
+                            <p>Explore the other display options on the page.</p>
+                        </div>
+                        <div class="step">
+                            <h4>8. Explore insertions and deletions</h4>
+                            <p>Insertion or deletion events are indicated by a red circle in the navigation bar. When we look at the ancestral POG, we will see a missing node.</p>
+                            <p class="question">Which ancestors have many insertion or deletion events when compared to the alignment? SOME QUESTION ABOUT WHAT DOES THIS MEAN OR SOMETHING?</p>
+                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG; inspect the regions where there are red circles on the navigation line.</em></p>
+                            <p>Insertion or deletion events can also be indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
+                            This means that groups of characters have been inferred to be parsimonious. The darker paths are more certain than the lighter paths; however, both should be considered.</p>
+                            <p class="question">Which ancestors have a lot of variability in the potential sequence content when compared to the alignment? SOME QUESTION ABOUT WHAT THIS MEANS .....</p>
+                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG; inspect the regions where there are grey boxes on the navigation line.</em></p>
+                        </div>
+                        <div class="step">
+                            <h4>9. Find a .... particular class/family using the search function?</h4>
+
+                            14. Look at the 2U1 ancestor and Fish ancestor (Note that currently the fish insertion isn't quite right) M: ?? (I don't know which the fish is?)
+                        </div>
+                        <div class="step">
+                            <h4>10. Download a consensus sequence</h4>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <h3>Bring your own sequences</h3>
+                        <p class="step">Repeat Steps 1-10 using your own sequence library.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="cell border-box-sizing text_cell rendered">
+                <div class="inner_cell">
+                    <div class="text_cell_render border-box-sizing rendered_html">
+                        <h2 id="refs-nav">References</h2>
+                        <ol>
+                            <li>Stamatakis A. RAxML Version 8: A tool for Phylogenetic Analysis and Post-Analysis of Large Phylogenies. Bioinformatics, 2014. 30 (9): 1312-1313</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

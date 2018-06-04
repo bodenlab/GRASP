@@ -66,7 +66,14 @@
                     <button type="button" id="saveButton" class="btn btn-default col-xs-2" onclick="save_phylo_svg_to_png()">Save tree</button>
                 </div>
                 <div>
-                    <input type="text" class="form-input col-xs-12" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value);" />
+                    <input type="text" class="form-input col-xs-10" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value);" />
+                    <div class="col-xs-2 no-padding" id="node-search">
+                        <button type="button" class="btn btn-default col-xs-12 no-padding  dropdown-toggle dropdown"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Search for ancestor: N<span id="searched-node">...</span><span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="node-id-menu">
+                        </ul>
+                    </div>
                 </div>
             </div>
 

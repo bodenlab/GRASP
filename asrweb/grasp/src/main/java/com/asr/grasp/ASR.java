@@ -197,6 +197,7 @@ public class ASR {
         while ((line = tree_file.readLine()) != null)
             tree += line;
         tree_file.close();
+
     }
 
     public int getNumberAlnCols() throws IOException {

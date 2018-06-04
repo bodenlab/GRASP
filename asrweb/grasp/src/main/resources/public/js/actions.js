@@ -35,6 +35,7 @@ var run_asr_app = function(json_str, recon, label, inf, node) {
     refresh_tree(); // to set height properly
     selectedNode = phylo_options.tree.selected_node.name;
     refresh_elements();
+    populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
     setup_poags(json_str, true, true, false, phylo_options.tree.selected_node.name)
@@ -43,6 +44,31 @@ var run_asr_app = function(json_str, recon, label, inf, node) {
     redraw_poags();
     poags.retain_previous_position = true;
     refresh_elements();
+}
+
+var populate_search_node_list = function (nodes) {
+    // empty list
+    var ul = $('#node-id-menu');
+    ul.empty();
+    for (var n in nodes) {
+        var lbl = nodes[n].id.split("-")[1];
+        var els = lbl.split("N");
+        if (lbl[0] == 'N' && els.length > 1 && !isNaN(Number(els[1]))) {
+            // add to list
+            var li = $('<li/>');
+            var a = $('<a/>');
+            a.text(lbl);
+            a.click(function() {
+                console.log(this.text);
+                var name = this.text;
+                // find the node and set visibility of the hover circle
+                var node = $("[id^=fill][id$='"+name+"']");
+                on_node_mouseover(node);
+            });
+            a.appendTo(li);
+            li.appendTo(ul);
+        }
+    }
 }
 
 

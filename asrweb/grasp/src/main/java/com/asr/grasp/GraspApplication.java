@@ -25,6 +25,7 @@ import javax.validation.Valid;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
@@ -287,6 +288,20 @@ public class GraspApplication extends SpringBootServletInitializer {
 	}
 
 	/**
+	 * Show workshop tutorial
+	 *
+	 * @return guide html
+	 */
+	@RequestMapping(value = "/tutorial", method = RequestMethod.GET)
+	public ModelAndView showTutorial(Model model) {
+		ModelAndView mav = new ModelAndView("tutorial");
+		mav.addObject("results", asr.getLabel() != "");
+		mav.addObject("user", loggedInUser);
+		mav.addObject("username", loggedInUser.getUsername());
+		return mav;
+	}
+
+	/**
 	 * Show max likelihood info
 	 *
 	 * @return guide html
@@ -327,20 +342,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 			mav.addObject("user", loggedInUser);
 			return mav;
 		}
-
-		// if the user already has N reconstructions saved, prompt to delete some
-		/*if (loggedInUser.getNonSharedReconstructions().size() == MAX_RECONS) {
-			currentRecon = recon;
-			ModelAndView mav = new ModelAndView("account");
-			mav.addObject("user", loggedInUser);
-			mav.addObject("share", new ShareObject());
-			mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
-			mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
-			mav.addObject("username", loggedInUser.getUsername());
-			mav.addObject("warning", MAX_RECONS);
-			mav.addObject("type", null);
-			return mav;
-		}*/
 
 		loggedInUser = reconstructionService.saveNewReconstruction(recon, loggedInUser);
 
@@ -536,6 +537,46 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		mav.addObject("username",  loggedInUser.getUsername());
 		return mav;
+	}
+
+	/**
+	 * Download files from reconstruction
+	 *
+	 * @param request   HTTP request (form request specifying parameters)
+	 * @param response  HTTP response to send data to client
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "/download-tutorial-files", method = RequestMethod.GET, produces = "application/zip")
+	public void downloadTutorial(HttpServletRequest request, HttpServletResponse response) throws IOException, URISyntaxException {
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Tutorial.zip\"");
+
+		// create temporary folder to send output as zipped files
+		if (asr.getSessionDir() == null) {
+			File sessionDir = new File(sessionPath + asr.getSessionId());
+			if (!sessionDir.exists())
+				sessionDir.mkdir();
+			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
+		}
+
+		String tempDir = asr.getSessionDir() + "/GRASP_Tutorial";
+		File sessionDir = new File(tempDir);
+		if (sessionDir.exists()) {
+			for (File file : sessionDir.listFiles())
+				file.delete();
+			sessionDir.delete();
+		}
+		sessionDir.mkdir();
+
+
+		// copy output files to temporary folder, or generate output where needed and save in temporary folder
+		File tutorialFile = new File(Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.fasta").toURI());
+		Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.fasta")).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		// send output folder to client
+		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
+		zipFiles(sessionDir, zout);
+		zout.close();
 	}
 
 	/**

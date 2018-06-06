@@ -48,6 +48,10 @@ h6 {
     font-weight: bold;
 }
 
+.modal-dialog {
+    width: 80%;
+}
+
 #tutorial-4-nwk-img-div {
     background: url(../images/tutorial4.nwk.png);
     background-size: contain;

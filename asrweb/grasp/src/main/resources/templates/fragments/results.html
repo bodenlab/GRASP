@@ -5,9 +5,10 @@
     <a id="results-nav"></a>
     <div class="content-section-b">
         <div class="row">
+            <a class="text-center col-xs-12 pad-top-bottom" href="/guide"> Read the guide to understand how to use GRASP and how to interpret the results</a>
+        </div>
+        <div class="row">
             <div id="heading">
-                <div><a class="guide-link row col-sm-8 col-sm-offset-4 pad-top-bottom" href="/guide"> Read the guide to understand how to use GRASP and how to interpret the results</a></div>
-
                 <h2 class="col-sm-9"><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
                 <hr class="h-divider"></hr>
             </div>
@@ -66,7 +67,7 @@
                     <button type="button" id="saveButton" class="btn btn-default col-xs-2" onclick="save_phylo_svg_to_png()">Save tree</button>
                 </div>
                 <div>
-                    <input type="text" class="form-input col-xs-10" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value, true, false);" />
+                    <input type="text" class="form-input col-xs-10 no-padding" style="height: 2.1em;" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value, true, false);" />
                     <div class="col-xs-2 no-padding" id="node-search">
                         <button type="button" class="btn btn-default col-xs-12 no-padding  dropdown-toggle dropdown"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Search for ancestor: N<span id="searched-node">...</span><span class="caret"></span>

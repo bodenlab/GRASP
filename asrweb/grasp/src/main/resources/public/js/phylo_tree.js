@@ -91,6 +91,13 @@ var phylo_options = {
         stacked_colour: "#EA78F5",           // colour for when a node appears in the poag stack
         collapsed_colour: "black",           // colour for when a node is collapsed
         collapsed_symbol: "triangle-up",     // symbol of tree node when sub-tree is collapsed
+
+        // -------------- Taxonomy style -----------//
+        modal_min_width: 700,
+        modal_width: 400, // will change if screen is larger than modal_min_width
+        modal_height: 400,
+        hist_colours: ["#209DD8", "#EF74A4", "#9DCBC2", "#F2DBB7", "#57C9D9", "#A3628D", "#83AC9C", "#F1CC96", "#3486C2" , "#9E6288"],
+        hist_height: 200,
     }
 }
 
@@ -407,11 +414,21 @@ var draw_phylo_circle = function (group, node, n) {
                     }
                 });
 
+            // find number in histogram (only want modal large if there are many items in the histogram)
+            var node_info = phylo_options.tree.node_dict[node.id];
+
+
+            if ($(window).width() > options.modal_min_width && node_info.common_taxonomy !== undefined) {
+                var tax_diff = node_info.taxonomy[node_info.common_taxonomy.differ_rank];
+                options.modal_width = 0.8*$(window).width() - 2*options.modal_min_width/Object.keys(tax_diff).length;
+            } else {
+                options.modal_width = options.modal_min_width;
+            }
             var modal_container = d3.select("#modalTree")
                 .append("svg")
                 .attr("id", "usedTreeModal")
-                .attr("width", 500)
-                .attr("height", 400)
+                .attr("width", options.modal_width)
+                .attr("height", options.modal_height)
                 .style("display", "block")
                 .style("margin", "auto");
 
@@ -502,8 +519,8 @@ var draw_histogram_taxonomy = function(node, taxonomy, group, options, x, y) {
     var num_cols = Object.keys(taxonomy).length;
     // TODO: limit to N taxonomic ranks
 
-    var col_width = 20;
-    var rect_height = 100;
+    var col_width = options.modal_width/num_cols;
+    var rect_height = options.hist_height;
 
     var hist_svg = group.append("svg")
         .attr("id", "tax_hist_svg");
@@ -514,6 +531,7 @@ var draw_histogram_taxonomy = function(node, taxonomy, group, options, x, y) {
         var height = rect_height*(taxonomy[tax]/phylo_options.tree.node_dict[node.id].num_extants);
         var x_t = x + count*col_width;
         var y_t = y + rect_height - height;
+        var c = options.hist_colours[count%options.hist_colours.length]
         hist_svg.append("rect")
             .attr("id", "rect-tax-" + count)
             .attr("class", function () {
@@ -521,12 +539,12 @@ var draw_histogram_taxonomy = function(node, taxonomy, group, options, x, y) {
             })
             .attr("x", x_t)
             .attr("y", y_t)
-            .attr("width", col_width)
+            .attr("width", col_width - 1) // -1 for white space between bars
             .attr("height", height)
-            .attr("fill", "grey");
+            .attr("fill", c);
 
         // add number of extants above rectangle
-        var x_t_r = x_t + col_width/4;
+        var x_t_r = x_t + col_width/2 - 5;
         var y_t_r = y + rect_height + 2;
         var y_t_l = y_t - 5;
         hist_svg.append("text")
@@ -540,7 +558,6 @@ var draw_histogram_taxonomy = function(node, taxonomy, group, options, x, y) {
             .text(function() {
                 return taxonomy[tax];
             });
-
 
         // add label under rectangle
         hist_svg.append("text")

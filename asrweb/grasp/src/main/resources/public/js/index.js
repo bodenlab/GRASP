@@ -1667,6 +1667,10 @@ setup_graph_overlay = function (options, graph_group) {
     var y = d3.scale.linear()
             .range([options.graph_height/ options.div_factor, 0]);
 
+    var yModal = d3.scale.linear()
+            .range([2*options.graph_height/ options.div_factor, 0]);
+
+
     var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
@@ -1677,13 +1681,14 @@ setup_graph_overlay = function (options, graph_group) {
             .ticks(2);
 
     var modalyAxis = d3.svg.axis()
-        .scale(y)
+        .scale(yModal)
         .orient("left")
         .ticks(5);
 
     //options.svg_overlay = svg;
     options.x = x;
     options.y = y;
+    options.yModal = yModal;
     options.xAxis = xAxis;
     options.yAxis = yAxis;
     options.modalyAxis = modalyAxis
@@ -1735,8 +1740,8 @@ function create_axis(node, options, graph_group) {
             })
             .call(options.yAxis)
             .append("text")
-            .attr("y", -10)
-            .attr("x", options.offset_graph_width + 25)
+            .attr("y", -20)
+            .attr("x", options.offset_graph_width + 40)
             .attr("dy", ".71em")
             .text(node.name + "   ID: " + (node.id + 1));
 }
@@ -1750,8 +1755,8 @@ function create_modal_axis(node, options, modal_group) {
         })
         .call(options.modalyAxis)
         .append("text")
-        .attr("y", -10)
-        .attr("x", options.offset_graph_width + 20)
+        .attr("y", -20)
+        .attr("x", options.offset_graph_width + 40)
         .attr("dy", ".71em")
         .text(node.name + "   ID: " + (node.id + 1));
 }
@@ -1760,7 +1765,7 @@ function create_bars(node, options, graph_group) {
     var num_bars = Object.keys(node.graph.bars).length; //options.max_bar_count;
     var size = options.size;
     var y = options.y;
-    var padding_x = 0;
+    var padding_x = (size/num_bars)/2 - 4;
     var outer_padding = 1;
 
     // Just to make it look nicer if there is only one bar
@@ -1783,9 +1788,9 @@ function create_bars(node, options, graph_group) {
                     return "bar2 movable";
                 })
                 .attr("x", function () {
-                    return outer_padding + padding_x + (bar * (size / num_bars)); /* where to place it */
+                    return outer_padding + (bar * (size / num_bars)); /* where to place it */
                 }) //Need to determine algoritm for determining this
-                .attr("width", (size / num_bars) - (3 * padding_x) - outer_padding/2)
+                .attr("width", (size / num_bars) - outer_padding/2)
                 .attr("y", function () {
                     return y(bar_info.value/100.0);
                 })
@@ -1799,9 +1804,9 @@ function create_bars(node, options, graph_group) {
         graph_group.append("text")
                 .attr("class", "y axis movable")
                 .attr("x", function () {
-                    return (2 * padding_x) + bar * (options.size / num_bars);
+                    return padding_x + bar * (options.size / num_bars);
                 }) //Need to determine algorithm for determining this
-                .attr("y", options.graph_height + 10)
+                .attr("y", options.graph_height + 20)
                 .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
 
     }
@@ -1815,9 +1820,9 @@ function create_bars(node, options, graph_group) {
 function create_modal_bars(node, options, modal_group) {
     var num_bars = Object.keys(node.graph.bars).length; //options.max_bar_count;
     var size = options.size*2;
-    var y = options.y;
-    var padding_x = 2;
-    var outer_padding = 1;
+    var y = options.yModal;
+    var padding_x = (size/num_bars)/2 - 6;;
+    var outer_padding = 0.5;
 
     // Just to make it look nicer if there is only one bar
     if (num_bars == 1) {
@@ -1839,15 +1844,15 @@ function create_modal_bars(node, options, modal_group) {
                 return "bar2 movable";
             })
             .attr("x", function () {
-                return outer_padding + padding_x + (bar * (size / num_bars)); /* where to place it */
+                return bar*(2*outer_padding  + size / num_bars); /* where to place it */
             }) //Need to determine algoritm for determining this
-            .attr("width", (size / num_bars) - (3 * padding_x) - outer_padding/2)
+            .attr("width", (size / num_bars) - 2*outer_padding)
             .attr("y", function () {
                 return y(bar_info.value/100.0);
             })
             .attr("height", function () {
                 // As the number is out of 100 need to modulate it
-                return options.graph_height - y(bar_info.value/100.0);
+                return 2*options.graph_height - y(bar_info.value/100.0);
             })
             .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
 
@@ -1855,9 +1860,9 @@ function create_modal_bars(node, options, modal_group) {
         modal_group.append("text")
             .attr("class", "y axis movable")
             .attr("x", function () {
-                return (padding_x) + bar * (size / num_bars);
+                return (padding_x) + bar * (size / num_bars + 2*outer_padding);
             }) //Need to determine algorithm for determining this
-            .attr("y", options.graph_height + 10)
+            .attr("y", 2*options.graph_height + 20)
             .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
 
     }
@@ -2026,7 +2031,7 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
                         .append("svg")
                         .attr("id", "usedModal")
                         .attr("width", 400)
-                        .attr("height", 200)
+                        .attr("height", 400)
                         .style("display", "block")
                         .style("margin", "auto");
 

@@ -40,8 +40,8 @@ import java.util.zip.ZipOutputStream;
 public class GraspApplication extends SpringBootServletInitializer {
 
 //	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
-		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-//	private final static String sessionPath = "/var/www/GRASP/";
+//		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
+	private final static String sessionPath = "/var/www/GRASP/";
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -572,6 +572,48 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// copy output files to temporary folder, or generate output where needed and save in temporary folder
 		File tutorialFile = new File(Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.fasta").toURI());
 		Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.fasta")).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		// send output folder to client
+		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
+		zipFiles(sessionDir, zout);
+		zout.close();
+	}
+
+	/**
+	 * Download files from reconstruction
+	 *
+	 * @param request   HTTP request (form request specifying parameters)
+	 * @param response  HTTP response to send data to client
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "/download-tutorial-files-aln", method = RequestMethod.GET, produces = "application/zip")
+	public void downloadTutorialAln(HttpServletRequest request, HttpServletResponse response) throws IOException, URISyntaxException {
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Tutorial.zip\"");
+
+		// create temporary folder to send output as zipped files
+		if (asr.getSessionDir() == null) {
+			File sessionDir = new File(sessionPath + asr.getSessionId());
+			if (!sessionDir.exists())
+				sessionDir.mkdir();
+			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
+		}
+
+		String tempDir = asr.getSessionDir() + "/GRASP_Tutorial";
+		File sessionDir = new File(tempDir);
+		if (sessionDir.exists()) {
+			for (File file : sessionDir.listFiles())
+				file.delete();
+			sessionDir.delete();
+		}
+		sessionDir.mkdir();
+
+
+		// copy output files to temporary folder, or generate output where needed and save in temporary folder
+		File tutorialFile = new File(Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.aln").toURI());
+		Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.aln")).toPath(), StandardCopyOption.REPLACE_EXISTING);
+		tutorialFile = new File(Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.nwk").toURI());
+		Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.nwk")).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 		// send output folder to client
 		ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());

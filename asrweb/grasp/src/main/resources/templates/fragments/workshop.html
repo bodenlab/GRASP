@@ -28,7 +28,8 @@
                         </div>
                         <div class="step">
                             <h4>Download the extant sequence library</h4>
-                            <p>The sequences we will be reconstructing are from the CYP2U1 family and can be found <a href="/download-tutorial-files">here</a>.</p>
+                            <p>The sequences we will be reconstructing are from the cytochrome P450 2U1 (CYP2U1) subfamily and the cytochrome P450 2R1 (CYP2R1) subfamily. Cytochromes P450 are key drug metabolisers and we wish to
+                                infer a CYP2U1 ancestor. We will be using four CYP2R1 sequences as an outgroup and these four sequences will be labelled as 25hydroxylase or 25hydroxylase-like in the data set. The data set can be found <a href="/download-tutorial-files">here</a>.</p>
                         </div>
                     <div class="step">
                     <h3>Curate an alignment and infer a tree</h3>
@@ -71,7 +72,7 @@
                     </div>
                     <div class="step">
                         <h4>5. Export tree for inference </h4>
-                        <p>Once you are happy with the alignment, using FigTree, re-root the tree on NP_000766.2 cytochrome P450 2J2 [Homo sapiens] sequence.</p>
+                        <p>Once you are happy with the alignment, using FigTree, re-root the tree on the branch between the CYP2U1 and the CYP2R1 sequences.</p>
                         <p>Export the tree in FigTree as a Newick string: File > Export Trees... and select Newick from the menu.</p>
                         <p><em>Note: Since FigTree surrounds the labels with quotation marks, the labels will not match those in the alignment file and will cause an error
                             when attempting to run the reconstruction.</em></p>
@@ -83,8 +84,8 @@
                         <div class="step">
                             <h4>6. Perform the reconstruction using GRASP</h4>
                             <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
-                            <p>GRASP may indicate that some of the sequences are obselete.</p>
-                            <p>Note down any obselete sequences and remove these from the original extant sequence file.</p>
+                            <p>GRASP may indicate that some of the sequences are obsolete.</p>
+                            <p>Note down any obsolete sequences and remove these from the original extant sequence file.</p>
                             <p>Perform the alignment and tree inference steps with the modified file (Steps 1-2).</p>
                             <p>Repeat Step 6 with the new alignment and tree files. </p>
                         </div>
@@ -96,8 +97,7 @@
                             At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
                             Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
                                 nodes in the tree) show the full available taxonomic information for that extant.
-                            <em>Note: taxonomic information will only be displayed if the input sequences are labelled with the NCBI identifier first,
-                            separated by a '|' symbol or ' ' (as in this tutorial).</em></p>
+                            <em>Note: taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em></p>
                             <p class="col-xs-4">Right-click on tree nodes</p>
                             <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
                             From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
@@ -112,25 +112,32 @@
                         </div>
                         <div class="step">
                             <h4>8. Explore insertions and deletions</h4>
-                            <p>Insertion or deletion events are indicated by a red circle in the navigation bar. When we look at the ancestral POG, we will see a missing node.</p>
-                            <p class="question">Which ancestors have many insertion or deletion events when compared to the alignment? SOME QUESTION ABOUT WHAT DOES THIS MEAN OR SOMETHING?</p>
-                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG; inspect the regions where there are red circles on the navigation line.</em></p>
+                            <p>Identify the node that represents the ancestor of just the CYP2U1 sequences and infer the ancestor here.</p>
+                            <p class="question">What do the red circles in the navigation bar indicate?</p>
+                            <p><em>Note: you may need to visually compare the ancestral POG to the POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
+                            <p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>
+                            <p class="question">Does checking which sequences have the edges to the node missing from the CYP2U1 ancestor explain why this node isn't inferred in the CYP2U1 ancestor?</p>
                             <p>Insertion or deletion events can also be indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
                             This means that groups of characters have been inferred to be parsimonious. The darker paths are more certain than the lighter paths; however, both should be considered.</p>
-                            <p class="question">Which ancestors have a lot of variability in the potential sequence content when compared to the alignment? SOME QUESTION ABOUT WHAT THIS MEANS .....</p>
-                            <p><em>Note: you may need to reconstruct some ancestors and visually compare this to the POAG; inspect the regions where there are grey boxes on the navigation line.</em></p>
-                            <p class="question">Can you find ancestral branch points in the tree where the alignment graph (MSA POAG) is variable?</p>
-                            <p><em>Note: hovering over edges in the MSA graph will highlight the extant sequences that contribute to that particular sequence path.</em></p>
                         </div>
                         <div class="step">
-                            <h4>9. Find a .... particular class/family using the search function?</h4>
+                            <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
+                            <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish</p>
+                            <p><em>Note: The full taxonomic name for the ray-finned fish is Actinopterygii and because GRASP mapped the taxonomy successfully we should be able to just search on the term "Actinopterygii". </em></p>
+                            <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
+                            <p class="question"> Set up your data so you are displaying the MSA graph, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously</p>
+                            <p><em>Note: Investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
+                            <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
+                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box?</p>
+                            <p> Look at the second grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p class="question"> Why does GRASP suggest two optimal paths for the CYP2U1 ancestor? Why might it be useful to consider both paths when reconstructing an ancestor?</p>
 
-                            Should we show marginal vs joint?
-                            14. Look at the 2U1 ancestor and Fish ancestor (Note that currently the fish insertion isn't quite right) M: ?? (I don't know which the fish is?)
+
                         </div>
                         <div class="step">
-                            <h4>10. Download the consensus sequence of ... ancestor or Save your session</h4>
-                            <p>Reconstruct ancestor ... using the menu in the tree.</p>
+                            <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>
+                            <p>Reconstruct ancestor N1 using the menu in the tree.</p>
                             <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.</p>
                             <p><em>Note: There are a few things that can be downloaded from your reconstruction. Alternatively, you can save your reconstruction for later by pressing the blue disk
                             at the top left corner and following the prompts for creating an account with GRASP.</em></p>

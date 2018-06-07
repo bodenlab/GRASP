@@ -8,23 +8,31 @@
                 <div class="col-xs-12">
                     <h3>Required Software</h3>
                     <p>
-                        MAFFT<br></br>
-                        RAxML
+                        <ul>
+                            <li>MAFFT - Multiple sequence Alignment (MA) based on the Fast Fourier Transform (FFT)</li>
+                            <li>RAxML - Randomized Accelerated (RAx) Maximum Likelihood (ML) to infer evolutionary relationships</li>
+                        </ul>
                     </p>
                     <h3>Pre-requisites</h3>
                         <div class="step">
                             <h4>Install required software</h4>
                             <p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and RAxML (<a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">https://sco.h-its.org/exelixis/web/software/raxml/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
-                                If you do not have these already, install the software to your machine using the instructions found on the websites for your operating system.</p>
-                            <h5>MAFFT</h5>
-                            <p>Download the executable file for your operating system from the MAFFT website and install using the prompts.</p>
-                            <h5>RAxML for Mac/Linux</h5>
-                            <ol>
-                                <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
-                                <li>Navigate into the standard-RAxML directory using 'cd standard-RAxML'</li>
-                                <li>Make the files by running 'make -f Makefile.PTHREADS.gcc'</li>
-                                <li>Remove all output files that were created by running make 'rm *.o'</li>
-                            </ol>
+                                If you do not have these already, install the software on your machine using the instructions found on the websites for your operating system.</p>
+                            <ul>
+                                <li>
+                                    <h5>MAFFT</h5>
+                                    <p>Download the executable file for your operating system from the MAFFT website and install using the prompts.</p>
+                                </li>
+                                <li>
+                                    <h5>RAxML for Mac/Linux</h5>
+                                    <ol>
+                                        <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
+                                        <li>Navigate into the standard-RAxML directory using 'cd standard-RAxML'</li>
+                                        <li>Make the files by running 'make -f Makefile.PTHREADS.gcc'</li>
+                                        <li>Remove all output files that were created by running make 'rm *.o'</li>
+                                    </ol>
+                                </li>
+                            </ul>
                         </div>
                         <div class="step">
                             <h4>Download the extant sequence library</h4>
@@ -61,7 +69,7 @@
                         <h4>3. Inspect the alignment and tree</h4>
                         <p>Using an alignment viewer (such as <a href="http://www.jalview.org/Download">Jalview</a> or <a href="http://ormbunkar.se/aliview/">Aliview</a>) and a
                         tree viewer (such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a>), inspect the resulting alignment and inferred tree (e.g. .../RAxML_result.GRASPTutorial.nwk).</p>
-                        <p class="question">Do any sequences look out of place? Note the sequence/s down.</p>
+                        <p class="question">Do any sequences look out of place in the alignment and the tree? Note the sequence/s down.</p>
                     </div>
                     <div class="step">
                         <h4>4. Perform quality control on input data</h4>
@@ -73,7 +81,9 @@
                     <div class="step">
                         <h4>5. Export tree for inference </h4>
                         <p>Once you are happy with the alignment, using FigTree, re-root the tree on the branch between the CYP2U1 and the CYP2R1 sequences.</p>
-                        <p>Export the tree in FigTree as a Newick string: File > Export Trees... and select Newick from the menu.</p>
+                        <p><em>Note: FigTree may strip the longer name in the sequence labels and so you may need to refer back to your alignment to identify the sequences that belong
+                            to 2U1 and those that belong to 2R1. Once re-rooted, you should have a tree with two distinct groupings of approximately 4 and 21 sequences.</em></p>
+                        <p>Export the tree in FigTree as a Newick string: File > Export Trees... select Newick from the menu and select the 'Save as currently displayed' option.</p>
                         <p><em>Note: Since FigTree surrounds the labels with quotation marks, the labels will not match those in the alignment file and will cause an error
                             when attempting to run the reconstruction.</em></p>
                         <p>Open the tree file in a text editor and remove all single quotation marks from the labels.</p>
@@ -112,34 +122,37 @@
                         </div>
                         <div class="step">
                             <h4>8. Explore insertions and deletions</h4>
-                            <p>Identify the node that represents the ancestor of just the CYP2U1 sequences and infer the ancestor here.</p>
+                            <p>Identify the node that represents the ancestor of <em>only</em> the CYP2U1 sequences and infer the ancestor here.</p>
+                            <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both CYP2U1 and CYP2R1 sequences.</em></p>
                             <p class="question">What do the red circles in the navigation bar indicate?</p>
-                            <p><em>Note: you may need to visually compare the ancestral POG to the POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
+                            <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
                             <p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>
-                            <p class="question">Does checking which sequences have the edges to the node missing from the CYP2U1 ancestor explain why this node isn't inferred in the CYP2U1 ancestor?</p>
+                            <p class="question">Which sequences contribute to the edge in the (MSA) POAG that jumps the node that is missing from the CYP2U1 ancestor? Does this explain why this node isn't inferred in this ancestor?</p>
+                            <p>Take note of the node ID (i.e. the grey number under the node) of the first red circle.</p>
+                            <p>Infer the CYP2R1 ancestor and navigate to the node ID you took note of.</p>
+                            <p class="question">Is the node missing as well in the CYP2R1 ancestor? Similar to the CYP2U1 ancestor, does considering the sequences that contribute to the different edges explain why this node is inferred in this ancestor?</p>
                             <p>Insertion or deletion events can also be indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
-                            This means that groups of characters have been inferred to be parsimonious. The darker paths are more certain than the lighter paths; however, both should be considered.</p>
+                                This means that groups of characters have been inferred to be parsimonious. The darker paths are more certain than the lighter paths; however, both should be considered.</p>
                         </div>
                         <div class="step">
                             <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
-                            <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish</p>
-                            <p><em>Note: The full taxonomic name for the ray-finned fish is Actinopterygii and because GRASP mapped the taxonomy successfully we should be able to just search on the term "Actinopterygii". </em></p>
+                            <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish.</p>
+                            <p><em>Note: the full taxonomic name for the ray-finned fish is Actinopterygii and because GRASP mapped the taxonomy successfully we should be able to just search on the term "Actinopteri". </em></p>
                             <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
                             <p class="question"> Set up your data so you are displaying the MSA graph, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously</p>
-                            <p><em>Note: Investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
+                            <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
                             <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
                             <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
-                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box?</p>
+                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>
                             <p> Look at the second grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p>Remember that GRASP indicates a more certain optimal path (based on <a href="http://grasp.scmb.uq.edu.au/guide#bi-pars-nav">edge parsimony</a>) as a darker edge.</p>
                             <p class="question"> Why does GRASP suggest two optimal paths for the CYP2U1 ancestor? Why might it be useful to consider both paths when reconstructing an ancestor?</p>
-
-
                         </div>
                         <div class="step">
                             <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>
-                            <p>Reconstruct ancestor N1 using the menu in the tree.</p>
+                            <p>Reconstruct the CYP2U1 ancestor.</p>
                             <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.</p>
-                            <p><em>Note: There are a few things that can be downloaded from your reconstruction. Alternatively, you can save your reconstruction for later by pressing the blue disk
+                            <p><em>Note: there are a few things that can be downloaded from your reconstruction. Alternatively, you can save your reconstruction for later by pressing the blue disk
                             at the top left corner and following the prompts for creating an account with GRASP.</em></p>
                         </div>
                     </div>

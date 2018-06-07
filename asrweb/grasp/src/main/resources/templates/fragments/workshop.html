@@ -82,7 +82,7 @@
                         <h4>5. Export tree for inference </h4>
                         <p>Once you are happy with the alignment, using FigTree, re-root the tree on the branch between the CYP2U1 and the CYP2R1 sequences.</p>
                         <p><em>Note: FigTree may strip the longer name in the sequence labels and so you may need to refer back to your alignment to identify the sequences that belong
-                            to 2U1 and those that belong to 2R1. Once re-rooted, you should have a tree with two distinct groupings of approximately 4 and 21 sequences.</em></p>
+                            to 2U1 and those that belong to 2R1. Once re-rooted, you should have a tree with two distinct groupings of approximately 4 and 20 sequences.</em></p>
                         <p>Export the tree in FigTree as a Newick string: File > Export Trees... select Newick from the menu and select the 'Save as currently displayed' option.</p>
                         <p><em>Note: Since FigTree surrounds the labels with quotation marks, the labels will not match those in the alignment file and will cause an error
                             when attempting to run the reconstruction.</em></p>
@@ -117,13 +117,13 @@
                             graph/s are the reconstructed ancestor graphs (POGs). Hovering over the graph nodes will display a popup showing a histogram of the characters in the
                             alignment POAG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
                             <br></br><br></br>
-                            We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the POAG.</p>
+                            We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
                             <p>Explore the other display options on the page.</p>
                         </div>
                         <div class="step">
                             <h4>8. Explore insertions and deletions</h4>
                             <p>Identify the node that represents the ancestor of <em>only</em> the CYP2U1 sequences and infer the ancestor here.</p>
-                            <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both CYP2U1 and CYP2R1 sequences.</em></p>
+                            <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both the CYP2U1 and CYP2R1 sequences.</em></p>
                             <p class="question">What do the red circles in the navigation bar indicate?</p>
                             <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
                             <p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>
@@ -131,7 +131,7 @@
                             <p>Take note of the node ID (i.e. the grey number under the node) of the first red circle.</p>
                             <p>Infer the CYP2R1 ancestor and navigate to the node ID you took note of.</p>
                             <p class="question">Is the node missing as well in the CYP2R1 ancestor? Similar to the CYP2U1 ancestor, does considering the sequences that contribute to the different edges explain why this node is inferred in this ancestor?</p>
-                            <p>Insertion or deletion events can also be indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
+                            <p>Insertion or deletion events are also indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
                                 This means that groups of characters have been inferred to be parsimonious. The darker paths are more certain than the lighter paths; however, both should be considered.</p>
                         </div>
                         <div class="step">
@@ -139,8 +139,9 @@
                             <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish.</p>
                             <p><em>Note: the full taxonomic name for the ray-finned fish is Actinopterygii and because GRASP mapped the taxonomy successfully we should be able to just search on the term "Actinopteri". </em></p>
                             <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
-                            <p class="question"> Set up your data so you are displaying the MSA graph, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously</p>
+                            <p>Set up your data so you are displaying the (MSA) POAG, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously.</p>
                             <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
+                            <p class="question">Can you identify differences between these inferred ancestors?</p>
                             <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
                             <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
                             <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>

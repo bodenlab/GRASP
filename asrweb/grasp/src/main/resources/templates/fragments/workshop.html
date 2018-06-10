@@ -96,7 +96,7 @@
                     <div class="step">
                         <h3>Infer ancestral sequences</h3>
                         <div class="step">
-                            <p>Although we don't recommend it, if you have had issues curating an alignment, or want to jump ahead to exploring GRASP, download the curated alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
+                            <p>If you have had issues curating the alignment for the example data set, or want to jump ahead to exploring GRASP, download the curated alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
                         </div>
                         <div class="step">
                             <h4>6. Perform the reconstruction using GRASP</h4>
@@ -160,8 +160,9 @@
                         <div class="step">
                             <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>
                             <p>Reconstruct the CYP2U1 ancestor.</p>
-                            <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.</p>
-                            <p><em>Note: there are a few things that can be downloaded from your reconstruction. Alternatively, you can save your reconstruction for later by pressing the blue disk
+                            <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.
+                                Consensus sequences only follow a single path, so you can use your alignment viewer to look at the downloaded results.</p>
+                            <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
                             at the top left corner and following the prompts for creating an account with GRASP.
                                 You can access the list of previously saved reconstructions by clicking your account name which will appear in the menu.</em></p>
                         </div>
@@ -169,9 +170,12 @@
                     <div class="step">
                         <h3>Bring your own sequences</h3>
                         <p class="step">Repeat Steps 1-10 using your own sequence library.</p>
-                        <p>We recommend that you make use of resources such as <a href="http://www.uniprot.org/">Uniprot</a> and <a href="https://www.ncbi.nlm.nih.gov/">NCBI</a> to populate a sequence library.
-                            If you have specific (seed) protein sequences for which ancestors you would like to explore,
-                            we suggest you use tools such as <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a> to create an initial sequence library.</p>
+                        <p>A major issue with the example above is the limited number of sequences that we have included. Using the public databases as at early 2018 the set of high-quality homologs of CYP2U1 is close to 200.
+                            Excluding sequences is likely to ultimately impede the quality of your ancestral predictions. </p>
+                        <p>To construct your own sequence set for a protein family of interest to you, we recommend that you make use of resources such as <a href="http://www.uniprot.org/">Uniprot</a> and <a href="https://www.ncbi.nlm.nih.gov/">NCBI</a>.
+                            If you have specific (seed) protein sequences for which ancestors you would like to explore, we suggest you use tools such as <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a> to create an initial sequence library.
+                            It is imperative that you exercise caution as exemplified above, before you interpret ancestral predictions. There is no tool currently that will curate your data as well as a well-informed protein scientist...
+                        </p>
                     </div>
                 </div>
             </div>
@@ -180,9 +184,9 @@
                     <div class="text_cell_render border-box-sizing rendered_html">
                         <h2 id="refs-nav">References</h2>
                         <ol>
-                            <li>Katoh, K. and Standley, D. M. MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. Mol Biol Evol, 2013. 30(4): 772–780. <a href="https://dx.doi.org/10.1093/molbev/mst010">DOI</a>.</li>
-                            <li>Stamatakis A. RAxML Version 8: A tool for Phylogenetic Analysis and Post-Analysis of Large Phylogenies. Bioinformatics, 2014. 30(9): 1312-1313. <a href="https://dx.doi.org/10.1093/bioinformatics/btu033">DOI</a>.</li>
-                            <li>Larsson, A. AliView: a fast and lightweight alignment viewer and editor for large data sets. Bioinformatics, 2014. 30(22): 3276-3278. <a href="http://dx.doi.org/10.1093/bioinformatics/btu531">DOI</a>.</li>
+                            <li>Katoh, K. and Standley, D. M. (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. <i>Mol Biol Evol</i>. 30(4): 772–780. <a href="https://dx.doi.org/10.1093/molbev/mst010">DOI</a>.</li>
+                            <li>Stamatakis A. (2014) RAxML Version 8: A tool for Phylogenetic Analysis and Post-Analysis of Large Phylogenies. <i>Bioinformatics</i>. 30(9): 1312-1313. <a href="https://dx.doi.org/10.1093/bioinformatics/btu033">DOI</a>.</li>
+                            <li>Larsson, A. (2014) AliView: a fast and lightweight alignment viewer and editor for large data sets. <i>Bioinformatics</i>. 30(22): 3276-3278. <a href="http://dx.doi.org/10.1093/bioinformatics/btu531">DOI</a>.</li>
                         </ol>
                     </div>
                 </div>

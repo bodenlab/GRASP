@@ -162,20 +162,46 @@
                             <p>Reconstruct the CYP2U1 ancestor.</p>
                             <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.
                                 Consensus sequences only follow a single path, so you can use your alignment viewer to look at the downloaded results.</p>
-                            <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
-                            at the top left corner and following the prompts for creating an account with GRASP.
+                            <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction
+                                (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
+                                at the top left corner and following the prompts for creating an account with GRASP.
                                 You can access the list of previously saved reconstructions by clicking your account name which will appear in the menu.</em></p>
                         </div>
-                    </div>
-                    <div class="step">
-                        <h3>Bring your own sequences</h3>
-                        <p class="step">Repeat Steps 1-10 using your own sequence library.</p>
-                        <p>A major issue with the example above is the limited number of sequences that we have included. Using the public databases as at early 2018 the set of high-quality homologs of CYP2U1 is close to 200.
-                            Excluding sequences is likely to ultimately impede the quality of your ancestral predictions. </p>
-                        <p>To construct your own sequence set for a protein family of interest to you, we recommend that you make use of resources such as <a href="http://www.uniprot.org/">Uniprot</a> and <a href="https://www.ncbi.nlm.nih.gov/">NCBI</a>.
-                            If you have specific (seed) protein sequences for which ancestors you would like to explore, we suggest you use tools such as <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a> to create an initial sequence library.
-                            It is imperative that you exercise caution as exemplified above, before you interpret ancestral predictions. There is no tool currently that will curate your data as well as a well-informed protein scientist...
-                        </p>
+                        <div class="step">
+                            <h4>11. Inspect the probabilities of amino acids at an ancestor</h4>
+                            <p>So far we have only looked at the so-called joint reconstructions of ancestors. We will now perform marginal reconstruction of the CYP2U1 ancestor.
+                                Refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a> for more technical information on the difference of the two types of inference.
+                                Marginal reconstruction will allow us get a greater understanding of the biological variability that exists at a specified ancestor;
+                                we are essentially asking what is the probability of each amino acid, in each position.
+                            </p>
+                            <p>
+                                Select 'View marginal reconstruction' for the CYP2U1 ancestor.
+                                You will note that the topology of the POG is identical to that of performing joint reconstruction.
+                                (You can use the navigation bar to look at the same two red circles, for instance.)
+                                The difference lies in what information is inferred for nodes with character states.
+                                Inspect that information by hovering your pointer over or clicking the nodes in the POG.
+                            </p>
+                            <p class="question">Can you identify two nodes where the probability of one amino acid is about 50&#37; and a second almost as big? Make a note of the two positions they occupy.</p>
+                            <p>Such positions are good candidates to mutate to explore ancestral variants.
+                                A new menu item 'View mutants' has appeared above the navigation bar.
+                                Click on it and increase the number to '1'.
+                                For each increment a small triangle appears somewhere along the navigation bar; it indicates a position in the POG which is a good candidate for mutation.
+                                By using the navigation bar, inspect and make a note of the distribution of the node identified by the first triangle to appear.
+                                Then, keep incrementing it until you see a triangle identify the positions of one of your own 50/50 nodes.
+                            </p>
+                            <p class="question">If you were to allow a mutation to happen, which of the three positions above do you think would best explore the space of possible CYP2U1 ancestors?</p>
+                            <p>See the <a href="http://grasp.scmb.uq.edu.au/guide#mutant-nav">GRASP Guide</a> to work out why the program choose its position.</p>
+                        </div>
+                        <div class="step">
+                            <h3>Bring your own sequences</h3>
+                            <p class="step">Repeat Steps 1-10 using your own sequence library.</p>
+                            <p>A major issue with the example above is the limited number of sequences that we have included. Using the public databases as at early 2018 the set of high-quality homologs of CYP2U1 is close to 200.
+                                Excluding sequences is likely to ultimately impede the quality of your ancestral predictions. </p>
+                            <p>To construct your own sequence set for a protein family of interest to you, we recommend that you make use of resources such as <a href="http://www.uniprot.org/">Uniprot</a> and <a href="https://www.ncbi.nlm.nih.gov/">NCBI</a>.
+                                If you have specific (seed) protein sequences for which ancestors you would like to explore, we suggest you use tools such as <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a> to create an initial sequence library.
+                                It is imperative that you exercise caution as exemplified above, before you interpret ancestral predictions. There is no tool currently that will curate your data as well as a well-informed protein scientist...
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -77,7 +77,7 @@ var phylo_options = {
         font_family: "Varela Round, sans-serif",
         font_size: "10px",
         font_colour: "#24232d",
-        search_colour: "#EA78F5",
+        search_colour: "#87dded",
 
         // ---------------- Context menu style ----//
         contextmenu_fill: "#F0F8FF",

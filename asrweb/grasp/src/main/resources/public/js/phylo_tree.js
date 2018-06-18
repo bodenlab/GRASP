@@ -1353,7 +1353,7 @@ var get_common_taxon = function(node) {
             differ_rank = r
             break;
         }
-        common_tax = tax;
+        common_tax = Object.keys(tax)[0];
         common_rank = r;
     }
 

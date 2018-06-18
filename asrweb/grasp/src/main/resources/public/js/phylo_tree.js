@@ -1320,8 +1320,6 @@ var get_common_taxon = function(node) {
         }
 
         if (child.taxonomy != undefined && child.taxonomy != null) {
-
-
             for (var rank in ranks) {
                 var tax = taxonomy[ranks[rank]];
                 var child_labels = {};
@@ -1345,42 +1343,18 @@ var get_common_taxon = function(node) {
 
     var common_tax = null;
     var common_rank = null;
+    var differ_rank = null;
 
+    // find first rank that differs (not including undefined)
     for (var r in ranks) {
-        var common_t = null;
-        var common_r = null;
-        var differ = false;
-        for (var c in node.children) {
-            child = node.children[c];
-            var c_tax = child.taxonomy;
-            if (c_tax != undefined && c_tax != null) {
-                var tax = c_tax[ranks[r]];
-                if (tax !== undefined && child.children !== undefined) {
-                    tax = Object.keys(c_tax[ranks[r]]);
-                    if (tax.length === 1) {
-                        tax = tax[0];
-                    }
-                }
-                if (tax === undefined || tax === "undefined") {
-                    differ = true;
-                    break;
-                }
-                if (common_t === null) {
-                    common_t = tax;
-                    common_r = r;
-                } else if ((!(tax instanceof Array) && common_t !== tax) ||
-                    ((common_t instanceof Array) && !is_intersect(tax, common_t)) || !tax.includes(common_t)) {
-                    differ = true;
-                    break;
-                }
-            }
-        }
-        if (!differ && common_r !== null) {
-            common_tax = common_t;
-            common_rank = common_r;
-        } else if (differ && common_r !== null) {
+        var tax = taxonomy[ranks[r]]
+        var keys = Object.keys(tax)
+        if ((keys.includes('undefined') && keys.length > 2) || (!keys.includes('undefined') && keys.length > 1)) {
+            differ_rank = r
             break;
         }
+        common_tax = tax;
+        common_rank = r;
     }
 
     var common = {};
@@ -1390,7 +1364,7 @@ var get_common_taxon = function(node) {
         common.common_rank = ranks[common_rank];
     }
     common.common_taxonomy = common_tax;
-    common.differ_rank = ranks[common_r];
+    common.differ_rank = ranks[r];
     node.common_taxonomy = common;
     node.taxonomy = taxonomy;
 

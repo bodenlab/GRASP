@@ -63,6 +63,7 @@ var populate_search_node_list = function (nodes) {
                 var name = this.text;
                 // find the node and set visibility of the hover circle
                 var node = $("[id^=fill][id$='"+name+"']");
+                console.log(node)
                 on_node_mouseover(node);
             });
             a.appendTo(li);

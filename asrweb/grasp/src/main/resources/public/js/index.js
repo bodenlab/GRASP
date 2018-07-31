@@ -115,6 +115,7 @@ var poag_options = {
         colours: clustal_colours,
         number_of_edges_to_be_interesting: 2, // Min number of edges to consider it interesting
         interesting_many_edges_colour: "Crimson",
+        parent_comparison_colour: "Green",
         diff_colour: "black",
         diff_opacity: 0.3,
         num_start_nodes: 20, // How many nodes that it starts with
@@ -1184,7 +1185,7 @@ var draw_mini_msa = function (poags) {
                     .attr("fill", options.diff_colour);
             rect.moveToBack();
         }
-        if (node.deleted_during_inference == true) {
+        if (node.deleted_during_inference == true && poags.options.parent_comparison == false) {
              group.append("circle")
                     .attr("class", "poag")
                     .attr("id", "node_" + node.label + n)
@@ -1196,6 +1197,19 @@ var draw_mini_msa = function (poags) {
             d3.select("#node_"+node.label+n).moveToBack();
             //circle.moveToBack();
         }
+
+        if (node.different_from_parent == true && poags.options.parent_comparison == true) {
+            group.append("circle")
+                .attr("class", "poag")
+                .attr("id", "node_" + node.label + n)
+                .attr('cx', line_x)
+                .attr('cy', line_y)
+                .attr('r', mini_opt.radius)
+                .attr("opacity", options.diff_opacity)
+                .attr("fill", options.parent_comparison_colour);
+            d3.select("#node_"+node.label+n).moveToBack();
+        }
+
         if (node_inferred != null && poags.options.mutants.draw == true && node_inferred.mutant == true) {
             var tri = group.append("path")
                     .attr("class", "poag")

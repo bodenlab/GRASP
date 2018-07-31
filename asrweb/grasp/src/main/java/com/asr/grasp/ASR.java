@@ -3,6 +3,7 @@ package com.asr.grasp;
 import com.asr.grasp.service.ASRService;
 import dat.EnumSeq;
 import dat.Enumerable;
+import json.JSONArray;
 import json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -419,6 +420,15 @@ public class ASR {
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
         return asrService.getAncestralGraphJSON(inferenceType, nodeLabel);
     }
+
+    public JSONArray getIndelDifferencesJSON(){
+        return asrService.getIndelDifferencesJSON();
+    }
+
+    public String getIndelDifferences(){
+        return asrService.getIndelDifferences();
+    }
+
 
     public void setSessionDir(String path) {
         asrService.setSessionDir(path);

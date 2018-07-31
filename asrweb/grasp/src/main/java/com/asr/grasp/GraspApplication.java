@@ -40,8 +40,8 @@ import java.util.zip.ZipOutputStream;
 public class GraspApplication extends SpringBootServletInitializer {
 
 //	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
-//		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
+		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
+//	private final static String sessionPath = "/var/www/GRASP/";
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -440,9 +440,33 @@ public class GraspApplication extends SpringBootServletInitializer {
 		model.addAttribute("results", true);
 		model.addAttribute("node", asr.getNodeLabel());
 		model.addAttribute("username",  loggedInUser.getUsername());
+		model.addAttribute("indelDifferences", asr.getIndelDifferencesJSON());
+		System.out.println(asr.getIndelDifferencesJSON());
 
 		return graphs;
 	}
+
+//	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"getindel"})
+//	public String returnIndelDifferences(@RequestParam("getindeldifferences") String getindeldifferences, Model model, HttpServletRequest request) {
+//
+//		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
+//		model.addAttribute("graph", graphs);
+//		model.addAttribute("indelDifferences", asr.getIndelDifferencesJSON());
+//
+//		return graphs;
+//
+//	}
+
+	@RequestMapping(value = "/", method = RequestMethod.POST, params={"getindeldiffs"})
+	public @ResponseBody String returnIndelDiffs(@RequestParam("getindeldiffs") String getindeldiffs, Model model, HttpServletRequest request) {
+
+		String diffs = asr.getIndelDifferences();
+
+		return diffs;
+	}
+
+
+
 
 
 	/**
@@ -531,6 +555,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView performReconstruction(@RequestParam("infer") String infer, @RequestParam("node") String node, @RequestParam("addgraph") Boolean addGraph, Model model, HttpServletRequest request) {
 
 		ModelAndView mav = new ModelAndView("processing");
+
 
 		// run reconstruction
 		recon = new ASRThread(asr, infer, node, addGraph, logger);

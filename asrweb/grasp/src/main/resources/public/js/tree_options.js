@@ -7,12 +7,16 @@ var perform_marginal = function(node_name, node_fill) {
     $('#progress-status').fadeIn();
     $('#progress').removeClass('disable');
     selectedNode = node_name;
+    console.log("NODE SELECTED")
+    console.log(node_name)
     set_inf_type("marginal");
         $.ajax({
             url : window.location.pathname.split("?")[0],
             type : 'POST',
             data : {infer: inferType, node: selectedNode, addgraph: false},
             success: function(data) {
+                console.log("Got marginal")
+                console.log(window.location.pathname)
                 var inter = setInterval(function() {
                     $.ajax({
                         url : window.location.pathname.split("?")[0],
@@ -27,6 +31,9 @@ var perform_marginal = function(node_name, node_fill) {
                                     type : 'POST',
                                     data : {getrecongraph: node_name},
                                     success: function(data) {
+                                        console.log("And here it is")
+                                        console.log(JSON.parse(data))
+                                        console.log(data)
                                         var json_str = data;
                                         graph_array = [];
                                         // if mutant library is selected, display mutant library with the selected number of mutants, else just
@@ -72,7 +79,21 @@ var perform_marginal = function(node_name, node_fill) {
 /*
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
-var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
+var displayJointGraph = function(node_name, node_fill, reset_graphs=false) {
+
+
+    // Check if we've passed in a reference to a branch, and we'll add both pairs
+    if (node_name.indexOf("branch") !== -1) {
+        child_node_name = node_name.split("branch-")[1].split("-")[1]
+        node_name = node_name.split("branch-")[1].split("-")[0]
+        add_pairs = true;
+
+    }
+
+    else {
+        add_pairs = false;
+    }
+
     if (reset_graphs == false && inferType == "marginal") {
         reset_graphs = true;
         selectedNode = node_name;
@@ -96,12 +117,14 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
         type : 'POST',
         data : {infer: inferType, node: node_name, addgraph: reset_graphs==false},
         success: function(data) {
+            console.log("Got here")
             var inter = setInterval(function() {
                 $.ajax({
                     url : window.location.pathname.split("?")[0],
                     type : 'GET',
                     data : {request: "status"},
                     success: function(data) {
+                        console.log("success")
                         // redirect to results if finished.. otherwise, update user...
                         if (data == "done") {
                             $.ajax({
@@ -129,8 +152,14 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
                                     }
                                     refresh_elements();
                                     redraw_poags();
+
+
                                 }
                             });
+
+                            if (add_pairs) {
+                                displayJointGraph(child_node_name, node_fill, false)
+                            }
                             clearInterval(inter);
                             $('#progress-status').fadeOut();
                             $('#progress').addClass('disable');
@@ -151,3 +180,78 @@ var displayJointGraph = function(node_name, node_fill, reset_graphs = false) {
     });
     redraw_poags();
 };
+
+// var get_indel_differences = function() {
+//     $("#status").text("");
+//     $('#progress-status').fadeIn();
+//     $('#progress').removeClass('disable');
+//     console.log("NODE SELECTED")
+//     set_inf_type("marginal");
+//     $.ajax({
+//         url : window.location.pathname.split("?")[0],
+//         type : 'POST',
+//         data : {infer: "marginal", node: "N1", addgraph: false},
+//         success: function(data) {
+//             console.log("Got marginal")
+//             console.log(window.location.pathname)
+//             var inter = setInterval(function() {
+//                 $.ajax({
+//                     url : window.location.pathname.split("?")[0],
+//                     type : 'GET',
+//                     data : {request: "status"},
+//                     success: function(data) {
+//                         // redirect to results if finished.. otherwise, update user...
+//                         if (data == "done") {
+//                             $("#status").text(" finishing up...");
+//                             $.ajax({
+//                                 url : window.location.pathname.split("?")[0],
+//                                 type : 'POST',
+//                                 data : {getrecongraph: "N1"},
+//                                 success: function(data) {
+//                                     console.log("And here it is")
+//                                     // console.log(data)
+//                                     var json_str = data;
+//                                     console.log(data.graph)
+//                                     console.log(json_str.getrecongraph)
+//                                     graph_array = [];
+//                                     // if mutant library is selected, display mutant library with the selected number of mutants, else just
+//                                     // display the marginal distribution in the nodes
+//                                     graph_array.push(JSON.parse(json_str));
+//                                     // Add the colours of the POAG assigned by name and merged_id
+//                                     poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length+1)] = poags.options.names_to_colour['Inferred'];
+//                                     poags.options.name_to_merged_id[name] = ["poag" + (Object.keys(poags.options.poagColours).length+1)];
+//                                     setup_poags(json_str, true, false, false, "N1");
+//                                     redraw_poags();
+//                                     refresh_elements();
+//                                     if ($("#mutant-btn").attr("aria-pressed") === 'true') {
+//                                         set_draw_mutants(true);
+//                                         $('#mutant-input').fadeIn();
+//                                         view_mutant_library();
+//                                     } else {
+//                                         set_draw_mutants(false);
+//                                         $('#mutant-input').fadeOut();
+//                                         set_mutant(0);
+//                                     }
+//                                 }
+//                             });
+//                             clearInterval(inter);
+//                             $('#progress-status').fadeOut();
+//                             $('#progress').addClass('disable');
+//                         } else if (data.includes("error")) {
+//                             clearInterval(inter);
+//                             $('#progress-status').fadeOut();
+//                             $('#progress').addClass('disable');
+//                             $("#warning").attr('style', "display: block;");
+//                             $("#warning-text").text(data.split("\t")[1]);
+//                             // window.location.replace(window.location.pathname.split("?")[0] + "error");
+//                         } else {
+//                             $("#status").text(data);
+//                         }
+//                     }
+//                 });
+//             }, 1000);
+//         }
+//     });
+//
+//
+// }

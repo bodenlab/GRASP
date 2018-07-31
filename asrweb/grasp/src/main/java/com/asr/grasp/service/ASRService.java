@@ -5,6 +5,7 @@ import api.PartialOrderGraph;
 import dat.EnumSeq;
 import dat.Enumerable;
 import dat.POGraph;
+import json.JSONArray;
 import json.JSONObject;
 import reconstruction.ASRPOG;
 import vis.POAGJson;
@@ -118,6 +119,8 @@ public class ASRService {
         asrMarginal.runReconstruction(treeNwk, seqs, false, msa == null ? null : msa.getMSAGraph());
         return true;
     }
+
+
 
     /**
      * Save MSA graph
@@ -247,7 +250,7 @@ public class ASRService {
     }
 
     /**
-     * Get tje JSON representation of the inferred graph at the given tree node
+     * Get the JSON representation of the inferred graph at the given tree node
      *
      * @param type reconstruction type to query ("joint" or "marginal")
      * @param nodeLabel label of tree node to get graph representation of
@@ -298,6 +301,7 @@ public class ASRService {
     }
 
     public int getNumDeletedNodes(String infType, String node) {
+
         if (node == null)
             node = rootLabel;
         POGraph msa = msaGraph;
@@ -311,6 +315,22 @@ public class ASRService {
         if (asrMarginal != null && infType.equalsIgnoreCase("marginal"))
             return msa.getNumNodes() - asrMarginal.getGraph(node).getNodeIDs().length;
         return -1;
+    }
+
+    public JSONArray getIndelDifferencesJSON(){
+        if (asrJoint != null)
+            return asrJoint.getIndelDifferencesJSON();
+        if (asrMarginal != null)
+            return asrMarginal.getIndelDifferencesJSON();
+        return null;
+    }
+
+    public String getIndelDifferences(){
+        if (asrJoint != null)
+            return asrJoint.getIndelDifferencesJSON().toString();
+        if (asrMarginal != null)
+            return asrMarginal.getIndelDifferencesJSON().toString();
+        return null;
     }
 
 }

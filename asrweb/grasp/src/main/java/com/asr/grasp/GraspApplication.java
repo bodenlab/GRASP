@@ -40,8 +40,8 @@ import java.util.zip.ZipOutputStream;
 public class GraspApplication extends SpringBootServletInitializer {
 
 //	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
-//		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
+		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
+//	private final static String sessionPath = "/var/www/GRASP/";
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -672,13 +672,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg").equalsIgnoreCase("on"))
 			asr.saveAncestorGraph(request.getParameter("node-label"), tempDir + "/", false);
 		if (request.getParameter("check-marg-dist") != null && request.getParameter("check-marg-dist").equalsIgnoreCase("on"))
-			asr.saveMarginalDistribution(tempDir, request.getParameter("marg-node"));
+			asr.saveMarginalDistribution(tempDir, request.getParameter("joint-node"));
 		if (request.getParameter("check-pog-joint") != null && request.getParameter("check-pog-joint").equalsIgnoreCase("on"))
 			asr.saveAncestors(tempDir + "/", ancs);
 		if (request.getParameter("check-pog-joint-single") != null && request.getParameter("check-pog-joint-single").equalsIgnoreCase("on"))
 			asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
 		if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg").equalsIgnoreCase("on"))
-			asr.saveConsensusMarginal(tempDir + "/" + request.getParameter("marg-node") + "_consensus");
+			asr.saveConsensusMarginal(tempDir + "/" + request.getParameter("joint-node") + "_consensus");
 		if (request.getParameter("check-seq-joint-single") != null && request.getParameter("check-seq-joint-single").equalsIgnoreCase("on"))
 			asr.saveConsensusJoint(tempDir + "/" + request.getParameter("joint-node") + "_consensus", request.getParameter("joint-node"));
 //		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))

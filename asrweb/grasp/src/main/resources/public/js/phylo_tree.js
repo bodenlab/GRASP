@@ -903,7 +903,7 @@ var search_tree = function(search, clear, exact) {
                     found = true;
                 } else {
                     if (extant.taxonomy !== undefined && extant.taxonomy !== null) {
-                        var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
+                        var ranks = ["domain", "kingdom", "phylum", "class", "order","family",  "genus", "species"]
 
                         for (var rank in ranks) {
                             var tax = extant.taxonomy[ranks[rank]];
@@ -1114,7 +1114,9 @@ var run_phylo_tree = function () {
     $.when(get_taxon_ids(tree_json)).then(function() {
         // console.log("RETURNED")
         // console.log(phylo_options.tree.extants)
+        console.log(phylo_options.tree.extants)
         queue_taxonomy()
+
         // get_taxonomy(phylo_options.tree.root);
         // assign_num_children(phylo_options.tree.root);
         //
@@ -1432,6 +1434,11 @@ var get_taxon_ids = function (node) {
         chunk = extant_list.splice(0,50)
 
         for (i in chunk) {
+            console.log(chunk[i].name)
+
+
+
+
 
 
             // console.log('now we are working on ')
@@ -1439,14 +1446,24 @@ var get_taxon_ids = function (node) {
             // console.log(chunk)
             // console.log(chunk[i])
             if (chunk[i] !== null && chunk[i] !== undefined) {
-                if (chunk[i].name.indexOf('|') > -1) {
-                    // console.log('it is a uniprot')
+
+                if (chunk[i].name[2] == "|"){
                     uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
                 }
+
                 else {
-                    // console.log('it is an ncbi')
-                    ncbi_names += chunk[i].name + ","
+                    ncbi_names += chunk[i].name.split("|")[0].split(" ")[0] + ","
+
+
                 }
+                // if (chunk[i].name.indexOf('|') > -1) {
+                //     // console.log('it is a uniprot')
+                //     uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
+                // }
+                // else {
+                //     // console.log('it is an ncbi')
+                //     ncbi_names += chunk[i].name + ","
+                // }
             }
 
         }
@@ -1458,11 +1475,11 @@ var get_taxon_ids = function (node) {
             ncbi_names = ncbi_names.substring(0, ncbi_names.length - 1);
             uniprot_names = uniprot_names.substring(0, uniprot_names.length - 4);
 
-            // console.log ('ncbi names')
-            // console.log(ncbi_names)
-            //
-            // console.log ('uniprot names')
-            // console.log(uniprot_names)
+            console.log ('ncbi names')
+            console.log(ncbi_names)
+
+            console.log ('uniprot names')
+            console.log(uniprot_names)
             if (ncbi_names.length > 0){
                 ncbi_array.push(ncbi_names)
 
@@ -1534,7 +1551,7 @@ function get_taxon_id_from_ncbi(extant_names) {
             if (speciesData != null) {
 
                 for (i in phylo_options.tree.extants) {
-                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name + "')]/../Item[@Name='TaxId']/text()";
+                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name.split("|")[0].split(" ")[0] + "')]/../Item[@Name='TaxId']/text()";
 
                     var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
@@ -1666,8 +1683,7 @@ var queue_taxonomy = function (){
     var taxon_array = [];
 
     extant_list = phylo_options.tree.extants.slice()
-    // console.log("Here is the extant list")
-    // console.log(extant_list)
+
 
     while (extant_list.length) {
         var taxon_ids = "";
@@ -1728,9 +1744,9 @@ var get_taxonomy = function (taxon_ids) {
     //     taxon_ids += phylo_options.tree.extants[i].taxon_id + ","
     // }
 
-    // console.log("Here are the taxon ids")
+    console.log("Here are the taxon ids")
 
-    // console.log(taxon_ids)
+    console.log(taxon_ids)
 
     // Remove the final comma
     // taxon_ids = taxon_ids.substring(0, taxon_ids.length - 1)
@@ -2738,7 +2754,7 @@ var next_right = function (node) {
  * fix_subtrees updates the subtrees of a node.
  *
  * This is done itterattively so that each time we progress up the levels
- * of the trees we know w edon't have to fix any lower trees as they
+ * of the trees we know we don't have to fix any lower trees as they
  * have already been fixed.
  *
  * Parameters:

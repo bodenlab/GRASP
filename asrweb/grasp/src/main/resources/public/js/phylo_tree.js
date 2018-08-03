@@ -34,7 +34,8 @@ var phylo_options = {
         // So we can easily keep track of the children nodes when we're updating
         // the tree's collapsed nodes
         node_count: 0, // Used to assign IDs to the nodes.
-        obsolete_list: [] // Keeps track of any sequences in the tree which are obsolete
+        obsolete_list: [], // Keeps track of any sequences in the tree which are obsolete
+        failed_taxonomy_list: []
     },
     legend: {
         width: 20,
@@ -1110,22 +1111,31 @@ var run_phylo_tree = function () {
 
     collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 
-    // Add the taxon information to the leaf nodes
-    $.when(get_taxon_ids(tree_json)).then(function() {
-        // console.log("RETURNED")
-        // console.log(phylo_options.tree.extants)
-        console.log(phylo_options.tree.extants)
-        queue_taxonomy()
+    // // Add the taxon information to the leaf nodes
+    // $.when(get_taxon_ids(tree_json)).then(function() {
+    //     // console.log("RETURNED")
+    //     // console.log(phylo_options.tree.extants)
+    //     console.log(phylo_options.tree.extants)
+    //     queue_taxonomy()
 
         // get_taxonomy(phylo_options.tree.root);
         // assign_num_children(phylo_options.tree.root);
         //
         // collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 
-    });
+    // });
 
 }
 
+var annotate_taxonomy = function() {
+    // Add the taxon information to the leaf nodes
+
+    $('#taxonomy-info-alert').removeClass("hidden");
+
+    $.when(get_taxon_ids()).then(function() {
+        queue_taxonomy()
+    })
+};
 /**
  *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
  */
@@ -1418,7 +1428,7 @@ var is_intersect = function(arr1, arr2) {
  * Annotate the extant sequences with their taxonomic ids
  */
 
-var get_taxon_ids = function (node) {
+var get_taxon_ids = function () {
 
 
     // Create a new copy of the extant list
@@ -1434,17 +1444,8 @@ var get_taxon_ids = function (node) {
         chunk = extant_list.splice(0,50)
 
         for (i in chunk) {
-            console.log(chunk[i].name)
 
 
-
-
-
-
-            // console.log('now we are working on ')
-            // console.log(i)
-            // console.log(chunk)
-            // console.log(chunk[i])
             if (chunk[i] !== null && chunk[i] !== undefined) {
 
                 if (chunk[i].name[2] == "|"){
@@ -1475,11 +1476,11 @@ var get_taxon_ids = function (node) {
             ncbi_names = ncbi_names.substring(0, ncbi_names.length - 1);
             uniprot_names = uniprot_names.substring(0, uniprot_names.length - 4);
 
-            console.log ('ncbi names')
-            console.log(ncbi_names)
-
-            console.log ('uniprot names')
-            console.log(uniprot_names)
+            // console.log ('ncbi names')
+            // console.log(ncbi_names)
+            //
+            // console.log ('uniprot names')
+            // console.log(uniprot_names)
             if (ncbi_names.length > 0){
                 ncbi_array.push(ncbi_names)
 
@@ -1511,7 +1512,7 @@ var get_taxon_ids = function (node) {
     }
 
     return $.when.apply(undefined, requests).then(function () {
-        // console.log("Abbout to return")
+        // console.log("About to return")
 
     })
 
@@ -1543,10 +1544,12 @@ function get_taxon_id_from_ncbi(extant_names) {
         type: 'POST',
         headers: {
             'Content-Type': 'text/plain'
+            // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
 
         success: function (speciesData) {
+            // console.log("this succeeded")
 
             if (speciesData != null) {
 
@@ -1558,9 +1561,7 @@ function get_taxon_id_from_ncbi(extant_names) {
                     try {
                         var thisNode = node.iterateNext();
                         while (thisNode) {
-                            // console.log('updating it')
                             phylo_options.tree.extants[i].taxon_id = thisNode.textContent;
-                            //console.log(phylo_options.tree.extants[i]);
                             thisNode = node.iterateNext();
                         }
 
@@ -1593,7 +1594,17 @@ function get_taxon_id_from_ncbi(extant_names) {
 
                 }
 
-            }
+            },
+
+
+
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            $('#taxonomy-info-alert').addClass("hidden");
+            $('#taxonomy-failed-alert').removeClass("hidden");
+            return
+        }
+
+
 
     });
 }
@@ -1601,7 +1612,7 @@ function get_taxon_id_from_ncbi(extant_names) {
 function get_taxon_id_from_uniprot(uniprot_names) {
 
 
-    url = "http://www.uniprot.org/uniprot/?query=" + uniprot_names +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+    url = "https://www.uniprot.org/uniprot/?query=" + uniprot_names +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
     // console.log("uniprot url is ", url)
     speciesDict = {}
 
@@ -1610,6 +1621,7 @@ function get_taxon_id_from_uniprot(uniprot_names) {
         type: 'POST',
         headers: {
             'Content-Type':'text/plain'
+            // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
 
@@ -1693,7 +1705,14 @@ var queue_taxonomy = function (){
         if (chunk !== null && chunk !== undefined) {
 
             for (i in chunk){
-                taxon_ids += chunk[i].taxon_id + ","
+                if (chunk[i].taxon_id == undefined){
+                    phylo_options.tree.failed_taxonomy_list.push(chunk[i].name)
+
+                }
+
+                else {
+                    taxon_ids += chunk[i].taxon_id + ","
+                }
             }
 
             // console.log("Chunk is")
@@ -1716,13 +1735,34 @@ var queue_taxonomy = function (){
     }
 
     return $.when.apply(undefined, requests).then(function () {
-        // console.log("Abbout to return")
-        // assign topmost common taxon information for internal nodes
+
+        // Assign topmost common taxon information for internal nodes
         get_common_taxon(phylo_options.tree.root);
         refresh_tree();
-        $('#taxonomy-info-alert').addClass("hidden");
-        $('#taxonomy-success-alert').removeClass("hidden");
-        get_obsolete()
+
+        // Add a warning if not all the taxonomy annotations worked
+
+        if (phylo_options.tree.failed_taxonomy_list.length > 0) {
+            $('#taxonomy-info-alert').addClass("hidden");
+
+            var counts = phylo_options.tree.failed_taxonomy_list.length + " out of " + phylo_options.tree.extants.length + " sequences couldn't be mapped."
+
+
+            add_warning(phylo_options.tree.failed_taxonomy_list, "#taxonomy-warning-alert", "Warning! " + counts + " The following sequences could not be mapped to their taxonomy: ");
+
+        }
+
+        else { //Everything worked, so add the success alert
+            $('#taxonomy-info-alert').addClass("hidden");
+            $('#taxonomy-success-alert').removeClass("hidden");
+
+
+        }
+
+        // Add a warning if we found obsolete sequences
+        if (phylo_options.tree.obsolete_list.length > 1) {
+            add_warning(phylo_options.tree.obsolete_list, "#obsolete-warning-alert", "Warning! The following sequences are obsolete: ");
+        }
         redraw_poags();
 
     })
@@ -1732,6 +1772,8 @@ var queue_taxonomy = function (){
 
 
 }
+
+
 
 
 /**
@@ -1744,9 +1786,9 @@ var get_taxonomy = function (taxon_ids) {
     //     taxon_ids += phylo_options.tree.extants[i].taxon_id + ","
     // }
 
-    console.log("Here are the taxon ids")
-
-    console.log(taxon_ids)
+    // console.log("Here are the taxon ids")
+    //
+    // console.log(taxon_ids)
 
     // Remove the final comma
     // taxon_ids = taxon_ids.substring(0, taxon_ids.length - 1)
@@ -1764,6 +1806,7 @@ var get_taxonomy = function (taxon_ids) {
         type: 'POST',
         headers: {
             'Content-Type': 'text/plain'
+            // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
 
@@ -1833,24 +1876,20 @@ var get_taxonomy = function (taxon_ids) {
 
 }
 
-var get_obsolete = function() {
+var add_warning = function(list, type, msg) {
 
-    // console.log("Called get obsolete")
+    var list_string = "";
 
-    var obsolete_string = ""
-    if (phylo_options.tree.obsolete_list.length > 0){
-        for (i = 0; i < phylo_options.tree.obsolete_list.length; i++) {
-            obsolete_string += phylo_options.tree.obsolete_list[i] + ", "
-        }
-
-        // Remove final comma
-        obsolete_string = obsolete_string.substring(0, obsolete_string.length - 2)
-        $('#obsolete-warning-alert').removeClass("hidden").html("Warning: The following sequences are obsolete: " + obsolete_string)
-
+    for (i = 0; i < list.length; i++) {
+        list_string += list[i] + ", "
     }
+        // Remove final comma
+    list_string = list_string.substring(0, list_string.length - 2)
+    $(type).removeClass("hidden").html(msg + list_string)
 
 
-}
+
+};
 
 
 

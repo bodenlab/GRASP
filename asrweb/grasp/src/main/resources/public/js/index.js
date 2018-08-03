@@ -1302,18 +1302,40 @@ var draw_edges = function (poags, edge, group, scale_y) {
             .attr("opacity", edge_opt.opacity)
             .attr("fill", "none")
             .attr("marker-mid", "url(#triangle-end)")
-            .on("mouseover", function() {
-                $(this).attr("stroke-width", stroke_width*2)
-                $(this).attr("opacity", 1)
-                for (var s in edge.sequences){
-                    search_tree(edge.sequences[s], false, true);
+
+            .on("click", function() {
+
+                if ($(this).attr("opacity") == 1) { // If it's already selected clear the search
+                    $(this).attr("stroke-width", stroke_width)
+                    $(this).attr("opacity", edge_opt.opacity)
+                    search_tree("", true, true); // clear tree
                 }
+                else { // If it isn't selected, search for the sequences in the tree
+
+                    $(this).attr("stroke-width", stroke_width*2)
+                    $(this).attr("opacity", 1)
+                    for (var s in edge.sequences){
+                        search_tree(edge.sequences[s], false, true);
+                    }
+
+    }
+
             })
-            .on("mouseout", function() {
-                $(this).attr("stroke-width", stroke_width)
-                $(this).attr("opacity", edge_opt.opacity)
-                search_tree("", true, true); // clear tree
-            });
+
+            // .on("mouseover", function() {
+            //     $(this).attr("stroke-width", stroke_width*2)
+            //     $(this).attr("opacity", 1)
+            //     for (var s in edge.sequences){
+            //         search_tree(edge.sequences[s], false, true);
+            //     }
+            // })
+            // .on("mouseout", function() {
+            //     $(this).attr("stroke-width", stroke_width)
+            //     $(this).attr("opacity", edge_opt.opacity)
+            //     search_tree("", true, true); // clear tree
+            // });
+
+
     
 //    
 //    group.append("circle")

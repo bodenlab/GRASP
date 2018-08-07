@@ -28,7 +28,7 @@
 		<profile>
 			<id>dev</id>
 			<properties>
-				<activatedProperties>override</activatedProperties>
+				<activatedProperties>dev-override</activatedProperties>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>

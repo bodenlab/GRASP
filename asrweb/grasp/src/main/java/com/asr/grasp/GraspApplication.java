@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -32,21 +31,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
+import org.springframework.beans.factory.annotation.Value;
 
 @Controller
 @SpringBootApplication
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-//	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
-//		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = System.getProperty("spring.project.sessionPath");
+	@Value("${project.sessionPath}")
+	private String sessionPath;
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
 	private ASRThread recon = null;
-
 
 	@Autowired
 	private IUserService service;

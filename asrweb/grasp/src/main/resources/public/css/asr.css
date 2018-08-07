@@ -52,6 +52,15 @@ h6 {
     width: 80%;
 }
 
+#taxonomic-annotation-img-div {
+    background: url(../images/taxonomic_annotation.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
 #tutorial-4-nwk-img-div {
     background: url(../images/tutorial4.nwk.png);
     background-size: contain;

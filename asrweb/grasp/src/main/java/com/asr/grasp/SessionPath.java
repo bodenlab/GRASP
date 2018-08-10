@@ -7,5 +7,5 @@ package com.asr.grasp;
  */
 public class SessionPath {
 
-    public static String path = "/var/www/GRASP";
+    public static String path = "/var/www/GRASP/";
 }

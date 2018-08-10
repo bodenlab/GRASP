@@ -22,3 +22,6 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+### Class to set WebSessions path ###
+/src/main/java/com/asr/grasp/SessionPath.java

@@ -4,6 +4,7 @@ import com.asr.grasp.service.IReconstructionService;
 import com.asr.grasp.service.IUserService;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
+import com.asr.grasp.SessionPath;
 import json.JSONArray;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +35,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 
+
 @Controller
 @SpringBootApplication
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
 
-//	final static String sessionPath = "/Users/marnie/Documents/WebSessions/";
-//		final String sessionPath = "/Users/gabefoley/Documents/WebSessions/";
-	private final static String sessionPath = "/var/www/GRASP/";
+
+	private final static String sessionPath = SessionPath.path;
 
 	private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 

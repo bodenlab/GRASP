@@ -103,6 +103,7 @@
 					<finalName>${project.artifactId}</finalName>
 				</configuration>
 			</plugin>
+
 			<!-- FOR DEV:-->
 			<plugin>
 				<groupId>org.liquibase</groupId>

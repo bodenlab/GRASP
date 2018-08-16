@@ -11,7 +11,8 @@ public interface IUserService {
     List<Reconstruction> getSharedReconstructions(User account) ;
     User getUserAccount(User account) ;
     boolean userExist(String username) ;
-    User getUser(String username) ;
+    User getUser(String username, String password) ;
     User removeReconstruction(User account, Long id) ;
+    User getUserByUsername(String username) ;
     void saveUser(User account) ;
 }

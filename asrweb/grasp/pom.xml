@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.asr</groupId>
@@ -28,7 +28,7 @@
 		<profile>
 			<id>dev</id>
 			<properties>
-				<activatedProperties>dev-override</activatedProperties>
+				<activatedProperties>dev</activatedProperties>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -47,6 +47,8 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
+
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -91,6 +93,15 @@
 			<artifactId>bnkit</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>3.1.0.RELEASE</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -103,7 +114,6 @@
 					<finalName>${project.artifactId}</finalName>
 				</configuration>
 			</plugin>
-
 			<!-- FOR DEV:-->
 			<plugin>
 				<groupId>org.liquibase</groupId>
@@ -115,12 +125,7 @@
 					<username>sa</username>
 					<password></password>
 					<diffChangeLogFile>file:///${project.basedir}/src/main/resources/db/changelog/db-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>-->
-					<!--
-					=====================================================================
-						Change the following line to change between -dev and -release
-					=====================================================================
-					-->
-					<propertyFile>src/main/resources/db/liquibase-dev.properties</propertyFile>
+					<propertyFile>src/main/resources/db/liquibase.properties</propertyFile>
 					<changeLogFile>src/main/resources/db/db-initial.xml</changeLogFile>
 					<diffChangeLogFile>src/main/resources/db/changelog/db-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>
 					<referenceUrl>hibernate:spring:com.asr.grasp?dialect=org.hibernate.dialect.H2Dialect</referenceUrl>

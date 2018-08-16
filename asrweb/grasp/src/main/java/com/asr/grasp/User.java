@@ -18,6 +18,12 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "confirmation_token")
+    private String confirmationToken;
+
     @Transient
     private String passwordMatch;
 
@@ -25,10 +31,12 @@ public class User {
             CascadeType.PERSIST,
             CascadeType.MERGE
     })
+
     @JoinTable(name = "User_Recon",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "recon_id")
     )
+
     private Set<Reconstruction> reconstructions = new HashSet<>();
 
     @Column(name = "shared")
@@ -39,36 +47,96 @@ public class User {
         return id;
     }
 
-    public void setId(Long id){
+    public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Gets the username of the user.
+     * @return username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Sets the username. This is must be unique.
+     * @param username
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getPassword(){
+    /**
+     * Gets the users password from the database
+     * @return hashed password
+     */
+    public String getPassword() {
         return this.password;
     }
 
-    public void setPassword(String password){
+    /**
+     * Sets a users password in the database.
+     * The password has already been hashed.
+     * @param password
+     */
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    @Transient
+    /**
+     * Sets the secondary password. This is only used in the registration of
+     * a new user. Once it has been validated that the two passwords are the
+     * same this is no longer stored.
+     * @param password
+     */
+    public void setPasswordMatch(String password) {
+        this.passwordMatch = password;
+    }
+
+    /**
+     * ToDo: Check that the email is correctly formatted.
+     * @param email
+     */
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    /**
+     * ToDo: Implement this.
+     * @param confirmationToken
+     */
+    public void setConfirmationToken(String confirmationToken) {
+       this.confirmationToken = confirmationToken;
+    }
+
+    /**
+     *
+     * @param email
+     */
+    public String getEmail() {
+        return this.email;
+    }
+
+    /**
+     * ToDo: Implement this.
+     * @param confirmationToken
+     */
+    public String getConfirmationToken() {
+        return this.confirmationToken;
+    }
+
+    /**
+     * Gets the temporary password match. This is taken from the users form.
+     * @return hashed password
+     */
     public String getPasswordMatch() {
         return this.passwordMatch;
     }
 
-    public void setPasswordMatch(String passwordMatch){
-        this.passwordMatch = passwordMatch;
+    public Set<Reconstruction> getAllReconstructions() {
+        return this.reconstructions;
     }
-
-    public Set<Reconstruction> getAllReconstructions() { return this.reconstructions; }
 
     public Set<Reconstruction> getNonSharedReconstructions() {
         Set<Reconstruction> recons = new HashSet<>();
@@ -82,7 +150,7 @@ public class User {
         return this.sharedReconstructionIDs;
     }
 
-    public void setReconstructions(Set<Reconstruction> reconstructions){
+    public void setReconstructions(Set<Reconstruction> reconstructions) {
         this.reconstructions = reconstructions;
     }
 

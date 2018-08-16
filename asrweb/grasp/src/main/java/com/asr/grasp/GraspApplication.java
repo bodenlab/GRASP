@@ -2,8 +2,10 @@ package com.asr.grasp;
 
 import com.asr.grasp.service.IReconstructionService;
 import com.asr.grasp.service.IUserService;
+import com.asr.grasp.service.IEmailService;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import json.JSONArray;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +29,20 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 @Controller
 @SpringBootApplication
@@ -47,6 +58,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	@Autowired
 	private IUserService service;
+
+	@Autowired
+	private IEmailService emailService;
 
 	@Autowired
 	private IReconstructionService reconstructionService;
@@ -154,7 +168,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		// check if user exists
 		if (service.userExist(user.getUsername())) {
-			User u = service.getUser(user.getUsername());
+			User u = service.getUserByUsername(user.getUsername());
 			Reconstruction recon = reconstructionService.getReconstruction(user.getReconID());
 			if (!u.getSharedReconstructions().contains(recon)) {
 				u.addSharedReconstruction(recon);
@@ -216,8 +230,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 		loginValidator.validate(user, bindingResult);
 		if (bindingResult.hasErrors())
 			return new ModelAndView("login");
-		User registered = getUserAccount(user);
 
+		// If we have passed the validation this means that the username and
+		// password are correct.
+		User registered = getUserAccount(user);
 		reconstructionService.checkObseleteReconstructions();
 		ModelAndView mav = new ModelAndView("account");
 
@@ -250,16 +266,46 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (!bindingResult.hasErrors())
 			registered = createUserAccount(user);
 
+
+
+
 		if (currentRecon != null)
 			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
 		currentRecon = null;
 
 		ModelAndView mav = new ModelAndView("account");
+
 		mav.addObject("user", registered);
 		mav.addObject("share", new ShareObject());
 		mav.addObject("reconstructions", registered.getNonSharedReconstructions());
 		loggedInUser = registered;
 		return mav;
+	}
+
+	/**
+	 * ToDo: Implememnt send registration email. This will enable users to
+	 * reset passwords etc.
+	 * @param registered
+	 * @return
+	 */
+	private User sendRegistrationEmail(User registered, HttpServletRequest request) {
+		// Disable user until they click on confirmation link in email
+		// registered.setEnabled(false);
+
+		// Generate random 36-character string token for confirmation link
+		registered.setConfirmationToken(UUID.randomUUID().toString());
+
+		String appUrl = request.getScheme() + "://" + request.getServerName();
+
+		SimpleMailMessage registrationEmail = new SimpleMailMessage();
+		registrationEmail.setTo(registered.getEmail());
+		registrationEmail.setSubject("Registration Confirmation");
+		registrationEmail.setText("To confirm your e-mail address, please click the link below:\n"
+				+ appUrl + "/confirm?token=" + registered.getConfirmationToken());
+		registrationEmail.setFrom("noreply@domain.com");
+
+		emailService.sendEmail(registrationEmail);
+		return registered;
 	}
 
 	private User createUserAccount(User user){
@@ -364,6 +410,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		mav.addObject("asrForm", asr);
 		mav.addObject("error", true);
 		mav.addObject("errorMessage", "Sorry! An unknown error occurred. Please check the error types in the guide and retry your reconstruction... ");
+
 		mav.addObject("username",  loggedInUser.getUsername());
 		return mav;
 	}

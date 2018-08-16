@@ -25,3 +25,5 @@ nbdist/
 
 ### Specific user configs ###
 *-override.properties
+
+*maven-metadata.xml*

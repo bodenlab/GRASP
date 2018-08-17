@@ -72,13 +72,12 @@ public class Base {
      * @param query
      * @return
      */
-    public ResultSet queryOnString(String query, String id) {
+    public ResultSet queryOnString(String query, String value) {
         try {
             Connection con = DriverManager.getConnection(url, username,
                     password);
             PreparedStatement statement = con.prepareStatement(query);
-            // Sets the
-            statement.setString(1, id);
+            statement.setString(1, value);
             ResultSet results = statement.executeQuery();
             return results;
         } catch (Exception e) {
@@ -87,6 +86,51 @@ public class Base {
         return null;
     }
 
+    /**
+     * Generic execute query that performs a query on a unique string. E.g. a
+     * person's username.
+     *
+     * @param query
+     * @return
+     */
+    public int getIdOnUniqueString(String query, String id) {
+        try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setString(1, id);
+            ResultSet results = statement.executeQuery();
+            return results.getInt(1);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return -1;
+    }
+
+    /**
+     * Generic execute query that performs a query on a unique string. E.g. a
+     * person's username.
+     *
+     * @param query
+     * @return
+     */
+    public boolean insertStrings(String query, String[] values) {
+        try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            int idx = 1;
+            for (String value: values) {
+                statement.setString(idx, value);
+                idx ++;
+            }
+            statement.executeQuery();
+            return true;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
 
     /**
      * Generic execute query that gets a connection to the database and
@@ -129,7 +173,7 @@ public class Base {
                 statement.setString(index, value);
                 index++;
             }
-            // ID is in the where clause thus at the endgit
+            // ID is in the where clause thus at the end.
             statement.setInt(index, id);
             ResultSet results = statement.executeQuery();
             return results;
@@ -141,7 +185,9 @@ public class Base {
 
     /**
      * An Update query that updates a string based on an ID.
-     * These
+     *
+     * For update commands we have the ID at the end, so it should always be
+     * at the last index of the query (i.e. SELECT * FROM .... WHERE ... <- ID)
      *
      * @param query
      * @return
@@ -152,9 +198,8 @@ public class Base {
             Connection con = DriverManager.getConnection(url, username,
                     password);
             PreparedStatement statement = con.prepareStatement(query);
-            // Sets the ID
-            statement.setInt(1, id);
-            statement.setString(2, value);
+            statement.setString(1, value);
+            statement.setInt(2, id);
             ResultSet results = statement.executeQuery();
             return results;
         } catch (Exception e) {
@@ -213,10 +258,10 @@ public class Base {
             Connection con = DriverManager.getConnection(url, username,
                     password);
             PreparedStatement statement = con.prepareStatement(query);
-            // Sets the ID
-            statement.setInt(1, id);
             // Adds each String into the query
             statement = addValuesToStatement(statement, values);
+            // Sets the ID
+            statement.setInt(values.size() + 1, id);
             // Execute the query
             ResultSet results = statement.executeQuery();
             return results;
@@ -240,10 +285,10 @@ public class Base {
             Connection con = DriverManager.getConnection(url, username,
                     password);
             PreparedStatement statement = con.prepareStatement(query);
-            // Sets the ID
-            statement.setString(1, id);
             // Adds each String into the query
             statement = addValuesToStatement(statement, values);
+            // Sets the ID
+            statement.setString(values.size() + 1, id);
             // Execute the query
             ResultSet results = statement.executeQuery();
             return results;

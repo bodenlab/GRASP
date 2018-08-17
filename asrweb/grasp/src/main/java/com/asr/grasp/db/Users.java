@@ -34,13 +34,19 @@ public class Users extends Base {
      * @param account
      * @return User
      */
-    @Override
-    public User registerNewUserAccount(User account) {
-        User user = new User();
-        user.setId(generateId());
-        user.setUsername(account.getUsername());
-        user.setPassword(encryptPassword(account.getPassword()));
-        return saveNewUser(user);
+    public int registerUser(String username, String rawPassword) {
+        String[] values = {username, encryptPassword(rawPassword)};
+        // Check a user doesn't exist with that username
+        if (getUserId(username) > 0) {
+            // Usernames are unique.
+            return -1;
+         }
+         if (!insertStrings("INSERT INTO USERS(username, password) " +
+                "VALUES(?, ?);", values)) {
+             return -1;
+         }
+         // Get the userId based on the unique username
+        return getUserId(username);
     }
 
     /**
@@ -89,11 +95,28 @@ public class Users extends Base {
     }
 
     /**
+     * Gets the user ID from the unique username.
+     *
+     * @param username
+     * @return
+     */
+    public int getUserId(String username) {
+        return getIdOnUniqueString("SELECT id FROM USERS WHERE username=?;",
+                username);
+    }
+
+    public boolean deleteUser(String username) {
+        // Also need to delete all the groups that this person owns and all
+        // the reconstructions that they have.
+        return false;
+    }
+
+    /**
      * Checks the username and password are valid.
      *
      * @return
      */
-    public int getUserId(String username, String rawPassword) {
+    public int loginUser(String username, String rawPassword) {
         try {
             // Find the user by username in the database
             ResultSet user = queryOnString("SELECT * FROM USERS WHERE " +

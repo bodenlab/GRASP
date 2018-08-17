@@ -1,0 +1,3 @@
+./mvnw deploy:deploy-file -Dfile=src/main/resources/lib/bnkit.jar -DgroupId=com.asr -DartifactId=bnkit -DrepositoryId=grasp-repo -Dversion=1.0 -Dpackaging=jar -Durl=file:src/main/resources/grasp-repo
+./mvnw clean compile package -P release
+mv target/GRASP.war target/ROOT.war

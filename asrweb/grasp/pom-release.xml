@@ -30,15 +30,15 @@
 			<properties>
 				<activatedProperties>dev-override</activatedProperties>
 			</properties>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 		</profile>
 		<profile>
 			<id>release</id>
 			<properties>
 				<activatedProperties>release-override</activatedProperties>
 			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 		</profile>
 	</profiles>
 
@@ -133,7 +133,7 @@
 						Change the following line to change between -dev and -release
 					=====================================================================
 					-->
-					<propertyFile>src/main/resources/db/liquibase-dev-override.properties</propertyFile>
+					<propertyFile>src/main/resources/db/liquibase-release-override.properties</propertyFile>
 					<changeLogFile>src/main/resources/db/db-initial.xml</changeLogFile>
 					<diffChangeLogFile>src/main/resources/db/changelog/db-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>
 					<referenceUrl>hibernate:spring:com.asr.grasp?dialect=org.hibernate.dialect.H2Dialect</referenceUrl>

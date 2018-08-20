@@ -266,9 +266,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 		if (!bindingResult.hasErrors())
 			registered = createUserAccount(user);
 
-
-
-
 		if (currentRecon != null)
 			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
 		currentRecon = null;

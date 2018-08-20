@@ -433,7 +433,7 @@ public class ASR {
     }
 
     /**
-     * Formats the MSA and inferred objects into JSON representation of two graphs, used for javascript visualisation.
+     * Formats the MSA and inferred controller into JSON representation of two graphs, used for javascript visualisation.
      * This format is sent through to the website for visualisation.
      *
      * @param graphMSA          JSON object of MSA graph
@@ -441,7 +441,7 @@ public class ASR {
      * @return                  String of JSON
      */
     public String catGraphJSONBuilder(JSONObject graphMSA, JSONObject graphInferred) {
-        // Create metadata objects to add to the POAGS
+        // Create metadata controller to add to the POAGS
         JSONObject metadataInferred = new JSONObject();
         JSONObject metadataMSA = new JSONObject();
 

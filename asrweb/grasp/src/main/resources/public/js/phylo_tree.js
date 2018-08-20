@@ -1536,7 +1536,7 @@ var get_taxon_ids = function () {
 
 function get_taxon_id_from_ncbi(extant_names) {
     // console.log('in here with names,', extant_names)
-    var url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
+    var url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?model=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
     // console.log (url)
 
     return promise = $.ajax({
@@ -1796,7 +1796,7 @@ var get_taxonomy = function (taxon_ids) {
     var ranks = ["domain", "kingdom", "phylum", "class", "order","family",  "genus", "species"]
 
 
-    var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
+    var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?model=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
 
     // console.log(url)
 

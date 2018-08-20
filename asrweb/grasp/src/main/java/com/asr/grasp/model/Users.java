@@ -1,13 +1,11 @@
-package com.asr.grasp.db;
+package com.asr.grasp.model;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.asr.grasp.Reconstruction;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collection;
+import java.util.Set;
+import com.asr.grasp.utils.Defines;
 
 public class Users extends Base {
 
@@ -15,38 +13,32 @@ public class Users extends Base {
      * Tells us where we can expect each value for the results from the
      * database.
      */
-    final int idIdx = 1;
-    final int usernameIdx = 2;
-    final int passwordIdx = 3;
 
-    final String idCol = "id";
-    final String usernameCol = "username";
-    final String passwordCol = "password";
-
-    public Users() {
-
-    }
+    final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
+    final ColumnEntry username = new ColumnEntry(2, "username", Defines
+            .STRING);
+    final ColumnEntry password = new ColumnEntry(3, "password", Defines
+            .STRING);
 
     /**
      * Creates a new user account. Encrypts password using bCrypt algorithm.
      * Saves the user to the database.
      *
-     * @param account
+     * @param
      * @return User
      */
-    public int registerUser(String username, String rawPassword) {
+    public String registerUser(String username, String rawPassword) {
         String[] values = {username, encryptPassword(rawPassword)};
         // Check a user doesn't exist with that username
         if (getUserId(username) > 0) {
             // Usernames are unique.
-            return -1;
+            return "user.username.duplicate";
          }
          if (!insertStrings("INSERT INTO USERS(username, password) " +
                 "VALUES(?, ?);", values)) {
-             return -1;
+             return "user.username.error";
          }
-         // Get the userId based on the unique username
-        return getUserId(username);
+        return null;
     }
 
     /**
@@ -80,16 +72,18 @@ public class Users extends Base {
      *
      * @return
      */
-    public Boolean resetPassword(int id, String newPassword) {
+    public String resetPassword(int id, String newPassword) {
         try {
-            ResultSet user = updateStringOnId("UPDATE USERS(password) VALUES" +
-                    "(?) WHERE id=?;", id, newPassword);
-            if (user.next()) {
-                return true;
+            if (updateStringOnId("UPDATE USERS(password) VALUES" +
+                    "(?) WHERE id=?;", id, encryptPassword(newPassword))) {
+                return null; // i.e. success
             }
-            return false;
+            return "user.username.nonexist";
         } catch (Exception e) {
-
+            System.err.println(e);
+            // If we had an error here it means that we weren't able to reset
+            // the user name thus the user must not exist
+            return "user.username.nonexist";
         }
         return user;
     }
@@ -105,25 +99,33 @@ public class Users extends Base {
                 username);
     }
 
-    public boolean deleteUser(String username) {
+    /**
+     * ToDo: We don't have the capabilities of deleting a user - probably
+     * should add this.
+     *
+     * @param userId
+     * @return
+     */
+    public boolean deleteUser(int userId) {
         // Also need to delete all the groups that this person owns and all
         // the reconstructions that they have.
         return false;
     }
 
+
     /**
      * Checks the username and password are valid.
      *
-     * @return
+     * @return String for error message or null for success
      */
-    public int loginUser(String username, String rawPassword) {
+    public String loginUser(String username, String rawPassword) {
         try {
             // Find the user by username in the database
             ResultSet user = queryOnString("SELECT * FROM USERS WHERE " +
                     " username=?;", username);
 
             // Update the users password if we have been given the override
-            String encryptedPassword = user.getString(passwordIdx);
+            String encryptedPassword = user.getString(password.getLabel());
 
             // Check the inputted username against the encrypted password
             // needs to be in a try catch at the moment as we have to change the
@@ -132,14 +134,19 @@ public class Users extends Base {
             Boolean matches = BCrypt.checkpw(rawPassword, encryptedPassword);
 
             if (matches == true) {
-                return user.getInt(idIdx);
+                // If there is no error i.e. the user correctly enters the
+                // password we return null.
+                return null;
+            } else {
+                return "user.password.incorrect";
             }
         } catch (Exception e) {
-            System.out.println(e);
-            return -1;
+            System.err.println(e);
+            // The user musn't exist
+            return "user.username.nonexist";
         }
 
-        return -1;
+        return "user.username.nonexist";
     }
 
 }

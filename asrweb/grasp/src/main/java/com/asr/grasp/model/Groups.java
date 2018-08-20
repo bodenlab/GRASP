@@ -1,9 +1,4 @@
-package com.asr.grasp.db;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+package com.asr.grasp.model;
 
 public class Groups extends Base {
 
@@ -15,7 +10,7 @@ public class Groups extends Base {
         String query = "INSERT INTO GROUPS(owner_id,name) VALUES(" +
                 ownerId + "," + groupName + ");";
         // May need to change this to a query and then a get query
-        return getId(execQuery(query));
+        return getId(query(query));
     }
 
     public int update() {

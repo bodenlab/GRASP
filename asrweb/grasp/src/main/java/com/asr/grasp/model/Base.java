@@ -1,13 +1,11 @@
-package com.asr.grasp.db;
+package com.asr.grasp.model;
 
-import com.asr.grasp.db.DbValue;
+import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Value;
-import org.thymeleaf.expression.Strings;
 
-import javax.persistence.criteria.CriteriaBuilder;
+import javax.management.Query;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class Base {
 
@@ -161,7 +159,7 @@ public class Base {
      * @param query
      * @return
      */
-    public ResultSet updateStringsOnId(String query, int id, String[]
+    public boolean updateStringsOnId(String query, int id, String[]
             values) {
         try {
             Connection con = DriverManager.getConnection(url, username,
@@ -175,12 +173,12 @@ public class Base {
             }
             // ID is in the where clause thus at the end.
             statement.setInt(index, id);
-            ResultSet results = statement.executeQuery();
-            return results;
+            statement.executeQuery();
+            return true;
         } catch (Exception e) {
             System.out.println(e);
+            return false;
         }
-        return null;
     }
 
     /**
@@ -192,7 +190,7 @@ public class Base {
      * @param query
      * @return
      */
-    public ResultSet updateStringOnId(String query, int id, String
+    public boolean updateStringOnId(String query, int id, String
             value) {
         try {
             Connection con = DriverManager.getConnection(url, username,
@@ -200,12 +198,12 @@ public class Base {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, value);
             statement.setInt(2, id);
-            ResultSet results = statement.executeQuery();
-            return results;
+            statement.executeQuery();
+            return true;
         } catch (Exception e) {
             System.out.println(e);
+            return false;
         }
-        return null;
     }
 
     /**
@@ -221,9 +219,9 @@ public class Base {
      */
     private PreparedStatement addValuesToStatement(PreparedStatement
                                                            statement,
-                                                   ArrayList<DbValue> values) {
+                                                   ArrayList<QueryEntry> values) {
         try {
-            for (DbValue value : values) {
+            for (QueryEntry value : values) {
                 switch (value.type) {
                     case 1: // int
                         statement.setInt(value.index, (Integer) value.value);
@@ -252,7 +250,7 @@ public class Base {
      * @param values
      * @return
      */
-    public ResultSet updateValuesOnId(String query, int id, ArrayList<DbValue>
+    public ResultSet updateValuesOnId(String query, int id, ArrayList<QueryEntry>
             values) {
         try {
             Connection con = DriverManager.getConnection(url, username,
@@ -279,7 +277,7 @@ public class Base {
      * @return
              */
     public ResultSet updateValuesOnUniqueString(String query, String id,
-                                      ArrayList<DbValue>
+                                      ArrayList<QueryEntry>
             values) {
         try {
             Connection con = DriverManager.getConnection(url, username,
@@ -339,7 +337,7 @@ public class Base {
         try {
             if (results.next()) {
                 // Check we were only returned a single result
-                if (results.getInt("RECORDCOUNT") != = 1) {
+                if (results.getInt("RECORDCOUNT") != 1) {
                     return -1;
                 }
                 // Get the ID stored in the first column
@@ -371,4 +369,22 @@ public class Base {
         }
         return -1;
     }
+
+    /**
+     * Gets an entry from a column for a row. The results set is currently
+     * pointing to the row in question and the columnEntry is used to define
+     * the type and label or the entry in that row.
+     *
+     */
+    public Object getRowEntry(ResultSet row, ColumnEntry entry) throws
+            SQLException {
+        if (entry.getType() == Defines.STRING) {
+            return row.getString(entry.getLabel());
+        }
+        if (entry.getType() == Defines.INT) {
+            return row.getInt(entry.getLabel());
+        }
+        return null;
+    }
+
 }

@@ -2129,8 +2129,8 @@ function formatMutants(node, poag) {
 
 
 /*
- * Fuses the information from two objects containing edge objects
- * params = edges1 and edges2 are objects containing edge objects
+ * Fuses the information from two controller containing edge controller
+ * params = edges1 and edges2 are controller containing edge controller
  *	   from two different POAGS.
  *
  * returns object containing the unique edges from each edge object, and
@@ -2284,7 +2284,7 @@ function fuse_edges(edge1Info, edge2Info, metadata1, metadata2) {
 /*
  * Fuses inputted two list of nodes from two different POAGs
  *
- * param = -> nodes1 and nodes2 are arrays containing node objects from
+ * param = -> nodes1 and nodes2 are arrays containing node controller from
  *	     different POAGS.
  *	  -> nodes1 can be from a fused type poag, marginal type, or
  *	     joint type.
@@ -2491,7 +2491,7 @@ function fuse_nodes(node1, node2, newNodes, metadata1, metadata2) {
     //fusing the nodes appropriately depending on the poags they are from
     if (metadata1.type == "joint" && metadata2.type == "joint") {
 
-        //need to create new graph and seq objects when fusing joint types
+        //need to create new graph and seq controller when fusing joint types
         newNode.seq = create_seqObject(node1, node2);
         newNode.graph = createGraphObject(newNode.seq, node1, node2);
 
@@ -2569,12 +2569,12 @@ function fuse_marginalGraphs(node1, node2, npoags1, npoags2) {
 }
 
 /*
- * Fuses two bar objects with the same label
+ * Fuses two bar controller with the same label
  *
  * params: -> bar1 must be from a graph object from either a fused or
  *	     marginal poag
  *	      -> bar2 must be from a graph object from a marginal poag
- *	         Both bar objects must have the same label.
+ *	         Both bar controller must have the same label.
  *	     -> npoags1 and 2 is the same as described in params for
  *	        'fused_marginalGraphs'
  *
@@ -2625,7 +2625,7 @@ function create_seqObject(node1, node2) {
 
     if (node1.label != node2.label) {
 
-        //creating two new seperate char objects
+        //creating two new seperate char controller
         newSeq.chars[0] = {"label": node1.label, "value": 1};
         newSeq.chars[1] = {"label": node2.label, "value": 1};
     } else {

@@ -1,6 +1,6 @@
-package com.asr.grasp.db;
+package com.asr.grasp.model;
 
-public class DbValue {
+public class QueryEntry {
     /**
      * Generic record class to store a value, a type and an index of where to
      * either insert of get a record from a database query.
@@ -10,10 +10,9 @@ public class DbValue {
     Object value;
     int index;
 
-    public DbValue(int type, int index, Object value) {
+    public QueryEntry(int type, int index, Object value) {
         this.type = type;
         this.index = index;
         this.value = value;
     }
-}
 }

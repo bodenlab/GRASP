@@ -158,7 +158,7 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Commits any changes to the db.
+     * Commits any changes to the model.
      *
      * @param user
      * @return user

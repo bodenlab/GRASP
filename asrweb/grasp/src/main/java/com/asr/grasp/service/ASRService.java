@@ -221,7 +221,7 @@ public class ASRService {
                 return asrMarginal.getGraphReconNodeId();
             return -1;
         } catch (NullPointerException e) {
-            // objects are still being parsed
+            // controller are still being parsed
             return 0;
         }
     }

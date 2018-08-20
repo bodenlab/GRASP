@@ -124,10 +124,10 @@
 				<version>3.4.2</version>
 				<configuration>
 					<!--<propertyFile>file:///${project.basedir}/src/main/resources/application.properties</propertyFile>
-					<changeLogFile>file:///${project.basedir}/src/main/resources/db/db-initial.xml</changeLogFile>
+					<changeLogFile>file:///${project.basedir}/src/main/resources/model/model-initial.xml</changeLogFile>
 					<username>sa</username>
 					<password></password>
-					<diffChangeLogFile>file:///${project.basedir}/src/main/resources/db/changelog/db-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>-->
+					<diffChangeLogFile>file:///${project.basedir}/src/main/resources/model/changelog/model-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>-->
 					<!--
 					=====================================================================
 						Change the following line to change between -dev and -release

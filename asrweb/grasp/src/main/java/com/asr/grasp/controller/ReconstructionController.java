@@ -1,16 +1,31 @@
-package com.asr.grasp.service;
+package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.ShareUsersModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.*;
+import java.util.zip.DeflaterOutputStream;
 
-public class ReconstructionService {
+@Component
+@SessionScope
+public class ReconstructionController implements Reconstruction {
+
+    /**
+     * The reconstruction controller controls the users actions with the
+     * reconstruction.
+     *
+     * Also it stores the current reconstruction fields.
+     *
+     * Only one reconstruction can be in memory at a time this will reduce
+     * overheads.
+     */
 
     // Means we only instanciate this once
     @Autowired
@@ -136,18 +151,18 @@ public class ReconstructionService {
      *      recons).
      *      2. they already have the dataset or access to this dataset - a
      *      user can't re-save a dataset (this could compromise data security).
-     * @param reconstruction
+     * @param user
      */
-    public String save(ReconstructionService reconstruction, UserService user) {
+    public String save(UserController user) {
 
         // If the user has just created this reconstruction then the ID of
         // the reconstruction will be null
-        if (reconstruction.getId() != Defines.FALSE) {
+        if (this.id != Defines.FALSE) {
             // Try to save the reconstruction, it can potentially return an
             // error e.g. if the label already exists.
-            String err = reconModel.save(reconstruction);
+            String err = reconModel.save(this);
             if (err != null) {
-                user.addToOwnerdReconIds(reconstruction.getId());
+                user.addToOwnerdReconIds(this.id);
             }
             return err;
         } else {
@@ -159,31 +174,29 @@ public class ReconstructionService {
      * Share the reconstruction with a user by their username.
      *
      * Checks that the user who is sharing it has access.
-     * @param reconstruction
+     * @param reconId
      * @param username
      * @return
      */
-    public String shareWithUser(ReconstructionService reconstruction,
-                                String username, UserService
-                                        loggedInUser) {
-        // Check this user has owner access to this reconsturction
-        if (reconstruction.getOwnerId() != loggedInUser.getId() &&
-                reconstruction.getOwnerId() != Defines.UNINIT) {
+    public String shareWithUser(int reconId, String username, int
+                                        loggedInUserId) {
+
+        // Check the logged in user is allowed to share this
+        if (getUsersAccess(reconId, loggedInUserId) != Defines
+                .OWNER_ACCESS) {
             return "recon.share.notowner";
         }
-
         // Get the userId of the user we want to save that reconstruction with
         int userId = usersModel.getUserId(username);
         if (userId == Defines.FALSE) {
             return "user.username.nonexist";
         }
-        // Check if the user already has access
-        if (reconModel.getUsersAccess(reconstruction
-                .getId(), userId) != Defines.NO_ACCESS) {
+        // Check if the user already has access that we're trying to share with
+        if (reconModel.getUsersAccess(reconId, userId) != Defines.NO_ACCESS) {
             return "recon.share.exists";
         }
         // Share the reconstruction with the user
-        return shareUsersModel.shareWithUser(reconstruction.getId(), userId);
+        return shareUsersModel.shareWithUser(reconId, userId);
     }
 
     /**
@@ -191,13 +204,13 @@ public class ReconstructionService {
      *
      * Must be performed by the owner of the reconstruction.
      *
-     * @param reconstruction
+     * @param reconId
      * @param username
-     * @param loggedInUser
+     * @param loggedInUserId
      * @return
      */
-    public String removeUsersAccess(int reconId, String username, UserService
-            loggedInUser) {
+    public String removeUsersAccess(int reconId, String username, int
+            loggedInUserId) {
         // Get the userId of the user we want to save that reconstruction with
         int userId = usersModel.getUserId(username);
         if (userId == Defines.FALSE) {
@@ -205,20 +218,7 @@ public class ReconstructionService {
         }
         // Check if this is the currect reonstruction. If it is we can just
         // get the owner ID from currentRecon
-        ReconstructionService currRecon = loggedInUser.getCurrRecon();
-        if (currRecon != null) {
-            if (reconId == currRecon.getId()) {
-                if (loggedInUser.getId() == currRecon.getOwnerId() &&
-                        loggedInUser.getId() != Defines.UNINIT) {
-                    return shareUsersModel.removeUsersAccess(reconId,
-                            userId);
-                }
-                return "recon.share.notowner";
-            }
-        }
-        // Otherwise we need to check if this user has owner access to be
-        // able to delete it
-        int access = reconModel.getUsersAccess(reconId, userId);
+        int access = getUsersAccess(reconId, loggedInUserId);
         if (access == Defines.OWNER_ACCESS) {
             return shareUsersModel.removeUsersAccess(reconId,
                     userId);
@@ -226,39 +226,40 @@ public class ReconstructionService {
         return "recon.share.notowner";
     }
 
+    private int getUsersAccess(int reconId, int userId) {
+        // Check if this is the currect reonstruction. If it is we can just
+        // get the owner ID from currentRecon
+        if (reconId == this.getId() && reconId != Defines.UNINIT) {
+             if (userId == this.getOwnerId() &&
+                 userId != Defines.UNINIT) {
+                return Defines.OWNER_ACCESS;
+             }
+             return Defines.MEMBER_ACCESS;
+        }
+        // Otherwise we need to check if this user has owner access from the DB.
+        return reconModel.getUsersAccess(reconId, userId);
+    }
     /**
      * Deletes a reconstruction and all its data from the model.
      *
-     * @param reconstruction
+     * @param reconId
      */
-    public String delete(int reconId, UserService loggedInUser) {
-        // Check if this is the currect reonstruction. If it is we can just
-        // get the owner ID from currentRecon
-        ReconstructionService currRecon = loggedInUser.getCurrRecon();
-        int userId = loggedInUser.getId();
-        if (currRecon != null) {
-            if (reconId == currRecon.getId()) {
-                if (userId == currRecon.getOwnerId() &&
-                        userId != Defines.UNINIT) {
-                    return reconModel.delete(reconId);
-                }
-                return "recon.share.notowner";
-            }
-        }
+    public String delete(int reconId, int loggedInUserId) {
         // Otherwise we need to check if this user has owner access to be
         // able to delete it
-        int access = reconModel.getUsersAccess(reconId, userId);
+        int access = getUsersAccess(reconId, loggedInUserId);
+
         if (access == Defines.OWNER_ACCESS) {
             return reconModel.delete(reconId);
         }
-        return "recon.share.notowner";
+        return "recon.delete.notowner";
     }
 
     /**
      * Find reconstructions that are older than a given number of days.
      * Threshold has been set to 30 days.
      */
-    public String checkObseleteReconstructions() {
+    public String checkObsolete() {
         // find reconstructions older than the threshold and remove from repository
         Long threshold = subtractTimeFrame();
         ArrayList<Integer> recons = reconModel.findByDateOlder

@@ -1,9 +1,10 @@
 package com.asr.grasp;
 
-import com.asr.grasp.service.ASRService;
+import com.asr.grasp.controller.ASRController;
 import dat.EnumSeq;
 import dat.Enumerable;
 import json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +25,8 @@ import java.util.List;
 public class ASR {
     private int NUM_THREADS = 5;
 
-    private ASRService asrService = null;
+    @Autowired
+    ASRController asrController;
 
     private String label = "";
     private String inferenceType = "joint";
@@ -61,10 +63,6 @@ public class ASR {
 
     private boolean firstPass = true;
     private int prevProgress = 0;
-
-    public ASR() {
-        this.asrService = new ASRService();
-    }
 
     /*******************************************************************************************************************
      ****** Setters and getters for ASR attributes (forms, etc, automatically call these)
@@ -104,7 +102,7 @@ public class ASR {
         this.nodeLabel = node; }
     public String getNodeLabel() {
         if (nodeLabel == null)
-            nodeLabel = asrService.getRootTreeLabel();
+            nodeLabel = asrController.getRootTreeLabel();
         return this.nodeLabel;
     }
     public void setWorkingNodeLabel(String node) {
@@ -112,7 +110,7 @@ public class ASR {
     }
     public String getWorkingNodeLabel() {
         if (workingNodeLabel == null)
-            workingNodeLabel = asrService.getRootTreeLabel();
+            workingNodeLabel = asrController.getRootTreeLabel();
         return this.workingNodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }
@@ -132,16 +130,16 @@ public class ASR {
     // Logging functions
     public int getNumberBases(){
         if (numBases == 0)
-            numBases = asrService.getNumBases();
+            numBases = asrController.getNumBases();
         return numBases;
     };
     public int getNumberAncestors() {
         if (numAncestors == 0)
-            numAncestors = asrService.getNumAncestors();
+            numAncestors = asrController.getNumAncestors();
         return numAncestors;
     }
     public int getNumberDeletedNodes() {
-        return asrService.getNumDeletedNodes(inferenceType, workingNodeLabel);
+        return asrController.getNumDeletedNodes(inferenceType, workingNodeLabel);
     }
 
     /*******************************************************************************************************************
@@ -150,7 +148,7 @@ public class ASR {
 
 
     public void loadParameters() {
-        asrService.loadParameters(model, NUM_THREADS, nodeLabel, extants, tree, msa);
+        asrController.loadParameters(model, NUM_THREADS, nodeLabel, extants, tree, msa);
         loaded = true;
     }
 
@@ -166,10 +164,10 @@ public class ASR {
         if (tree == null)
             loadTree();
         if (performAlignment && extants == null)
-            asrService.performAlignment(alnFilepath);
-        asrService.runReconstruction(inferenceType, NUM_THREADS, model, nodeLabel, tree, extants);
+            asrController.performAlignment(alnFilepath);
+        asrController.runReconstruction(inferenceType, NUM_THREADS, model, nodeLabel, tree, extants);
         if (reconstructedTree == null)
-            reconstructedTree = asrService.getReconstructedNewick();
+            reconstructedTree = asrController.getReconstructedNewick();
     }
 
     private void loadExtants() throws IOException {
@@ -213,7 +211,7 @@ public class ASR {
     }
 
     public boolean performedRecon() {
-        return asrService.performedRecon();
+        return asrController.performedRecon();
     }
 
 
@@ -260,20 +258,20 @@ public class ASR {
      */
     public String getReconstructedNewickString() {
         if (reconstructedTree == null)
-            reconstructedTree = asrService.getReconstructedNewick();
+            reconstructedTree = asrController.getReconstructedNewick();
         return reconstructedTree;
     }
 
     public String getJointInferences() {
         if (jointInferences == null)
-            jointInferences = asrService.getJointInferences();
+            jointInferences = asrController.getJointInferences();
         return jointInferences;
     }
 
     public void setJointInferences(String inference) {
         jointInferences = inference;
         if (inference != null)
-            asrService.setJointInferences(inference);
+            asrController.setJointInferences(inference);
     }
 
     public void setReconstructedTree(String tree) {
@@ -304,11 +302,11 @@ public class ASR {
      * @param filepath  filepath of where to save graph
      */
     public void saveMSA(String filepath) {
-        asrService.saveMSA(filepath);
+        asrController.saveMSA(filepath);
     }
 
     public void saveMSAAln(String filepath) throws IOException {
-        asrService.saveMSAAln(filepath);
+        asrController.saveMSAAln(filepath);
     }
 
     public String getSequences() {
@@ -342,11 +340,11 @@ public class ASR {
      * @param joint     flag: true, get from joint recon, false, get from marginal
      */
     public void saveAncestorGraph(String label, String filepath, boolean joint) {
-        asrService.saveAncestorGraph(label, filepath, joint);
+        asrController.saveAncestorGraph(label, filepath, joint);
     }
 
     public void saveTree(String filepath) throws IOException {
-        asrService.saveTree(filepath);
+        asrController.saveTree(filepath);
     }
 
     /**
@@ -355,12 +353,12 @@ public class ASR {
      * @param filepath  filepath of where to save ancestor graphs
      */
     public void saveAncestors(String filepath) {
-        asrService.saveAllAncestors(filepath);
+        asrController.saveAllAncestors(filepath);
     }
 
     public void saveAncestors(String filepath, String[] labels) {
         for (String a : labels)
-            asrService.saveAncestorGraph(a, filepath, true);
+            asrController.saveAncestorGraph(a, filepath, true);
     }
 
     /**
@@ -370,7 +368,7 @@ public class ASR {
      * @throws IOException
      */
     public void saveConsensusMarginal(String filepath) throws IOException {
-        asrService.saveConsensusMarginal(filepath);
+        asrController.saveConsensusMarginal(filepath);
     }
 
     /**
@@ -381,7 +379,7 @@ public class ASR {
      * @throws IOException
      */
     public void saveMarginalDistribution(String filepath, String node) throws IOException {
-        asrService.saveMarginalDistribution(filepath, node);
+        asrController.saveMarginalDistribution(filepath, node);
     }
 
     /**
@@ -391,15 +389,15 @@ public class ASR {
      * @throws IOException
      */
     public void saveConsensusJoint(String filepath, String label) throws IOException {
-        asrService.saveConsensusJoint(filepath, label);
+        asrController.saveConsensusJoint(filepath, label);
     }
 
     public void saveConsensusJoint(String filepath, String[] labels) throws IOException {
-        asrService.saveConsensusJoint(filepath, labels);
+        asrController.saveConsensusJoint(filepath, labels);
     }
 
     public int getReconCurrentNodeId() {
-        return asrService.getReconCurrentNodeId(inferenceType);
+        return asrController.getReconCurrentNodeId(inferenceType);
     }
 
     /**
@@ -407,7 +405,7 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getMSAGraphJSON() {
-        return asrService.getMSAGraphJSON(inferenceType);
+        return asrController.getMSAGraphJSON(inferenceType);
     }
 
     /**
@@ -417,19 +415,19 @@ public class ASR {
      * @return  graph JSON object
      */
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
-        return asrService.getAncestralGraphJSON(inferenceType, nodeLabel);
+        return asrController.getAncestralGraphJSON(inferenceType, nodeLabel);
     }
 
     public void setSessionDir(String path) {
-        asrService.setSessionDir(path);
+        asrController.setSessionDir(path);
     }
 
     public String getSessionDir(){
-        return asrService.getSessionDir();
+        return asrController.getSessionDir();
     }
 
     public String getSessionId(){
-        return asrService.getSessionId();
+        return asrController.getSessionId();
     }
 
     /**

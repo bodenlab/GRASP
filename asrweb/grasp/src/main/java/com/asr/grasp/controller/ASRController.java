@@ -1,4 +1,4 @@
-package com.asr.grasp.service;
+package com.asr.grasp.controller;
 
 import alignment.MSA;
 import api.PartialOrderGraph;
@@ -12,7 +12,12 @@ import vis.POAGJson;
 import java.io.IOException;
 import java.util.List;
 
-public class ASRService {
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
+
+@Component
+@SessionScope
+public class ASRController {
     private int NUM_THREADS = 5;
 
     private String sessionId = "";
@@ -36,7 +41,7 @@ public class ASRService {
 
     private String rootLabel = null;
 
-    public ASRService() {
+    public ASRController() {
         this.sessionId = "grasp" + System.currentTimeMillis();
     }
 

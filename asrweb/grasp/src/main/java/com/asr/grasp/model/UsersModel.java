@@ -3,7 +3,11 @@ package com.asr.grasp.model;
 import java.sql.ResultSet;
 
 import com.asr.grasp.utils.Defines;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
+@Component
+@SessionScope
 public class UsersModel extends BaseModel {
 
     /**
@@ -82,7 +86,6 @@ public class UsersModel extends BaseModel {
             // the user name thus the user must not exist
             return "user.username.nonexist";
         }
-        return user;
     }
 
     /**

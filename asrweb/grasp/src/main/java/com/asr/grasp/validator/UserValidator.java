@@ -1,7 +1,8 @@
 package com.asr.grasp.validator;
 
-import com.asr.grasp.User;
-import com.asr.grasp.controller.IUserService;
+import com.asr.grasp.controller.User;
+import com.asr.grasp.controller.UserController;
+import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -11,12 +12,10 @@ import org.springframework.validation.Validator;
 
 @Component
 public class UserValidator implements Validator {
-    @Autowired
-    private IUserService userService;
 
     @Override
     public boolean supports(Class<?> aClass) {
-        return User.class.equals(aClass);
+        return UserController.class.equals(aClass);
     }
 
     @Override
@@ -25,13 +24,13 @@ public class UserValidator implements Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "user.password.empty");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "passwordMatch", "user.passwordMatch.empty");
 
-        User user = (User) o;
+        UserController user = (UserController) o;
 
         if (user.getUsername().length() < 3 || user.getUsername().length() > 32)
             errors.rejectValue("username", "user.username.size");
 
-        if (userService.userExist(user.getUsername()))
-            errors.rejectValue("username", "user.username.duplicate");
+//        if (user.getId() != Defines.UNINIT)
+//            errors.rejectValue("username", "user.username.duplicate");
 
         if (user.getPassword().length() < 3 || user.getPassword().length() > 32)
             errors.rejectValue("password", "user.password.size");

@@ -1,14 +1,18 @@
-package com.asr.grasp.service;
+package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class UserService {
+@Component
+@SessionScope
+public class UserController implements User {
 
     // Means we only instanciate this once
     @Autowired
@@ -35,7 +39,7 @@ public class UserService {
     private HashSet<Integer> memberAccessReconIds; // Didn't create the
     // reconstruction
 
-    private ReconstructionService currRecon; // Store only the users current
+    private ReconstructionController currRecon; // Store only the users current
     // reconstruction.
 
 
@@ -59,6 +63,24 @@ public class UserService {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    /**
+     * Registers the user.
+     */
+    public String register() {
+        // Register the user
+        String err = usersModel.registerUser(this.username, this.password);
+        // We remove the password
+        this.password = null;
+
+        if (err != null) {
+            return err;
+        }
+        // Otherwise we want to update the users ID.
+        setId(usersModel.getUserId(username));
+
+        return null;
     }
 
     /**
@@ -190,7 +212,11 @@ public class UserService {
 
     /**
     /**
-     * Adds the current reconstruction to the Users List
+     * Adds the current reconstruction to the Users List.
+     *
+     * This is done when the user chooses to save the reconstruction. Called
+     * from the ReconstructionController.
+     *
      * @param reconId
      */
     public void addToOwnerdReconIds(int reconId) {
@@ -203,7 +229,7 @@ public class UserService {
     /**
      * Gets the currect reconstruction if the user is working on one.
      */
-    public ReconstructionService getCurrRecon() {
+    public ReconstructionController getCurrRecon() {
         return this.currRecon;
     }
 }

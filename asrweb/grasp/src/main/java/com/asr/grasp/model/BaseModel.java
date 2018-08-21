@@ -2,10 +2,14 @@ package com.asr.grasp.model;
 
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.sql.*;
 import java.util.ArrayList;
 
+@Component
+@SessionScope
 public class BaseModel {
 
     // Connection to model

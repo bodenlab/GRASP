@@ -1,6 +1,11 @@
 package com.asr.grasp.model;
 
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
+
+@Component
+@SessionScope
 public class ShareUsersModel extends BaseModel {
     /**
      * Share a reconstruction with a user.

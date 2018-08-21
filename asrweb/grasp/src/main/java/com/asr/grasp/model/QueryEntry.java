@@ -3,7 +3,7 @@ package com.asr.grasp.model;
 public class QueryEntry {
     /**
      * Generic record class to store a value, a type and an index of where to
-     * either insert of get a record from a database query.
+     * either insert of get a record from a model query.
      */
 
     int type;

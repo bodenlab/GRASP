@@ -1,6 +1,6 @@
 package com.asr.grasp.validator;
 
-import com.asr.grasp.service.IUserService;
+import com.asr.grasp.controller.IUserService;
 import com.asr.grasp.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

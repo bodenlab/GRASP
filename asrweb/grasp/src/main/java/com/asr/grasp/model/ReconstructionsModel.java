@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.asr.grasp.controller.Reconstruction;
+import com.asr.grasp.service.ReconstructionService;
 import com.asr.grasp.utils.Defines;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.print.DocFlavor;
+public class ReconstructionsModel extends BaseModel {
 
-public class Reconstructions extends Base {
+    @Autowired
+    ShareUsersModel shareUsersModel;
 
     final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
     final ColumnEntry ownerId = new ColumnEntry(2, "owner_id", Defines.INT);
@@ -40,9 +42,9 @@ public class Reconstructions extends Base {
      * @return
      * @throws SQLException
      */
-    private Reconstruction createFromDB(ResultSet rawRecons)
+    private ReconstructionService createFromDB(ResultSet rawRecons)
             throws SQLException{
-        Reconstruction reconstruction = new Reconstruction();
+        ReconstructionService reconstruction = new ReconstructionService();
         reconstruction.setId(rawRecons.getInt(id.getLabel()));
         reconstruction.setOwnerId(rawRecons.getInt(ownerId
                 .getLabel()));
@@ -69,6 +71,46 @@ public class Reconstructions extends Base {
 
         return reconstruction;
     }
+
+    /**
+     * Creates the insert statement for a reconstruction.
+     */
+    private String insertIntoDb(ReconstructionService recon) {
+        String query = "INSERT INTO reconstructions(owner_id, ancestor, " +
+                "inference_type, joint_inferences, label, model, msa, node, " +
+                "num_threads, reconstructed_tree, sequences, tree) VALUES(?," +
+                "?,?,?,?,?,?,?,?,?,?,?);";
+
+        try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            // Need to set all the parameters
+            // Note the parameter index corrosponds to where in the statement
+            // above the value has been assigned FOR consistency try do the
+            // same as the model BUT it is up to the programmer to confirm
+            // this is all correct.
+            statement.setInt(1, recon.getOwnerId());
+            statement.setString(2, recon.getAncestor());
+            statement.setString(3, recon.getInferenceType());
+            statement.setString(4, recon.getJointInferences());
+            statement.setString(5, recon.getLabel());
+            statement.setString(6, recon.getModel());
+            statement.setString(7, recon.getMsa());
+            statement.setString(8, recon.getNode());
+            statement.setInt(9, recon.getNumThreads());
+            statement.setString(10, recon.getReconTree());
+            statement.setString(11, recon.getSequences());
+            statement.setString(12, recon.getTree());
+
+            // Deletes the record from the model
+            statement.executeQuery();
+            return null;
+        } catch (Exception e) {
+            return "recon.insert.fail";
+        }
+    }
+
     /**
      * Gets the reconstructions for a current user.
      *
@@ -78,7 +120,7 @@ public class Reconstructions extends Base {
      *
      * @return Set<Reconstruction>
      */
-    public HashSet<Reconstruction> getAllForUser(int userId) {
+    public HashSet<ReconstructionService> getAllForUser(int userId) {
         ResultSet rawRecons = queryOnId("SELECT * FROM " +
                 "reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
@@ -91,7 +133,7 @@ public class Reconstructions extends Base {
 
         // Try format the data and create reconstruction objects to return to
         // the user.
-        HashSet<Reconstruction> reconstructions = new HashSet<>();
+        HashSet<ReconstructionService> reconstructions = new HashSet<>();
         try {
             /**
              * Raw reconstructions maintains a pointer to each row. Each time
@@ -125,13 +167,10 @@ public class Reconstructions extends Base {
      *
      * @return Set<Reconstruction>
      */
-    public HashMap<Integer, HashSet<Integer>>
-    getIdsForUser(int
-                                                                            userId) {
+    public HashMap<Integer, HashSet<Integer>> getIdsForUser(int userId) {
         ResultSet rawRecons = queryOnId("SELECT reconstruction.id as r_id, " +
                 "reconstruction.ownerId as owner_id " +
-                " FROM " +
-                "reconstructions" +
+                " FROM reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
                 "reconstructions.id WHERE " +
                 "share_users.u_id=?;", userId);
@@ -181,14 +220,14 @@ public class Reconstructions extends Base {
      *
      * @return null if no reconstruction matches those configs
      */
-    public Reconstruction getById(int reconId, int
+    public ReconstructionService getById(int reconId, int
             userId) {
         String query = "SELECT * FROM " +
                 "reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
                 "reconstructions.id WHERE " +
                 "share_users.u_id=? AND reconstructions.id=?;";
-        ResultSet rawRecons = runReconQuery(query, reconId, userId, 2,
+        ResultSet rawRecons = runTwoIdQuery(query, reconId, userId, 2,
                 1);
         try {
             // If we have an entry convert it to the correct format.
@@ -221,7 +260,7 @@ public class Reconstructions extends Base {
                 "reconstructions.id WHERE " +
                 "share_users.u_id=? AND reconstructions.id=?;";
 
-         ResultSet rawRecons = runReconQuery(query, reconId, userId, 2,
+         ResultSet rawRecons = runTwoIdQuery(query, reconId, userId, 2,
                     1);
          try {
             // Get the ownerId and userId if the reconstruction exists
@@ -242,7 +281,7 @@ public class Reconstructions extends Base {
 
 
     /**
-     * Save a reconstruction to the database. The owner should already be
+     * Save a reconstruction to the model. The owner should already be
      * stored in the owner_id attribute of the reconstruction.
      *
      * Note: We want to return the error message so that upstream we don't
@@ -254,7 +293,7 @@ public class Reconstructions extends Base {
      *
      * @return  null on success or an
      */
-    public String save(Reconstruction reconstruction) {
+    public String save(ReconstructionService reconstruction) {
         // Check that the reconstruction name is unique
         int reconId = getIdOnUniqueString("SELECT id FROM " +
                 "reconstructions WHERE label=?;", reconstruction.getLabel());
@@ -263,38 +302,30 @@ public class Reconstructions extends Base {
         }
         // Save the reconstruction to both the recon table and to the user
         // share table.
+        String err = insertIntoDb(reconstruction);
+        if (err != null) {
+            return err;
+        }
+        // Check we have this reconstruction in the model also update the
+        // reconstruction ID now it has been assigned an ID.
+        reconId = getId(queryOnString("SELECT id FROM reconstructions " +
+                "WHERE label=?;", reconstruction.getLabel()));
+        // If there is an error here it wasn't able to be inserted. Let the
+        // user know to try again.
+        if (reconId == Defines.ERROR) {
+            return "fail";
+        }
+        // Otherwise we can set the reconstruction ID and add the owner to
+        // the share_users table.
+        reconstruction.setId(reconId);
+        err = shareUsersModel.shareWithUser(reconId, reconstruction.getOwnerId
+                ());
+        if (err != null) {
+            return "fail";
+        }
         return "recon.saved";
     }
 
-    /**
-     * Share a reconstruction with a user.
-     *
-     * This assumes that the user and reconstruction ID exist.
-     * @param reconId
-     * @param userId
-     * @return
-     */
-    public String shareWithUser(int reconId, int userId) {
-        String query = "INSERT INTO share_users(r_id, u_id) VALUES(?, ?);";
-        if(runReconQuery(query, reconId, userId, 1, 2) == null) {
-            return "fail";
-        }
-        return null;
-    }
-
-    /**
-     * Remove a users' access to a reconstruction.
-     * @param reconId
-     * @param userId
-     * @return
-     */
-    public String removeUsersAccess(int reconId, int userId) {
-        String query = "DELETE FROM share_users WHERE r_id = ? AND u_id = ?;";
-        if (runReconQuery(query, reconId, userId, 1, 2) == null) {
-            return "fail";
-        }
-        return null;
-    }
 
     /**
      * Deletes a reconstruction and all it's data.
@@ -355,28 +386,5 @@ public class Reconstructions extends Base {
         return getIdList(query(query));
     }
 
-    /**
-     * Run specific query for reconstruction. This usually involves both the
-     * user ID and the reconstruction ID.
-     *
-     * @param query
-     * @param reconId
-     * @param userId
-     * @return
-     */
-    private ResultSet runReconQuery(String query, int reconId, int userId, int
-            reconIdx, int userIdx) {
-        try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
-            PreparedStatement statement = con.prepareStatement(query);
-            // Sets the
-            statement.setInt(userIdx, userId);
-            statement.setInt(reconIdx, reconId);
-            return statement.executeQuery();
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
-        }
-    }
+
 }

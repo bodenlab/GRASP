@@ -6,7 +6,7 @@ public class Defines {
      */
 
     /**
-     * Add in used datatypes for the database.
+     * Add in used datatypes for the model.
      */
     public static final int INT = 1;
     public final static int STRING = 2;

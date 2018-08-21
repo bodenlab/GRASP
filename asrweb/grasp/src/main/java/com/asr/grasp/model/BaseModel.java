@@ -3,13 +3,12 @@ package com.asr.grasp.model;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.management.Query;
 import java.sql.*;
 import java.util.ArrayList;
 
-public class Base {
+public class BaseModel {
 
-    // Connection to database
+    // Connection to model
     @Value("${spring.datasource.url}")
     String url;
     @Value("${spring.datasource.username}")
@@ -17,12 +16,12 @@ public class Base {
     @Value("${spring.datasource.password}")
     String password;
 
-    public Base() {
+    public BaseModel() {
 
     }
 
     /**
-     * Generic execute query that gets a connection to the database and
+     * Generic execute query that gets a connection to the model and
      * returns the results set.
      *
      * @param query
@@ -42,7 +41,7 @@ public class Base {
     }
 
     /**
-     * Generic execute query that gets a connection to the database and
+     * Generic execute query that gets a connection to the model and
      * returns the results set.
      *
      * @param query
@@ -131,7 +130,7 @@ public class Base {
     }
 
     /**
-     * Generic execute query that gets a connection to the database and
+     * Generic execute query that gets a connection to the model and
      * returns the results set.
      *
      * @param query
@@ -234,7 +233,7 @@ public class Base {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Your database values were incorrectly " +
+            System.err.println("Your model values were incorrectly " +
                     "formmatted");
             return null;
         }
@@ -243,7 +242,7 @@ public class Base {
 
     /**
      * Updates values in a table based on a unique identifier which is
-     * typically the ID of the record in the database.
+     * typically the ID of the record in the model.
      *
      * @param query
      * @param id
@@ -328,7 +327,7 @@ public class Base {
      * Get the id.
      * <p>
      * This also checks that only a single value user returned from the
-     * database so we need to check the length of the results.
+     * model so we need to check the length of the results.
      *
      * @param results
      * @return
@@ -350,7 +349,7 @@ public class Base {
     }
 
     /**
-     * Deletes a database record on ID
+     * Deletes a model record on ID
      *
      * @return success (> 0) or not -1
      */
@@ -361,7 +360,7 @@ public class Base {
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the ID of the element to be deleted
             statement.setInt(1, id);
-            // Deletes the record from the database
+            // Deletes the record from the model
             statement.executeQuery();
             return 1;
         } catch (Exception e) {
@@ -385,6 +384,31 @@ public class Base {
             return row.getInt(entry.getLabel());
         }
         return null;
+    }
+
+    /**
+     * Run specific query on two IDs. This usually involves both the
+     * user ID and the reconstruction ID.
+     *
+     * @param query
+     * @param reconId
+     * @param userId
+     * @return
+     */
+    public ResultSet runTwoIdQuery(String query, int reconId, int userId, int
+            reconIdx, int userIdx) {
+        try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            // Sets the
+            statement.setInt(userIdx, userId);
+            statement.setInt(reconIdx, reconId);
+            return statement.executeQuery();
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
     }
 
 }

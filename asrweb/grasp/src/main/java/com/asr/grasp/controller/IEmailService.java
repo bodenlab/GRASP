@@ -1,4 +1,4 @@
-package com.asr.grasp.service;
+package com.asr.grasp.controller;
 
 import org.springframework.mail.SimpleMailMessage;
 

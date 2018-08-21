@@ -68,7 +68,7 @@ public class User {
     }
 
     /**
-     * Gets the users password from the database
+     * Gets the users password from the model
      * @return hashed password
      */
     public String getPassword() {
@@ -76,7 +76,7 @@ public class User {
     }
 
     /**
-     * Sets a users password in the database.
+     * Sets a users password in the model.
      * The password has already been hashed.
      * @param password
      */

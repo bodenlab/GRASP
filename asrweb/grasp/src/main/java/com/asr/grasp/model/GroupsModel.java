@@ -1,8 +1,8 @@
 package com.asr.grasp.model;
 
-public class Groups extends Base {
+public class GroupsModel extends BaseModel {
 
-    Groups () {
+    GroupsModel() {
 
     }
 

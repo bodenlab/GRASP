@@ -1,17 +1,14 @@
 package com.asr.grasp.model;
 
-import com.asr.grasp.Reconstruction;
-
 import java.sql.ResultSet;
-import java.util.Collection;
-import java.util.Set;
+
 import com.asr.grasp.utils.Defines;
 
-public class Users extends Base {
+public class UsersModel extends BaseModel {
 
     /**
      * Tells us where we can expect each value for the results from the
-     * database.
+     * model.
      */
 
     final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
@@ -22,7 +19,7 @@ public class Users extends Base {
 
     /**
      * Creates a new user account. Encrypts password using bCrypt algorithm.
-     * Saves the user to the database.
+     * Saves the user to the model.
      *
      * @param
      * @return User
@@ -120,7 +117,7 @@ public class Users extends Base {
      */
     public String loginUser(String username, String rawPassword) {
         try {
-            // Find the user by username in the database
+            // Find the user by username in the model
             ResultSet user = queryOnString("SELECT * FROM USERS WHERE " +
                     " username=?;", username);
 

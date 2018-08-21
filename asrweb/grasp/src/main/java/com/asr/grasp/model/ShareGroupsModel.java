@@ -1,5 +1,4 @@
 package com.asr.grasp.model;
 
-
-public class ShareUsers {
+public class ShareGroupsModel {
 }

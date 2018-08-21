@@ -1,11 +1,10 @@
 package com.asr.grasp;
 
-import com.asr.grasp.service.IReconstructionService;
-import com.asr.grasp.service.IUserService;
-import com.asr.grasp.service.IEmailService;
+import com.asr.grasp.controller.IReconstructionService;
+import com.asr.grasp.controller.IUserService;
+import com.asr.grasp.controller.IEmailService;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import json.JSONArray;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +37,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
 @Controller
 @SpringBootApplication

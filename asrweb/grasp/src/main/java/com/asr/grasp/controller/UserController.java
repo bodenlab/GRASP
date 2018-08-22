@@ -2,6 +2,8 @@ package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.UsersModel;
+import com.asr.grasp.objects.Reconstruction;
+import com.asr.grasp.objects.User;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +14,7 @@ import java.util.HashSet;
 
 @Component
 @SessionScope
-public class UserController implements User {
+public class UserController {
 
     // Means we only instanciate this once
     @Autowired
@@ -21,27 +23,22 @@ public class UserController implements User {
     @Autowired
     ReconstructionsModel reconModel;
 
-    private int id = Defines.FALSE; // Ensure we don't use an uninitialised
-    // variable.
 
-    private String username;
+    /**
+     * Checks if we can login the current user.
+     *
+     * @param user
+     * @return String if error with the error message otherwise returns a
+     * null value.
+     */
+    public String loginUser(User user) {
+        String err = usersModel.loginUser(user.getUsername(), user.getPassword());
+        // We want to set the users password (and password Match to be null
+        user.setPassword(null);
+        user.setPasswordMatch(null);
 
-    private String password;
-
-    private String email;
-
-    private String confirmationToken;
-
-    private String passwordMatch;
-
-    private HashSet<Integer> ownerAccessReconIds; // was created by this user.
-
-    private HashSet<Integer> memberAccessReconIds; // Didn't create the
-    // reconstruction
-
-    private ReconstructionController currRecon; // Store only the users current
-    // reconstruction.
-
+        return err;
+    }
 
     /**
      * Get the ID. If the ID hasn't been set yet we need to set it based on
@@ -49,122 +46,37 @@ public class UserController implements User {
      *
      * @return
      */
-    public int getId() {
-        if (id == Defines.FALSE) {
-            if (username != null) {
+    public int getId(User user) {
+        if (user.getId() == Defines.FALSE) {
+            if (user.getUsername() != null) {
                 // Set the user ID
-                setId(usersModel.getUserId(username));
-                return this.id;
+                user.setId(usersModel.getUserId(user.getUsername()));
+                return user.getId();
             }
             return Defines.FALSE;
         }
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        return user.getId();
     }
 
     /**
      * Registers the user.
      */
-    public String register() {
+    public String register(User user) {
         // Register the user
-        String err = usersModel.registerUser(this.username, this.password);
+        String err = usersModel.registerUser(user.getUsername(), user.getPassword());
         // We remove the password
-        this.password = null;
+        user.setPassword(null);
+        user.setPasswordMatch(null);
 
         if (err != null) {
             return err;
         }
         // Otherwise we want to update the users ID.
-        setId(usersModel.getUserId(username));
+        user.setId(usersModel.getUserId(user.getUsername()));
 
         return null;
     }
 
-    /**
-     * Gets the username of the user.
-     * @return username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the username. This is must be unique.
-     * @param username
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Gets the users password from the model
-     * @return hashed password
-     */
-    public String getPassword() {
-        return this.password;
-    }
-
-    /**
-     * Sets a users password in the model.
-     * The password has already been hashed.
-     * @param password
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Sets the secondary password. This is only used in the registration of
-     * a new user. Once it has been validated that the two passwords are the
-     * same this is no longer stored.
-     * @param password
-     */
-    public void setPasswordMatch(String password) {
-        this.passwordMatch = password;
-    }
-
-    /**
-     * ToDo: Check that the email is correctly formatted.
-     * @param email
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    /**
-     * ToDo: Implement this.
-     * @param confirmationToken
-     */
-    public void setConfirmationToken(String confirmationToken) {
-       this.confirmationToken = confirmationToken;
-    }
-
-    /**
-     *
-     * @param email
-     */
-    public String getEmail() {
-        return this.email;
-    }
-
-    /**
-     * ToDo: Implement this.
-     * @param confirmationToken
-     */
-    public String getConfirmationToken() {
-        return this.confirmationToken;
-    }
-
-    /**
-     * Gets the temporary password match. This is taken from the users form.
-     * @return hashed password
-     */
-    public String getPasswordMatch() {
-        return this.passwordMatch;
-    }
 
     /**
      * If we don't already have the reconstructions in memory, we need to get
@@ -172,13 +84,14 @@ public class UserController implements User {
      *
      * @return
      */
-    public HashSet<Integer> getOwnerAccessReconIds() {
+    public HashSet<Integer> getOwnerAccessReconIds(User user) {
         // check if we have already gotten the reconstructions
-        if (this.ownerAccessReconIds != null) {
-            return this.ownerAccessReconIds;
+        if (user.getOwnerAccessReconIds() != null) {
+            return user.getOwnerAccessReconIds();
         }
-        setAllReconIds();
-        return this.ownerAccessReconIds;
+        // Set all the reconstruction Ids for this user.
+        setAllReconIds(user);
+        return user.getOwnerAccessReconIds();
     }
 
     /**
@@ -187,49 +100,35 @@ public class UserController implements User {
      *
      * @return
      */
-    public HashSet<Integer> getMemberAccessReconIds() {
+    public HashSet<Integer> getMemberAccessReconIds(User user) {
         // check if we have already gotten the reconstructionsMember
-        if (this.memberAccessReconIds != null) {
-            return this.memberAccessReconIds;
+        if (user.getMemberAccessReconIds() != null) {
+            return user.getMemberAccessReconIds();
         }
-        setAllReconIds();
-        return this.memberAccessReconIds;
+        // Otherwise we need to set the reconstruction IDs for this user
+        setAllReconIds(user);
+        return user.getMemberAccessReconIds();
     }
 
 
     /**
      * Sets the reconstruction ID's. These are separated by access levels.
      */
-    private void setAllReconIds() {
+    private void setAllReconIds(User user) {
         HashMap<Integer, HashSet<Integer>> allRecons = reconModel
                 .getIdsForUser
-                        (this.id);
-        // Separate out the user access reconstructions and the ownerAccess
-        // ones.
-        this.ownerAccessReconIds = allRecons.get(Defines.OWNER_ACCESS);
-        this.memberAccessReconIds = allRecons.get(Defines.MEMBER_ACCESS);
-    }
-
-    /**
-    /**
-     * Adds the current reconstruction to the Users List.
-     *
-     * This is done when the user chooses to save the reconstruction. Called
-     * from the ReconstructionController.
-     *
-     * @param reconId
-     */
-    public void addToOwnerdReconIds(int reconId) {
-        if (this.ownerAccessReconIds == null) {
-            setAllReconIds();
-        }
-        this.ownerAccessReconIds.add(reconId);
+                        (user.getId());
+        // Set the users reconstrcutions there they will be divided by access
+        user.setAllReconIds(allRecons);
     }
 
     /**
      * Gets the currect reconstruction if the user is working on one.
      */
-    public ReconstructionController getCurrRecon() {
-        return this.currRecon;
+    public Reconstruction setCurrRecon(int reconId, User user) {
+        Reconstruction reconstruction = reconModel.getById(reconId, user
+                .getId());
+        user.setCurrRecon(reconstruction);
+        return reconstruction;
     }
 }

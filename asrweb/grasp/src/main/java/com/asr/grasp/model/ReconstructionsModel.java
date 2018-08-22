@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.asr.grasp.controller.ReconstructionController;
+import com.asr.grasp.objects.Reconstruction;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,9 +48,9 @@ public class ReconstructionsModel extends BaseModel {
      * @return
      * @throws SQLException
      */
-    private ReconstructionController createFromDB(ResultSet rawRecons)
+    private Reconstruction createFromDB(ResultSet rawRecons)
             throws SQLException{
-        ReconstructionController reconstruction = new ReconstructionController();
+        Reconstruction reconstruction = new Reconstruction();
         reconstruction.setId(rawRecons.getInt(id.getLabel()));
         reconstruction.setOwnerId(rawRecons.getInt(ownerId
                 .getLabel()));
@@ -80,7 +81,7 @@ public class ReconstructionsModel extends BaseModel {
     /**
      * Creates the insert statement for a reconstruction.
      */
-    private String insertIntoDb(ReconstructionController recon) {
+    private String insertIntoDb(Reconstruction recon) {
         String query = "INSERT INTO reconstructions(owner_id, ancestor, " +
                 "inference_type, joint_inferences, label, model, msa, node, " +
                 "num_threads, reconstructed_tree, sequences, tree) VALUES(?," +
@@ -125,7 +126,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return Set<Reconstruction>
      */
-    public HashSet<ReconstructionController> getAllForUser(int userId) {
+    public HashSet<Reconstruction> getAllForUser(int userId) {
         ResultSet rawRecons = queryOnId("SELECT * FROM " +
                 "reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
@@ -138,7 +139,7 @@ public class ReconstructionsModel extends BaseModel {
 
         // Try format the data and create reconstruction objects to return to
         // the user.
-        HashSet<ReconstructionController> reconstructions = new HashSet<>();
+        HashSet<Reconstruction> reconstructions = new HashSet<>();
         try {
             /**
              * Raw reconstructions maintains a pointer to each row. Each time
@@ -225,7 +226,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return null if no reconstruction matches those configs
      */
-    public ReconstructionController getById(int reconId, int
+    public Reconstruction getById(int reconId, int
             userId) {
         String query = "SELECT * FROM " +
                 "reconstructions" +
@@ -298,7 +299,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return  null on success or an
      */
-    public String save(ReconstructionController reconstruction) {
+    public String save(Reconstruction reconstruction) {
         // Check that the reconstruction name is unique
         int reconId = getIdOnUniqueString("SELECT id FROM " +
                 "reconstructions WHERE label=?;", reconstruction.getLabel());
@@ -363,7 +364,7 @@ public class ReconstructionsModel extends BaseModel {
      * Also deletes the reconstruction from ther user shares and group shares
      * table.
      *
-     * @param reconId
+     * @param
      * @return
      */
     public String deleteByIdList(ArrayList<Integer> reconIds) {

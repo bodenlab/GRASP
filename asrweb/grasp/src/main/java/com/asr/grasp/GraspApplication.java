@@ -2,6 +2,9 @@ package com.asr.grasp;
 
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
+import com.asr.grasp.objects.Reconstruction;
+import com.asr.grasp.objects.User;
+import com.asr.grasp.objects.Share;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
@@ -28,7 +31,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -58,10 +60,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 	private LoginValidator loginValidator;
 
 	@Autowired
-	private UserController loggedInUser;
+	private UserController userController;
 
 	@Autowired
-	private ReconstructionController currRecon;
+	private ReconstructionController reconController;
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -71,6 +73,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public static void main(String[] args) {
 		SpringApplication.run(GraspApplication.class, args);
 	}
+
+	private User loggedInUser;
+	private Reconstruction currRecon;
 
 	@Autowired
 	private ASR asr;
@@ -98,14 +103,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView showLoginForm(WebRequest request, Model model) {
 		model.addAttribute("user", loggedInUser);
 		model.addAttribute("username", null);
-//		loggedInUser = new com.asr.grasp.User();
 		return new ModelAndView("login");
 	}
 
 	@RequestMapping(value = "/account", method = RequestMethod.GET)
 	public ModelAndView showAccount(WebRequest request, Model model) {
-		currRecon.checkObsolete();
-		return ;
+		reconController.checkObsolete();
+		return accountView.get(loggedInUser);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"cancel"})
@@ -121,12 +125,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 	}
 
 	/**
-	 * ToDo need to change to int reconId from long id
+	 * ToDo need to change to int reconId from long id.
+	 *  Deletes a reconstruction
+	 *
 	 * @param delete
 	 * @param reconId
 	 * @param webrequest
 	 * @param model
-	 * @return
+	 * @return the view for the account page.
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET, params =
 			{"delete", "id"})
@@ -136,7 +142,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		ModelAndView mav = accountView.get(loggedInUser);
 		// Need to check if the users details were correct
-		String err = currRecon.delete(reconId, loggedInUser.getId());
+		String err = reconController.delete(reconId, loggedInUser);
 
 		if (err != null) {
 			mav.addObject("warning", err);
@@ -148,11 +154,25 @@ public class GraspApplication extends SpringBootServletInitializer {
 		return mav;
 	}
 
+	/**
+	 * Shares the reconsrtruction with another user by their username.
+	 *
+	 * ToDo: Need to look at what the shareObject was
+	 * @param share
+	 * @param shareObject
+	 * @param bindingResult
+	 * @param model
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"share"})
-	public ModelAndView shareRecon(@RequestParam("share") String share, @ModelAttribute("share") ShareObject user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+	public ModelAndView shareRecon(@RequestParam("share") String share,
+								   @ModelAttribute("share") Share shareObject,
+								   BindingResult bindingResult, Model model, HttpServletRequest request) {
 		ModelAndView mav = accountView.get(loggedInUser);
 		// Share it with the user
-		String err = currRecon.shareWithUser();
+		String err = reconController.shareWithUser(shareObject.getReconID(),
+				shareObject.getUsername(), loggedInUser);
 
 		if (err != null) {
 			mav.addObject("warning", err);
@@ -164,23 +184,41 @@ public class GraspApplication extends SpringBootServletInitializer {
 		return mav;
 	}
 
+	/**
+	 * Loads a reconstruction based on the ID. ID is the reconstruction ID.
+	 * @param load
+	 * @param id
+	 * @param webrequest
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"load", "id"})
-	public ModelAndView loadRecon(@RequestParam("load") String load, @RequestParam("id") Long id, WebRequest webrequest, Model model) {
+	public ModelAndView loadRecon(@RequestParam("load") String load,
+								  @RequestParam("id") int id, WebRequest
+											  webrequest, Model model) {
 
-		com.asr.grasp.Reconstruction recon = reconstructionService.getReconstruction(id);
-		reconstructionService.updateReconstruction(recon);
+		// Here since we store the current reconsruction we just need to
+		// update the reconstruction that it is pointing at.
+
+		String err = reconController.setCurrentReconForUser(id, loggedInUser);
+
+		if (err != null) {
+			// Return an error
+		}
+
+		currRecon = loggedInUser.getCurrRecon();
 
 		asr = new ASR();
-		asr.setLabel(recon.getLabel());
-		asr.setInferenceType(recon.getInferenceType());
-		asr.setModel(recon.getModel());
-		asr.setNodeLabel(recon.getNode());
-		asr.setTree(recon.getTree());
-		asr.setReconstructedTree(recon.getReconTree());
-		asr.setMSA(recon.getMsa());
-		asr.setAncestor(recon.getAncestor());
-		asr.loadSequences(recon.getSequences());
-		asr.setJointInferences(recon.getJointInferences());
+		asr.setLabel(currRecon.getLabel());
+		asr.setInferenceType(currRecon.getInferenceType());
+		asr.setModel(currRecon.getModel());
+		asr.setNodeLabel(currRecon.getNode());
+		asr.setTree(currRecon.getTree());
+		asr.setReconstructedTree(currRecon.getReconTree());
+		asr.setMSA(currRecon.getMsa());
+		asr.setAncestor(currRecon.getAncestor());
+		asr.loadSequences(currRecon.getSequences());
+		asr.setJointInferences(currRecon.getJointInferences());
 		asr.loadParameters();
 
 		ModelAndView mav = new ModelAndView("index");
@@ -204,93 +242,124 @@ public class GraspApplication extends SpringBootServletInitializer {
 		return mav;
 	}
 
+	/**
+	 * Logs in the user and takes them to their account page.
+	 *
+	 * @param user
+	 * @param bindingResult
+	 * @param model
+	 * @param request
+	 * @return
+	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public ModelAndView loginUser(@Valid @ModelAttribute("user") com.asr.grasp.User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+	public ModelAndView loginUser(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+
 		loginValidator.validate(user, bindingResult);
+
 		if (bindingResult.hasErrors())
 			return new ModelAndView("login");
 
 		// If we have passed the validation this means that the username and
 		// password are correct.
-		com.asr.grasp.User registered = getUserAccount(user);
-		reconstructionService.checkObseleteReconstructions();
-		ModelAndView mav = new ModelAndView("account");
+		String err = userController.loginUser(user);
 
-		if (currentRecon != null) {
-			//if (registered.getNonSharedReconstructions().size() == MAX_RECONS) {
-				mav.addObject("warning", reconstructionService.getLiveTime());
-			//	mav.addObject("type", null);
-			//} else {
-				registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
-				mav.addObject("type", "saved");
-				currentRecon = null;
-			//}
+		reconController.checkObsolete();
+
+		ModelAndView mav = accountView.get(user);
+
+		// CHeck that err wasn't try
+		if (err != null) {
+			mav.addObject("warning", err);
+		} else {
+			mav.addObject("type", "shared");
+			mav.addObject("warning", null);
 		}
 
-		mav.addObject("user", registered);
-		mav.addObject("share", new ShareObject());
-		mav.addObject("reconstructions", registered.getNonSharedReconstructions());
-		mav.addObject("sharedreconstructions", service.getSharedReconstructions(registered));
-
-		loggedInUser = registered;
-		return mav;
-	}
-
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ModelAndView registerUser(@Valid @ModelAttribute("user") com.asr.grasp.User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
-		userValidator.validate(user, bindingResult);
-		if (bindingResult.hasErrors())
-			return new ModelAndView("register");
-		com.asr.grasp.User registered = new com.asr.grasp.User();
-		if (!bindingResult.hasErrors())
-			registered = createUserAccount(user);
-
-		if (currentRecon != null)
-			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
-		currentRecon = null;
-
-		ModelAndView mav = new ModelAndView("account");
-
-		mav.addObject("user", registered);
-		mav.addObject("share", new ShareObject());
-		mav.addObject("reconstructions", registered.getNonSharedReconstructions());
-		loggedInUser = registered;
+//		if (currentRecon != null) {
+//			//if (registered.getNonSharedReconstructions().size() == MAX_RECONS) {
+//				mav.addObject("warning", reconstructionService.getLiveTime());
+//			//	mav.addObject("type", null);
+//			//} else {
+//				registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
+//				mav.addObject("type", "saved");
+//				currentRecon = null;
+//			//}
+//		}
+;
 		return mav;
 	}
 
 	/**
-	 * ToDo: Implememnt send registration email. This will enable users to
-	 * reset passwords etc.
-	 * @param registered
+	 * Registers a new user account and sends the user to the accounts page.
+	 * @param user
+	 * @param bindingResult
+	 * @param model
+	 * @param request
 	 * @return
 	 */
-	private com.asr.grasp.User sendRegistrationEmail(com.asr.grasp.User registered, HttpServletRequest request) {
-		// Disable user until they click on confirmation link in email
-		// registered.setEnabled(false);
+	@RequestMapping(value = "/register", method = RequestMethod.POST)
+	public ModelAndView registerUser(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
 
-		// Generate random 36-character string token for confirmation link
-		registered.setConfirmationToken(UUID.randomUUID().toString());
+		userValidator.validate(user, bindingResult);
 
-		String appUrl = request.getScheme() + "://" + request.getServerName();
+		if (bindingResult.hasErrors()) {
+			return new ModelAndView("register");
+		}
 
-		SimpleMailMessage registrationEmail = new SimpleMailMessage();
-		registrationEmail.setTo(registered.getEmail());
-		registrationEmail.setSubject("Registration Confirmation");
-		registrationEmail.setText("To confirm your e-mail address, please click the link below:\n"
-				+ appUrl + "/confirm?token=" + registered.getConfirmationToken());
-		registrationEmail.setFrom("noreply@domain.com");
+		String err = userController.register(user);
 
-		emailService.sendEmail(registrationEmail);
-		return registered;
+		if (err != null) {
+			// Probably should add an error here
+			return new ModelAndView("register");
+		}
+		// Otherwise we want to get the now logged in user by ID
+		userController.getId(user);
+
+		// Set the loggedInUser
+		loggedInUser = user;
+
+		// Send them to their accounts page
+		return accountView.get(loggedInUser);
+
+//		if (currentRecon != null)
+//			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
+//		currentRecon = null;
+
 	}
 
-	private com.asr.grasp.User createUserAccount(com.asr.grasp.User user){
-		return service.registerNewUserAccount(user);
-	}
-
-	private com.asr.grasp.User getUserAccount(com.asr.grasp.User user){
-		return service.getUserAccount(user);
-	}
+//	/**
+//	 * ToDo: Implememnt send registration email. This will enable users to
+//	 * reset passwords etc.
+//	 * @param registered
+//	 * @return
+//	 */
+//	private User sendRegistrationEmail(User registered, HttpServletRequest request) {
+//		// Disable user until they click on confirmation link in email
+//		// registered.setEnabled(false);
+//
+//		// Generate random 36-character string token for confirmation link
+//		registered.setConfirmationToken(UUID.randomUUID().toString());
+//
+//		String appUrl = request.getScheme() + "://" + request.getServerName();
+//
+//		SimpleMailMessage registrationEmail = new SimpleMailMessage();
+//		registrationEmail.setTo(registered.getEmail());
+//		registrationEmail.setSubject("Registration Confirmation");
+//		registrationEmail.setText("To confirm your e-mail address, please click the link below:\n"
+//				+ appUrl + "/confirm?token=" + registered.getConfirmationToken());
+//		registrationEmail.setFrom("noreply@domain.com");
+//
+//		emailService.sendEmail(registrationEmail);
+//		return registered;
+//	}
+//
+//	private com.asr.grasp.User createUserAccount(com.asr.grasp.User user){
+//		return service.registerNewUserAccount(user);
+//	}
+//
+//	private com.asr.grasp.User getUserAccount(com.asr.grasp.User user){
+//		return service.getUserAccount(user);
+//	}
 
 	/**
 	 * Show guide
@@ -341,38 +410,24 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/save", method = RequestMethod.GET)
 	public ModelAndView saveRecon(WebRequest request, Model model) throws IOException {
-		com.asr.grasp.Reconstruction recon = new com.asr.grasp.Reconstruction();
-		recon.setTree(asr.getTree());
-		recon.setInferenceType(asr.getInferenceType());
-		recon.setNumThreads(asr.getNumberThreads());
-		recon.setLabel(asr.getLabel());
-		recon.setMsa(asr.getMSAGraphJSON().toString());
-		recon.setModel(asr.getModel());
-		recon.setReconTree(asr.getReconstructedNewickString());
-		recon.setNode(asr.getNodeLabel());
-		recon.setJointInferences(asr.getJointInferences());
-		recon.setSequences(asr.getSequences());
-		recon.setAncestor(asr.getAncestralGraphJSON(asr.getNodeLabel()).toString());
+		// Saves the current reconstruction
 
 		// if a user is not logged in, prompt to login
 		if (loggedInUser.getUsername() == null || loggedInUser.getUsername() == "") {
-			currentRecon = recon;
 			ModelAndView mav = new ModelAndView("login");
 			mav.addObject("user", loggedInUser);
 			return mav;
 		}
 
-		loggedInUser = reconstructionService.saveNewReconstruction(recon, loggedInUser);
+		String err = reconController.save(loggedInUser, currRecon);
 
-		ModelAndView mav = new ModelAndView("account");
-		mav.addObject("user", loggedInUser);
-		mav.addObject("share", new ShareObject());
-		mav.addObject("warning", reconstructionService.getLiveTime());
-		mav.addObject("reconstructions", loggedInUser.getNonSharedReconstructions());
-		mav.addObject("sharedreconstructions", service.getSharedReconstructions(loggedInUser));
-		mav.addObject("username", loggedInUser.getUsername());
-		mav.addObject("type", "saved");
-		return mav;
+		// Check if we were able to save it
+		if (err != null) {
+			// ToDo: Something
+			return showError(model);
+		}
+
+		return accountView.get(loggedInUser);
 	}
 
 	/**
@@ -386,7 +441,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 		mav.addObject("asrForm", asr);
 		mav.addObject("error", true);
 		mav.addObject("errorMessage", "Sorry! An unknown error occurred. Please check the error types in the guide and retry your reconstruction... ");
-
 		mav.addObject("username",  loggedInUser.getUsername());
 		return mav;
 	}

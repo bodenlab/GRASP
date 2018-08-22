@@ -3,6 +3,8 @@ package com.asr.grasp.controller;
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.ShareUsersModel;
 import com.asr.grasp.model.UsersModel;
+import com.asr.grasp.objects.Reconstruction;
+import com.asr.grasp.objects.User;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +17,7 @@ import java.util.zip.DeflaterOutputStream;
 
 @Component
 @SessionScope
-public class ReconstructionController implements Reconstruction {
+public class ReconstructionController {
 
     /**
      * The reconstruction controller controls the users actions with the
@@ -37,109 +39,17 @@ public class ReconstructionController implements Reconstruction {
     @Autowired
     ShareUsersModel shareUsersModel;
 
-    private int id = Defines.UNINIT;
 
-    private int ownerId = Defines.UNINIT;
-
-    private String label;
-
-    private String tree;
-
-    private String reconTree;
-
-    private int numThreads;
-
-    private String msa;
-
-    private String sequences;
-
-    private String jointInferences;
-
-    private String ancestor;
-
-    private String inferenceType;
-
-    private String model;
-
-    private String node;
-
-    private String updated_at;
-
-    public int getId() {
-        return this.id;
-    }
-
-    public void setId(int id) { this.id = id; }
-
-    public int getOwnerId() {return this.ownerId; }
-
-    public void setOwnerId(int ownerId) { this.ownerId = ownerId; }
-
-    public void setLabel(String label) { this.label = label; }
-
-    public String getLabel() { return this.label; }
-
-    public void setTree(String tree) { this.tree = tree; }
-
-    public String getSequences() { return this.sequences; }
-
-    public void setSequences(String sequences) { this.sequences = sequences; }
-
-    public String getTree() { return this.tree; }
-
-    public String getJointInferences() { return this.jointInferences; }
-
-    public void setReconTree(String tree) { this.reconTree = tree; }
-
-    public String getReconTree() { return this.reconTree; }
-
-    public void setModel(String model) { this.model = model; }
-
-    public String getModel() { return this.model; }
-
-    public void setNumThreads(int numThreads) { this.numThreads = numThreads; }
-
-    public int getNumThreads() {
-        return this.numThreads;
-    }
-
-    public void setMsa(String msa) {
-        this.msa = msa;
-    }
-
-    public String getMsa() {
-        return this.msa;
-    }
-
-    public void setAncestor(String ancestor) {
-        this.ancestor = ancestor;
-    }
-
-    public String getAncestor() {
-        return this.ancestor;
-    }
-
-    public void setNode(String node) { this.node = node; }
-
-    public String getNode() { return this.node;}
-
-    public String getUpdatedAt() { return this.updated_at; }
-
-    public void setInferenceType(String inferenceType) {
-
-        this.inferenceType = inferenceType;
-
-    }
-
-    public void setJointInferences(String inferences) {
-
-        this.jointInferences = inferences;
-
-    }
-
-    public String getInferenceType() {
-
-        return this.inferenceType;
+    public String setCurrentReconForUser(int reconId, User user) {
+        // Check we can get the reconsrtcution
+        Reconstruction reconstruction = reconModel.getById(reconId, user
+                .getId());
+        // If we have an error return the error
+        if (reconstruction != null) {
+            return "fail";
+        }
+        user.setCurrRecon(reconstruction);
+        return null;
     }
 
     /**
@@ -153,16 +63,16 @@ public class ReconstructionController implements Reconstruction {
      *      user can't re-save a dataset (this could compromise data security).
      * @param user
      */
-    public String save(UserController user) {
+    public String save(User user, Reconstruction recon) {
 
         // If the user has just created this reconstruction then the ID of
         // the reconstruction will be null
-        if (this.id != Defines.FALSE) {
+        if (recon.getId() != Defines.FALSE) {
             // Try to save the reconstruction, it can potentially return an
             // error e.g. if the label already exists.
-            String err = reconModel.save(this);
+            String err = reconModel.save(recon);
             if (err != null) {
-                user.addToOwnerdReconIds(this.id);
+                user.addToOwnerdReconIds(recon.getId());
             }
             return err;
         } else {
@@ -178,11 +88,11 @@ public class ReconstructionController implements Reconstruction {
      * @param username
      * @return
      */
-    public String shareWithUser(int reconId, String username, int
-                                        loggedInUserId) {
+    public String shareWithUser(int reconId, String username, User
+                                        loggedInUser) {
 
         // Check the logged in user is allowed to share this
-        if (getUsersAccess(reconId, loggedInUserId) != Defines
+        if (getUsersAccess(reconId, loggedInUser) != Defines
                 .OWNER_ACCESS) {
             return "recon.share.notowner";
         }
@@ -206,11 +116,11 @@ public class ReconstructionController implements Reconstruction {
      *
      * @param reconId
      * @param username
-     * @param loggedInUserId
+     * @param loggedInUser
      * @return
      */
-    public String removeUsersAccess(int reconId, String username, int
-            loggedInUserId) {
+    public String removeUsersAccess(int reconId, String username, User
+            loggedInUser) {
         // Get the userId of the user we want to save that reconstruction with
         int userId = usersModel.getUserId(username);
         if (userId == Defines.FALSE) {
@@ -218,7 +128,7 @@ public class ReconstructionController implements Reconstruction {
         }
         // Check if this is the currect reonstruction. If it is we can just
         // get the owner ID from currentRecon
-        int access = getUsersAccess(reconId, loggedInUserId);
+        int access = getUsersAccess(reconId, loggedInUser);
         if (access == Defines.OWNER_ACCESS) {
             return shareUsersModel.removeUsersAccess(reconId,
                     userId);
@@ -226,11 +136,13 @@ public class ReconstructionController implements Reconstruction {
         return "recon.share.notowner";
     }
 
-    private int getUsersAccess(int reconId, int userId) {
+    private int getUsersAccess(int reconId, User user) {
         // Check if this is the currect reonstruction. If it is we can just
         // get the owner ID from currentRecon
-        if (reconId == this.getId() && reconId != Defines.UNINIT) {
-             if (userId == this.getOwnerId() &&
+        Reconstruction currRecon = user.getCurrRecon();
+        int userId = user.getId();
+        if (reconId == currRecon.getId() && reconId != Defines.UNINIT) {
+             if (userId == currRecon.getOwnerId() &&
                  userId != Defines.UNINIT) {
                 return Defines.OWNER_ACCESS;
              }
@@ -244,10 +156,10 @@ public class ReconstructionController implements Reconstruction {
      *
      * @param reconId
      */
-    public String delete(int reconId, int loggedInUserId) {
+    public String delete(int reconId, User loggedInUser) {
         // Otherwise we need to check if this user has owner access to be
         // able to delete it
-        int access = getUsersAccess(reconId, loggedInUserId);
+        int access = getUsersAccess(reconId, loggedInUser);
 
         if (access == Defines.OWNER_ACCESS) {
             return reconModel.delete(reconId);

@@ -4,17 +4,18 @@ import java.sql.ResultSet;
 
 import com.asr.grasp.utils.Defines;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.SessionScope;
+//import org.springframework.security.crypto.bcrypt.BCrypt;
 
-@Component
-@SessionScope
+
+@Repository
 public class UsersModel extends BaseModel {
 
     /**
      * Tells us where we can expect each value for the results from the
      * model.
      */
-
     final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
     final ColumnEntry username = new ColumnEntry(2, "username", Defines
             .STRING);
@@ -62,8 +63,8 @@ public class UsersModel extends BaseModel {
      * @return hashed password
      */
     private String encryptPassword(String password) {
-        String encryptedPassword = BCrypt.hashpw(password, BCrypt
-                .gensalt());
+        String encryptedPassword = password;// BCrypt.hashpw(password, BCrypt
+               // .gensalt());
         return encryptedPassword;
     }
 
@@ -131,7 +132,8 @@ public class UsersModel extends BaseModel {
             // needs to be in a try catch at the moment as we have to change the
             // users' passwords from plain text to encrypted.
 
-            Boolean matches = BCrypt.checkpw(rawPassword, encryptedPassword);
+            Boolean matches = Boolean.TRUE; // BCrypt.checkpw(rawPassword,
+            // encryptedPassword);
 
             if (matches == true) {
                 // If there is no error i.e. the user correctly enters the
@@ -145,8 +147,6 @@ public class UsersModel extends BaseModel {
             // The user musn't exist
             return "user.username.nonexist";
         }
-
-        return "user.username.nonexist";
     }
 
 }

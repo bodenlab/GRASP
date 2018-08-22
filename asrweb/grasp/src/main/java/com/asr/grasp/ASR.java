@@ -25,8 +25,7 @@ import java.util.List;
 public class ASR {
     private int NUM_THREADS = 5;
 
-    @Autowired
-    ASRController asrController;
+    private ASRController asrController;
 
     private String label = "";
     private String inferenceType = "joint";
@@ -63,6 +62,10 @@ public class ASR {
 
     private boolean firstPass = true;
     private int prevProgress = 0;
+
+    public ASR() {
+        this.asrController = new ASRController();
+    }
 
     /*******************************************************************************************************************
      ****** Setters and getters for ASR attributes (forms, etc, automatically call these)
@@ -219,6 +222,8 @@ public class ASR {
         this.msa = msa;
     }
 
+    public String getMSA() { return this.msa; }
+
     public JSONObject getMSAGraph() {
         return new JSONObject(msa);
     }
@@ -226,6 +231,8 @@ public class ASR {
     public void setAncestor(String ancestor){
         this.ancestor = ancestor;
     }
+
+    public String getAncestor() { return this.ancestor; }
 
     public JSONObject getAncestorGraph() {
         return new JSONObject(ancestor);

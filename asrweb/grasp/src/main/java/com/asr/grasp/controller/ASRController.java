@@ -15,8 +15,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
-@Component
-@SessionScope
 public class ASRController {
     private int NUM_THREADS = 5;
 

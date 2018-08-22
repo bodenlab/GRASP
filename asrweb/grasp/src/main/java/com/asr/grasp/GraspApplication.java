@@ -15,6 +15,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,7 +37,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCrypt;
+//import org.springframework.security.crypto.bcrypt.BCrypt;
 
 @Controller
 @SpringBootApplication
@@ -74,8 +75,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 		SpringApplication.run(GraspApplication.class, args);
 	}
 
-	private User loggedInUser;
-	private Reconstruction currRecon;
+	private User loggedInUser = new User();
+
+	private Reconstruction currRecon = new Reconstruction();
 
 	@Autowired
 	private ASR asr;
@@ -109,7 +111,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	@RequestMapping(value = "/account", method = RequestMethod.GET)
 	public ModelAndView showAccount(WebRequest request, Model model) {
 		reconController.checkObsolete();
-		return accountView.get(loggedInUser);
+		return accountView.get(loggedInUser, userController);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"cancel"})
@@ -140,7 +142,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 									@RequestParam("id") int reconId, WebRequest
 												webrequest, Model model) {
 
-		ModelAndView mav = accountView.get(loggedInUser);
+		ModelAndView mav = accountView.get(loggedInUser, userController);
 		// Need to check if the users details were correct
 		String err = reconController.delete(reconId, loggedInUser);
 
@@ -169,7 +171,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView shareRecon(@RequestParam("share") String share,
 								   @ModelAttribute("share") Share shareObject,
 								   BindingResult bindingResult, Model model, HttpServletRequest request) {
-		ModelAndView mav = accountView.get(loggedInUser);
+		ModelAndView mav = accountView.get(loggedInUser, userController);
 		// Share it with the user
 		String err = reconController.shareWithUser(shareObject.getReconID(),
 				shareObject.getUsername(), loggedInUser);
@@ -200,11 +202,16 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// Here since we store the current reconsruction we just need to
 		// update the reconstruction that it is pointing at.
 
-		String err = reconController.setCurrentReconForUser(id, loggedInUser);
-
-		if (err != null) {
-			// Return an error
+		Reconstruction recon = reconController.getById(id,
+				loggedInUser);
+		// We want to return that the reconstruction doesn't exist if it
+		// isn't in the db or the user doesn't have access
+		if (recon == null) {
+			return showError(model);
 		}
+
+		// Otherwise we want to set this for the user.
+		userController.setCurrRecon(recon, loggedInUser);
 
 		currRecon = loggedInUser.getCurrRecon();
 
@@ -263,9 +270,13 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// password are correct.
 		String err = userController.loginUser(user);
 
+		userController.getId(user);
+
+		loggedInUser = user;
+
 		reconController.checkObsolete();
 
-		ModelAndView mav = accountView.get(user);
+		ModelAndView mav = accountView.get(loggedInUser, userController);
 
 		// CHeck that err wasn't try
 		if (err != null) {
@@ -319,7 +330,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		loggedInUser = user;
 
 		// Send them to their accounts page
-		return accountView.get(loggedInUser);
+		return accountView.get(loggedInUser, userController);
 
 //		if (currentRecon != null)
 //			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
@@ -427,7 +438,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return showError(model);
 		}
 
-		return accountView.get(loggedInUser);
+		return accountView.get(loggedInUser, userController);
 	}
 
 	/**
@@ -478,6 +489,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView returnASR(Model model) {
 
 		ModelAndView mav = new ModelAndView("index");
+
+		// Here we need to update the reconstruction to have all the
+		// parameters of the ASR.
+		currRecon = reconController.createFromASR(asr);
+		userController.setCurrRecon(currRecon, loggedInUser);
 
 		mav.addObject("label", asr.getLabel());
 

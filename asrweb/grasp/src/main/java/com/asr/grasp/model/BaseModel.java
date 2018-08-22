@@ -3,13 +3,13 @@ package com.asr.grasp.model;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.SessionScope;
 
 import java.sql.*;
 import java.util.ArrayList;
 
-@Component
-@SessionScope
+@Repository
 public class BaseModel {
 
     // Connection to model
@@ -125,7 +125,7 @@ public class BaseModel {
                 statement.setString(idx, value);
                 idx ++;
             }
-            statement.executeQuery();
+            statement.executeUpdate();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -156,6 +156,28 @@ public class BaseModel {
     }
 
     /**
+     * Generic execute query that gets a connection to the model and
+     * returns the results set.
+     *
+     * @param query
+     * @return
+     */
+    public Boolean deleteOnIds(String query, ArrayList<Integer> ids) {
+        try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            // Sets the array of ids
+            statement.setArray(1, (Array) ids);
+            statement.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
+    /**
      * An Update query that updates a number of values of type strings based
      * on an ID.
      *
@@ -176,7 +198,7 @@ public class BaseModel {
             }
             // ID is in the where clause thus at the end.
             statement.setInt(index, id);
-            statement.executeQuery();
+            statement.executeUpdate();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -201,7 +223,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, value);
             statement.setInt(2, id);
-            statement.executeQuery();
+            statement.executeUpdate();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -253,7 +275,7 @@ public class BaseModel {
      * @param values
      * @return
      */
-    public ResultSet updateValuesOnId(String query, int id, ArrayList<QueryEntry>
+    public Boolean updateValuesOnId(String query, int id, ArrayList<QueryEntry>
             values) {
         try {
             Connection con = DriverManager.getConnection(url, username,
@@ -264,12 +286,12 @@ public class BaseModel {
             // Sets the ID
             statement.setInt(values.size() + 1, id);
             // Execute the query
-            ResultSet results = statement.executeQuery();
-            return results;
+            statement.executeUpdate();
+            return true;
         } catch (Exception e) {
             System.out.println(e);
         }
-        return null;
+        return false;
     }
 
     /** Updates values in a table based on a unique String identifier.
@@ -279,7 +301,7 @@ public class BaseModel {
      * @param values
      * @return
              */
-    public ResultSet updateValuesOnUniqueString(String query, String id,
+    public Boolean updateValuesOnUniqueString(String query, String id,
                                       ArrayList<QueryEntry>
             values) {
         try {
@@ -291,12 +313,12 @@ public class BaseModel {
             // Sets the ID
             statement.setString(values.size() + 1, id);
             // Execute the query
-            ResultSet results = statement.executeQuery();
-            return results;
+            statement.executeQuery();
+            return true;
         } catch (Exception e) {
             System.out.println(e);
         }
-        return null;
+        return false;
     }
 
     /**
@@ -357,7 +379,7 @@ public class BaseModel {
      *
      * @return success (> 0) or not -1
      */
-    public int deleteOnId(String query, int id) {
+    public Boolean deleteOnId(String query, int id) {
         try {
             Connection con = DriverManager.getConnection(url, username,
                     password);
@@ -365,12 +387,12 @@ public class BaseModel {
             // Sets the ID of the element to be deleted
             statement.setInt(1, id);
             // Deletes the record from the model
-            statement.executeQuery();
-            return 1;
+            statement.executeUpdate();
+            return true;
         } catch (Exception e) {
             System.out.println(e);
         }
-        return -1;
+        return false;
     }
 
     /**

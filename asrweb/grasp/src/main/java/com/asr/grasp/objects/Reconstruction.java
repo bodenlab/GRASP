@@ -1,6 +1,8 @@
 package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 public class Reconstruction {
     private int id = Defines.UNINIT;

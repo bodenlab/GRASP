@@ -1,6 +1,8 @@
 package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -143,8 +145,13 @@ public class User {
      * Sets the reconstruction ID's. These are separated by access levels.
      */
     public void setAllReconIds(HashMap<Integer, HashSet<Integer>> allRecons) {
-        this.ownerAccessReconIds = allRecons.get(Defines.OWNER_ACCESS);
-        this.memberAccessReconIds = allRecons.get(Defines.MEMBER_ACCESS);
+        if (allRecons == null) {
+            this.ownerAccessReconIds = new HashSet<>();
+            this.memberAccessReconIds = new HashSet<>();
+        } else {
+            this.ownerAccessReconIds = allRecons.get(Defines.OWNER_ACCESS);
+            this.memberAccessReconIds = allRecons.get(Defines.MEMBER_ACCESS);
+        }
     }
 
     /**

@@ -6,17 +6,20 @@ import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.Reconstruction;
 import com.asr.grasp.objects.User;
 import com.asr.grasp.utils.Defines;
+import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
+import com.asr.grasp.ASR;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 
-@Component
-@SessionScope
+@Service
 public class ReconstructionController {
 
     /**
@@ -40,16 +43,15 @@ public class ReconstructionController {
     ShareUsersModel shareUsersModel;
 
 
-    public String setCurrentReconForUser(int reconId, User user) {
+    public Reconstruction getById(int reconId, User user) {
         // Check we can get the reconsrtcution
         Reconstruction reconstruction = reconModel.getById(reconId, user
                 .getId());
         // If we have an error return the error
         if (reconstruction != null) {
-            return "fail";
+            return null;
         }
-        user.setCurrRecon(reconstruction);
-        return null;
+        return reconstruction;
     }
 
     /**
@@ -183,7 +185,7 @@ public class ReconstructionController {
     /**
      * Gets the datestamp a month ago.
      * @return
-     */
+     *//**/
     private Long subtractTimeFrame(){
         LocalDate now = LocalDate.now();
         int month = now.getMonthValue();
@@ -199,5 +201,27 @@ public class ReconstructionController {
         Long time = threshold.getLong(ChronoField.YEAR)*1000 + threshold.getLong(ChronoField.DAY_OF_YEAR);
 
         return time;
+    }
+
+    /**
+     * Creates the reconstrcution object using the values returned from BNkit.
+     * @param asrRecon
+     * @return
+     */
+    public Reconstruction createFromASR(ASR asrRecon) {
+        Reconstruction recon = new Reconstruction();
+        recon.setLabel(asrRecon.getLabel());
+        // Need to check if it is null otherwise will throw an error
+        recon.setAncestor(asrRecon.getAncestor());
+        recon.setInferenceType(asrRecon.getInferenceType());
+        recon.setJointInferences(asrRecon.getJointInferences());
+        recon.setModel(asrRecon.getModel());
+        recon.setMsa(asrRecon.getMSA());
+        recon.setNode(asrRecon.getNodeLabel());
+        recon.setSequences(asrRecon.getSequences());
+        recon.setNumThreads(asrRecon.getNumberThreads());
+        recon.setTree(asrRecon.getTree());
+        recon.setReconTree(asrRecon.getReconstructedNewickString());
+        return recon;
     }
 }

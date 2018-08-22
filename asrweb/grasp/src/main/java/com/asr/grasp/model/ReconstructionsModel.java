@@ -11,14 +11,14 @@ import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.context.annotation.SessionScope;
 
-@Component
-@SessionScope
+
+@Repository
 public class ReconstructionsModel extends BaseModel {
 
-    @Autowired
-    ShareUsersModel shareUsersModel;
+    ShareUsersModel shareUsersModel = new ShareUsersModel();
 
     final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
     final ColumnEntry ownerId = new ColumnEntry(2, "owner_id", Defines.INT);
@@ -110,7 +110,7 @@ public class ReconstructionsModel extends BaseModel {
             statement.setString(12, recon.getTree());
 
             // Deletes the record from the model
-            statement.executeQuery();
+            statement.executeUpdate();
             return null;
         } catch (Exception e) {
             return "recon.insert.fail";
@@ -350,9 +350,9 @@ public class ReconstructionsModel extends BaseModel {
         query = "DELETE FROM share_groups WHERE r_id=?;";
         queryOnId(query, reconId);
         // Delete the reconstruction
-        query = "DELETE FORM reconstructions WHERE id=?;";
+        query = "DELETE FROM reconstructions WHERE id=?;";
 
-        if (queryOnId(query, reconId) == null) {
+        if (deleteOnId(query, reconId) == false) {
             return "fail";
         }
         return null;
@@ -375,8 +375,8 @@ public class ReconstructionsModel extends BaseModel {
         query = "DELETE FROM share_groups WHERE r_id IN ?;";
         queryOnIds(query, reconIds);
         // Delete the reconstruction
-        query = "DELETE FORM reconstructions WHERE id IN ?;";
-        if (queryOnIds(query, reconIds) == null) {
+        query = "DELETE FROM reconstructions WHERE id IN ?;";
+        if (deleteOnIds(query, reconIds) == null) {
             return "fail";
         }
         return null;

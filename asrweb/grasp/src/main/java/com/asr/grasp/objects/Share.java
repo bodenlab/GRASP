@@ -1,5 +1,8 @@
 package com.asr.grasp.objects;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
+
 public class Share {
     /**
      * Object to pass reconstruction share information between the client and server

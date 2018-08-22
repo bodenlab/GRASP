@@ -6,14 +6,13 @@ import com.asr.grasp.objects.Reconstruction;
 import com.asr.grasp.objects.User;
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
-@Component
-@SessionScope
+@Service
 public class UserController {
 
     // Means we only instanciate this once
@@ -125,10 +124,7 @@ public class UserController {
     /**
      * Gets the currect reconstruction if the user is working on one.
      */
-    public Reconstruction setCurrRecon(int reconId, User user) {
-        Reconstruction reconstruction = reconModel.getById(reconId, user
-                .getId());
-        user.setCurrRecon(reconstruction);
-        return reconstruction;
+    public void setCurrRecon(Reconstruction recon, User user) {
+        user.setCurrRecon(recon);
     }
 }

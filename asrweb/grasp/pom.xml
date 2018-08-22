@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.asr</groupId>
@@ -53,21 +53,6 @@
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.liquibase</groupId>
-			<artifactId>liquibase-maven-plugin</artifactId>
-			<version>3.4.2</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
@@ -85,25 +70,23 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity4</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
-			<version>3.1.0.RELEASE</version>
-		</dependency>
+
 
 		<dependency>
 			<groupId>com.asr</groupId>
 			<artifactId>bnkit</artifactId>
 			<version>1.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901-1.jdbc4</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -115,47 +98,6 @@
 					<!-- this will get rid of version info from war file name -->
 					<finalName>${project.artifactId}</finalName>
 				</configuration>
-			</plugin>
-
-			<!-- FOR DEV:-->
-			<plugin>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>3.4.2</version>
-				<configuration>
-					<!--<propertyFile>file:///${project.basedir}/src/main/resources/application.properties</propertyFile>
-					<changeLogFile>file:///${project.basedir}/src/main/resources/model/model-initial.xml</changeLogFile>
-					<username>sa</username>
-					<password></password>
-					<diffChangeLogFile>file:///${project.basedir}/src/main/resources/model/changelog/model-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>-->
-					<!--
-					=====================================================================
-						Change the following line to change between -dev and -release
-					=====================================================================
-					-->
-					<propertyFile>src/main/resources/db/liquibase-dev-override.properties</propertyFile>
-					<changeLogFile>src/main/resources/db/db-initial.xml</changeLogFile>
-					<diffChangeLogFile>src/main/resources/db/changelog/db-changelog-${maven.build.timestamp}.xml</diffChangeLogFile>
-					<referenceUrl>hibernate:spring:com.asr.grasp?dialect=org.hibernate.dialect.H2Dialect</referenceUrl>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.liquibase.ext</groupId>
-						<artifactId>liquibase-hibernate4</artifactId>
-						<version>3.5</version>
-					</dependency>
-
-					<dependency>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-beans</artifactId>
-						<version>4.1.7.RELEASE</version>
-					</dependency>
-					<dependency>
-						<groupId>org.springframework.data</groupId>
-						<artifactId>spring-data-jpa</artifactId>
-						<version>1.7.3.RELEASE</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

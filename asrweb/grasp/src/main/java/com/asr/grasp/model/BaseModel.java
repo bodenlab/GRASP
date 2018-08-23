@@ -12,11 +12,11 @@ public class BaseModel {
 
     // Connection to model
     @Value("${spring.datasource.url}")
-    String url;
+    public String dbUrl;
     @Value("${spring.datasource.username}")
-    String username;
+    public String dbUsername;
     @Value("${spring.datasource.password}")
-    String password;
+    public String dbPassword;
 
     public BaseModel() {
 
@@ -31,8 +31,8 @@ public class BaseModel {
      */
     public ResultSet query(String query) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             ResultSet results = statement.executeQuery();
             return results;
@@ -51,8 +51,8 @@ public class BaseModel {
      */
     public ResultSet queryOnId(String query, int id) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the
             statement.setInt(1, id);
@@ -73,8 +73,8 @@ public class BaseModel {
      */
     public ResultSet queryOnString(String query, String value) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, value);
             ResultSet results = statement.executeQuery();
@@ -94,8 +94,8 @@ public class BaseModel {
      */
     public int getIdOnUniqueString(String query, String id) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, id);
             ResultSet results = statement.executeQuery();
@@ -115,8 +115,8 @@ public class BaseModel {
      */
     public boolean insertStrings(String query, String[] values) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             int idx = 1;
             for (String value: values) {
@@ -140,8 +140,8 @@ public class BaseModel {
      */
     public ResultSet queryOnIds(String query, ArrayList<Integer> ids) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the array of ids
             statement.setArray(1, (Array) ids);
@@ -162,8 +162,8 @@ public class BaseModel {
      */
     public Boolean deleteOnIds(String query, ArrayList<Integer> ids) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the array of ids
             statement.setArray(1, (Array) ids);
@@ -185,8 +185,8 @@ public class BaseModel {
     public boolean updateStringsOnId(String query, int id, String[]
             values) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Adds each String into the query
             int index = 1;
@@ -216,8 +216,8 @@ public class BaseModel {
     public boolean updateStringOnId(String query, int id, String
             value) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, value);
             statement.setInt(2, id);
@@ -276,8 +276,8 @@ public class BaseModel {
     public Boolean updateValuesOnId(String query, int id, ArrayList<QueryEntry>
             values) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Adds each String into the query
             statement = addValuesToStatement(statement, values);
@@ -303,8 +303,8 @@ public class BaseModel {
                                       ArrayList<QueryEntry>
             values) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Adds each String into the query
             statement = addValuesToStatement(statement, values);
@@ -380,8 +380,8 @@ public class BaseModel {
      */
     public Boolean deleteOnId(String query, int id) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the ID of the element to be deleted
             statement.setInt(1, id);
@@ -423,8 +423,8 @@ public class BaseModel {
     public ResultSet runTwoIdQuery(String query, int reconId, int userId, int
             reconIdx, int userIdx) {
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the
             statement.setInt(userIdx, userId);
@@ -436,4 +436,21 @@ public class BaseModel {
         }
     }
 
+
+    public String runTwoUpdateQuery(String query, int reconId, int userId,
+                                       int reconIdx, int userIdx) {
+        try {
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            // Sets the
+            statement.setInt(userIdx, userId);
+            statement.setInt(reconIdx, reconId);
+            statement.executeUpdate();
+            return null;
+        } catch (Exception e) {
+            System.out.println(e);
+            return "fail";
+        }
+    }
 }

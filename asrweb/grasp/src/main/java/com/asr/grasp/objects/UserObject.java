@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class UserObject {
-    private int id = Defines.FALSE; // Ensure we don't use an uninitialised
+    private int id = Defines.UNINIT; // Ensure we don't use an uninitialised
     // variable.
 
     private String username;
@@ -21,10 +21,12 @@ public class UserObject {
 
     private String passwordMatch;
 
-    private ArrayList<GeneralObject> ownerAccessReconIds; // was created by this
+    private ArrayList<GeneralObject> ownerAccessReconIds = new ArrayList<>(); // was created
+    // by this
     // user.
 
-    private ArrayList<GeneralObject> memberAccessReconIds; // Didn't create the
+    private ArrayList<GeneralObject> memberAccessReconIds = new ArrayList<>(); // Didn't
+    // create the
     // reconstruction
 
     private ReconstructionObject currRecon; // Store only the users current

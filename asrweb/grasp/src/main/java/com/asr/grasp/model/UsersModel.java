@@ -107,7 +107,20 @@ public class UsersModel extends BaseModel {
     public boolean deleteUser(int userId) {
         // Also need to delete all the groups that this person owns and all
         // the reconstructions that they have.
-        return false;
+        String queryDeleteShareUsers = "DELETE FROM share_users WHERE u_id =?;";
+        if (deleteOnId(queryDeleteShareUsers, userId) != true) {
+            return false;
+        }
+        String queryDeleteRecon = "DELETE FROM reconstructions WHERE " +
+                "owner_id=?;";
+        if (deleteOnId(queryDeleteRecon, userId) != true) {
+            return false;
+        }
+        String queryDeleteUser = "DELETE FROM users WHERE id=?;";
+        if (deleteOnId(queryDeleteUser, userId) != true) {
+            return false;
+        }
+        return true;
     }
 
 

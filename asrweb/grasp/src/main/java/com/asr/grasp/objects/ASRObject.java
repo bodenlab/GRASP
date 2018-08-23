@@ -9,8 +9,11 @@ import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -470,5 +473,67 @@ public class ASRObject {
 
         // Return a string representation of this
         return combinedPoags.toString();
+    }
+
+    /**
+     * -------------------------------------------------------------------------
+     *          User Interaction Methods
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Runs an ASR on a Session, the user has uploaded files or chosen one of
+     * the example datasets.
+     *
+     * @param sessionPath
+     * @return
+     */
+    public Exception runForSession(String sessionPath) {
+        try {
+            File sessionDir = new File(sessionPath + getSessionId());
+            if (!sessionDir.exists())
+                sessionDir.mkdir();
+
+            setSessionDir(sessionDir.getAbsolutePath() + "/");
+
+            if (seqFile != null || alnFile != null) {
+                // aligning input data before performing reconstruction
+                if (seqFile != null) {
+                    seqFile.transferTo(new File(sessionDir +
+                            seqFile.getOriginalFilename()));
+                    setAlnFilepath(sessionDir + seqFile
+                            .getOriginalFilename());
+                    setPerformAlignment(true);
+                }
+                // performing reconstruction on already aligned data
+                if (alnFile != null) {
+                    alnFile.transferTo(new File(sessionDir + alnFile
+                            .getOriginalFilename()));
+                    setAlnFilepath(sessionDir + alnFile
+                            .getOriginalFilename());
+                }
+                getTreeFile().transferTo(new File(sessionDir + treeFile
+                        .getOriginalFilename()));
+                setTreeFilepath(sessionDir + treeFile.getOriginalFilename());
+            } else {
+                // performing reconstruction on test data
+                File alnFile = new File(Thread.currentThread()
+                        .getContextClassLoader().getResource(data + ".aln")
+                        .toURI());
+                setAlnFilepath(sessionDir + data + ".aln");
+                Files.copy(alnFile.toPath(), (new File(alnFilepath)).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+                File treeFile = new File(Thread.currentThread()
+                        .getContextClassLoader().getResource(data + ".nwk")
+                        .toURI());
+                setTreeFilepath(sessionDir + data + ".nwk");
+                Files.copy(treeFile.toPath(), (new File(treeFilepath)).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+            // Return that it was a success
+            return null;
+        } catch (Exception e) {
+            System.err.println(e);
+            return e;
+        }
     }
 }

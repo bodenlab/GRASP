@@ -85,8 +85,8 @@ public class ReconstructionsModel extends BaseModel {
                 "?,?,?,?,?,?,?,?,?,?,?);";
 
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Need to set all the parameters
             // Note the parameter index corrosponds to where in the statement
@@ -236,8 +236,8 @@ public class ReconstructionsModel extends BaseModel {
                 "reconstructions.id WHERE " +
                 "reconstructions.id=? AND share_users.u_id=?;";
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setInt(2, userId);
@@ -270,8 +270,8 @@ public class ReconstructionsModel extends BaseModel {
                 "reconstructions.id WHERE " +
                 "reconstructions.label=? AND share_users.u_id=?;";
         try {
-            Connection con = DriverManager.getConnection(url, username,
-                    password);
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, reconLabel);
             statement.setInt(2, userId);

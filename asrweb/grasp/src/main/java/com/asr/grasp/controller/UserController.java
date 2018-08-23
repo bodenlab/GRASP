@@ -131,4 +131,18 @@ public class UserController {
     public void setCurrRecon(ReconstructionObject recon, UserObject user) {
         user.setCurrRecon(recon);
     }
+
+    /**
+     * ------------------------------------------------------------------------
+     *          The following are to set the test env.
+     * ------------------------------------------------------------------------
+     */
+    public void setUsersModel(UsersModel usersModel) {
+        this.usersModel = usersModel;
+    }
+
+    public void setReconModel(ReconstructionsModel reconModel) {
+        this.reconModel = reconModel;
+    }
+
 }

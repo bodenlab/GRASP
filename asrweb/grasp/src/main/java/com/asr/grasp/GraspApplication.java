@@ -553,50 +553,28 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		this.asr = asrForm;
 
-		logger.log(Level.INFO, "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
+		// ToDo: Also check here that they have a unique label
 
-
-		// upload supplied files
-		try {
-			File sessionDir = new File(sessionPath + asr.getSessionId());
-			if (!sessionDir.exists())
-				sessionDir.mkdir();
-
-			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-
-			if (asr.getSeqFile() != null || asr.getAlnFile() != null) {
-				// aligning input data before performing reconstruction
-				if (asr.getSeqFile() != null) {
-					asr.getSeqFile().transferTo(new File(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename()));
-					asr.setAlnFilepath(asr.getSessionDir() + asr.getSeqFile().getOriginalFilename());
-					asr.setPerformAlignment(true);
-				}
-				// performing reconstruction on already aligned data
-				if (asr.getAlnFile() != null) {
-					asr.getAlnFile().transferTo(new File(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename()));
-					asr.setAlnFilepath(asr.getSessionDir() + asr.getAlnFile().getOriginalFilename());
-				}
-				asr.getTreeFile().transferTo(new File(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename()));
-				asr.setTreeFilepath(asr.getSessionDir() + asr.getTreeFile().getOriginalFilename());
-			} else {
-				// performing reconstruction on test data
-				File alnFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".aln").toURI());
-				asr.setAlnFilepath(asr.getSessionDir() + asr.getData() + ".aln");
-				Files.copy(alnFile.toPath(), (new File(asr.getAlnFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
-				File treeFile = new File(Thread.currentThread().getContextClassLoader().getResource(asr.getData() + ".nwk").toURI());
-				asr.setTreeFilepath(asr.getSessionDir() + asr.getData() + ".nwk");
-				Files.copy(treeFile.toPath(), (new File(asr.getTreeFilepath())).toPath(), StandardCopyOption.REPLACE_EXISTING);
-			}
-
-			if (asr.getLabel() == "")
-				asr.setLabel("Grasp");
-
-		} catch (Exception e) {
+		if (asr.getLabel() == "") {
 			ModelAndView mav = new ModelAndView("index");
 			mav.addObject("error", true);
-			String message = e.getMessage();
-			logger.log(Level.SEVERE, "ERR, request_addr: " + request.getRemoteAddr() + " error: " + message);
-			if (e.getMessage() == null || e.getMessage().contains("FileNotFoundException"))
+			mav.addObject("errorMessage", "recon.require.label");
+			mav.addObject("user", loggedInUser);
+			mav.addObject("username", loggedInUser.getUsername());
+			return mav;
+		}
+
+		logger.log(Level.INFO, "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
+
+		Exception err = asr.runForSession(sessionPath);
+
+		if (err != null) {
+			ModelAndView mav = new ModelAndView("index");
+			mav.addObject("error", true);
+			String message = err.getMessage();
+			logger.log(Level.SEVERE, "ERR, request_addr: " + request
+					.getRemoteAddr() + " error: " + message);
+			if (err.getMessage() == null || err.getMessage().contains("FileNotFoundException"))
 				message = checkErrors(asr);
 			mav.addObject("errorMessage", message);
 			mav.addObject("user", loggedInUser);

@@ -97,8 +97,9 @@ public class ReconstructionController {
             err = shareUsersModel.shareWithUser(this.getId(recon, user.getId()),
                     user.getId
                     ());
-            if (err != null) {
+            if (err == null) {
                 user.addToOwnerdReconIds(recon.getId(), recon.getLabel());
+                return null;
             }
             return err;
         } else {
@@ -247,5 +248,23 @@ public class ReconstructionController {
         recon.setTree(asrRecon.getTree());
         recon.setReconTree(asrRecon.getReconstructedNewickString());
         return recon;
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     *          The following are to set the test env.
+     * ------------------------------------------------------------------------
+     */
+
+    public void setUsersModel(UsersModel usersModel) {
+        this.usersModel = usersModel;
+    }
+
+    public void setReconModel(ReconstructionsModel reconModel) {
+        this.reconModel = reconModel;
+    }
+
+    public void setShareUsersModel(ShareUsersModel shareUsersModel) {
+        this.shareUsersModel = shareUsersModel;
     }
 }

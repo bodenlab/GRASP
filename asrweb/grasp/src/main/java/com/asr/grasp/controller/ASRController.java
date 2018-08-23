@@ -12,9 +12,6 @@ import vis.POAGJson;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
-
 public class ASRController {
     private int NUM_THREADS = 5;
 

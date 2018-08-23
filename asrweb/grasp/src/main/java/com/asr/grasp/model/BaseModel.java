@@ -2,9 +2,7 @@ package com.asr.grasp.model;
 
 import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.context.annotation.SessionScope;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -101,7 +99,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, id);
             ResultSet results = statement.executeQuery();
-            return results.getInt(1);
+            return getId(results);
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -362,9 +360,10 @@ public class BaseModel {
         try {
             if (results.next()) {
                 // Check we were only returned a single result
-                if (results.getInt("RECORDCOUNT") != 1) {
-                    return -1;
-                }
+//                int recordCount = results.getInt("RECORDCOUNT");
+//                if (recordCount != 1) {
+//                    return -1;
+//                }
                 // Get the ID stored in the first column
                 return results.getInt(1);
             }

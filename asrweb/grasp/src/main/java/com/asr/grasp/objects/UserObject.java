@@ -1,13 +1,13 @@
 package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class User {
+public class UserObject {
     private int id = Defines.FALSE; // Ensure we don't use an uninitialised
     // variable.
 
@@ -21,12 +21,13 @@ public class User {
 
     private String passwordMatch;
 
-    private HashSet<Integer> ownerAccessReconIds; // was created by this user.
+    private ArrayList<GeneralObject> ownerAccessReconIds; // was created by this
+    // user.
 
-    private HashSet<Integer> memberAccessReconIds; // Didn't create the
+    private ArrayList<GeneralObject> memberAccessReconIds; // Didn't create the
     // reconstruction
 
-    private Reconstruction currRecon; // Store only the users current
+    private ReconstructionObject currRecon; // Store only the users current
     // reconstruction.
 
     public int getId() {
@@ -126,7 +127,7 @@ public class User {
      *
      * @return
      */
-    public HashSet<Integer> getOwnerAccessReconIds() {
+    public ArrayList<GeneralObject> getOwnerAccessReconIds() {
         return this.ownerAccessReconIds;
     }
 
@@ -136,7 +137,7 @@ public class User {
      *
      * @return
      */
-    public HashSet<Integer> getMemberAccessReconIds() {
+    public ArrayList<GeneralObject> getMemberAccessReconIds() {
         return this.memberAccessReconIds;
     }
 
@@ -144,10 +145,11 @@ public class User {
     /**
      * Sets the reconstruction ID's. These are separated by access levels.
      */
-    public void setAllReconIds(HashMap<Integer, HashSet<Integer>> allRecons) {
+    public void setAllReconIds(HashMap<Integer, ArrayList<GeneralObject>>
+                                       allRecons) {
         if (allRecons == null) {
-            this.ownerAccessReconIds = new HashSet<>();
-            this.memberAccessReconIds = new HashSet<>();
+            this.ownerAccessReconIds = new ArrayList<>();
+            this.memberAccessReconIds = new ArrayList<>();
         } else {
             this.ownerAccessReconIds = allRecons.get(Defines.OWNER_ACCESS);
             this.memberAccessReconIds = allRecons.get(Defines.MEMBER_ACCESS);
@@ -163,21 +165,21 @@ public class User {
      *
      * @param reconId
      */
-    public void addToOwnerdReconIds(int reconId) {
-        this.ownerAccessReconIds.add(reconId);
+    public void addToOwnerdReconIds(int reconId, String reconLabel) {
+        this.ownerAccessReconIds.add(new GeneralObject(reconId, reconLabel));
     }
 
     /**
      * Gets the currect reconstruction if the user is working on one.
      */
-    public Reconstruction getCurrRecon() {
+    public ReconstructionObject getCurrRecon() {
         return this.currRecon;
     }
 
     /**
      * Sets the currect reconstruction if the user is working on one.
      */
-    public void setCurrRecon(Reconstruction reconstruction) {
+    public void setCurrRecon(ReconstructionObject reconstruction) {
         this.currRecon = reconstruction;
     }
 }

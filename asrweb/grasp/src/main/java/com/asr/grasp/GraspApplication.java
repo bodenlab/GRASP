@@ -1,10 +1,11 @@
 package com.asr.grasp;
 
+import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
-import com.asr.grasp.objects.Reconstruction;
-import com.asr.grasp.objects.User;
-import com.asr.grasp.objects.Share;
+import com.asr.grasp.objects.ReconstructionObject;
+import com.asr.grasp.objects.UserObject;
+import com.asr.grasp.objects.ShareObject;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
@@ -15,7 +16,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.security.crypto.bcrypt.BCrypt;
+
 
 @Controller
 @SpringBootApplication
@@ -75,25 +75,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 		SpringApplication.run(GraspApplication.class, args);
 	}
 
-	private User loggedInUser = new User();
+	private UserObject loggedInUser = new UserObject();
 
-	private Reconstruction currRecon = new Reconstruction();
+	private ReconstructionObject currRecon = new ReconstructionObject();
 
 	@Autowired
-	private ASR asr;
-
-	/**
-	 * Initialise the initial form in the index
-	 *
-	 * @return index html
-	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public ModelAndView showForm(Model model) {
-		this.asr = new ASR();
-		model.addAttribute("asrForm", this.asr);
-		model.addAttribute("username", loggedInUser.getUsername());
-		return new ModelAndView("index");
-	}
+	private ASRObject asr;
 
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
 	public ModelAndView showRegistrationForm(WebRequest request, Model model) {
@@ -113,6 +100,20 @@ public class GraspApplication extends SpringBootServletInitializer {
 		reconController.checkObsolete();
 		return accountView.get(loggedInUser, userController);
 	}
+
+	/**
+	 * Initialise the initial form in the index
+	 *
+	 * @return index html
+	 */
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public ModelAndView showForm(Model model) {
+		this.asr = new ASRObject();
+		model.addAttribute("asrForm", this.asr);
+		model.addAttribute("username", loggedInUser.getUsername());
+		return new ModelAndView("index");
+	}
+
 
 	@RequestMapping(value = "/", method = RequestMethod.GET, params = {"cancel"})
 	public ModelAndView cancelRecon(WebRequest request, Model model) {
@@ -169,10 +170,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = {"share"})
 	public ModelAndView shareRecon(@RequestParam("share") String share,
-								   @ModelAttribute("share") Share shareObject,
+								   @ModelAttribute("share") ShareObject shareObject,
 								   BindingResult bindingResult, Model model, HttpServletRequest request) {
 		ModelAndView mav = accountView.get(loggedInUser, userController);
-		// Share it with the user
+		// ShareObject it with the user
 		String err = reconController.shareWithUser(shareObject.getReconID(),
 				shareObject.getUsername(), loggedInUser);
 
@@ -202,7 +203,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// Here since we store the current reconsruction we just need to
 		// update the reconstruction that it is pointing at.
 
-		Reconstruction recon = reconController.getById(id,
+		ReconstructionObject recon = reconController.getById(id,
 				loggedInUser);
 		// We want to return that the reconstruction doesn't exist if it
 		// isn't in the db or the user doesn't have access
@@ -215,7 +216,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		currRecon = loggedInUser.getCurrRecon();
 
-		asr = new ASR();
+		asr = new ASRObject();
 		asr.setLabel(currRecon.getLabel());
 		asr.setInferenceType(currRecon.getInferenceType());
 		asr.setModel(currRecon.getModel());
@@ -259,7 +260,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public ModelAndView loginUser(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+	public ModelAndView loginUser(@Valid @ModelAttribute("user") UserObject user, BindingResult bindingResult, Model model, HttpServletRequest request) {
 
 		loginValidator.validate(user, bindingResult);
 
@@ -309,7 +310,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return
 	 */
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ModelAndView registerUser(@Valid @ModelAttribute("user") User user, BindingResult bindingResult, Model model, HttpServletRequest request) {
+	public ModelAndView registerUser(@Valid @ModelAttribute("user") UserObject user, BindingResult bindingResult, Model model, HttpServletRequest request) {
 
 		userValidator.validate(user, bindingResult);
 
@@ -365,11 +366,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 //	}
 //
 //	private com.asr.grasp.User createUserAccount(com.asr.grasp.User user){
-//		return service.registerNewUserAccount(user);
+//		return controller.registerNewUserAccount(user);
 //	}
 //
 //	private com.asr.grasp.User getUserAccount(com.asr.grasp.User user){
-//		return service.getUserAccount(user);
+//		return controller.getUserAccount(user);
 //	}
 
 	/**
@@ -423,13 +424,17 @@ public class GraspApplication extends SpringBootServletInitializer {
 	public ModelAndView saveRecon(WebRequest request, Model model) throws IOException {
 		// Saves the current reconstruction
 
-		// if a user is not logged in, prompt to login
+		// if a user is not logged in, prompt to Login
 		if (loggedInUser.getUsername() == null || loggedInUser.getUsername() == "") {
 			ModelAndView mav = new ModelAndView("login");
 			mav.addObject("user", loggedInUser);
 			return mav;
 		}
 
+		// Set the owner to be the logged in user
+		currRecon.setOwnerId(loggedInUser.getId());
+
+		// Save the reconstruction
 		String err = reconController.save(loggedInUser, currRecon);
 
 		// Check if we were able to save it
@@ -544,7 +549,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @return index with results as attributes in the model
 	 */
 	@RequestMapping(value = "/", method = RequestMethod.POST, params = "submitAsr")
-	public ModelAndView performReconstruction(@Valid @ModelAttribute("asrForm") ASR asrForm, BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
+	public ModelAndView performReconstruction(@Valid @ModelAttribute("asrForm") ASRObject asrForm, BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
 
 		this.asr = asrForm;
 
@@ -800,7 +805,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		}
 	}
 
-	private String checkErrors(ASR asr) {
+	private String checkErrors(ASRObject asr) {
 		String message = null;
 		if (!asr.getLoaded())
 			if ((asr.getData() == null || asr.getData().equalsIgnoreCase("") || asr.getData().equalsIgnoreCase("none"))

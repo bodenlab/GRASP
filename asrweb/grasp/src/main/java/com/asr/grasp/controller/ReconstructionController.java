@@ -3,21 +3,16 @@ package com.asr.grasp.controller;
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.ShareUsersModel;
 import com.asr.grasp.model.UsersModel;
-import com.asr.grasp.objects.Reconstruction;
-import com.asr.grasp.objects.User;
+import com.asr.grasp.objects.ReconstructionObject;
+import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
-import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.SessionScope;
-import com.asr.grasp.ASR;
+import com.asr.grasp.objects.ASRObject;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.*;
-import java.util.zip.DeflaterOutputStream;
 
 @Service
 public class ReconstructionController {
@@ -43,9 +38,34 @@ public class ReconstructionController {
     ShareUsersModel shareUsersModel;
 
 
-    public Reconstruction getById(int reconId, User user) {
+    /**
+     * Get the ID. If the ID hasn't been set yet we need to set it based on
+     * the username.
+     *
+     * @return
+     */
+    public int getId(ReconstructionObject recon, int userId) {
+        if (recon.getId() == Defines.FALSE) {
+            if (recon.getLabel() != null) {
+                // Set the user ID
+                recon.setId(reconModel.getIdByLabel(recon.getLabel(), userId));
+                return recon.getId();
+            }
+            return Defines.FALSE;
+        }
+        return recon.getId();
+    }
+
+    /**
+     * Gets a reconstruction by its ID.
+     * This is used to load a saved reconstruction.
+     * @param reconId
+     * @param user
+     * @return
+     */
+    public ReconstructionObject getById(int reconId, UserObject user) {
         // Check we can get the reconsrtcution
-        Reconstruction reconstruction = reconModel.getById(reconId, user
+        ReconstructionObject reconstruction = reconModel.getById(reconId, user
                 .getId());
         // If we have an error return the error
         if (reconstruction != null) {
@@ -65,7 +85,7 @@ public class ReconstructionController {
      *      user can't re-save a dataset (this could compromise data security).
      * @param user
      */
-    public String save(User user, Reconstruction recon) {
+    public String save(UserObject user, ReconstructionObject recon) {
 
         // If the user has just created this reconstruction then the ID of
         // the reconstruction will be null
@@ -73,8 +93,12 @@ public class ReconstructionController {
             // Try to save the reconstruction, it can potentially return an
             // error e.g. if the label already exists.
             String err = reconModel.save(recon);
+            // We want to add it to the share table
+            err = shareUsersModel.shareWithUser(this.getId(recon, user.getId()),
+                    user.getId
+                    ());
             if (err != null) {
-                user.addToOwnerdReconIds(recon.getId());
+                user.addToOwnerdReconIds(recon.getId(), recon.getLabel());
             }
             return err;
         } else {
@@ -83,14 +107,14 @@ public class ReconstructionController {
     }
 
     /**
-     * Share the reconstruction with a user by their username.
+     * ShareObject the reconstruction with a user by their username.
      *
      * Checks that the user who is sharing it has access.
      * @param reconId
      * @param username
      * @return
      */
-    public String shareWithUser(int reconId, String username, User
+    public String shareWithUser(int reconId, String username, UserObject
                                         loggedInUser) {
 
         // Check the logged in user is allowed to share this
@@ -107,7 +131,7 @@ public class ReconstructionController {
         if (reconModel.getUsersAccess(reconId, userId) != Defines.NO_ACCESS) {
             return "recon.share.exists";
         }
-        // Share the reconstruction with the user
+        // ShareObject the reconstruction with the user
         return shareUsersModel.shareWithUser(reconId, userId);
     }
 
@@ -121,7 +145,7 @@ public class ReconstructionController {
      * @param loggedInUser
      * @return
      */
-    public String removeUsersAccess(int reconId, String username, User
+    public String removeUsersAccess(int reconId, String username, UserObject
             loggedInUser) {
         // Get the userId of the user we want to save that reconstruction with
         int userId = usersModel.getUserId(username);
@@ -138,10 +162,10 @@ public class ReconstructionController {
         return "recon.share.notowner";
     }
 
-    private int getUsersAccess(int reconId, User user) {
+    private int getUsersAccess(int reconId, UserObject user) {
         // Check if this is the currect reonstruction. If it is we can just
         // get the owner ID from currentRecon
-        Reconstruction currRecon = user.getCurrRecon();
+        ReconstructionObject currRecon = user.getCurrRecon();
         int userId = user.getId();
         if (reconId == currRecon.getId() && reconId != Defines.UNINIT) {
              if (userId == currRecon.getOwnerId() &&
@@ -158,7 +182,7 @@ public class ReconstructionController {
      *
      * @param reconId
      */
-    public String delete(int reconId, User loggedInUser) {
+    public String delete(int reconId, UserObject loggedInUser) {
         // Otherwise we need to check if this user has owner access to be
         // able to delete it
         int access = getUsersAccess(reconId, loggedInUser);
@@ -208,8 +232,8 @@ public class ReconstructionController {
      * @param asrRecon
      * @return
      */
-    public Reconstruction createFromASR(ASR asrRecon) {
-        Reconstruction recon = new Reconstruction();
+    public ReconstructionObject createFromASR(ASRObject asrRecon) {
+        ReconstructionObject recon = new ReconstructionObject();
         recon.setLabel(asrRecon.getLabel());
         // Need to check if it is null otherwise will throw an error
         recon.setAncestor(asrRecon.getAncestor());

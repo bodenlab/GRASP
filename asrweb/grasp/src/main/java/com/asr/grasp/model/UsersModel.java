@@ -1,12 +1,9 @@
 package com.asr.grasp.model;
 
 import java.sql.ResultSet;
-
 import com.asr.grasp.utils.Defines;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.context.annotation.SessionScope;
-//import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 
 @Repository
@@ -63,8 +60,7 @@ public class UsersModel extends BaseModel {
      * @return hashed password
      */
     private String encryptPassword(String password) {
-        String encryptedPassword = password;// BCrypt.hashpw(password, BCrypt
-               // .gensalt());
+        String encryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         return encryptedPassword;
     }
 
@@ -96,7 +92,8 @@ public class UsersModel extends BaseModel {
      * @return
      */
     public int getUserId(String username) {
-        return getIdOnUniqueString("SELECT id FROM USERS WHERE username=?;",
+        return getIdOnUniqueString("SELECT id, username FROM USERS WHERE " +
+                        "username=?;",
                 username);
     }
 
@@ -132,8 +129,7 @@ public class UsersModel extends BaseModel {
             // needs to be in a try catch at the moment as we have to change the
             // users' passwords from plain text to encrypted.
 
-            Boolean matches = Boolean.TRUE; // BCrypt.checkpw(rawPassword,
-            // encryptedPassword);
+            Boolean matches = BCrypt.checkpw(rawPassword, encryptedPassword);
 
             if (matches == true) {
                 // If there is no error i.e. the user correctly enters the

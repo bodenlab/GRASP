@@ -1,10 +1,9 @@
-package com.asr.grasp;
+package com.asr.grasp.objects;
 
 import com.asr.grasp.controller.ASRController;
 import dat.EnumSeq;
 import dat.Enumerable;
 import json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +21,7 @@ import java.util.List;
  */
 @Component
 @SessionScope
-public class ASR {
+public class ASRObject {
     private int NUM_THREADS = 5;
 
     private ASRController asrController;
@@ -63,7 +62,7 @@ public class ASR {
     private boolean firstPass = true;
     private int prevProgress = 0;
 
-    public ASR() {
+    public ASRObject() {
         this.asrController = new ASRController();
     }
 

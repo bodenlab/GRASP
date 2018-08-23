@@ -5,14 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import com.asr.grasp.controller.ReconstructionController;
-import com.asr.grasp.objects.Reconstruction;
+import com.asr.grasp.objects.GeneralObject;
+import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.context.annotation.SessionScope;
 
 
 @Repository
@@ -48,9 +45,9 @@ public class ReconstructionsModel extends BaseModel {
      * @return
      * @throws SQLException
      */
-    private Reconstruction createFromDB(ResultSet rawRecons)
+    private ReconstructionObject createFromDB(ResultSet rawRecons)
             throws SQLException{
-        Reconstruction reconstruction = new Reconstruction();
+        ReconstructionObject reconstruction = new ReconstructionObject();
         reconstruction.setId(rawRecons.getInt(id.getLabel()));
         reconstruction.setOwnerId(rawRecons.getInt(ownerId
                 .getLabel()));
@@ -81,7 +78,7 @@ public class ReconstructionsModel extends BaseModel {
     /**
      * Creates the insert statement for a reconstruction.
      */
-    private String insertIntoDb(Reconstruction recon) {
+    private String insertIntoDb(ReconstructionObject recon) {
         String query = "INSERT INTO reconstructions(owner_id, ancestor, " +
                 "inference_type, joint_inferences, label, model, msa, node, " +
                 "num_threads, reconstructed_tree, sequences, tree) VALUES(?," +
@@ -126,7 +123,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return Set<Reconstruction>
      */
-    public HashSet<Reconstruction> getAllForUser(int userId) {
+    public HashSet<ReconstructionObject> getAllForUser(int userId) {
         ResultSet rawRecons = queryOnId("SELECT * FROM " +
                 "reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
@@ -139,7 +136,7 @@ public class ReconstructionsModel extends BaseModel {
 
         // Try format the data and create reconstruction objects to return to
         // the user.
-        HashSet<Reconstruction> reconstructions = new HashSet<>();
+        HashSet<ReconstructionObject> reconstructions = new HashSet<>();
         try {
             /**
              * Raw reconstructions maintains a pointer to each row. Each time
@@ -173,9 +170,12 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return Set<Reconstruction>
      */
-    public HashMap<Integer, HashSet<Integer>> getIdsForUser(int userId) {
-        ResultSet rawRecons = queryOnId("SELECT reconstruction.id as r_id, " +
-                "reconstruction.ownerId as owner_id " +
+    public HashMap<Integer, ArrayList<GeneralObject>> getReconsForUser(int
+                                                                            userId) {
+        ResultSet rawRecons = queryOnId("SELECT reconstruction.label as " +
+                "label, " +
+                "reconstruction.ownerId as owner_id, reconstruction.id as " +
+                "r_id " +
                 " FROM reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
                 "reconstructions.id WHERE " +
@@ -187,8 +187,8 @@ public class ReconstructionsModel extends BaseModel {
 
         // Try format the data and create reconstruction objects to return to
         // the user.
-        HashSet<Integer> ownedReconIds = new HashSet<>();
-        HashSet<Integer> sharedWithReconIds = new HashSet<>();
+        ArrayList<GeneralObject> ownedRecons = new ArrayList<>();
+        ArrayList<GeneralObject> sharedWithRecons = new ArrayList<>();
 
         try {
             /**
@@ -199,12 +199,14 @@ public class ReconstructionsModel extends BaseModel {
             while (rawRecons.next()) {
                 int reconOwnerId = rawRecons.getInt("owner_id");
                 int reconId = rawRecons.getInt("r_id");
+                String reconLabel = rawRecons.getString("label");
 
                 // Check if the user owns this reconstruction
                 if (reconOwnerId == userId) {
-                    ownedReconIds.add(reconId);
+                    ownedRecons.add(new GeneralObject(reconId, reconLabel));
                 } else {
-                    sharedWithReconIds.add(reconId);
+                    sharedWithRecons.add(new GeneralObject(reconId,
+                            reconLabel));
                 }
             }
         }
@@ -213,9 +215,9 @@ public class ReconstructionsModel extends BaseModel {
             System.err.println(e);
             return null;
         }
-        HashMap<Integer, HashSet<Integer>> recons = new HashMap<>();
-        recons.put(Defines.OWNER_ACCESS, ownedReconIds);
-        recons.put(Defines.MEMBER_ACCESS, sharedWithReconIds);
+        HashMap<Integer, ArrayList<GeneralObject>> recons = new HashMap<>();
+        recons.put(Defines.OWNER_ACCESS, ownedRecons);
+        recons.put(Defines.MEMBER_ACCESS, sharedWithRecons);
 
         return recons;
     }
@@ -226,16 +228,22 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return null if no reconstruction matches those configs
      */
-    public Reconstruction getById(int reconId, int
+    public ReconstructionObject getById(int reconId, int
             userId) {
         String query = "SELECT * FROM " +
                 "reconstructions" +
                 " LEFT JOIN share_users ON share_users.r_id == " +
                 "reconstructions.id WHERE " +
-                "share_users.u_id=? AND reconstructions.id=?;";
-        ResultSet rawRecons = runTwoIdQuery(query, reconId, userId, 2,
-                1);
+                "reconstructions.id=? AND share_users.u_id=?;";
         try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setInt(1, reconId);
+            statement.setInt(2, userId);
+//            statement.setInt(3, userId);
+
+            ResultSet rawRecons = statement.executeQuery();
             // If we have an entry convert it to the correct format.
             if (rawRecons.next()) {
                 return createFromDB(rawRecons);
@@ -245,6 +253,35 @@ public class ReconstructionsModel extends BaseModel {
             System.out.println(e);
         }
         return null;
+    }
+
+
+    /**
+     * Gets a reconstruction by ID. A user ID is also passed so we need to
+     * confirm that the user has access to this reconstruction.
+     *
+     * @return null if no reconstruction matches those configs
+     */
+    public int getIdByLabel(String reconLabel, int
+            userId) {
+        String query = "SELECT id FROM " +
+                "reconstructions" +
+                " LEFT JOIN share_users ON share_users.r_id == " +
+                "reconstructions.id WHERE " +
+                "reconstructions.label=? AND share_users.u_id=?;";
+        try {
+            Connection con = DriverManager.getConnection(url, username,
+                    password);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setString(1, reconLabel);
+            statement.setInt(2, userId);
+//            statement.setInt(3, userId);
+
+            return getId(statement.executeQuery());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return Defines.ERROR;
     }
 
     /**
@@ -299,7 +336,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return  null on success or an
      */
-    public String save(Reconstruction reconstruction) {
+    public String save(ReconstructionObject reconstruction) {
         // Check that the reconstruction name is unique
         int reconId = getIdOnUniqueString("SELECT id FROM " +
                 "reconstructions WHERE label=?;", reconstruction.getLabel());

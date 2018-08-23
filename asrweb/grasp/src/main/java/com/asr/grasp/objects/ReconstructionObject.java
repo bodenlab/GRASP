@@ -1,10 +1,8 @@
 package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
 
-public class Reconstruction {
+public class ReconstructionObject {
     private int id = Defines.UNINIT;
 
     private int ownerId = Defines.UNINIT;
@@ -30,8 +28,6 @@ public class Reconstruction {
     private String model;
 
     private String node;
-
-    private String updated_at;
 
     public int getId() {
         return this.id;
@@ -90,8 +86,6 @@ public class Reconstruction {
     public void setNode(String node) { this.node = node; }
 
     public String getNode() { return this.node;}
-
-    public String getUpdatedAt() { return this.updated_at; }
 
     public void setInferenceType(String inferenceType) {
 

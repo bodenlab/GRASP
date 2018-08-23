@@ -1,7 +1,5 @@
 package com.asr.grasp.model;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
 
 public class ColumnEntry {
 

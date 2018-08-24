@@ -23,37 +23,8 @@ import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GraspConfig.class})
-public class UserControllerTest {
+public class UserControllerTest extends BaseTest {
 
-    UserController userController;
-    ReconstructionsModel reconModel;
-    UsersModel userModel;
-    UserObject user;
-    String err;
-
-    private UserObject createUser(String username, String password) {
-        UserObject user = new UserObject();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setPasswordMatch(password);
-        return user;
-    }
-
-    /**
-     * Since we are bypassing some of Springs things we need to set up the
-     * test environment before we can actually run tests.
-     */
-    private void setUpEnv() {
-        userController = new UserController();
-        userModel = new UsersModel();
-        userModel.dbPassword = "none";
-        userModel.dbUrl = "jdbc:postgresql://localhost:5432/grasp";
-        userModel.dbUsername = "web";
-        reconModel = new ReconstructionsModel();
-
-        userController.setReconModel(reconModel);
-        userController.setUsersModel(userModel);
-    }
 
     /**
      * Helper method for other tests.
@@ -62,7 +33,7 @@ public class UserControllerTest {
      */
     private UserObject registerUser(UserObject user) {
         // Register User 1
-        err = userController.register(user);
+        String err = userController.register(user);
 
         // check we have no errors
         assertThat(err, is(equalTo(null)));
@@ -82,10 +53,10 @@ public class UserControllerTest {
          */
         setUpEnv();
 
-        user = createUser("testuser", "testpassword");
+        UserObject user = createUser("testuser", "testpassword");
 
         // Register User
-        err = userController.register(user);
+        String err = userController.register(user);
 
         // check we have no errors
         assertThat(err, is(equalTo(null)));
@@ -104,7 +75,7 @@ public class UserControllerTest {
          */
         setUpEnv();
 
-        user = createUser("testuser", "testpassword");
+        UserObject user = createUser("testuser", "testpassword");
         user = registerUser(user); // success method tested above
 
         int userId = user.getId();
@@ -113,7 +84,7 @@ public class UserControllerTest {
         user = createUser("testuser", "testpassword");
 
         // Register User 1
-        err = userController.register(user);
+        String err = userController.register(user);
 
         // check we have an error
         assertThat(err, is(equalTo("user.username.duplicate")));

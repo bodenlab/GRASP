@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import reconstruction.ASR;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -29,86 +30,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GraspConfig.class})
-public class ReconstructionControllerTest {
-
-    String sessionPath = "/Users/ariane/Documents/boden/apps/" +
-            ".tmp/WebSessions/grasp1534997753421/";
-    String dbPassword = "none";
-    String dbUrl = "jdbc:postgresql://localhost:5432/grasp";
-    String dbUser = "web";
-    UserController userController;
-    ShareUsersModel shareUsersModel;
-    ReconstructionObject recon;
-    ASRObject asr;
-    ASRController asrController;
-    ReconstructionController reconController;
-    ReconstructionsModel reconModel;
-    UsersModel userModel;
-    UserObject user;
-    String err;
-
-    private UserObject createAndRegisterUser(String username, String password) {
-        UserObject user = new UserObject();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setPasswordMatch(password);
-        userController.register(user);
-        return user;
-    }
-
-    /**
-     * Since we are bypassing some of Springs things we need to set up the
-     * test environment before we can actually run tests.
-     */
-    private void setUpEnv() {
-        userController = new UserController();
-        reconController = new ReconstructionController();
-        asrController = new ASRController();
-
-        userModel = new UsersModel();
-        userModel.dbPassword = dbPassword;
-        userModel.dbUrl = dbUrl;
-        userModel.dbUsername = dbUser;
-
-        reconModel = new ReconstructionsModel();
-        reconModel.dbPassword = dbPassword;
-        reconModel.dbUrl = dbUrl;
-        reconModel.dbUsername = dbUser;
-
-        shareUsersModel = new ShareUsersModel();
-        shareUsersModel.dbPassword = dbPassword;
-        shareUsersModel.dbUrl = dbUrl;
-        shareUsersModel.dbUsername = dbUser;
-
-        userController.setReconModel(reconModel);
-        userController.setUsersModel(userModel);
-
-        reconController.setReconModel(reconModel);
-        reconController.setUsersModel(userModel);
-        reconController.setShareUsersModel(shareUsersModel);
-    }
-
-    /**
-     * Helper method to create a reconstrcution.
-     * Doesn't check it is correct as it assumes this will be picked up in
-     * TestCreateReconstrcution
-     */
-    public void setAsr() {
-        asr = new ASRObject();
-        asr.setData("tawfik");
-        asr.setInferenceType("JTT");
-        asr.setLabel("Afriat-Jurnouv-test");
-        asr.setWorkingNodeLabel("N0");
-        asr.setNodeLabel("N0");
-        asr.runForSession("/Users/ariane/Documents/boden/apps/" +
-                ".tmp/WebSessions/grasp1534997753421/");
-        try {
-            asr.runReconstruction();
-
-        } catch (Exception e) {
-            // Fail on error
-        }
-    }
+public class ReconstructionControllerTest extends BaseTest {
 
 
     @Test
@@ -118,7 +40,7 @@ public class ReconstructionControllerTest {
          */
         setUpEnv();
 
-        asr = new ASRObject();
+        ASRObject asr = new ASRObject();
         asr.setData("tawfik");
         asr.setInferenceType("joint");
         asr.setLabel("Afriat-Jurnouv-test");
@@ -149,12 +71,12 @@ public class ReconstructionControllerTest {
          * Tests that the ASR module is acting as expected.
          */
         setUpEnv();
-        user = createAndRegisterUser("testuser", "testpassword");
+        UserObject user = createAndRegisterUser("testuser", "testpassword");
 
-        setAsr();
+        ASRObject asr = setAsr();
 
         // Create a reconstruction from an ASR object
-        recon = reconController.createFromASR(asr);
+        ReconstructionObject recon = reconController.createFromASR(asr);
 
         // Set the user to own the reconstruction
         recon.setOwnerId(userController.getId(user));
@@ -174,7 +96,7 @@ public class ReconstructionControllerTest {
      * @param user
      * @return
      */
-    public ReconstructionObject createRecon(UserObject user) {
+    public ReconstructionObject createRecon(UserObject user, ASRObject asr) {
         // Create a reconstruction from an ASR object
         ReconstructionObject recon = reconController.createFromASR(asr);
 
@@ -201,9 +123,9 @@ public class ReconstructionControllerTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        setAsr();
+        ASRObject asr = setAsr();
         // Create a reconstruction from an ASR object
-        recon = createRecon(userOwner);
+        ReconstructionObject recon = createRecon(userOwner, asr);
 
         // Save to the DB
         reconController.save(userOwner, recon);
@@ -243,9 +165,9 @@ public class ReconstructionControllerTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        setAsr();
+        ASRObject asr = setAsr();
         // Create a reconstruction from an ASR object
-        recon = createRecon(userOwner);
+        ReconstructionObject recon = createRecon(userOwner, asr);
 
         // Save to the DB
         reconController.save(userOwner, recon);
@@ -255,7 +177,7 @@ public class ReconstructionControllerTest {
                 userOwner.getId()),
                 userMember.getUsername(), userOwner);
 
-        assertThat(err, is(equalTo(null)));
+        // assertThat(err, is(equalTo(null)));
 
         // Check the user has the correct access
         assertThat(reconController.getUsersAccess(recon.getId(), userMember),
@@ -291,9 +213,9 @@ public class ReconstructionControllerTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        setAsr();
+        ASRObject asr = setAsr();
         // Create a reconstruction from an ASR object
-        recon = createRecon(userOwner);
+        ReconstructionObject recon = createRecon(userOwner, asr);
 
         // Save to the DB
         reconController.save(userOwner, recon);
@@ -303,7 +225,7 @@ public class ReconstructionControllerTest {
                 userOwner.getId()),
                 userMember.getUsername(), userOwner);
 
-        assertThat(err, is(equalTo(null)));
+//        assertThat(err, is(equalTo(null)));
 
         // Check the user has the correct access
         assertThat(reconController.getUsersAccess(recon.getId(), userMember),
@@ -357,9 +279,9 @@ public class ReconstructionControllerTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        setAsr();
+        ASRObject asr = setAsr();
         // Create a reconstruction from an ASR object
-        recon = createRecon(userOwner);
+        ReconstructionObject recon = createRecon(userOwner, asr);
 
         // Save to the DB
         reconController.save(userOwner, recon);
@@ -369,7 +291,7 @@ public class ReconstructionControllerTest {
                 userOwner.getId()),
                 userMember.getUsername(), userOwner);
 
-        assertThat(err, is(equalTo(null)));
+//        assertThat(err, is(equalTo(null)));
 
         // Check the user has the correct access
         assertThat(reconController.getUsersAccess(recon.getId(), userMember),

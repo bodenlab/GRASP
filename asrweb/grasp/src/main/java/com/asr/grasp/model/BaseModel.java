@@ -18,10 +18,6 @@ public class BaseModel {
     @Value("${spring.datasource.password}")
     public String dbPassword;
 
-    public BaseModel() {
-
-    }
-
     /**
      * Generic execute query that gets a connection to the model and
      * returns the results set.
@@ -446,6 +442,24 @@ public class BaseModel {
         } catch (Exception e) {
             System.out.println(e);
             return "fail";
+        }
+    }
+
+    /**
+     * Helper function for running the tests. As we are running it when the
+     * beans are not instanciated it means we need to manually expose the
+     * database. However in release we can have a properties variable that
+     * prevents this (i.e. these will already be set so won't be overridden).
+     */
+    public void setDBConfig(String url, String password, String username) {
+        if (dbPassword == null) {
+            dbPassword = password;
+        }
+        if (dbUsername == null) {
+            dbUsername = username;
+        }
+        if (dbUrl == null) {
+            dbUrl = url;
         }
     }
 }

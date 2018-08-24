@@ -74,8 +74,9 @@ public class UserController {
         if (err != null) {
             return err;
         }
-        // Otherwise we want to update the users ID.
-        user.setId(usersModel.getUserId(user.getUsername()));
+
+        // Set the user's ID
+        getId(user);
 
         return null;
     }

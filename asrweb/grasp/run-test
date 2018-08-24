@@ -1,0 +1,2 @@
+cp pom-test.xml pom.xml
+./mvnw clean compile test

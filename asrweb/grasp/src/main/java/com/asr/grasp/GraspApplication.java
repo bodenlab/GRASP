@@ -273,25 +273,17 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * This is called when a user registers (i.e. they may have just made a
 	 * reconstruction) or logs in.
 	 *
-	 * @param mav
 	 * @return
 	 */
-	public ModelAndView saveCurrRecon(ModelAndView mav) {
-		if (currRecon.getLabel() != null) {
-			// The user may have just logged in so we need to update the
-			// owner id
-			currRecon.setOwnerId(loggedInUser.getId());
+	public String saveCurrRecon() {
+        // The user may have just logged in so we need to update the
+        // owner id
+        currRecon.setOwnerId(loggedInUser.getId());
 
-			String err = reconController.save(loggedInUser, currRecon);
-			// Reset the current recon
-			currRecon = new ReconstructionObject();
-			if (err != null) {
-				mav.addObject("warning", err);
-			} else {
-				mav.addObject("type", "saved");
-			}
-		}
-		return mav;
+        String err = reconController.save(loggedInUser, currRecon);
+        // Reset the current recon
+        currRecon = new ReconstructionObject();
+        return err;
 	}
 
 	/**
@@ -320,17 +312,27 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// ToDo: check the obsolete recons
 		//reconController.checkObsolete();
 
-		ModelAndView mav = accountView.get(loggedInUser, userController);
-
+		String errSave = null;
+		Boolean saved = false;
 		// If there is a current reconstruction save it.
-		mav = saveCurrRecon(mav);
+        if (currRecon.getLabel() != null) {
+            errSave = saveCurrRecon();
+            saved = true;
+        }
 
-		// CHeck that err wasn't try
-		if (err != null) {
-			mav.addObject("warning", err);
+        // Get their accounts page after we have saved the reconstruction (if
+        // one existed).
+        ModelAndView mav = accountView.get(loggedInUser, userController);
+
+        // CHeck that err wasn't try
+		if (err != null || errSave != null) {
+			mav.addObject("warning", err.toString() + errSave.toString());
 		} else {
 			mav.addObject("warning", null);
 		}
+        if (errSave == null && saved == true) {
+            mav.addObject("type", "saved");
+        }
 
 		return mav;
 	}
@@ -364,12 +366,28 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// Set the loggedInUser
 		loggedInUser = user;
 
+        Boolean saved = false;
+        String errSave = null;
+        // If there is a current reconstruction save it.
+        if (currRecon.getLabel() != null) {
+            errSave = saveCurrRecon();
+            saved = true;
+        }
 
-		// Send them to their accounts page
-		ModelAndView mav = accountView.get(loggedInUser, userController);
+        // Get their accounts page after we have saved the reconstruction (if
+        // one existed).
+        ModelAndView mav = accountView.get(loggedInUser, userController);
 
-		// If there is a current reconstruction save it.
-		return saveCurrRecon(mav);
+        // CHeck that err wasn't try
+        if (err != null || errSave != null) {
+            mav.addObject("warning", err.toString() + errSave.toString());
+        } else {
+            mav.addObject("warning", null);
+        }
+        if (errSave == null && saved == true) {
+            mav.addObject("type", "saved");
+        }
+        return mav;
 	}
 
 //	/**
@@ -531,7 +549,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 */
 	public void setReconFromASR(ASRObject asr, JSONObject ancestor,
 								JSONObject msa) {
-		currRecon = reconController.createFromASR(asr);
+
+	    currRecon = reconController.createFromASR(asr);
 
 		// Set the anscestor and the msa
 		currRecon.setAncestor(ancestor.toString());

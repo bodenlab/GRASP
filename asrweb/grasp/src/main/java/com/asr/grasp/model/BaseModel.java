@@ -103,7 +103,7 @@ public class BaseModel {
         } catch (Exception e) {
             System.out.println(e);
         }
-        return -1;
+        return Defines.FALSE;
     }
 
     /**
@@ -365,7 +365,7 @@ public class BaseModel {
         } catch (Exception e) {
             System.err.println(e);
         }
-        return -1;
+        return Defines.FALSE;
     }
 
     /**

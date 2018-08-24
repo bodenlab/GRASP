@@ -10,6 +10,7 @@ import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
 import json.JSONArray;
+import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -88,8 +89,22 @@ public class GraspApplication extends SpringBootServletInitializer {
 		return new ModelAndView("register");
 	}
 
+	/**
+	 * This is actually to logout.
+	 * Here we want to reset the loggedInUser and also the current
+	 * reconstruction and ASR.
+	 *
+	 * @param request
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public ModelAndView showLoginForm(WebRequest request, Model model) {
+		// Reset our variables.
+		loggedInUser = new UserObject();
+		currRecon = new ReconstructionObject();
+		asr = new ASRObject();
+
 		model.addAttribute("user", loggedInUser);
 		model.addAttribute("username", null);
 		return new ModelAndView("login");
@@ -97,7 +112,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	@RequestMapping(value = "/account", method = RequestMethod.GET)
 	public ModelAndView showAccount(WebRequest request, Model model) {
-		reconController.checkObsolete();
+		// ToDo: Check the obsolete recons
+		//reconController.checkObsolete();
 		return accountView.get(loggedInUser, userController);
 	}
 
@@ -238,6 +254,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		// add msa and inferred ancestral graph
 		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraph(), asr.getAncestorGraph());
+
 		mav.addObject("graph", graphs);
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -247,6 +264,33 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		mav.addObject("user", loggedInUser);
 		mav.addObject("username", loggedInUser.getUsername());
+		return mav;
+	}
+
+	/**
+	 * Save the current reconstruction if there is a current reconstruction.
+	 *
+	 * This is called when a user registers (i.e. they may have just made a
+	 * reconstruction) or logs in.
+	 *
+	 * @param mav
+	 * @return
+	 */
+	public ModelAndView saveCurrRecon(ModelAndView mav) {
+		if (currRecon.getLabel() != null) {
+			// The user may have just logged in so we need to update the
+			// owner id
+			currRecon.setOwnerId(loggedInUser.getId());
+
+			String err = reconController.save(loggedInUser, currRecon);
+			// Reset the current recon
+			currRecon = new ReconstructionObject();
+			if (err != null) {
+				mav.addObject("warning", err);
+			} else {
+				mav.addObject("type", "saved");
+			}
+		}
 		return mav;
 	}
 
@@ -271,33 +315,23 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// password are correct.
 		String err = userController.loginUser(user);
 
-		userController.getId(user);
-
 		loggedInUser = user;
 
-		reconController.checkObsolete();
+		// ToDo: check the obsolete recons
+		//reconController.checkObsolete();
 
 		ModelAndView mav = accountView.get(loggedInUser, userController);
+
+		// If there is a current reconstruction save it.
+		mav = saveCurrRecon(mav);
 
 		// CHeck that err wasn't try
 		if (err != null) {
 			mav.addObject("warning", err);
 		} else {
-			mav.addObject("type", "shared");
 			mav.addObject("warning", null);
 		}
 
-//		if (currentRecon != null) {
-//			//if (registered.getNonSharedReconstructions().size() == MAX_RECONS) {
-//				mav.addObject("warning", reconstructionService.getLiveTime());
-//			//	mav.addObject("type", null);
-//			//} else {
-//				registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
-//				mav.addObject("type", "saved");
-//				currentRecon = null;
-//			//}
-//		}
-;
 		return mav;
 	}
 
@@ -330,13 +364,12 @@ public class GraspApplication extends SpringBootServletInitializer {
 		// Set the loggedInUser
 		loggedInUser = user;
 
+
 		// Send them to their accounts page
-		return accountView.get(loggedInUser, userController);
+		ModelAndView mav = accountView.get(loggedInUser, userController);
 
-//		if (currentRecon != null)
-//			registered = reconstructionService.saveNewReconstruction(currentRecon, registered);
-//		currentRecon = null;
-
+		// If there is a current reconstruction save it.
+		return saveCurrRecon(mav);
 	}
 
 //	/**
@@ -490,6 +523,27 @@ public class GraspApplication extends SpringBootServletInitializer {
 		return asr.getPrevProgress() + "%";
 	}
 
+	/**
+	 * Helper function to set the current reconstruction.
+	 * @param asr
+	 * @param ancestor
+	 * @param msa
+	 */
+	public void setReconFromASR(ASRObject asr, JSONObject ancestor,
+								JSONObject msa) {
+		currRecon = reconController.createFromASR(asr);
+
+		// Set the anscestor and the msa
+		currRecon.setAncestor(ancestor.toString());
+		currRecon.setMsa(msa.toString());
+
+		// Set the owner ID to be the logged in user
+		currRecon.setOwnerId(loggedInUser.getId());
+
+		// Set the current reconstruction of the owner to be this reconstruction
+		userController.setCurrRecon(currRecon, loggedInUser);
+	}
+
 	@RequestMapping(value = "/", method = RequestMethod.GET, params={"getrecon"})
 	public ModelAndView returnASR(Model model) {
 
@@ -497,8 +551,15 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		// Here we need to update the reconstruction to have all the
 		// parameters of the ASR.
-		currRecon = reconController.createFromASR(asr);
-		userController.setCurrRecon(currRecon, loggedInUser);
+
+		// Set some of the features that we'll need to be able to reconstruct
+		// it correctly.
+		JSONObject ancestorJson = asr.getAncestralGraphJSON(asr
+				.getWorkingNodeLabel());
+		JSONObject msaGraph = asr.getMSAGraphJSON();
+
+		// Set the current reconstruction
+		setReconFromASR(asr, ancestorJson, msaGraph);
 
 		mav.addObject("label", asr.getLabel());
 
@@ -506,7 +567,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		mav.addObject("tree", asr.getReconstructedNewickString());
 
 		// add msa and inferred ancestral graph
-		String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
+		String graphs = asr.catGraphJSONBuilder(msaGraph, ancestorJson);
 		mav.addObject("graph", graphs);
 
 		// add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -612,6 +673,19 @@ public class GraspApplication extends SpringBootServletInitializer {
 		return mav;
 	}
 
+
+	/**
+	 * Creates a temporary session folder for users to save data in.
+	 */
+	public void createTemporarySessionFolder() {
+		if (asr.getSessionDir() == null) {
+			File sessionDir = new File(sessionPath + asr.getSessionId());
+			if (!sessionDir.exists())
+				sessionDir.mkdir();
+			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
+		}
+	}
+
 	/**
 	 * Download files from reconstruction
 	 *
@@ -625,12 +699,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Tutorial.zip\"");
 
 		// create temporary folder to send output as zipped files
-		if (asr.getSessionDir() == null) {
-			File sessionDir = new File(sessionPath + asr.getSessionId());
-			if (!sessionDir.exists())
-				sessionDir.mkdir();
-			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-		}
+		createTemporarySessionFolder();
 
 		String tempDir = asr.getSessionDir() + "/GRASP_Tutorial";
 		File sessionDir = new File(tempDir);
@@ -664,13 +733,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Tutorial.zip\"");
 
+
 		// create temporary folder to send output as zipped files
-		if (asr.getSessionDir() == null) {
-			File sessionDir = new File(sessionPath + asr.getSessionId());
-			if (!sessionDir.exists())
-				sessionDir.mkdir();
-			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-		}
+		createTemporarySessionFolder();
 
 		String tempDir = asr.getSessionDir() + "/GRASP_Tutorial";
 		File sessionDir = new File(tempDir);
@@ -713,13 +778,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
 
+
 		// create temporary folder to send output as zipped files
-		if (asr.getSessionDir() == null) {
-			File sessionDir = new File(sessionPath + asr.getSessionId());
-			if (!sessionDir.exists())
-				sessionDir.mkdir();
-			asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-		}
+		createTemporarySessionFolder();
 
 		String tempDir = asr.getSessionDir() + "/GRASP_" + asr.getLabel();
 		File sessionDir = new File(tempDir);

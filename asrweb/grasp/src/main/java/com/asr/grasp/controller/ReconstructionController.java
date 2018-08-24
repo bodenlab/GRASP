@@ -67,10 +67,6 @@ public class ReconstructionController {
         // Check we can get the reconsrtcution
         ReconstructionObject reconstruction = reconModel.getById(reconId, user
                 .getId());
-        // If we have an error return the error
-        if (reconstruction != null) {
-            return null;
-        }
         return reconstruction;
     }
 
@@ -92,9 +88,10 @@ public class ReconstructionController {
         if (recon.getId() != Defines.FALSE) {
             // Try to save the reconstruction, it can potentially return an
             // error e.g. if the label already exists.
-            String err = reconModel.save(recon);
+            reconModel.save(recon);
             // We want to add it to the share table
-            err = shareUsersModel.shareWithUser(this.getId(recon, user.getId()),
+            String err = shareUsersModel.shareWithUser(this.getId(recon, user
+                            .getId()),
                     user.getId
                     ());
             if (err == null) {
@@ -163,12 +160,13 @@ public class ReconstructionController {
         return "recon.share.notowner";
     }
 
-    private int getUsersAccess(int reconId, UserObject user) {
+    public int getUsersAccess(int reconId, UserObject user) {
         // Check if this is the currect reonstruction. If it is we can just
         // get the owner ID from currentRecon
         ReconstructionObject currRecon = user.getCurrRecon();
         int userId = user.getId();
-        if (reconId == currRecon.getId() && reconId != Defines.UNINIT) {
+        if (currRecon != null && reconId == currRecon.getId() && reconId !=
+                Defines.UNINIT) {
              if (userId == currRecon.getOwnerId() &&
                  userId != Defines.UNINIT) {
                 return Defines.OWNER_ACCESS;

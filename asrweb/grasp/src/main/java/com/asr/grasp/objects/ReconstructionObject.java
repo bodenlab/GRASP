@@ -7,7 +7,7 @@ public class ReconstructionObject {
 
     private int ownerId = Defines.UNINIT;
 
-    private String label;
+    private String label = null;
 
     private String tree;
 

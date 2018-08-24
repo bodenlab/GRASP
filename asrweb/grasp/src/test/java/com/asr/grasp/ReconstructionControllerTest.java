@@ -11,6 +11,7 @@ import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import com.fasterxml.jackson.databind.ser.Serializers;
+import json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,12 +98,13 @@ public class ReconstructionControllerTest {
         asr.setData("tawfik");
         asr.setInferenceType("JTT");
         asr.setLabel("Afriat-Jurnouv-test");
-
-
+        asr.setWorkingNodeLabel("N0");
+        asr.setNodeLabel("N0");
         asr.runForSession("/Users/ariane/Documents/boden/apps/" +
                 ".tmp/WebSessions/grasp1534997753421/");
         try {
             asr.runReconstruction();
+
         } catch (Exception e) {
             // Fail on error
         }
@@ -121,7 +123,8 @@ public class ReconstructionControllerTest {
         asr.setInferenceType("joint");
         asr.setLabel("Afriat-Jurnouv-test");
         asr.setModel("JTT");
-
+        asr.setWorkingNodeLabel(asr.getNodeLabel());
+        asr.setNodeLabel(asr.getNodeLabel());
         asr.runForSession(sessionPath);
 
         try {
@@ -149,6 +152,7 @@ public class ReconstructionControllerTest {
         user = createAndRegisterUser("testuser", "testpassword");
 
         setAsr();
+
         // Create a reconstruction from an ASR object
         recon = reconController.createFromASR(asr);
 
@@ -164,4 +168,246 @@ public class ReconstructionControllerTest {
         // any reconstructions associated with the user.
         userModel.deleteUser(userController.getId(user));
     }
+
+    /**
+     * helper function for tests using a reconstruction object.
+     * @param user
+     * @return
+     */
+    public ReconstructionObject createRecon(UserObject user) {
+        // Create a reconstruction from an ASR object
+        ReconstructionObject recon = reconController.createFromASR(asr);
+
+        // Set the user to own the reconstruction
+        recon.setOwnerId(userController.getId(user));
+
+        assertThat(asr.getWorkingNodeLabel(), not(equalTo(null)));
+
+        return recon;
+
+    }
+
+    @Test
+    public void testShareReconstruction() {
+        /**
+         * Tests sharing a reconstruction gives a user access and it gets
+         * added to their memberSharedReconstructions.
+         */
+        setUpEnv();
+
+        UserObject userOwner = createAndRegisterUser("testuser",
+                "testpassword");
+
+        UserObject userMember = createAndRegisterUser("testmember",
+                "testpassword");
+
+        setAsr();
+        // Create a reconstruction from an ASR object
+        recon = createRecon(userOwner);
+
+        // Save to the DB
+        reconController.save(userOwner, recon);
+
+        // Now we want to share with the other user
+        String err = reconController.shareWithUser(reconController.getId(recon,
+                userOwner.getId()),
+                userMember.getUsername(), userOwner);
+
+        assertThat(err, is(equalTo(null)));
+
+        // Check the user has the correct access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.MEMBER_ACCESS)));
+
+        assertThat(reconController.getUsersAccess(recon.getId(), userOwner),
+                is(equalTo(Defines.OWNER_ACCESS)));
+
+        // Delete userMember first
+        userModel.deleteUser(userController.getId(userMember));
+        // Delete the user to clean up the database will automatically delete
+        // any reconstructions associated with the user.
+        userModel.deleteUser(userController.getId(userOwner));
+    }
+
+    @Test
+    public void testUnShareReconstruction() {
+        /**
+         * Tests sharing a reconstruction gives a user access and it gets
+         * added to their memberSharedReconstructions.
+         */
+        setUpEnv();
+
+        UserObject userOwner = createAndRegisterUser("testuser",
+                "testpassword");
+
+        UserObject userMember = createAndRegisterUser("testmember",
+                "testpassword");
+
+        setAsr();
+        // Create a reconstruction from an ASR object
+        recon = createRecon(userOwner);
+
+        // Save to the DB
+        reconController.save(userOwner, recon);
+
+        // Now we want to share with the other user
+        String err = reconController.shareWithUser(reconController.getId(recon,
+                userOwner.getId()),
+                userMember.getUsername(), userOwner);
+
+        assertThat(err, is(equalTo(null)));
+
+        // Check the user has the correct access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.MEMBER_ACCESS)));
+
+        // Now we want to unshare the recon.
+        err = reconController.removeUsersAccess(recon.getId(),userMember
+                .getUsername(), userOwner);
+
+        // Check the user has No access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.NO_ACCESS)));
+
+        // Delete userMember first
+        userModel.deleteUser(userController.getId(userMember));
+        // Delete the user to clean up the database will automatically delete
+        // any reconstructions associated with the user.
+        userModel.deleteUser(userController.getId(userOwner));
+    }
+
+
+    @Test
+    public void testDeleteReconstruction() {
+        /**
+         * Tests that a reconstruction can only be deleted by a user who has
+         * owner access.
+         */
+        setUpEnv();
+
+        UserObject userOwner = createAndRegisterUser("testuser",
+                "testpassword");
+
+        UserObject userMember = createAndRegisterUser("testmember",
+                "testpassword");
+
+        setAsr();
+        // Create a reconstruction from an ASR object
+        recon = createRecon(userOwner);
+
+        // Save to the DB
+        reconController.save(userOwner, recon);
+
+        // Now we want to share with the other user
+        String err = reconController.shareWithUser(reconController.getId(recon,
+                userOwner.getId()),
+                userMember.getUsername(), userOwner);
+
+        assertThat(err, is(equalTo(null)));
+
+        // Check the user has the correct access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.MEMBER_ACCESS)));
+
+        /**
+         * Test that a user with member access can't delete a reconstruction
+         */
+        assertThat(reconController.delete(recon.getId(), userMember), is(equalTo
+                ("recon.delete.notowner")));
+
+        // Now we want to unshare the recon.
+        err = reconController.removeUsersAccess(recon.getId(),userMember
+                .getUsername(), userOwner);
+
+        // Check the user has No access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.NO_ACCESS)));
+        /**
+         * Test that a user with No access can't delete a reconstruction
+         */
+        assertThat(reconController.delete(recon.getId(), userMember), is(equalTo
+                ("recon.delete.notowner")));
+
+        /**
+         * Test that the owner can delete a reconstruction
+         */
+        assertThat(reconController.delete(recon.getId(), userOwner), is(equalTo
+                (null)));
+
+        // Delete userMember first
+        userModel.deleteUser(userController.getId(userMember));
+        // Delete the user to clean up the database will automatically delete
+        // any reconstructions associated with the user.
+        userModel.deleteUser(userController.getId(userOwner));
+    }
+
+    @Test
+    public void testLoadReconstruction() {
+        /**
+         * Tests that a reconstruction is saved by one user and thety are
+         * abel to load it. Check that another user isn't able to load it who
+         * doesn't have access. Test that a user who has member access can
+         * also load it.
+         */
+        setUpEnv();
+
+        UserObject userOwner = createAndRegisterUser("testuser",
+                "testpassword");
+
+        UserObject userMember = createAndRegisterUser("testmember",
+                "testpassword");
+
+        setAsr();
+        // Create a reconstruction from an ASR object
+        recon = createRecon(userOwner);
+
+        // Save to the DB
+        reconController.save(userOwner, recon);
+
+        // Now we want to share with the other user
+        String err = reconController.shareWithUser(reconController.getId(recon,
+                userOwner.getId()),
+                userMember.getUsername(), userOwner);
+
+        assertThat(err, is(equalTo(null)));
+
+        // Check the user has the correct access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.MEMBER_ACCESS)));
+
+        /**
+         * Test that a user with member can load a reconstruction
+         */
+        assertThat(reconController.getById(recon.getId(), userMember), not
+                (equalTo
+                (null)));
+
+        // Now we want to unshare the recon.
+        err = reconController.removeUsersAccess(recon.getId(),userMember
+                .getUsername(), userOwner);
+
+        // Check the user has No access
+        assertThat(reconController.getUsersAccess(recon.getId(), userMember),
+                is(equalTo(Defines.NO_ACCESS)));
+        /**
+         * Test that a user with No access can't access a reconstruction
+         */
+        assertThat(reconController.getById(recon.getId(), userMember), is
+                (equalTo
+                        (null)));
+
+         /**
+         * Test that a user with owner access can load a reconstruction
+         */
+        assertThat(reconController.getById(recon.getId(), userOwner), not
+                (equalTo
+                        (null)));
+
+        // Delete userMember first
+        userModel.deleteUser(userController.getId(userMember));
+        // Delete the user to clean up the database will automatically delete
+        // any reconstructions associated with the user.
+        userModel.deleteUser(userController.getId(userOwner));
+    }
+
 }

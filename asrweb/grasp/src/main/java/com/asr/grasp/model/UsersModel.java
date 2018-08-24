@@ -92,7 +92,7 @@ public class UsersModel extends BaseModel {
      * @return
      */
     public int getUserId(String username) {
-        return getIdOnUniqueString("SELECT id, username FROM USERS WHERE " +
+        return getIdOnUniqueString("SELECT id FROM users WHERE " +
                         "username=?;",
                 username);
     }
@@ -132,25 +132,29 @@ public class UsersModel extends BaseModel {
     public String loginUser(String username, String rawPassword) {
         try {
             // Find the user by username in the model
-            ResultSet user = queryOnString("SELECT * FROM USERS WHERE " +
+            ResultSet user = queryOnString("SELECT password FROM USERS WHERE" +
+                    " " +
                     " username=?;", username);
 
-            // Update the users password if we have been given the override
-            String encryptedPassword = user.getString(password.getLabel());
+            if (user.next()) {
+                // Update the users password if we have been given the override
+                String encryptedPassword = user.getString(password.getLabel());
 
-            // Check the inputted username against the encrypted password
-            // needs to be in a try catch at the moment as we have to change the
-            // users' passwords from plain text to encrypted.
+                // Check the inputted username against the encrypted password
+                // needs to be in a try catch at the moment as we have to change the
+                // users' passwords from plain text to encrypted.
 
-            Boolean matches = BCrypt.checkpw(rawPassword, encryptedPassword);
+                Boolean matches = BCrypt.checkpw(rawPassword, encryptedPassword);
 
-            if (matches == true) {
-                // If there is no error i.e. the user correctly enters the
-                // password we return null.
-                return null;
-            } else {
-                return "user.password.incorrect";
+                if (matches == true) {
+                    // If there is no error i.e. the user correctly enters the
+                    // password we return null.
+                    return null;
+                } else {
+                    return "user.password.incorrect";
+                }
             }
+            return "user.username.nonexist";
         } catch (Exception e) {
             System.err.println(e);
             // The user musn't exist

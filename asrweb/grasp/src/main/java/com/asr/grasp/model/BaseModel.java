@@ -359,12 +359,7 @@ public class BaseModel {
     public int getId(ResultSet results) {
         try {
             if (results.next()) {
-                // Check we were only returned a single result
-//                int recordCount = results.getInt("RECORDCOUNT");
-//                if (recordCount != 1) {
-//                    return -1;
-//                }
-                // Get the ID stored in the first column
+                // ToDo: Check we only get 1 result
                 return results.getInt(1);
             }
         } catch (Exception e) {

@@ -38,6 +38,8 @@ public class UserController {
         user.setPassword(null);
         user.setPasswordMatch(null);
 
+        // Set the user's ID
+        getId(user);
         return err;
     }
 
@@ -48,7 +50,7 @@ public class UserController {
      * @return
      */
     public int getId(UserObject user) {
-        if (user.getId() == Defines.FALSE) {
+        if (user.getId() == Defines.UNINIT) {
             if (user.getUsername() != null) {
                 // Set the user ID
                 user.setId(usersModel.getUserId(user.getUsername()));

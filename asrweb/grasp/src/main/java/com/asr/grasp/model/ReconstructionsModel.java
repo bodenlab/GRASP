@@ -24,7 +24,7 @@ public class ReconstructionsModel extends BaseModel {
     final ColumnEntry inferenceType = new ColumnEntry(4, "inference_type",
             Defines.STRING);
     final ColumnEntry jointInferences = new ColumnEntry(5,
-            "joint_inference", Defines.STRING);
+            "joint_inferences", Defines.STRING);
     final ColumnEntry label = new ColumnEntry(6, "label", Defines.STRING);
     final ColumnEntry model = new ColumnEntry(7, "model", Defines.STRING);
     final ColumnEntry msa = new ColumnEntry(8, "msa", Defines.STRING);
@@ -126,7 +126,7 @@ public class ReconstructionsModel extends BaseModel {
     public HashSet<ReconstructionObject> getAllForUser(int userId) {
         ResultSet rawRecons = queryOnId("SELECT * FROM " +
                 "reconstructions" +
-                " LEFT JOIN share_users ON share_users.r_id == " +
+                " LEFT JOIN share_users ON share_users.r_id = " +
                 "reconstructions.id WHERE " +
                 "share_users.u_id=?;", userId);
         // Need to convert each of the sets to a Reconstruction object
@@ -172,14 +172,14 @@ public class ReconstructionsModel extends BaseModel {
      */
     public HashMap<Integer, ArrayList<GeneralObject>> getReconsForUser(int
                                                                             userId) {
-        ResultSet rawRecons = queryOnId("SELECT reconstruction.label as " +
-                "label, " +
-                "reconstruction.ownerId as owner_id, reconstruction.id as " +
-                "r_id " +
+        ResultSet rawRecons = queryOnId(
+                "SELECT reconstructions.label as label, " +
+                " reconstructions.owner_id as owner_id, " +
+                "reconstructions.id as r_id " +
                 " FROM reconstructions" +
-                " LEFT JOIN share_users ON share_users.r_id == " +
-                "reconstructions.id WHERE " +
-                "share_users.u_id=?;", userId);
+                " LEFT JOIN share_users ON share_users.r_id = " +
+                "reconstructions.id " +
+                        "WHERE share_users.u_id=?;", userId);
         // Need to convert each of the sets to a Reconstruction object
         if (rawRecons == null) {
             return null;
@@ -230,11 +230,17 @@ public class ReconstructionsModel extends BaseModel {
      */
     public ReconstructionObject getById(int reconId, int
             userId) {
-        String query = "SELECT * FROM " +
-                "reconstructions" +
-                " LEFT JOIN share_users ON share_users.r_id == " +
-                "reconstructions.id WHERE " +
-                "reconstructions.id=? AND share_users.u_id=?;";
+        String query = "SELECT r.id, r.owner_id, " +
+                "r.ancestor, r" +
+                ".inference_type, r.joint_inferences, r.label, " +
+                "r.model, r.msa, r.node," +
+                " r.num_threads, r.reconstructed_tree, " +
+                "r.sequences, r.tree" +
+                " FROM " +
+                "reconstructions AS r LEFT JOIN share_users ON share_users" +
+                ".r_id = " +
+                "r.id WHERE " +
+                "r.id=? AND share_users.u_id=?;";
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
@@ -264,9 +270,9 @@ public class ReconstructionsModel extends BaseModel {
      */
     public int getIdByLabel(String reconLabel, int
             userId) {
-        String query = "SELECT id FROM " +
-                "reconstructions" +
-                " LEFT JOIN share_users ON share_users.r_id == " +
+        String query = "SELECT reconstructions.id FROM " +
+                "reconstructions " +
+                " LEFT JOIN share_users ON share_users.r_id = " +
                 "reconstructions.id WHERE " +
                 "reconstructions.label=? AND share_users.u_id=?;";
         try {
@@ -295,13 +301,10 @@ public class ReconstructionsModel extends BaseModel {
     public int getUsersAccess(int reconId, int
             userId) {
         String query = "SELECT reconstructions.owner_id as owner_id, " +
-                "share_users.u_id as" +
-                " user_id " +
-                "FROM " +
-                "reconstructions" +
-                " LEFT JOIN share_users ON share_users.r_id == " +
-                "reconstructions.id WHERE " +
-                "share_users.u_id=? AND reconstructions.id=?;";
+                "share_users.u_id as user_id " +
+                "FROM reconstructions " +
+                "LEFT JOIN share_users ON share_users.r_id = reconstructions.id" +
+                " WHERE share_users.u_id=? AND reconstructions.id=?;";
 
          ResultSet rawRecons = runTwoIdQuery(query, reconId, userId, 2,
                     1);
@@ -382,10 +385,10 @@ public class ReconstructionsModel extends BaseModel {
     public String delete(int reconId) {
         // Delete the reconstruction from the share_users table
         String query = "DELETE FROM share_users WHERE r_id=?;";
-        queryOnId(query, reconId);
+        deleteOnId(query, reconId);
         // Delete from the group users table
         query = "DELETE FROM share_groups WHERE r_id=?;";
-        queryOnId(query, reconId);
+        deleteOnId(query, reconId);
         // Delete the reconstruction
         query = "DELETE FROM reconstructions WHERE id=?;";
 

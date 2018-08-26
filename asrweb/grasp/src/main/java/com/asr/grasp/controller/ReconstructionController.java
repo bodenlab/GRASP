@@ -45,7 +45,7 @@ public class ReconstructionController {
      * @return
      */
     public int getId(ReconstructionObject recon, int userId) {
-        if (recon.getId() == Defines.FALSE) {
+        if (recon.getId() == Defines.UNINIT) {
             if (recon.getLabel() != null) {
                 // Set the user ID
                 recon.setId(reconModel.getIdByLabel(recon.getLabel(), userId));
@@ -85,15 +85,15 @@ public class ReconstructionController {
 
         // If the user has just created this reconstruction then the ID of
         // the reconstruction will be null
-        if (recon.getId() != Defines.FALSE) {
+        if (recon.getId() == Defines.UNINIT) {
             // Try to save the reconstruction, it can potentially return an
             // error e.g. if the label already exists.
             reconModel.save(recon);
             // We want to add it to the share table
-            String err = shareUsersModel.shareWithUser(this.getId(recon, user
-                            .getId()),
-                    user.getId
-                    ());
+            getId(recon, user.getId());
+
+            String err = shareUsersModel.shareWithUser(recon.getId(),
+                    user.getId());
             if (err == null) {
                 user.addToOwnerdReconIds(recon.getId(), recon.getLabel());
                 return null;
@@ -232,20 +232,25 @@ public class ReconstructionController {
      * @return
      */
     public ReconstructionObject createFromASR(ASRObject asrRecon) {
-        ReconstructionObject recon = new ReconstructionObject();
-        recon.setLabel(asrRecon.getLabel());
-        // Need to check if it is null otherwise will throw an error
-        recon.setAncestor(asrRecon.getAncestor());
-        recon.setInferenceType(asrRecon.getInferenceType());
-        recon.setJointInferences(asrRecon.getJointInferences());
-        recon.setModel(asrRecon.getModel());
-        recon.setMsa(asrRecon.getMSA());
-        recon.setNode(asrRecon.getNodeLabel());
-        recon.setSequences(asrRecon.getSequences());
-        recon.setNumThreads(asrRecon.getNumberThreads());
-        recon.setTree(asrRecon.getTree());
-        recon.setReconTree(asrRecon.getReconstructedNewickString());
-        return recon;
+        try {
+            ReconstructionObject recon = new ReconstructionObject();
+            recon.setLabel(asrRecon.getLabel());
+            // Need to check if it is null otherwise will throw an error
+            recon.setAncestor(asrRecon.getAncestor());
+            recon.setInferenceType(asrRecon.getInferenceType());
+            recon.setJointInferences(asrRecon.getJointInferences());
+            recon.setModel(asrRecon.getModel());
+            recon.setMsa(asrRecon.getMSA());
+            recon.setNode(asrRecon.getNodeLabel());
+            recon.setSequences(asrRecon.getSequences());
+            recon.setNumThreads(asrRecon.getNumberThreads());
+            recon.setTree(asrRecon.getTree());
+            recon.setReconTree(asrRecon.getReconstructedNewickString());
+            return recon;
+        } catch (Exception e) {
+            System.err.println("Error in recreating reconstruction: " + e.getMessage());
+            return null;
+        }
     }
 
     /**

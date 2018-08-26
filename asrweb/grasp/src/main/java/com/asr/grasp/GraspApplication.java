@@ -300,12 +300,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		loginValidator.validate(user, bindingResult);
 
-		if (bindingResult.hasErrors())
-			return new ModelAndView("login");
-
 		// If we have passed the validation this means that the username and
 		// password are correct.
 		String err = userController.loginUser(user);
+		if (err != null) {
+			bindingResult.rejectValue("username", err);
+		}
+		if (bindingResult.hasErrors())
+			return new ModelAndView("login");
 
 		loggedInUser = user;
 
@@ -325,8 +327,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = accountView.get(loggedInUser, userController);
 
         // CHeck that err wasn't try
-		if (err != null || errSave != null) {
-			mav.addObject("warning", err.toString() + errSave.toString());
+		if (errSave != null) {
+			mav.addObject("warning",  errSave);
 		} else {
 			mav.addObject("warning", null);
 		}

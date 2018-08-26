@@ -23,14 +23,9 @@ public class LoginValidator implements Validator {
 
         user = (UserObject) o;
 
-//        if (!userService.userExist(user.getUsername())) {
-//            errors.rejectValue("username", "user.username.nonexist");
-//        }
-        // If the user's password was incorrect don't let them Login and
-        // return an error message.
-//        if (userService.getUserAccount(user) == null) {
-//            errors.rejectValue("password", "user.password.incorrect");
-//        }
+        /**
+         * We'll only use this if we add an email in. For now it does nothing.
+         */
     }
 
 }

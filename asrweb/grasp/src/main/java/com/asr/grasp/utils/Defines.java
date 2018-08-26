@@ -16,7 +16,7 @@ public class Defines {
      * Common
      */
     public static final int TRUE = 1;
-    public static final int FALSE = -1;
+    public static final int FALSE = -2;
     public static final int ERROR = -999;
     public static final int UNINIT = -2;
 

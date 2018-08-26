@@ -441,7 +441,7 @@ public class BaseModel {
             return null;
         } catch (Exception e) {
             System.out.println(e);
-            return "fail";
+            return e.getMessage();
         }
     }
 

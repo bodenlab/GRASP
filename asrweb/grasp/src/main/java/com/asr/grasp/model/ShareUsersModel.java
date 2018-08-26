@@ -15,9 +15,9 @@ public class ShareUsersModel extends BaseModel {
 
     public String shareWithUser(int reconId, int userId) {
         String query = "INSERT INTO share_users(r_id, u_id) VALUES(?, ?);";
-
-        if(runTwoUpdateQuery(query, reconId, userId, 1, 2) != null) {
-            return "fail";
+        String err = runTwoUpdateQuery(query, reconId, userId, 1, 2);
+        if(err != null) {
+            return err;
         }
         return null;
     }

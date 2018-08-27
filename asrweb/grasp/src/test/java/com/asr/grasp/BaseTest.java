@@ -20,8 +20,10 @@ public class BaseTest {
      *
      * ------------------------------------------------------------------------
      */
+    // -------------------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER -------
     String sessionPath = "/Users/ariane/Documents/boden/apps/" +
             ".tmp/WebSessions/grasp1534997753421/";
+    // ------------------------------------------------------------------------
     String dbPassword = "none";
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp";
     String dbUser = "web";

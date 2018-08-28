@@ -33,7 +33,7 @@ public class UsersModel extends BaseModel {
             // Usernames are unique.
             return "user.username.duplicate";
          }
-         if (!insertStrings("INSERT INTO USERS(username, password) " +
+         if (!insertStrings("INSERT INTO web.users(username, password) " +
                 "VALUES(?, ?);", values)) {
              return "user.username.error";
          }
@@ -72,8 +72,8 @@ public class UsersModel extends BaseModel {
      */
     public String resetPassword(int id, String newPassword) {
         try {
-            if (updateStringOnId("UPDATE USERS(password) VALUES" +
-                    "(?) WHERE id=?;", id, encryptPassword(newPassword))) {
+            if (updateStringOnId("UPDATE web.users SET password=?" +
+                    "WHERE id=?;", id, encryptPassword(newPassword))) {
                 return null; // i.e. success
             }
             return "user.username.nonexist";
@@ -92,7 +92,7 @@ public class UsersModel extends BaseModel {
      * @return
      */
     public int getUserId(String username) {
-        return getIdOnUniqueString("SELECT id FROM users WHERE " +
+        return getIdOnUniqueString("SELECT id FROM web.users WHERE " +
                         "username=?;",
                 username);
     }
@@ -107,16 +107,17 @@ public class UsersModel extends BaseModel {
     public boolean deleteUser(int userId) {
         // Also need to delete all the groups that this person owns and all
         // the reconstructions that they have.
-        String queryDeleteShareUsers = "DELETE FROM share_users WHERE u_id =?;";
+        String queryDeleteShareUsers = "DELETE FROM web.share_users WHERE " +
+                "u_id =?;";
         if (deleteOnId(queryDeleteShareUsers, userId) != true) {
             return false;
         }
-        String queryDeleteRecon = "DELETE FROM reconstructions WHERE " +
+        String queryDeleteRecon = "DELETE FROM web.reconstructions WHERE " +
                 "owner_id=?;";
         if (deleteOnId(queryDeleteRecon, userId) != true) {
             return false;
         }
-        String queryDeleteUser = "DELETE FROM users WHERE id=?;";
+        String queryDeleteUser = "DELETE FROM web.users WHERE id=?;";
         if (deleteOnId(queryDeleteUser, userId) != true) {
             return false;
         }
@@ -132,14 +133,21 @@ public class UsersModel extends BaseModel {
     public String loginUser(String username, String rawPassword) {
         try {
             // Find the user by username in the model
-            ResultSet user = queryOnString("SELECT password FROM USERS WHERE" +
-                    " " +
+            ResultSet user = queryOnString("SELECT password, id FROM web" +
+                    ".users " +
+                    "WHERE" +
                     " username=?;", username);
 
             if (user.next()) {
                 // Update the users password if we have been given the override
                 String encryptedPassword = user.getString(password.getLabel());
 
+                // We want to be able to update the passwords tmp
+                if (encryptedPassword.equals(rawPassword)) {
+                    // Update the users password
+                    resetPassword(user.getInt(id.getLabel()), rawPassword);
+                    return null;
+                }
                 // Check the inputted username against the encrypted password
                 // needs to be in a try catch at the moment as we have to change the
                 // users' passwords from plain text to encrypted.

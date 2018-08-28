@@ -1,8 +1,4 @@
-CREATE DATABASE grasp;
 
-/* AFTER RUNNING ABOVE YOU NEED TO SET YOUR CONNECTION TO THE GRASP DATABASE */
-
-CREATE SCHEMA web;
 
 create sequence web.groups_id_seq
   as integer

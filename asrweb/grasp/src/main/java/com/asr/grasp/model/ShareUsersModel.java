@@ -14,7 +14,7 @@ public class ShareUsersModel extends BaseModel {
      */
 
     public String shareWithUser(int reconId, int userId) {
-        String query = "INSERT INTO share_users(r_id, u_id) VALUES(?, ?);";
+        String query = "INSERT INTO web.share_users(r_id, u_id) VALUES(?, ?);";
         String err = runTwoUpdateQuery(query, reconId, userId, 1, 2);
         if(err != null) {
             return err;
@@ -29,7 +29,8 @@ public class ShareUsersModel extends BaseModel {
      * @return
      */
     public String removeUsersAccess(int reconId, int userId) {
-        String query = "DELETE FROM share_users WHERE r_id = ? AND u_id = ?;";
+        String query = "DELETE FROM web.share_users WHERE r_id = ? AND u_id =" +
+                " ?;";
         if (runTwoUpdateQuery(query, reconId, userId, 1, 2) == null) {
             return "fail";
         }

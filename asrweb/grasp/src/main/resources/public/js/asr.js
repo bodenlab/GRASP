@@ -255,5 +255,6 @@ $(window).resize(function () {
         refresh_labels();
         refresh_tree();
         redraw_poags();
+        poags.page_width = $(window).width();
     }, 100);
 });

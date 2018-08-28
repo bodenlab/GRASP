@@ -5,6 +5,9 @@
     <a id="results-nav"></a>
     <div class="content-section-b">
         <div class="row">
+            <a class="text-center col-xs-12 pad-top-bottom" href="/guide"> Read the guide to understand how to use GRASP and how to interpret the results</a>
+        </div>
+        <div class="row">
             <div id="heading">
                 <h2 class="col-sm-9"><span class="node-label">Root</span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></h2>
                 <hr class="h-divider"></hr>
@@ -19,11 +22,60 @@
             </div>
         </div>
         <div id="results" class="container-fluid" >
-            <button type="button" id="extant-text-toggle" class="btn btn-default" onclick="toggle_extant_text()">View extant labels | ON</button>
-            <button type="button" id="node-text-toggle" class="btn btn-default" onclick="toggle_node_text()">View node labels | OFF</button>
-            <button type="button" id="branch-text-toggle" class="btn btn-default" onclick="toggle_branch_text()">View branch length | OFF</button>
-            <button type="button" id="additive-toggle" class="btn btn-default" onclick="toggle_additive()">View tree type | Additive</button>
-            <button type="button" id="saveButton" class="btn btn-default" onclick="save_phylo_svg_to_png()">Save tree</button>
+
+            <div id="taxonomy-info-alert" class="alert alert-info hidden" role="alert">
+                <p>Attempting to get taxonomic information from NCBI...</p>
+            </div>
+            <div id="taxonomy-success-alert" class="alert alert-success alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <p>Success! Left-click on phylogenetic nodes to see taxonomic information.</p>
+            </div>
+            <div id="taxonomy-warning-alert" class="alert alert-warning alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="obsolete-warning-alert" class="alert alert-warning alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <hr></hr>
+            </div>
+            <div id="taxonomy-failed-alert" class="alert alert-danger alert-dismissible hidden" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <p>Could not find taxonomic information.</p>
+                <hr></hr>
+                <p>Add NCBI identifiers as an initial tag to each extant label, separated by a "|" symbol.</p>
+                <p>e.g. "XP_005287999.1|Chordata_Testu...." etc  </p>
+            </div>
+
+            <div class="col-xs-12">
+                <div>
+                    <button type="button" id="extant-text-toggle" class="btn btn-default col-xs-2" onclick="toggle_extant_text()">View extant labels | ON</button>
+                    <button type="button" id="node-text-toggle" class="btn btn-default col-xs-2" onclick="toggle_node_text()">View node labels | OFF</button>
+                    <button type="button" id="branch-text-toggle" class="btn btn-default col-xs-2" onclick="toggle_branch_text()">View branch length | OFF</button>
+                    <button type="button" id="additive-toggle" class="btn btn-default col-xs-2" onclick="toggle_additive()">View tree type | Additive</button>
+                    <button type="button" id="expand-all-nodes" class="btn btn-default col-xs-2" onclick="expand_all_nodes()">Expand all nodes</button>
+                    <button type="button" id="saveButton" class="btn btn-default col-xs-2" onclick="save_phylo_svg_to_png()">Save tree</button>
+                </div>
+                <div>
+                    <input type="text" class="form-input col-xs-8 no-padding" style="height: 2.1em;" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value, true, false);" />
+                    <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2" onclick="annotate_taxonomy()">Annotate taxonomy</button>
+
+                    <div class="col-xs-2 no-padding" id="node-search">
+                        <button type="button" class="btn btn-default col-xs-12 no-padding  dropdown-toggle dropdown"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Search for ancestor: N<span id="searched-node">...</span><span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="node-id-menu">
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
 
             <div id="phylo-tree" class="col-sm-12" data-toggle="popover" data-placement="top" data-content="Right click tree nodes to access reconstruction options: view marginal reconstruction, view joint reconstruction and add joint reconstruction. Adding a joint reconstruction will compare the reconstructions of multiple ancestors by showing the ancestral graphs stacked and a summary merged graph of the reconstructions.">
             </div>

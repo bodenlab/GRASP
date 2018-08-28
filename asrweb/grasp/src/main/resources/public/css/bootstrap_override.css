@@ -1,3 +1,14 @@
+
+.nav-item-highlight {
+  background-color: #70BDD0;
+  color:black;
+}
+
+nav-item-highlight:hover {
+  background-color: #81cfe2;
+  color:white;
+}
+
 .topnav {
     font-size: 14px;
 }

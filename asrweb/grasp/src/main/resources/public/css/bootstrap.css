@@ -1097,7 +1097,7 @@ textarea {
   line-height: inherit;
 }
 a {
-  color: #337ab7;
+  color: #777;
   text-decoration: none;
 }
 a:hover,
@@ -4015,6 +4015,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .nav > li > a > img {
   max-width: none;
 }
+
+
 .nav-tabs {
   border-bottom: 1px solid #ddd;
 }
@@ -4167,7 +4169,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   position: relative;
   min-height: 50px;
   margin-bottom: 20px;
-  border: 1px solid transparent;
+  /*border: 1px solid transparent;*/
 }
 @media (min-width: 768px) {
   .navbar {
@@ -4507,12 +4509,12 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .navbar-default .navbar-text {
   color: #777;
 }
-.navbar-default .navbar-nav > li > a {
-  color: #777;
-}
+/*.navbar-default .navbar-nav > li > a {*/
+  /*color: #777;*/
+/*}*/
 .navbar-default .navbar-nav > li > a:hover,
 .navbar-default .navbar-nav > li > a:focus {
-  color: #333;
+  color: #c8cdce;
   background-color: transparent;
 }
 .navbar-default .navbar-nav > .active > a,
@@ -6755,3 +6757,5 @@ button.close {
   }
 }
 /*# sourceMappingURL=bootstrap.css.map */
+
+

@@ -8,7 +8,11 @@
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-10 pad-top-bottom">
                     <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
-                        <input type="text" class="form-input col-xs-7" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
+                        <input type="text" class="form-input col-xs-7"
+                               placeholder="Label your reconstruction..."
+                               id="label" name="label" th:field="*{label}"
+                               required="true"
+                               onchange="set_recon_label($('#label').val())" />
                         <div class="form-group col-xs-5 no-padding">
                             <div class="input-group col-xs-12 no-padding">
                                 <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Run joint reconstruction on the selected test dataset.">
@@ -16,6 +20,10 @@
                                         <small><span id="selected-example">...</span></small> | <small>Example datasets...</small> <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
+                                        <!--<li><a id="name_test" onclick="update_test('name_test')">Name Test <span id="name_test-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>-->
+                                        <!--<li><a id="name_test_with_no_error" onclick="update_test('name_test_with_no_error')">Name Test with no error <span id="name_test_with_no_error-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>-->
+                                        <!--<li><a id="name_test_with_one_error" onclick="update_test('name_test_with_one_error')">Name Test with one error <span id="name_test_with_one_error-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>-->
+
                                         <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 (139) <span id="cyp2u1-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                         <li><a id="tawfik" onclick="update_test('tawfik')">Afriat-Jurnou et al. (29) <span id="tawfik-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                         <li><a id="hudson" onclick="update_test('hudson')">Hudson et al. (234) <span id="hudson-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
@@ -196,7 +204,10 @@
                                     /*]]>*/
                     </script>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn" onclick="javascript:displayLoad();">Perform reconstruction</button></div>            </form>
+                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn" onclick="javascript:displayLoad();">Perform reconstruction</button>
+                    <a class="btn col-xs-12  pad-top-bottom" href="/guide"> Read the GRASP guide</a>
+
+                </div>            </form>
         </div>
         </div>
     </div>

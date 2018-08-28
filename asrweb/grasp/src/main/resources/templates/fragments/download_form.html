@@ -27,25 +27,25 @@
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
                                     <input id="check-pog-msa" name="check-pog-msa" class="dlopt" type="checkbox"></input>
                                     <label for="check-pog-msa">
-                                        Sequence alignment (*.dot)
+                                        Sequence alignment POAG (*.dot)
                                     </label>
                                 </div>
                                 <div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">
                                     <input id="check-pog-marg" class="disabled margopt dlopt" disabled="true" name="check-pog-marg" type="checkbox"></input>
                                     <label for="check-pog-marg">
-                                        Marginal reconstruction of <span class="node-label">Root</span> (*.dot)
+                                        Marginal reconstruction POG of <span class="node-label">Root</span> (*.dot)
                                     </label>
                                 </div>
                                 <div class="checkbox dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
                                     <input id="check-pog-joint" class="styled dlopt" name="check-pog-joint" type="checkbox"></input>
                                     <label for="check-pog-joint">
-                                        Joint reconstruction of selected ancestors (*.dot)
+                                        Joint reconstruction POG of added ancestors (*.dot)
                                     </label>
                                 </div>
                                 <div class="checkbox dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
                                     <input id="check-pog-joint-single" class="styled dlopt" name="check-pog-joint-single" type="checkbox"></input>
                                     <label for="check-pog-joint-single">
-                                        Joint reconstruction of <span class="node-label">Root</span> (*.dot)
+                                        Joint reconstruction POG of <span class="node-label">Root</span> (*.dot)
                                     </label>
                                 </div>
                             </fieldset>
@@ -78,10 +78,10 @@
                                 <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
                                     <input id="check-seq-joint" name="check-seq-joint" class="dlopt" type="checkbox"></input>
                                     <label for="check-seq-joint">
-                                        Consensus sequences of selected joint reconstructions (.fasta)
+                                        Consensus sequences of added joint reconstructions (.fasta)
                                     </label>
                                 </div>
-                                <hr />
+                               <!-- <hr />
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the alignment sequence graph.">
                                     <input id="check-msa-marg-dist" name="check-msa-marg-dist" class="dlopt" type="checkbox"></input>
                                     <label for="check-msa-marg-dist">
@@ -93,7 +93,7 @@
                                     <label for="check-msa-aln">
                                         Multiple sequence alignment (.aln)
                                     </label>
-                                </div>
+                                </div>-->
                                 <input id="graphs-input" name="graphs-input" hidden="hidden"></input>
                             </fieldset>
                         </div>
@@ -161,6 +161,8 @@
                         $(".dlopt").each(function() {
                             if ($(this).prop("checked")) {
                                 $("#download-btn").removeClass("disabled");
+                                $("#graphs-input").val("");
+                                graphs = [];
                                 graphs = poags.multi.names;
                                 graphs.push(poags.inferred_poag_name);
                                 console.log(graphs);

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="workshop" class="panel panel-default" aria-expanded="false" id="workshop">
+    <div class="content-section-b" id="workshop-div">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h2 id="Getting-Started" class="section-heading">Reconstructing ancestors with GRASP</h2>
+                    <h3>Required Software</h3>
+                    <p>
+                        <ul>
+                            <li>MAFFT - Multiple sequence Alignment (MA) based on the Fast Fourier Transform (FFT). See Katoh and Standley (2013).</li>
+                            <li>RAxML - Randomized Accelerated (RAx) Maximum Likelihood (ML) to infer evolutionary relationships. See Stamatakis (2014).</li>
+                        </ul>
+                        We also recommend using an alignment viewer, such as AliView. See Larsson (2014).
+                    </p>
+                    <h3>Pre-requisites</h3>
+                        <div class="step">
+                            <h4>Install required software</h4>
+                            <p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and RAxML (<a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">https://sco.h-its.org/exelixis/web/software/raxml/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
+                                If you do not have these already, install the software on your machine using the instructions found on the websites for your operating system.</p>
+                            <ul>
+                                <li>
+                                    <h5>MAFFT for Mac/Linux/Windows</h5>
+                                    <p>Download the executable file for your operating system from the MAFFT website and install using the prompts.</p>
+                                </li>
+                                <li>
+                                    <h5>RAxML for Mac/Linux</h5>
+                                    <ol>
+                                        <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
+                                        <li>Navigate into the standard-RAxML directory using 'cd standard-RAxML'</li>
+                                        <li>Make the files by running 'make -f Makefile.PTHREADS.gcc'</li>
+                                        <li>Remove all output files that were created by running make 'rm *.o'</li>
+                                    </ol>
+                                </li>
+                                <li>
+                                    <h5>RAxML for Windows</h5>
+                                    <p>There is a user interface available to download <a href="https://sourceforge.net/projects/raxmlgui/">here</a>. See Silvestro and Michalak (2012). </p>
+                                </li>
+                            </ul>
+                        </div>
+                    <div class="step">
+                    <h3>Curate an alignment and infer a tree</h3>
+                    <div class="step">
+                        <h4>Download the extant sequence library</h4>
+                        <p>The sequences we will be reconstructing are from the cytochrome P450 2U1 (CYP2U1) subfamily and the cytochrome P450 2R1 (CYP2R1) subfamily. Cytochromes P450 are key drug metabolisers and we wish to
+                            infer a CYP2U1 ancestor. We will be using four CYP2R1 sequences as an outgroup and these four sequences will be labelled as 25hydroxylase or 25hydroxylase-like in the data set. The data set can be found <a href="/download-tutorial-files">here</a>.</p>
+                        <p>The data set was compiled from searching NCBI for homologs to representative CYP2U1s. For the purpose of illustration, we are not using the full set.</p>
+                    </div>
+                    <div class="step">
+                        <h4>1. Align the extant sequences</h4>
+                        <p>Align the sequences together using the default MAFFT settings. In effect, this step identifies the positions at which sequences are (putatively) homologous.<br></br>
+                        In the console of your terminal window, type the following command in the same directory where you placed the downloaded tutorial .fasta file:</p>
+                        <p>mafft GRASPTutorial.fasta &gt; GRASPTutorial.aln</p>
+                        <p>This will perform the multiple sequence alignment and save it to "GRASPTutorial.aln" in the same directory. By default, MAFFT uses the FASTA format, with an additional "gap" character.</p>
+                    </div>
+                    <div class="step">
+                        <h4>2. Infer a tree using RAxML</h4>
+                        <p>We will be using RAxML to infer by maximum likelihood a phylogenetic tree.</p>
+                        <p>If you are using the user interface, use 'GRASPTutorial.aln' as the input alignment and follow the prompts in the interface. Save the resulting tree, and move to Step 3.</p>
+                        <p>If you are using the command line version (recommended), type the following command in terminal from within the directory where you installed RAxML.
+                        <br></br><em>Note: you will need to copy the input file (GRASPTutorial.aln) into the RAxML directory.</em></p>
+                        <p>./raxmlHPC-PTHREADS -m PROTGAMMAJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</p>
+                        <p class="col-xs-4">-m PROTGAMMAJTT</p>
+                        <p class="col-xs-8">PROTGAMMAJTT specifies to optimise substitution rates, use a GAMMA model of rate heterogeneity, and
+                            use the JTT amino acid substitution matrix.</p>
+                        <p class="col-xs-4">-p 23456</p>
+                        <p class="col-xs-8">Random number seed for inference.</p>
+                        <p class="col-xs-4">-n GRASPTutorial.nwk</p>
+                        <p class="col-xs-8">Name of the output file.</p>
+                        <p class="col-xs-4">-s GRASPTutorial.aln</p>
+                        <p class="col-xs-8">Name of the input alignment file.</p>
+                        <p>When finished (approximately 1 minute, depending on your machine) you will see some summary information output to the console.
+                        This will also tell you where the output file has been saved.</p>
+                    </div>
+                    <div class="step">
+                        <h4>3. Inspect the alignment and phylogenetic tree</h4>
+                        <p>Use an alignment viewer (such as <a href="http://ormbunkar.se/aliview/">Aliview</a> or <a href="http://www.jalview.org/Download">Jalview</a>) and a
+                        tree viewer (such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a>), to inspect the resulting alignment and inferred tree (e.g. .../RAxML_result.GRASPTutorial.nwk).</p>
+                        <p class="question">Do any sequences look out of place in the alignment and the tree? Note the sequence/s down.</p>
+                    </div>
+                    <div class="step">
+                        <h4>4. Perform quality control on input data</h4>
+                        <p>Remove the erroneous sequence/s from the input fasta file.</p>
+                        <p>Perform the alignment and tree inference steps with the modified file (Steps 1-2).</p>
+                        <p>Inspect the new alignment and inferred tree (Step 3). </p>
+                        <p class="question">Do any sequences look out of place? You might not see any obvious erroneous sequences in the tree, but some sequences may appear to have local misalignments and have several large internal deletions, despite appearing to align well overall. Note the sequence/s down and repeat this step.</p>
+                    </div>
+                    <div class="step">
+                        <h4>5. Export tree for inference </h4>
+                        <p>Once you are happy with the alignment, using FigTree, re-root the tree on the branch between the CYP2U1 and the CYP2R1 sequences.</p>
+                        <p><em>Note: FigTree may strip the longer name in the sequence labels and so you may need to refer back to your alignment to identify the sequences that belong
+                            to 2U1 and those that belong to 2R1. Once re-rooted, you should have a tree with two distinct groupings of approximately 4 and 20 sequences.</em></p>
+                        <p>Export the tree in FigTree as a Newick file, say "GRASPTutorial_FigTree.nwk": File > Export Trees... select Newick from the menu and select the 'Save as currently displayed' option.</p>
+                        <p><em>Note: Since FigTree surrounds the labels with quotation marks, the labels will not match those in the alignment file and will cause an error
+                            when attempting to run the reconstruction.</em></p>
+                        <p>You can open the Newick file in a text editor to remove all single quotation marks from the labels, or more simply use a command such as "tr" to delete all occurrences of "&#39;":</p>
+                        <p>tr -d &#92;&#39; &lt; GRASPTutorial_FigTree.nwk &gt; GRASPTutorial.nwk</p>
+                    </div>
+                    </div>
+                    <div class="step">
+                        <h3>Infer ancestral sequences</h3>
+                        <div class="step">
+                            <p>If you have had issues curating the alignment for the example data set, or want to jump ahead to exploring GRASP, download the curated alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
+                        </div>
+                        <div class="step">
+                            <h4>6. Perform the reconstruction using GRASP</h4>
+                            <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
+                            <p>GRASP may indicate that some of the sequences are obsolete.</p>
+                            <p>Note down any obsolete sequences and optionally remove these from the original extant sequence file.
+                            Perform the alignment and tree inference steps with the modified file (Steps 1-2).
+                            Repeat Step 6 with the new alignment and tree files. </p>
+                        </div>
+                        <div class="step">
+                            <h4>7. Inspect the reconstructed sequences</h4>
+                            <p>Explore GRASP:</p>
+
+                            <p class="col-xs-4"> Click Annotate
+                                Taxonomy at the top of the tree </p>
+                            <p class="col-xs-8">
+                                This will get the taxonomic information
+                                for the sequences.
+
+                                <em>Note:
+                                    taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em>
+                            </p>
+
+
+                            <p class="col-xs-4">Left-click on tree nodes</p>
+                            <p class="col-xs-8">This will show any taxonomic information (if available) of the selected ancestor.
+                            At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
+                            Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
+                                nodes in the tree) show the full available taxonomic information for that extant.
+                            </p>
+                            <p class="col-xs-4">Right-click on tree nodes</p>
+                            <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
+                            From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
+                            reconstruction graph that will be displayed below the current joint reconstruction. See <a href="http://grasp.scmb.uq.edu.au/guide#results-phylo-nav">the guide</a> for more details.</p>
+                            <p class="col-xs-4">Inspect the reconstructed ancestral POG</p>
+                            <p class="col-xs-8">At the bottom of the page you will see at least two partial order graphs. The top graph is the alignment graph (POAG; also referred to as MSA as it derives directly
+                                from the input multiple sequence alignment), and the bottom
+                            graph/s are the reconstructed ancestor graphs (POGs). Hovering over the graph nodes will display a popup showing a histogram of the characters in the
+                            alignment POAG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
+                            <br></br><br></br>
+                            We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
+                            <p>Explore the other display options on the page.</p>
+                        </div>
+                        <div class="step">
+                            <h4>8. Explore insertions and deletions</h4>
+                            <p>Identify the node that represents the ancestor of <em>only</em> the CYP2U1 sequences and infer the ancestor here.</p>
+                            <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both the CYP2U1 and CYP2R1 sequences.</em></p>
+                            <p class="question">What do the red circles in the navigation bar indicate?</p>
+                            <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
+                            <p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>
+                            <p class="question">Which sequences contribute to the edge in the (MSA) POAG that jumps the node that is missing from the CYP2U1 ancestor? Does this explain why this node isn't inferred in this ancestor?</p>
+                            <p>Take note of the node ID (i.e. the grey number under the node) of the first red circle.</p>
+                            <p>Infer the CYP2R1 ancestor and navigate to the node ID you took note of.</p>
+                            <p class="question">Is the node missing as well in the CYP2R1 ancestor? Similar to the CYP2U1 ancestor, does considering the sequences that contribute to the different edges explain why this node is inferred in this ancestor?</p>
+                            <p>Insertion or deletion events are also indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
+                                This means that groups of characters have been inferred to be parsimonious. The darker paths find greater support than the lighter paths; however, both could be considered.</p>
+                        </div>
+                        <div class="step">
+                            <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
+                            <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish.</p>
+                            <p><em>Note: the taxonomic name for the ray-finned fish is <a href="https://en.wikipedia.org/wiki/Actinopterygii">Actinopterygii</a> and because GRASP mapped the taxonomy successfully we should be able to search on the term "Actinopteri" which is the major class of ray-finned fish. </em></p>
+                            <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
+                            <p>Set up your data so you are displaying the (MSA) POAG, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously.</p>
+                            <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
+                            <p class="question">Can you identify differences between these inferred ancestors?</p>
+                            <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
+                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>
+                            <p> Look at the second grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p>Remember that GRASP indicates a more supported path (based on <a href="http://grasp.scmb.uq.edu.au/guide#bi-pars-nav">edge parsimony</a>) as a darker edge.</p>
+                            <p class="question"> Why does GRASP suggest two paths with greater support for the CYP2U1 ancestor? Why might it be useful to consider both paths when reconstructing an ancestor?</p>
+                        </div>
+                        <div class="step">
+                            <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>
+                            <p>Reconstruct the CYP2U1 ancestor.</p>
+                            <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.
+                                Consensus sequences only follow a single path, so you can use your alignment viewer to look at the downloaded results.</p>
+                            <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction
+                                (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
+                                at the top left corner and following the prompts for creating an account with GRASP.
+                                You can access the list of previously saved reconstructions by clicking your account name which will appear in the menu at the top right corner.</em></p>
+                        </div>
+                        <div class="step">
+                            <h4>11. Inspect the probabilities of amino acids at an ancestor</h4>
+                            <p>So far we have only looked at the so-called joint reconstructions of ancestors. We will now perform marginal reconstruction of the CYP2U1 ancestor.
+                                Refer to the <a href="http://grasp.scmb.uq.edu.au/guide#joint-marg-nav">GRASP Guide</a> for more technical information on the difference of the two types of inference.
+                                Marginal reconstruction will allow us to form a greater understanding of the biological variability that exists at a specified ancestor;
+                                we are essentially asking 'what is the probability of each amino acid, in each position'.
+                            </p>
+                            <p>
+                                Select 'View marginal reconstruction' for the CYP2U1 ancestor.
+                                You will note that the topology of the POG is identical to that of performing joint reconstruction.
+                                (You can use the navigation bar to look at the same two red circles, for instance.)
+                                The difference lies in what information is inferred for nodes with character states.
+                                Inspect that information by hovering over or clicking the nodes in the inferred POG.
+                            </p>
+                            <p class="question">Can you identify two nodes where the probability of one amino acid is about 50&#37; and a second almost as big? Make a note of the two node positions they occupy (i.e. the node IDs).</p>
+                            <p>Such positions are good candidates to mutate to explore ancestral variants.
+                                A new menu item 'View mutants' has appeared above the navigation bar.
+                                Click on it and increase the number to '1'.
+                                For each increment a small triangle appears somewhere along the navigation bar; it indicates a position in the POG which is a good candidate for mutation.
+                                By using the navigation bar, inspect and make a note of the distribution of the node identified by the first triangle to appear.
+                                Then, keep incrementing it until you see a triangle identify the positions of one of your own 50/50 nodes.
+                            </p>
+                            <p class="question">If you were to allow a mutation to happen, which of the positions above do you think would best explore the space of possible CYP2U1 ancestors?</p>
+                            <p>See the <a href="http://grasp.scmb.uq.edu.au/guide#mutant-nav">GRASP Guide</a> to work out why the program chose its position.</p>
+                        </div>
+                        <div class="step">
+                            <h3>Bring your own sequences</h3>
+                            <p class="step">Repeat Steps 1-11 using your own sequence library.</p>
+                            <p>A major issue with the example above is the limited number of sequences that we have included. Using the public databases as at early 2018 the set of high-quality homologs of CYP2U1 is close to 200.
+                                Excluding sequences is likely to impact the quality of your ancestral predictions. </p>
+                            <p>To construct your own sequence set for a protein family of interest to you, we recommend that you make use of resources such as <a href="http://www.uniprot.org/">Uniprot</a> and <a href="https://www.ncbi.nlm.nih.gov/">NCBI</a>.
+                                If you have specific (seed) protein sequences for which ancestors you would like to explore, we suggest you use tools such as <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a> to create an initial sequence library.
+                                It is imperative that you exercise caution as exemplified above, before you interpret ancestral predictions. There is no tool currently that will curate your data as well as a well-informed protein scientist...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cell border-box-sizing text_cell rendered">
+                <div class="inner_cell">
+                    <div class="text_cell_render border-box-sizing rendered_html">
+                        <h2 id="refs-nav">References</h2>
+                        <ol>
+                            <li>Katoh, K. and Standley, D. M. (2013) MAFFT Multiple Sequence Alignment Software Version 7: Improvements in Performance and Usability. <i>Mol Biol Evol</i>. 30(4): 772–780. <a href="https://dx.doi.org/10.1093/molbev/mst010">DOI</a>.</li>
+                            <li>Stamatakis A. (2014) RAxML Version 8: A tool for Phylogenetic Analysis and Post-Analysis of Large Phylogenies. <i>Bioinformatics</i>. 30(9): 1312-1313. <a href="https://dx.doi.org/10.1093/bioinformatics/btu033">DOI</a>.</li>
+                            <li>Larsson, A. (2014) AliView: a fast and lightweight alignment viewer and editor for large data sets. <i>Bioinformatics</i>. 30(22): 3276-3278. <a href="http://dx.doi.org/10.1093/bioinformatics/btu531">DOI</a>.</li>
+                            <li>Silvestro, D. and Michalak, I. (2012) - raxmlGUI: a graphical front-end for RAxML. <i>Organisms Diversity and Evolution</i>. 12(4): 335-337. <a href="https://link.springer.com/article/10.1007%2Fs13127-011-0056-0">DOI</a>.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

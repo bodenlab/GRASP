@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"></meta>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+
+    <title>GRASP Ancestral Sequence Reconstruction</title>
+
+    <!-- Custom Fonts -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/font-awesome.min.css}"></link>
+    <!--<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"></link>-->
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-switch.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/asr.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/bootstrap_override.css}"></link>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
+    <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap-switch.min.js}"></script>
+    <!--<script type="text/javascript" th:src="@{/js/d3.tip.v0.6.3.js}"></script>-->
+    <script type="text/javascript" th:src="@{/js/colour_defs.js}"></script>
+    <script type="text/javascript" th:src="@{/js/index.js}"></script>
+    <script type="text/javascript" th:src="@{/js/actions.js}"></script>
+    <script type="text/javascript" th:src="@{/js/asr.js}"></script>
+    <script type="text/javascript" th:src="@{/js/tree_options.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree.js}"></script>
+</head>
+<body class="container-fluid">
+<div th:replace="fragments/nav :: nav"></div>
+
+<!-- Header -->
+<div th:replace="fragments/header :: header"></div>
+
+<!-- Page Content -->
+
+<!-- Tutorial Section  -->
+<div class="col-xs-12 page-header">
+    <!--<button id="tutorial-toggle" class="btn btn-default col-sm-12" data-target="#tutorial" data-toggle="collapse">-->
+    <!--</button>-->
+    <div th:replace="fragments/workshop :: workshop"></div>
+</div>
+
+<!-- About Section -->
+<div th:replace="fragments/about :: about"></div>
+
+<!-- Footer -->
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+
+</html>

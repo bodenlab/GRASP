@@ -4,7 +4,7 @@ body.container-fluid {
 }
 
 body {
-padding-bottom: 70px;
+    padding-bottom: 70px;
 }
 
 body,
@@ -37,6 +37,28 @@ h6 {
 
 .img {
     margin: auto;
+}
+
+.step {
+    padding-top: 1em;
+}
+
+.question {
+    color: #2FA1B5;
+    font-weight: bold;
+}
+
+.modal-dialog {
+    width: 80%;
+}
+
+#taxonomic-annotation-img-div {
+    background: url(../images/taxonomic_annotation.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
 }
 
 #tutorial-4-nwk-img-div {
@@ -80,13 +102,13 @@ h6 {
     padding-top: 18%;
 }
 #GRASP-POAGs-img-div {
-     background: url(../images/GRASP_POAGs.png);
-     background-size: contain;
-     background-repeat: no-repeat;
-     width: 100%;
-     height: 0;
-     padding-top: 43%;
- }
+    background: url(../images/GRASP_POAGs.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 43%;
+}
 
 #home-img-div {
     background: url(../images/home_page.png);
@@ -221,6 +243,7 @@ li.nav-item-2 a {
     font-size: 12px;
 }
 
+
 .topnav {
     font-size: 12px;
 }
@@ -292,6 +315,19 @@ li.nav-item-2 a {
 img {
     width: 100%;
 }
+
+
+/* Add in some space before every div within the tutorial div, to get them to line up correctly*/
+
+
+#tutorial-div *[id]:before{
+    display: block;
+    content: " ";
+    margin-top: -70px;
+    height: 70px;
+    visibility: hidden;
+}
+
 
 .network-name {
     text-transform: uppercase;
@@ -383,3 +419,4 @@ footer {
 p.copyright {
     margin: 5px 0 0;
 }
+

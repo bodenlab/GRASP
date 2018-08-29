@@ -167,8 +167,10 @@ public class UserObject {
      *
      * @param reconId
      */
-    public void addToOwnerdReconIds(int reconId, String reconLabel) {
-        this.ownerAccessReconIds.add(new GeneralObject(reconId, reconLabel));
+    public void addToOwnerdReconIds(int reconId, String reconLabel, String size,
+     String updatedAt) {
+        this.ownerAccessReconIds.add(new GeneralObject(reconId, reconLabel,
+                size, updatedAt));
     }
 
     /**

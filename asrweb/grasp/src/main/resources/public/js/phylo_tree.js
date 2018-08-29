@@ -1457,49 +1457,43 @@ var get_taxon_ids = function () {
 
 
                 }
-                // if (chunk[i].name.indexOf('|') > -1) {
-                //     // console.log('it is a uniprot')
-                //     uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
-                // }
-                // else {
-                //     // console.log('it is an ncbi')
-                //     ncbi_names += chunk[i].name + ","
-                // }
+                if (chunk[i].name.indexOf('|') > -1) {
+                    // console.log('it is a uniprot')
+                    uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
+                }
+                else {
+                    // console.log('it is an ncbi')
+                    ncbi_names += chunk[i].name + ","
+                }
             }
 
         }
 
-            // console.log('ncbi name before')
-            // console.log(ncbi_names)
+        console.log('ncbi name before')
+        console.log(ncbi_names)
 
-            // Remove the final comma or "+OR+"
-            ncbi_names = ncbi_names.substring(0, ncbi_names.length - 1);
-            uniprot_names = uniprot_names.substring(0, uniprot_names.length - 4);
+        // Remove the final comma or "+OR+"
+        ncbi_names = ncbi_names.substring(0, ncbi_names.length - 1);
+        uniprot_names = uniprot_names.substring(0, uniprot_names.length - 4);
 
-            // console.log ('ncbi names')
-            // console.log(ncbi_names)
-            //
-            // console.log ('uniprot names')
-            // console.log(uniprot_names)
-            if (ncbi_names.length > 0){
-                ncbi_array.push(ncbi_names)
+        console.log ('ncbi names')
+        console.log(ncbi_names)
 
+        console.log ('uniprot names')
+        console.log(uniprot_names)
+        if (ncbi_names.length > 0){
+            ncbi_array.push(ncbi_names)
+        }
 
+        if (uniprot_names.length > 0) {
+            uniprot_array.push(uniprot_names)
             }
-
-            if (uniprot_names.length > 0) {
-                uniprot_array.push(uniprot_names)
-            }
-
     }
+    console.log("ncbi array")
+    console.log(ncbi_array)
 
-
-        //
-        // console.log("ncbi array")
-        // console.log(ncbi_array)
-        //
-        // console.log('uniprot array')
-        // console.log(uniprot_array)
+    console.log('uniprot array')
+    console.log(uniprot_array)
 
     var requests = []
 
@@ -1886,8 +1880,6 @@ var add_warning = function(list, type, msg) {
         // Remove final comma
     list_string = list_string.substring(0, list_string.length - 2)
     $(type).removeClass("hidden").html(msg + list_string)
-
-
 
 };
 

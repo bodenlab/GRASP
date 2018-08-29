@@ -28,7 +28,6 @@ public class BaseTest {
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp";
     String dbUser = "web";
     UserController userController;
-    ShareUsersModel shareUsersModel;
     ASRController asrController;
     ReconstructionController reconController;
     ReconstructionsModel reconModel;
@@ -68,15 +67,11 @@ public class BaseTest {
         reconModel = new ReconstructionsModel();
         reconModel.setDBConfig(dbUrl, dbPassword, dbUser);
 
-        shareUsersModel = new ShareUsersModel();
-        shareUsersModel.setDBConfig(dbUrl, dbPassword, dbUser);
-
         userController.setReconModel(reconModel);
         userController.setUsersModel(userModel);
 
         reconController.setReconModel(reconModel);
         reconController.setUsersModel(userModel);
-        reconController.setShareUsersModel(shareUsersModel);
     }
 
     /**

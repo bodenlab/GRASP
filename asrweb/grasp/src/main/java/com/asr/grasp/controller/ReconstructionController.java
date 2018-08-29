@@ -34,9 +34,12 @@ public class ReconstructionController {
     @Autowired
     ReconstructionsModel reconModel;
 
-    @Autowired
-    ShareUsersModel shareUsersModel;
-
+    /**
+     * Check if the label is unique.
+     */
+    public String isLabelUnique(String label) {
+        return reconModel.doesExist(label);
+    }
 
     /**
      * Get the ID. If the ID hasn't been set yet we need to set it based on
@@ -88,14 +91,15 @@ public class ReconstructionController {
         if (recon.getId() == Defines.UNINIT) {
             // Try to save the reconstruction, it can potentially return an
             // error e.g. if the label already exists.
-            reconModel.save(recon);
+            String err = reconModel.save(recon);
+            if (err != null) {
+                return err;
+            }
             // We want to add it to the share table
             getId(recon, user.getId());
-
-            String err = shareUsersModel.shareWithUser(recon.getId(),
-                    user.getId());
             if (err == null) {
-                user.addToOwnerdReconIds(recon.getId(), recon.getLabel());
+                user.addToOwnerdReconIds(recon.getId(), recon.getLabel(),
+                        "Not Available", "today");
                 return null;
             }
             return err;
@@ -130,7 +134,7 @@ public class ReconstructionController {
             return "recon.share.exists";
         }
         // ShareObject the reconstruction with the user
-        return shareUsersModel.shareWithUser(reconId, userId);
+        return reconModel.shareWithUser(reconId, userId);
     }
 
     /**
@@ -154,7 +158,7 @@ public class ReconstructionController {
         // get the owner ID from currentRecon
         int access = getUsersAccess(reconId, loggedInUser);
         if (access == Defines.OWNER_ACCESS) {
-            return shareUsersModel.removeUsersAccess(reconId,
+            return reconModel.removeUsersAccess(reconId,
                     userId);
         }
         return "recon.share.notowner";
@@ -265,9 +269,5 @@ public class ReconstructionController {
 
     public void setReconModel(ReconstructionsModel reconModel) {
         this.reconModel = reconModel;
-    }
-
-    public void setShareUsersModel(ShareUsersModel shareUsersModel) {
-        this.shareUsersModel = shareUsersModel;
     }
 }

@@ -4,23 +4,18 @@ create sequence web.groups_id_seq
   maxvalue 2147483647;
 
 create sequence web.users_id_seq
-  as integer
   maxvalue 2147483647;
 
 create sequence web.share_groups_id_seq
-  as integer
   maxvalue 2147483647;
 
 create sequence web.reconstructions_id_seq
-  as integer
   maxvalue 2147483647;
 
 create sequence web.share_users_id_seq
-  as integer
   maxvalue 2147483647;
 
 create sequence web.groups_users_id_seq
-  as integer
   maxvalue 2147483647;
 
 create table if not exists web.users

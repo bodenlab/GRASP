@@ -16,13 +16,15 @@ public class BaseTest {
      * ------------------------------------------------------------------------
      *
      *       You will need to change the session variable to be a file
-     *              path on your computer.
+     *              path on your computer. An example is in the
+     *              TestPropertiesExample
+     *              .java file. You'll need to copy this to a
+     *              TestPropertiesOverride.java file and add in your session path.
      *
      * ------------------------------------------------------------------------
      */
     // -------------------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER -------
-    String sessionPath = "/Users/ariane/Documents/boden/apps/" +
-            ".tmp/WebSessions/grasp1534997753421/";
+    String sessionPath = TestPropertiesOverride.sessionPath;
     // ------------------------------------------------------------------------
     String dbPassword = "none";
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp";

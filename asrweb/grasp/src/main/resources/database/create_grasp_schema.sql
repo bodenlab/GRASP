@@ -1,7 +1,6 @@
 
 
 create sequence web.groups_id_seq
-  as integer
   maxvalue 2147483647;
 
 create sequence web.users_id_seq

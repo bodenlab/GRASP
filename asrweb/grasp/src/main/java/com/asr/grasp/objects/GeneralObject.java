@@ -12,11 +12,23 @@ public class GeneralObject {
  */
     public int id;
     public String label;
+    public String size;
+    public String updatedAt;
 
-    public GeneralObject(int id, String label) {
+    public GeneralObject(int id, String label, String size, String updatedAt) {
         this.label = label;
         this.id = id;
+        this.size = size;
+        this.updatedAt = updatedAt;
     }
+
+    public String getUpdatedAt() {
+        return this.updatedAt;
+    }
+
+    public void setSize(String size) { this.size = size; }
+
+    public String getSize() { return this.size; }
 
     public String getLabel() {
         return this.label;

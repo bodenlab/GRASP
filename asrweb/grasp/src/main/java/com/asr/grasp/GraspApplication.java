@@ -495,8 +495,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 			// ToDo: Something
 			return showError(model);
 		}
+		ModelAndView mav = accountView.get(loggedInUser, userController);
 
-		return accountView.get(loggedInUser, userController);
+		mav.addObject("type", "saved");
+		return mav;
 	}
 
 	/**
@@ -636,11 +638,17 @@ public class GraspApplication extends SpringBootServletInitializer {
 		this.asr = asrForm;
 
 		// ToDo: Also check here that they have a unique label
-
-		if (asr.getLabel() == "") {
+		String err = null;
+		if (asr.getLabel().equals("")) {
+			err = "recon.require.label";
+		} else {
+			err = reconController.isLabelUnique(asr
+					.getLabel());
+		}
+		if (err != null) {
 			ModelAndView mav = new ModelAndView("index");
 			mav.addObject("error", true);
-			mav.addObject("errorMessage", "recon.require.label");
+			mav.addObject("errorMessage", err);
 			mav.addObject("user", loggedInUser);
 			mav.addObject("username", loggedInUser.getUsername());
 			return mav;
@@ -648,15 +656,15 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 		logger.log(Level.INFO, "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr.getInferenceType());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
 
-		Exception err = asr.runForSession(sessionPath);
+		Exception exception = asr.runForSession(sessionPath);
 
-		if (err != null) {
+		if (exception != null) {
 			ModelAndView mav = new ModelAndView("index");
 			mav.addObject("error", true);
-			String message = err.getMessage();
+			String message = exception.getMessage();
 			logger.log(Level.SEVERE, "ERR, request_addr: " + request
 					.getRemoteAddr() + " error: " + message);
-			if (err.getMessage() == null || err.getMessage().contains("FileNotFoundException"))
+			if (exception.getMessage() == null || exception.getMessage().contains("FileNotFoundException"))
 				message = checkErrors(asr);
 			mav.addObject("errorMessage", message);
 			mav.addObject("user", loggedInUser);

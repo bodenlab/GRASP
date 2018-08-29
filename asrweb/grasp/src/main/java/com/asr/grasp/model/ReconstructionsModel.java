@@ -9,13 +9,12 @@ import com.asr.grasp.objects.GeneralObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 
 @Repository
 public class ReconstructionsModel extends BaseModel {
-
-    ShareUsersModel shareUsersModel = new ShareUsersModel();
 
     final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
     final ColumnEntry ownerId = new ColumnEntry(2, "owner_id", Defines.INT);
@@ -175,7 +174,13 @@ public class ReconstructionsModel extends BaseModel {
         ResultSet rawRecons = queryOnId(
                 "SELECT r.label as label, " +
                 " r.owner_id as owner_id, " +
-                "r.id as r_id " +
+                "r.id as r_id," +
+                        "pg_size_pretty(CAST (pg_column_size(r.ancestor) + " +
+                        "pg_column_size(r.reconstructed_tree) + " +
+                        "pg_column_size" +
+                        "(r.joint_inferences) as BIGINT)) as size," +
+                        "TO_CHAR(r.updated_at, 'Dy DD Mon YYYY') as " +
+                        "updated_at " +
                 " FROM web.reconstructions AS r" +
                 " LEFT JOIN web.share_users AS su ON su.r_id = " +
                 "r.id " +
@@ -200,13 +205,15 @@ public class ReconstructionsModel extends BaseModel {
                 int reconOwnerId = rawRecons.getInt("owner_id");
                 int reconId = rawRecons.getInt("r_id");
                 String reconLabel = rawRecons.getString("label");
-
+                String updatedAt = rawRecons.getString("updated_at");
+                String size = rawRecons.getString("size");
                 // Check if the user owns this reconstruction
                 if (reconOwnerId == userId) {
-                    ownedRecons.add(new GeneralObject(reconId, reconLabel));
+                    ownedRecons.add(new GeneralObject(reconId, reconLabel,
+                            size, updatedAt));
                 } else {
                     sharedWithRecons.add(new GeneralObject(reconId,
-                            reconLabel));
+                            reconLabel, size, updatedAt));
                 }
             }
         }
@@ -246,7 +253,6 @@ public class ReconstructionsModel extends BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setInt(2, userId);
-//            statement.setInt(3, userId);
 
             ResultSet rawRecons = statement.executeQuery();
             // If we have an entry convert it to the correct format.
@@ -325,6 +331,20 @@ public class ReconstructionsModel extends BaseModel {
         }
     }
 
+    /**
+     * Checks if a label exists.
+     * @param label
+     * @return
+     */
+    public String doesExist(String label) {
+        int reconId = getIdOnUniqueString("SELECT id FROM " +
+                "web.reconstructions WHERE label=?;", label);
+        if (reconId != Defines.FALSE) {
+            return "Reconstructions must have a unique label, a " +
+                    "reconstruction already exists with that label.";
+        }
+        return null;
+    }
 
     /**
      * Save a reconstruction to the model. The owner should already be
@@ -365,12 +385,12 @@ public class ReconstructionsModel extends BaseModel {
         // Otherwise we can set the reconstruction ID and add the owner to
         // the share_users table.
         reconstruction.setId(reconId);
-        err = shareUsersModel.shareWithUser(reconId, reconstruction.getOwnerId
+        err = shareWithUser(reconId, reconstruction.getOwnerId
                 ());
         if (err != null) {
             return "fail";
         }
-        return "recon.saved";
+        return null;
     }
 
 
@@ -434,5 +454,37 @@ public class ReconstructionsModel extends BaseModel {
         return getIdList(query(query));
     }
 
+    /**
+     * ShareObject a reconstruction with a user.
+     *
+     * This assumes that the user and reconstruction ID exist.
+     * @param reconId
+     * @param userId
+     * @return
+     */
+
+    public String shareWithUser(int reconId, int userId) {
+        String query = "INSERT INTO web.share_users(r_id, u_id) VALUES(?, ?);";
+        String err = runTwoUpdateQuery(query, reconId, userId, 1, 2);
+        if(err != null) {
+            return err;
+        }
+        return null;
+    }
+
+    /**
+     * Remove a users' access to a reconstruction.
+     * @param reconId
+     * @param userId
+     * @return
+     */
+    public String removeUsersAccess(int reconId, int userId) {
+        String query = "DELETE FROM web.share_users WHERE r_id = ? AND u_id =" +
+                " ?;";
+        if (runTwoUpdateQuery(query, reconId, userId, 1, 2) == null) {
+            return "fail";
+        }
+        return null;
+    }
 
 }

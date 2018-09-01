@@ -36,7 +36,7 @@ var phylo_options = {
         branch_dict: {},
         node_count: 0, // Used to assign IDs to the nodes.
         obsolete_list: [], // Keeps track of any sequences in the tree which are obsolete
-        indel_pairs: {} // Keeps track of all of the parent child pairs that have differing indels
+        indel_pairs: {}, // Keeps track of all of the parent child pairs that have differing indels
         obsolete_list: [], // Keeps track of any sequences in the tree which are obsolete
         failed_taxonomy_list: []
     },
@@ -1704,7 +1704,7 @@ function get_taxon_id_from_ncbi(extant_names) {
             }
 
         }
-            }
+
 
 
 

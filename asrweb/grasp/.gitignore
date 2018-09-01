@@ -27,3 +27,5 @@ nbdist/
 *-override.properties
 
 *maven-metadata.xml*
+
+*.DS_Store

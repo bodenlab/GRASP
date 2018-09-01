@@ -25,6 +25,7 @@ nbdist/
 
 ### Specific user configs ###
 *-override.properties
+*TestProptertiesOverride.java
 
 *maven-metadata.xml*
 

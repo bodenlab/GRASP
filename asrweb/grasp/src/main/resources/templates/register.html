@@ -70,6 +70,17 @@
                 <small class="form-text text-danger" th:each="error : ${#fields.errors('passwordMatch')}"
                        th:text="${error}">Validation error</small>
             </div>
+            <!--<div class="form-group row">-->
+                <!--<label for="email">Email</label>-->
+                <!--<input class="form-control" type="email" id="email"-->
+                       <!--placeholder="someone@somewhere.com"-->
+                       <!--th:field="*{email}"-->
+                       <!--data-error="This email address is invalid"-->
+                       <!--required="true"/>-->
+                <!--<small class="form-text text-danger"-->
+                       <!--th:each="error : ${#fields.errors('email')}"-->
+                       <!--th:text="${error}">Validation error</small>-->
+            <!--</div>-->
             <div class="form-group row">
                 <button type="submit" class="btn btn-primary col-sm-4">Register</button>
             </div>
@@ -78,7 +89,7 @@
 </div>
 
 
-<!--<a th:href="@{/login.html}" th:text="#{label.form.loginLink}">login</a>-->
+<!--<a th:href="@{/Login.html}" th:text="#{label.form.loginLink}">Login</a>-->
 <!-- About Section -->
 <div th:replace="fragments/about :: about"></div>
 

@@ -8,7 +8,11 @@
             <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-10 pad-top-bottom">
                     <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
-                        <input type="text" class="form-input col-xs-7" placeholder="Label your reconstruction..." id="label" name="label" th:field="*{label}" onchange="set_recon_label($('#label').val())" />
+                        <input type="text" class="form-input col-xs-7"
+                               placeholder="Label your reconstruction..."
+                               id="label" name="label" th:field="*{label}"
+                               required="true"
+                               onchange="set_recon_label($('#label').val())" />
                         <div class="form-group col-xs-5 no-padding">
                             <div class="input-group col-xs-12 no-padding">
                                 <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Run joint reconstruction on the selected test dataset.">
@@ -22,7 +26,6 @@
                                         <li><a id="hudson" onclick="update_test('hudson')">Hudson et al. (234) <span id="hudson-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                         <li><a id="clifton" onclick="update_test('clifton')">Clifton and Jackson (340) <span id="clifton-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
                                         <li><a id="none" onclick="update_test('none')">None <span id="none-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-
                                     </ul>
                                     <input type="hidden" th:value="null" th:field="*{data}" class="data" />
                                     <script type="text/javascript">

@@ -4,7 +4,9 @@
 <div th:fragment="user">
     <div class="content-section-a">
         <div class="container">
-            <h2 class=""><span th:text="*{user.username}"></span></h2>
+            <h2
+                    class=""><span
+                    th:text="*{user.username}"></span></h2>
         </div>
     </div>
     <div class="content-section-b ">
@@ -28,21 +30,21 @@
                 <thead>
                 <tr>
                     <th scope="col">Label</th>
-                    <th scope="col">Model</th>
-                    <th scope="col">Number of Threads</th>
-                    <th scope="col">Inference Type</th>
-                    <th scope="col">Ancestral Node</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Last Updated</th>
+                    <!--<th scope="col">Inference Type</th>-->
+                    <!--<th scope="col">Ancestral Node</th>-->
                     <th scope="col"></th>
                     <th scope="col"></th>
                 </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="recon : *{reconstructions}">
+                    <tr th:each="recon : *{ownerAccessRecons}">
                         <td th:text="${recon.label}"></td>
-                        <td th:text="${recon.model}"></td>
-                        <td th:text="${{recon.numThreads}}"></td>
-                        <td th:text="${recon.inferenceType}"></td>
-                        <td th:text="${recon.node}"></td>
+                        <td th:text="${recon.size}"></td>
+                        <td th:text="${{recon.updatedAt}}"></td>
+                        <!--<td th:text="${recon.inferenceType}"></td>-->
+                        <!--<td th:text="${recon.node}"></td>-->
                         <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
                         <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
                         <td><a th:onclick="${'updateReconId(' + recon.id + ');'}" href="" data-toggle="modal" data-target="#share-user-modal" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
@@ -54,24 +56,22 @@
                 <thead>
                 <tr>
                     <th scope="col">Label</th>
-                    <th scope="col">Model</th>
-                    <th scope="col">Number of Threads</th>
-                    <th scope="col">Inference Type</th>
-                    <th scope="col">Ancestral Node</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Last Updated</th>
+                    <!--<th scope="col">Inference Type</th>-->
+                    <!--<th scope="col">Ancestral Node</th>-->
                     <th scope="col"></th>
                     <th scope="col"></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="recon : *{sharedreconstructions}">
+                <tr th:each="recon : *{memberAccessRecons}">
                     <td th:text="${recon.label}"></td>
-                    <td th:text="${recon.model}"></td>
-                    <td th:text="${{recon.numThreads}}"></td>
-                    <td th:text="${recon.inferenceType}"></td>
-                    <td th:text="${recon.node}"></td>
-                    <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
+                    <td th:text="${recon.size}"></td>
+                    <td th:text="${{recon.updatedAt}}"></td>
+                    <!--<td th:text="${recon.inferenceType}"></td>-->
+                    <!--<td th:text="${recon.node}"></td>-->
                     <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
-                    <td><a th:href="@{/(share='t',id=${recon.id})}" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
                 </tr>
                 </tbody>
             </table>

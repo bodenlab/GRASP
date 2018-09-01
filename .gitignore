@@ -8,4 +8,5 @@ asrweb/asr/.DS_Store
 asrweb/asr/target
 asrweb/.DS_Store
 .idea
-
+*.DS_Store*
+*maven*

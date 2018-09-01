@@ -37,6 +37,8 @@ var phylo_options = {
         node_count: 0, // Used to assign IDs to the nodes.
         obsolete_list: [], // Keeps track of any sequences in the tree which are obsolete
         indel_pairs: {} // Keeps track of all of the parent child pairs that have differing indels
+        obsolete_list: [], // Keeps track of any sequences in the tree which are obsolete
+        failed_taxonomy_list: []
     },
     legend: {
         width: 20,
@@ -155,7 +157,6 @@ var make_tree_scale = function (phylo_options) {
         .attr("stroke", phylo_options.branch_stroke)
         .attr("transform", "translate(" + 30 + ",0)")
         .call(y_axis)
-
 
     phylo_options.legend.colour_scale = d3.scale.linear()
         .domain(linspace(0, phylo_options.svg_info.height, 2))
@@ -439,7 +440,7 @@ var draw_phylo_circle = function (group, node, n) {
 
             var modal_group = modal_container.append("g")
                 .attr("opacity", 1);
-            //.attr("transform", "translate(100, 50)scale(1.5)");
+                //.attr("transform", "translate(100, 50)scale(1.5)");
 
             add_taxonomy_modal_info(node, modal_group, options);
 
@@ -728,9 +729,6 @@ var draw_phylo_nodes = function (phylo_options, initial) {
  *      node_selected: d3 node object, contains styling and coords etc.
  */
 var on_node_mouseover = function (node_selected) {
-    console.log(node_selected);
-
-    // d3.selectnode_selected.attr("stroke-width")
     var options = phylo_options.style;
     var id = node_selected.attr("id").split("fill-")[1];
     var view_node_labels = document.getElementById('node-text-toggle').innerHTML.split(" | ")[1] == "ON";
@@ -739,9 +737,6 @@ var on_node_mouseover = function (node_selected) {
         d3.select("#text-" + id).attr("opacity", view_extant_labels ? options.extant_label_opacity : 1);
     }
     if (!view_node_labels && node_selected.attr("class") == "node"){
-
-
-
         d3.select("#path-" + id).style("opacity", 0);
         node_selected.attr("r", options.hover_radius);
         var y = d3.select("#circle-" + id).attr("cy");
@@ -792,16 +787,6 @@ var on_node_mouseout = function (node_selected) {
         d3.select("#text-" + id).attr("opacity", 0);
     }
 
-}
-
-var on_branch_mouseover = function (branch_selected){
-    // console.log("BRANCH IS")
-    // console.log(branch_selected)
-}
-
-var on_branch_mouseout = function (branch_selected){
-    // console.log("BRANCH IS GOING AWAY")
-    // console.log(branch_selected)
 }
 
 
@@ -924,7 +909,7 @@ var search_tree = function(search, clear, exact) {
                     found = true;
                 } else {
                     if (extant.taxonomy !== undefined && extant.taxonomy !== null) {
-                        var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
+                        var ranks = ["domain", "kingdom", "phylum", "class", "order","family",  "genus", "species"]
 
                         for (var rank in ranks) {
                             var tax = extant.taxonomy[ranks[rank]];
@@ -1236,20 +1221,31 @@ var run_phylo_tree = function () {
 
     collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 
-    // Add the taxon information to the leaf nodes
-    $.when(get_taxon_ids(tree_json)).then(function() {
-        // console.log("RETURNED")
-        // console.log(phylo_options.tree.extants)
-        queue_taxonomy()
+    // // Add the taxon information to the leaf nodes
+    // $.when(get_taxon_ids(tree_json)).then(function() {
+    //     // console.log("RETURNED")
+    //     // console.log(phylo_options.tree.extants)
+    //     console.log(phylo_options.tree.extants)
+    //     queue_taxonomy()
+
         // get_taxonomy(phylo_options.tree.root);
         // assign_num_children(phylo_options.tree.root);
         //
         // collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 
-    });
+    // });
 
 }
 
+var annotate_taxonomy = function() {
+    // Add the taxon information to the leaf nodes
+
+    $('#taxonomy-info-alert').removeClass("hidden");
+
+    $.when(get_taxon_ids()).then(function() {
+        queue_taxonomy()
+    })
+};
 /**
  *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
  */
@@ -1542,7 +1538,7 @@ var is_intersect = function(arr1, arr2) {
  * Annotate the extant sequences with their taxonomic ids
  */
 
-var get_taxon_ids = function (node) {
+var get_taxon_ids = function () {
 
 
     // Create a new copy of the extant list
@@ -1560,11 +1556,17 @@ var get_taxon_ids = function (node) {
         for (i in chunk) {
 
 
-            // console.log('now we are working on ')
-            // console.log(i)
-            // console.log(chunk)
-            // console.log(chunk[i])
             if (chunk[i] !== null && chunk[i] !== undefined) {
+
+                if (chunk[i].name[2] == "|"){
+                    uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
+                }
+
+                else {
+                    ncbi_names += chunk[i].name.split("|")[0].split(" ")[0] + ","
+
+
+                }
                 if (chunk[i].name.indexOf('|') > -1) {
                     // console.log('it is a uniprot')
                     uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
@@ -1602,12 +1604,12 @@ var get_taxon_ids = function (node) {
     }
 
 
-    //
-    // console.log("ncbi array")
-    // console.log(ncbi_array)
-    //
-    // console.log('uniprot array')
-    // console.log(uniprot_array)
+        //
+        // console.log("ncbi array")
+        // console.log(ncbi_array)
+        //
+        // console.log('uniprot array')
+        // console.log(uniprot_array)
 
     var requests = []
 
@@ -1620,7 +1622,7 @@ var get_taxon_ids = function (node) {
     }
 
     return $.when.apply(undefined, requests).then(function () {
-        // console.log("Abbout to return")
+        // console.log("About to return")
 
     })
 
@@ -1644,7 +1646,7 @@ var get_taxon_ids = function (node) {
 
 function get_taxon_id_from_ncbi(extant_names) {
     // console.log('in here with names,', extant_names)
-    var url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
+    var url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?model=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
     // console.log (url)
 
     return promise = $.ajax({
@@ -1652,6 +1654,7 @@ function get_taxon_id_from_ncbi(extant_names) {
         type: 'POST',
         headers: {
             'Content-Type': 'text/plain'
+            // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
 
@@ -1660,16 +1663,14 @@ function get_taxon_id_from_ncbi(extant_names) {
             if (speciesData != null) {
 
                 for (i in phylo_options.tree.extants) {
-                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name + "')]/../Item[@Name='TaxId']/text()";
+                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name.split("|")[0].split(" ")[0] + "')]/../Item[@Name='TaxId']/text()";
 
                     var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
 
                     try {
                         var thisNode = node.iterateNext();
                         while (thisNode) {
-                            // console.log('updating it')
                             phylo_options.tree.extants[i].taxon_id = thisNode.textContent;
-                            //console.log(phylo_options.tree.extants[i]);
                             thisNode = node.iterateNext();
                         }
 
@@ -1703,6 +1704,11 @@ function get_taxon_id_from_ncbi(extant_names) {
             }
 
         }
+            }
+
+
+
+
 
     });
 }
@@ -1710,7 +1716,7 @@ function get_taxon_id_from_ncbi(extant_names) {
 function get_taxon_id_from_uniprot(uniprot_names) {
 
 
-    url = "http://www.uniprot.org/uniprot/?query=" + uniprot_names +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+    url = "https://www.uniprot.org/uniprot/?query=" + uniprot_names +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
     // console.log("uniprot url is ", url)
     speciesDict = {}
 
@@ -1792,8 +1798,7 @@ var queue_taxonomy = function (){
     var taxon_array = [];
 
     extant_list = phylo_options.tree.extants.slice()
-    // console.log("Here is the extant list")
-    // console.log(extant_list)
+
 
     while (extant_list.length) {
         var taxon_ids = "";
@@ -1803,7 +1808,14 @@ var queue_taxonomy = function (){
         if (chunk !== null && chunk !== undefined) {
 
             for (i in chunk){
-                taxon_ids += chunk[i].taxon_id + ","
+                if (chunk[i].taxon_id == undefined){
+                    phylo_options.tree.failed_taxonomy_list.push(chunk[i].name)
+
+                }
+
+                else {
+                    taxon_ids += chunk[i].taxon_id + ","
+                }
             }
 
             // console.log("Chunk is")
@@ -1826,13 +1838,34 @@ var queue_taxonomy = function (){
     }
 
     return $.when.apply(undefined, requests).then(function () {
-        // console.log("Abbout to return")
-        // assign topmost common taxon information for internal nodes
+
+        // Assign topmost common taxon information for internal nodes
         get_common_taxon(phylo_options.tree.root);
         refresh_tree();
-        $('#taxonomy-info-alert').addClass("hidden");
-        $('#taxonomy-success-alert').removeClass("hidden");
-        get_obsolete()
+
+        // Add a warning if not all the taxonomy annotations worked
+
+        if (phylo_options.tree.failed_taxonomy_list.length > 0) {
+            $('#taxonomy-info-alert').addClass("hidden");
+
+            var counts = phylo_options.tree.failed_taxonomy_list.length + " out of " + phylo_options.tree.extants.length + " sequences couldn't be mapped."
+
+
+            add_warning(phylo_options.tree.failed_taxonomy_list, "#taxonomy-warning-alert", "Warning! " + counts + " The following sequences could not be mapped to their taxonomy: ");
+
+        }
+
+        else { //Everything worked, so add the success alert
+            $('#taxonomy-info-alert').addClass("hidden");
+            $('#taxonomy-success-alert').removeClass("hidden");
+
+
+        }
+
+        // Add a warning if we found obsolete sequences
+        if (phylo_options.tree.obsolete_list.length > 1) {
+            add_warning(phylo_options.tree.obsolete_list, "#obsolete-warning-alert", "Warning! The following sequences are obsolete: ");
+        }
         redraw_poags();
 
     })
@@ -1864,7 +1897,7 @@ var get_taxonomy = function (taxon_ids) {
     var ranks = ["domain", "kingdom", "phylum", "class", "order","family",  "genus", "species"]
 
 
-    var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
+    var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?model=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
 
     // console.log(url)
 
@@ -1943,24 +1976,18 @@ var get_taxonomy = function (taxon_ids) {
 
 }
 
-var get_obsolete = function() {
+var add_warning = function(list, type, msg) {
 
-    // console.log("Called get obsolete")
+    var list_string = "";
 
-    var obsolete_string = ""
-    if (phylo_options.tree.obsolete_list.length > 0){
-        for (i = 0; i < phylo_options.tree.obsolete_list.length; i++) {
-            obsolete_string += phylo_options.tree.obsolete_list[i] + ", "
-        }
-
-        // Remove final comma
-        obsolete_string = obsolete_string.substring(0, obsolete_string.length - 2)
-        $('#obsolete-warning-alert').removeClass("hidden").html("Warning: The following sequences are obsolete: " + obsolete_string)
-
+    for (i = 0; i < list.length; i++) {
+        list_string += list[i] + ", "
     }
+        // Remove final comma
+    list_string = list_string.substring(0, list_string.length - 2)
+    $(type).removeClass("hidden").html(msg + list_string)
 
-
-}
+};
 
 
 
@@ -2459,7 +2486,6 @@ function contextMenu() {
                 console.log("AND call is")
                 console.log(call)
                 context_menu_action(call, node_fill, node_id);
-
             });
 
 
@@ -2492,75 +2518,6 @@ function contextMenu() {
 
             });
     }
-
-    // function branch_menu(x, y){
-    //     console.log("Calling branch menu")
-    //     d3.select('.context-menu').remove();
-    //     d3.select('.branch-menu').remove();
-    //     //scaleItems();
-    //
-    //     // Draw the menu
-    //     phylo_options.group
-    //         .append('g').attr('class', 'branch-menu')
-    //         .selectAll('tmp')
-    //         .data(items).enter()
-    //         .append('g').attr('class', 'menu-entry')
-    //         .style({'cursor': 'pointer'})
-    //         .on('mouseover', function () {
-    //             d3.select(this).select('rect').style(style.rect.mouseover)
-    //         })
-    //         .on('mouseout', function () {
-    //             d3.select(this).select('rect').style(style.rect.mouseout)
-    //         });
-    //
-    //
-    //     d3.selectAll('.menu-entry')
-    //         .append('rect')
-    //         .attr('name', function (d) {
-    //             return d;
-    //         })
-    //         .attr('x', x)
-    //         .attr('y', function (d, i) {
-    //             return y + (i * height);
-    //         })
-    //         .attr('width', width)
-    //         .attr('height', height)
-    //         .style(style.rect.mouseout)
-    //         .on('click', function () {
-    //             var call = d3.select(this);
-    //             branch_menu_action();
-    //
-    //         });
-    //
-    //
-    //     d3.selectAll('.menu-entry')
-    //         .append('text')
-    //         .text(function (d) {
-    //             return d;
-    //         })
-    //         .attr('x', x)
-    //         .attr('y', function (d, i) {
-    //             return (y + (i * height)) - height / 3;
-    //         })
-    //         .attr('dy', height - margin / 2)
-    //         .attr('dx', margin)
-    //         .style(style.text)
-    //         .attr('name', function (d) {
-    //             return d;
-    //         })
-    //         .on('click', function () {
-    //             var call = d3.select(this);
-    //             branch_menu_action();
-    //         });
-    //
-    //     // Other interactions
-    //     d3.select('body')
-    //         .on('click', function () {
-    //             d3.select('.context-menu').remove();
-    //             d3.select('.branch-menu').remove();
-    //
-    //         });
-    // }
 
     menu.items = function (e) {
         if (!arguments.length)
@@ -2620,14 +2577,10 @@ var context_menu_action = function (call, node_fill, node_id) {
     phylo_options.tree.collapsed_selection = null;
     document.getElementById('reset-button').disabled = true;
     if (call_type == "View joint reconstruction") {
-
-        console.log("ADding a joint one now")
-        console.log(phylo_options.tree)
         select_node(call.attr("id"));
         refresh_tree();
         reset_poag_stack();
         displayJointGraph(call.attr("id"), node_fill, true);
-
     } else if (call_type == "Add joint reconstruction") {
         document.getElementById('reset-button').disabled = false;
         d3.select("#fill-" + node_id).attr("stroke", phylo_options.style.stacked_colour);
@@ -2707,17 +2660,6 @@ var context_menu_action = function (call, node_fill, node_id) {
 
 }
 
-// var branch_menu_action = function (call, branch_id) {
-//     var call_type = call.attr("name");
-//     phylo_options.tree.collapsed_selection = null;
-//     document.getElementById('reset-button').disabled = true;
-//     if (call_type == "View joint reconstruction") {
-//         select_node(call.attr("id"));
-//         refresh_tree();
-//         reset_poag_stack();
-//         displayJointGraph(call.attr("id"), node_fill, true);
-//     }
-// }
 
 
 /**
@@ -2989,7 +2931,7 @@ var next_right = function (node) {
  * fix_subtrees updates the subtrees of a node.
  *
  * This is done itterattively so that each time we progress up the levels
- * of the trees we know w edon't have to fix any lower trees as they
+ * of the trees we know we don't have to fix any lower trees as they
  * have already been fixed.
  *
  * Parameters:

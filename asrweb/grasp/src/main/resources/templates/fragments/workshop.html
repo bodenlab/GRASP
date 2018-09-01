@@ -61,7 +61,7 @@
                         <p>If you are using the user interface, use 'GRASPTutorial.aln' as the input alignment and follow the prompts in the interface. Save the resulting tree, and move to Step 3.</p>
                         <p>If you are using the command line version (recommended), type the following command in terminal from within the directory where you installed RAxML.
                         <br></br><em>Note: you will need to copy the input file (GRASPTutorial.aln) into the RAxML directory.</em></p>
-                        <p>raxmlHPC -m PROTGAMMAJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</p>
+                        <p>./raxmlHPC-PTHREADS -m PROTGAMMAJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</p>
                         <p class="col-xs-4">-m PROTGAMMAJTT</p>
                         <p class="col-xs-8">PROTGAMMAJTT specifies to optimise substitution rates, use a GAMMA model of rate heterogeneity, and
                             use the JTT amino acid substitution matrix.</p>
@@ -115,12 +115,24 @@
                         <div class="step">
                             <h4>7. Inspect the reconstructed sequences</h4>
                             <p>Explore GRASP:</p>
+
+                            <p class="col-xs-4"> Click Annotate
+                                Taxonomy at the top of the tree </p>
+                            <p class="col-xs-8">
+                                This will get the taxonomic information
+                                for the sequences.
+
+                                <em>Note:
+                                    taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em>
+                            </p>
+
+
                             <p class="col-xs-4">Left-click on tree nodes</p>
                             <p class="col-xs-8">This will show any taxonomic information (if available) of the selected ancestor.
                             At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
                             Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
                                 nodes in the tree) show the full available taxonomic information for that extant.
-                            <em>Note: taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em></p>
+                            </p>
                             <p class="col-xs-4">Right-click on tree nodes</p>
                             <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
                             From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint

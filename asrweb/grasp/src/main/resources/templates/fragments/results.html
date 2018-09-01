@@ -23,7 +23,7 @@
         </div>
         <div id="results" class="container-fluid" >
 
-            <div id="taxonomy-info-alert" class="alert alert-info" role="alert">
+            <div id="taxonomy-info-alert" class="alert alert-info hidden" role="alert">
                 <p>Attempting to get taxonomic information from NCBI...</p>
             </div>
             <div id="taxonomy-success-alert" class="alert alert-success alert-dismissible hidden" role="alert">
@@ -36,15 +36,11 @@
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <p>Not all of your extant sequences could be automatically mapped to either NCBI or UniProt identifiers.</p>
-                <hr></hr>
-                <p>Taxonomic information in tree represents the sequences which could be mapped</p>
             </div>
             <div id="obsolete-warning-alert" class="alert alert-warning alert-dismissible hidden" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                <p>Warning: Your alignment file contains obsolete sequences</p>
                 <hr></hr>
             </div>
             <div id="taxonomy-failed-alert" class="alert alert-danger alert-dismissible hidden" role="alert">
@@ -67,13 +63,16 @@
                     <button type="button" id="saveButton" class="btn btn-default col-xs-2" onclick="save_phylo_svg_to_png()">Save tree</button>
                 </div>
                 <div>
-                    <input type="text" class="form-input col-xs-10 no-padding" style="height: 2.1em;" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value, true, false);" />
+                    <input type="text" class="form-input col-xs-8 no-padding" style="height: 2.1em;" placeholder="Search for terms (use wildcard *)" id="search" name="search" oninput="search_tree(this.value, true, false);" />
+                    <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2" onclick="annotate_taxonomy()">Annotate taxonomy</button>
+
                     <div class="col-xs-2 no-padding" id="node-search">
                         <button type="button" class="btn btn-default col-xs-12 no-padding  dropdown-toggle dropdown"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Search for ancestor: N<span id="searched-node">...</span><span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" id="node-id-menu">
                         </ul>
+
                     </div>
                 </div>
                 <div>

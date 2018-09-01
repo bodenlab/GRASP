@@ -9,7 +9,6 @@ import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
-import reconstruction.ASR;
 
 public class BaseTest {
     /**

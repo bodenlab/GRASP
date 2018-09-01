@@ -28,3 +28,5 @@ nbdist/
 *TestPropertiesOverride.java
 
 *maven-metadata.xml*
+
+*.DS_Store

@@ -96,9 +96,9 @@ public class BaseTest {
      * Doesn't check it is correct as it assumes this will be picked up in
      * TestCreateReconstrcution
      */
-    public ASRObject setAsr() {
+    public ASRObject setAsr(String data) {
         ASRObject asr = new ASRObject();
-        asr.setData("tawfik");
+        asr.setData(data);
         asr.setInferenceType("JTT");
         asr.setLabel("Afriat-Jurnouv-test");
         asr.setWorkingNodeLabel("N0");

@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.is;
 
 /**
  * Created by gabe on 3/9/18.
+ * These tests check that the error messages being thrown by known input errors are being caught and returned to
+ * the user correctly.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GraspConfig.class})

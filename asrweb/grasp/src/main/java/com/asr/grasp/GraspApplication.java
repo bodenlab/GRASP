@@ -1,14 +1,18 @@
 package com.asr.grasp;
 
+import com.asr.grasp.controller.TaxaController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
+import com.asr.grasp.utils.Defines;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
+import java.util.ArrayList;
+import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -66,6 +70,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 	@Autowired
 	private ReconstructionController reconController;
+
+	@Autowired
+	private TaxaController taxaController;
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -551,8 +558,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 	 * @param ancestor
 	 * @param msa
 	 */
-	public void setReconFromASR(ASRObject asr, JSONObject ancestor,
-								JSONObject msa) {
+	public void setReconFromASR(ASRObject asr, JSONObject ancestor, JSONObject msa) {
 
 	    currRecon = reconController.createFromASR(asr);
 
@@ -673,7 +679,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 			return mav;
 		}
 
-		// run reconstruction
+		// Run reconstruction but first get the extent names so we can asynronously do a lookup with
+		// NCBI to get the taxonomic iDs.
+		HashMap<String, ArrayList<String>> proteinNames = asr.getExtentNames();
+		JSONObject ids = taxaController.getTaxaInfoFromProtIds(proteinNames, Defines.UNIPROT);
 		recon = new ASRThread(asr, asr.getInferenceType(), asr.getNodeLabel(), false, logger);
 
 		ModelAndView mav = new ModelAndView("processing");

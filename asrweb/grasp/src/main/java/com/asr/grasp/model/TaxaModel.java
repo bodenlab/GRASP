@@ -1,5 +1,6 @@
 package com.asr.grasp.model;
 import com.asr.grasp.utils.Defines;
+import java.util.ArrayList;
 import json.JSONArray;
 import json.JSONObject;
 import org.springframework.stereotype.Repository;
@@ -30,8 +31,14 @@ public class TaxaModel extends BaseModel {
      * @param ids
      * @return
      */
-    public JSONObject getTaxa(JSONArray ids) {
-        return queryWithJson("SELECT JSON_AGG(util.taxa) FROM util.taxa WHERE id IN (?);", ids);
+    public JSONObject getTaxa(ArrayList<Integer> ids) {
+        ResultSet results = queryOnIds("SELECT JSON_AGG(util.taxa) FROM util.taxa WHERE id IN (?);", ids);
+        try {
+            return new JSONObject(results.getString(1));
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
     }
 
     /**
@@ -40,7 +47,7 @@ public class TaxaModel extends BaseModel {
      * @param type
      * @return
      */
-    public JSONObject getTaxaIdsFromProtId(JSONArray ids, String type) {
+    public JSONObject getTaxaIdsFromProtId(ArrayList<String> ids, String type) {
         if (type == Defines.UNIPROT) {
             return getTaxaIds(ids, "SELECT JSON_AGG(util.uniprot2taxa) FROM util.uniprot2taxa WHERE id IN (?);");
         } else if (type == Defines.PDB) {
@@ -50,6 +57,24 @@ public class TaxaModel extends BaseModel {
         }
         return null;
     }
+
+    /**
+     * Gets the taxanomic IDs from a protein identifier.
+     * @param ids
+     * @param type
+     * @return
+     */
+    public JSONObject getTaxaInfoFromProtId(ArrayList<String> ids, String type) {
+        if (type == Defines.UNIPROT) {
+            return getTaxaIds(ids, "SELECT JSON_AGG(t) FROM util.uniprot2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE id IN (?);");
+        } else if (type == Defines.PDB) {
+            return getTaxaIds(ids, "SELECT JSON_AGG(t) FROM util.pdb2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE id IN (?);");
+        } else if (type == Defines.NCBI) {
+            return getTaxaIds(ids, "SELECT JSON_AGG(t) FROM util.ncbi2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE id IN (?);");
+        }
+        return null;
+    }
+
 
 
     /**
@@ -78,8 +103,14 @@ public class TaxaModel extends BaseModel {
      * @param ids
      * @return
      */
-    public JSONObject getTaxaIds(JSONArray ids, String query) {
-        return queryWithJson(query, ids);
+    public JSONObject getTaxaIds(ArrayList<String> ids, String query) {
+        ResultSet results = queryOnStringIds(query, ids);
+        try {
+            return new JSONObject(results.getString(1));
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
     }
 
 

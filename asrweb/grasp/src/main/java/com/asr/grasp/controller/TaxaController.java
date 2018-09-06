@@ -1,6 +1,7 @@
 package com.asr.grasp.controller;
 
 import com.asr.grasp.model.TaxaModel;
+import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,12 @@ public class TaxaController {
      * @param type
      * @return
      */
-    public JSONObject getTaxaIds(JSONArray ids, String type) {
-        return taxaModel.getTaxaIdsFromProtId(ids, type);
+    public JSONObject getTaxaInfoFromProtIds(HashMap<String, ArrayList<String>> ids, String type) {
+        JSONObject taxaInfo = new JSONObject();
+        for (String key: ids.keySet()) {
+            taxaInfo.put(key, taxaModel.getTaxaInfoFromProtId(ids.get(key), key));
+        }
+        return taxaInfo;
     }
 
 
@@ -34,7 +39,7 @@ public class TaxaController {
      * @param ids
      * @return
      */
-    public JSONObject getTaxaInfo(JSONArray ids) {
+    public JSONObject getTaxaInfo(ArrayList<Integer> ids) {
         return taxaModel.getTaxa(ids);
     }
 

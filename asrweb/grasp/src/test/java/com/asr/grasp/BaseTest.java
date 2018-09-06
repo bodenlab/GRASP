@@ -2,9 +2,11 @@ package com.asr.grasp;
 
 import com.asr.grasp.controller.ASRController;
 import com.asr.grasp.controller.ReconstructionController;
+import com.asr.grasp.controller.TaxaController;
 import com.asr.grasp.controller.UserController;
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.ShareUsersModel;
+import com.asr.grasp.model.TaxaModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ReconstructionObject;
@@ -31,8 +33,10 @@ public class BaseTest {
     UserController userController;
     ASRController asrController;
     ReconstructionController reconController;
+    TaxaController taxaController;
     ReconstructionsModel reconModel;
     UsersModel userModel;
+    TaxaModel taxaModel;
 
 
     public UserObject createUser(String username, String password) {
@@ -61,6 +65,7 @@ public class BaseTest {
         userController = new UserController();
         reconController = new ReconstructionController();
         asrController = new ASRController();
+        taxaController = new TaxaController();
 
         userModel = new UsersModel();
         userModel.setDBConfig(dbUrl, dbPassword, dbUser);
@@ -68,11 +73,15 @@ public class BaseTest {
         reconModel = new ReconstructionsModel();
         reconModel.setDBConfig(dbUrl, dbPassword, dbUser);
 
+        taxaModel = new TaxaModel();
+
         userController.setReconModel(reconModel);
         userController.setUsersModel(userModel);
 
         reconController.setReconModel(reconModel);
         reconController.setUsersModel(userModel);
+
+        taxaController.setTaxaModel(taxaModel);
     }
 
     /**

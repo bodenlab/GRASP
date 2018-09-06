@@ -1,8 +1,10 @@
 package com.asr.grasp.objects;
 
 import com.asr.grasp.controller.ASRController;
+import com.asr.grasp.utils.Defines;
 import dat.EnumSeq;
 import dat.Enumerable;
+import java.util.HashMap;
 import json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -175,7 +177,7 @@ public class ASRObject {
             reconstructedTree = asrController.getReconstructedNewick();
     }
 
-    private void loadExtants() throws IOException {
+    public void loadExtants() throws IOException {
         if (extants != null || alnFilepath == null)
             return;
         BufferedReader aln_file = new BufferedReader(new FileReader(alnFilepath));
@@ -201,6 +203,38 @@ public class ASRObject {
             tree += line;
         tree_file.close();
 
+    }
+
+    /**
+     * Public method that allows us to get the extent names to and search for these while we're
+     * performing the ASR.
+     * @return
+     */
+    public HashMap<String, ArrayList<String>> getExtentNames() {
+        if (extants == null) {
+            try {
+                loadExtants();
+            } catch (Exception e) {
+                System.err.println(e);
+                return null;
+            }
+        }
+        ArrayList<String> extentNamesUniprot = new ArrayList<>();
+        ArrayList<String> extentNamesNcbi = new ArrayList<>();
+        for (EnumSeq.Gappy<Enumerable> extent: extants) {
+            String name = extent.getName();
+            // Uniprot names can be identified by the | character in position 2. https://www.uniprot.org/help/fasta-headers
+            if (name.substring(2, 3).equals("|")) {
+                extentNamesUniprot.add(name.split("|")[1]);
+            } else {
+                // Otherwise assume it is a NCBI id TODO: Have a check that it is NCBI format
+                extentNamesNcbi.add(name.split("\\.")[0]);
+            }
+        }
+        HashMap extentNames = new HashMap<>();
+        extentNames.put(Defines.UNIPROT, extentNamesUniprot);
+        extentNames.put(Defines.NCBI, extentNamesNcbi);
+        return extentNames;
     }
 
     public int getNumberAlnCols() throws IOException {

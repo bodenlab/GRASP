@@ -1,4 +1,39 @@
+CREATE TABLE util.ncbi2taxa
+(
+  id VARCHAR(12) PRIMARY KEY NOT NULL,
+  taxa_id int
+);
+CREATE UNIQUE INDEX ncbi2taxa_id_uindex ON util.ncbi2taxa (id);
 
+CREATE TABLE util.uniprot2taxa
+(
+  id VARCHAR(12) PRIMARY KEY NOT NULL,
+  taxa_id int
+);
+CREATE UNIQUE INDEX uniprot2taxa_id_uindex ON util.uniprot2taxa (id);
+
+CREATE TABLE util.taxa
+(
+  id int PRIMARY KEY NOT NULL,
+  superkingdom varchar(150),
+  phylum varchar(150),
+  class_t varchar(150),
+  order_t varchar(150),
+  family_t varchar(150),
+  genus varchar(150),
+  species varchar(150),
+  cohort varchar(150),
+  forma varchar(150),
+  infraclass varchar(150),
+  infraorder varchar(150),
+  kingdom varchar(150)
+);
+CREATE UNIQUE INDEX taxa_id_uindex ON util.taxa (id);
+
+ALTER SCHEMA util OWNER TO web;
+ALTER TABLE uniprot2taxa OWNER TO web;
+ALTER TABLE ncbi2taxa OWNER TO web;
+ALTER TABLE taxa OWNER TO web;
 
 create sequence web.groups_id_seq
   maxvalue 2147483647;

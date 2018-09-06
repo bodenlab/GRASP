@@ -1106,24 +1106,8 @@ var run_phylo_tree = function () {
     // Draw the branches and the nodes
     draw_phylo_branches(phylo_options, true);
     draw_phylo_nodes(phylo_options, true);
-
     assign_num_children(phylo_options.tree.root);
-
     collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
-
-    // // Add the taxon information to the leaf nodes
-    // $.when(get_taxon_ids(tree_json)).then(function() {
-    //     // console.log("RETURNED")
-    //     // console.log(phylo_options.tree.extants)
-    //     console.log(phylo_options.tree.extants)
-    //     queue_taxonomy()
-
-        // get_taxonomy(phylo_options.tree.root);
-        // assign_num_children(phylo_options.tree.root);
-        //
-        // collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
-
-    // });
 
 }
 
@@ -1136,12 +1120,11 @@ var annotate_taxonomy = function() {
         queue_taxonomy()
     })
 };
+
 /**
  *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
  */
 var collapse_subtree = function(node, num_expanded){
-
-
     var threshold = get_collapse_threshold(node, num_expanded);
 
     // search through children until evolutionary distance is crossed and collapse under this
@@ -1317,7 +1300,6 @@ var get_common_taxon = function(node) {
     if (node.children == undefined) {
         return;
     }
-
     // var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
     var ranks = ["domain", "kingdom", "phylum", "class", "order","family",  "genus", "species"]
 
@@ -1390,17 +1372,16 @@ var set_common_tax_node = function(node) {
         if (phylo_node.id === node.id) {
             phylo_node.common_rank = node.common_taxonomy.common_rank;
             phylo_node.common_taxonomy = node.common_taxonomy.common_taxonomy;
-
             // add common_taxonomy to poags info for name labelling
             if (phylo_node.common_taxonomy != undefined) {
                 poags.taxonomy[node.name.split("_")[0]] = node.common_taxonomy.common_rank.charAt(0).toUpperCase() +
                     node.common_taxonomy.common_rank.slice(1) + ": " + node.common_taxonomy.common_taxonomy;
             }
-
             return;
         }
     }
 }
+
 
 /**
  * Returns if there exists values that intersect arr1 and arr2
@@ -1429,109 +1410,63 @@ var is_intersect = function(arr1, arr2) {
  */
 
 var get_taxon_ids = function () {
-
-
     // Create a new copy of the extant list
-    extant_list = phylo_options.tree.extants.slice()
-
-    ncbi_array = []
-    uniprot_array = []
+    let extant_list = phylo_options.tree.extants.slice()
+    let ncbi_array = []
+    let uniprot_array = []
 
     while (extant_list.length) {
-        var ncbi_names = "";
-        var uniprot_names = "";
+        let ncbi_names = "";
+        let uniprot_names = "";
+        let chunk = extant_list.splice(0,50)
 
-        chunk = extant_list.splice(0,50)
-
-        for (i in chunk) {
-
-
+        for (let i in chunk) {
             if (chunk[i] !== null && chunk[i] !== undefined) {
-
                 if (chunk[i].name[2] == "|"){
                     uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
                 }
-
                 else {
                     ncbi_names += chunk[i].name.split("|")[0].split(" ")[0] + ","
-
-
                 }
                 if (chunk[i].name.indexOf('|') > -1) {
-                    // console.log('it is a uniprot')
                     uniprot_names += "id:" + chunk[i].name.split("|")[1] + "+OR+";
                 }
                 else {
-                    // console.log('it is an ncbi')
                     ncbi_names += chunk[i].name + ","
                 }
             }
-
         }
-
-        console.log('ncbi name before')
-        console.log(ncbi_names)
-
         // Remove the final comma or "+OR+"
         ncbi_names = ncbi_names.substring(0, ncbi_names.length - 1);
         uniprot_names = uniprot_names.substring(0, uniprot_names.length - 4);
 
-        console.log ('ncbi names')
-        console.log(ncbi_names)
-
-        console.log ('uniprot names')
-        console.log(uniprot_names)
         if (ncbi_names.length > 0){
             ncbi_array.push(ncbi_names)
         }
 
         if (uniprot_names.length > 0) {
             uniprot_array.push(uniprot_names)
-            }
+        }
     }
-    console.log("ncbi array")
-    console.log(ncbi_array)
 
-    console.log('uniprot array')
-    console.log(uniprot_array)
-
-    var requests = []
-
-    for (i = 0; i < ncbi_array.length; i++) {
+    let requests = []
+    console.log(ncbi_array);
+    console.log(uniprot_array);
+    for (let i = 0; i < ncbi_array.length; i++) {
         requests.push(get_taxon_id_from_ncbi(ncbi_array[i]))
     }
 
-    for (i = 0; i < uniprot_array.length; i++) {
+    for (let i = 0; i < uniprot_array.length; i++) {
         requests.push(get_taxon_id_from_uniprot(uniprot_array[i]))
     }
 
     return $.when.apply(undefined, requests).then(function () {
         // console.log("About to return")
-
     })
-
-
-
-
-
-    // get_taxon_id_from_ncbi(extant_names)
-        // get_taxon_name_from_uniprot(ncbi_names)
-        //
-        // return $.when(get_taxon_id_from_ncbi(ncbi_names), get_taxon_name_from_uniprot(uniprot_names)).done(function () {
-        // });
-        //
-
-
-
-
-
-
 }
 
 function get_taxon_id_from_ncbi(extant_names) {
-    // console.log('in here with names,', extant_names)
-    var url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?model=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
-    // console.log (url)
+    var url= "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=" + extant_names +"&retmode=xml&rettype=docsum";
 
     return promise = $.ajax({
         url: url,
@@ -1541,74 +1476,48 @@ function get_taxon_id_from_ncbi(extant_names) {
             // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
-
         success: function (speciesData) {
-            // console.log("this succeeded")
-
             if (speciesData != null) {
-
-                for (i in phylo_options.tree.extants) {
-                    path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name.split("|")[0].split(" ")[0] + "')]/../Item[@Name='TaxId']/text()";
-
-                    var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
-
+                for (let i in phylo_options.tree.extants) {
+                    let path = "*/DocSum/Item[@Name='AccessionVersion'][contains(., '" + phylo_options.tree.extants[i].name.split("|")[0].split(" ")[0] + "')]/../Item[@Name='TaxId']/text()";
+                    let node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
                     try {
-                        var thisNode = node.iterateNext();
+                        let thisNode = node.iterateNext();
                         while (thisNode) {
                             phylo_options.tree.extants[i].taxon_id = thisNode.textContent;
                             thisNode = node.iterateNext();
                         }
-
-
                     } catch (e) {
-
                         console.log(e)
                     }
                 }
-
-                    // console.log("NCBI check for obsolete")
-                    // console.log(speciesData)
-                    obsoleteCheck = "//DocSum[Item[contains(., 'removed')]]//Item[@Name='AccessionVersion']/text()";
-                    obsoleteNode = speciesData.evaluate(obsoleteCheck, speciesData, null, XPathResult.ANY_TYPE, null);
-
-                    // console.log(obsoleteNode)
-
-                    try {
-                        // console.log('trying')
+                let obsoleteCheck = "//DocSum[Item[contains(.," +
+                    " 'removed')]]//Item[@Name='AccessionVersion']/text()";
+                let obsoleteNode = speciesData.evaluate(obsoleteCheck, speciesData, null, XPathResult.ANY_TYPE, null);
+                try {
+                    let thisObsoleteNode = obsoleteNode.iterateNext();
+                    while (thisObsoleteNode) {
+                        phylo_options.tree.obsolete_list.push(thisObsoleteNode.textContent);
                         thisObsoleteNode = obsoleteNode.iterateNext();
-
-                        while (thisObsoleteNode) {
-                            // console.log("FOUND SOMETHING OBSOLETE")
-                            phylo_options.tree.obsolete_list.push(thisObsoleteNode.textContent);
-                            thisObsoleteNode = obsoleteNode.iterateNext();
-                        }
-                    } catch (e) {
-                        bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
                     }
-
+                } catch (e) {
+                    bootstrap_alert.warning('Error: There was a problem reading the XML records ' + e);
                 }
-
-            },
-
-
-
+            }
+        },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
             $('#taxonomy-info-alert').addClass("hidden");
             $('#taxonomy-failed-alert').removeClass("hidden");
             return
         }
-
-
-
     });
 }
 
+
 function get_taxon_id_from_uniprot(uniprot_names) {
 
-
-    url = "https://www.uniprot.org/uniprot/?query=" + uniprot_names +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
-    // console.log("uniprot url is ", url)
-    speciesDict = {}
+    let url = "https://www.uniprot.org/uniprot/?query=" + uniprot_names +"&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
+    let speciesDict = {}
 
     return promise = $.ajax({
         url: url,
@@ -1618,113 +1527,71 @@ function get_taxon_id_from_uniprot(uniprot_names) {
             // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
-
-
         success: function(speciesData) {
-
-            splitData = speciesData.split("\n");
-
-
+            let splitData = speciesData.split("\n");
             for (var line in splitData) {
                 if (splitData[line] != null){
-                    splitLine = splitData[line].split("\t");
-
+                    let splitLine = splitData[line].split("\t");
                     if (splitLine[2] != null){
-
                         if (splitLine[2].includes("Deleted") || (splitLine[2].includes("Merged"))) {
                             phylo_options.tree.obsolete_list.push(splitLine[0]);
                         }
-
                         else {
-
-
-                            taxonList = splitLine[4].split(",");
-
+                            let taxonList = splitLine[4].split(",");
                             speciesDict[splitLine[0]] = taxonList[taxonList.length - 1].trim();
-
-
                         }
                     }
                 }
             }
-
-
-
-            for (i in phylo_options.tree.extants) {
-                // console.log("Checking species dict")
-                //
-                // console.log(speciesDict)
-                // console.log(i)
-                // console.log(phylo_options.tree.extants[i])
-
+            for (let i in phylo_options.tree.extants) {
                 if (phylo_options.tree.extants[i].name.split("|")[1] in speciesDict){
                     // console.log('uniprot update')
                     phylo_options.tree.extants[i].taxon_id = speciesDict[phylo_options.tree.extants[i].name.split("|")[1]];
                 }
             }
-
-
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
             if (errorThrown == "Bad Request"){
                 response = XMLHttpRequest.responseText;
                 alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable");
-
                 obsoleteList = [];
 
             }
-
             else {
-
+                console.log(errorThrown);
             }
-
         }
     });
 }
 
 
-var queue_taxonomy = function (){
+var queue_taxonomy = function () {
 
-    var requests = [];
-    var taxon_array = [];
+    let requests = [];
+    let taxon_array = [];
 
-    extant_list = phylo_options.tree.extants.slice()
-
+    let extant_list = phylo_options.tree.extants.slice()
 
     while (extant_list.length) {
-        var taxon_ids = "";
-
-        chunk = extant_list.splice(0,20)
+        let taxon_ids = "";
+        let chunk = extant_list.splice(0,20)
 
         if (chunk !== null && chunk !== undefined) {
-
-            for (i in chunk){
+            for (let i in chunk){
                 if (chunk[i].taxon_id == undefined){
                     phylo_options.tree.failed_taxonomy_list.push(chunk[i].name)
-
                 }
-
                 else {
                     taxon_ids += chunk[i].taxon_id + ","
                 }
             }
-
-            // console.log("Chunk is")
-            // console.log(chunk)
-            //
-            // console.log("taxon ids are")
-            // console.log(taxon_ids)
-
             // Remove the final comma
             taxon_ids = taxon_ids.substring(0, taxon_ids.length - 1)
             taxon_array.push(taxon_ids)
-
         }
-
-
     }
 
-    for (i = 0; i < taxon_array.length; i++) {
+    for (let i = 0; i < taxon_array.length; i++) {
         requests.push(get_taxonomy(taxon_array[i]))
     }
 
@@ -1739,32 +1606,20 @@ var queue_taxonomy = function (){
         if (phylo_options.tree.failed_taxonomy_list.length > 0) {
             $('#taxonomy-info-alert').addClass("hidden");
 
-            var counts = phylo_options.tree.failed_taxonomy_list.length + " out of " + phylo_options.tree.extants.length + " sequences couldn't be mapped."
-
+            let counts = phylo_options.tree.failed_taxonomy_list.length + " out of " + phylo_options.tree.extants.length + " sequences couldn't be mapped."
 
             add_warning(phylo_options.tree.failed_taxonomy_list, "#taxonomy-warning-alert", "Warning! " + counts + " The following sequences could not be mapped to their taxonomy: ");
-
         }
-
         else { //Everything worked, so add the success alert
             $('#taxonomy-info-alert').addClass("hidden");
             $('#taxonomy-success-alert').removeClass("hidden");
-
-
         }
-
         // Add a warning if we found obsolete sequences
         if (phylo_options.tree.obsolete_list.length > 1) {
             add_warning(phylo_options.tree.obsolete_list, "#obsolete-warning-alert", "Warning! The following sequences are obsolete: ");
         }
         redraw_poags();
-
     })
-
-
-
-
-
 }
 
 
@@ -1774,27 +1629,10 @@ var queue_taxonomy = function (){
  * Annotate the extant sequences with their taxonomic ids
  */
 var get_taxonomy = function (taxon_ids) {
-    // var taxon_ids = "";
-    //
-    // for (i in phylo_options.tree.extants){
-    //     taxon_ids += phylo_options.tree.extants[i].taxon_id + ","
-    // }
+    var ranks = ["kingdom", "phylum", "class", "order", "family",  "genus", "species"]
 
-    // console.log("Here are the taxon ids")
-    //
-    // console.log(taxon_ids)
-
-    // Remove the final comma
-    // taxon_ids = taxon_ids.substring(0, taxon_ids.length - 1)
-    // var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
-    var ranks = ["domain", "kingdom", "phylum", "class", "order","family",  "genus", "species"]
-
-
-    var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?model=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
-
-    // console.log(url)
-
-
+    var url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=taxonomy&id=" + taxon_ids + "&retmode=xml&rettype=all"; // Taxonomy url
+    console.log(url)
     return promise = $.ajax({
         url: url,
         type: 'POST',
@@ -1803,25 +1641,17 @@ var get_taxonomy = function (taxon_ids) {
             // 'Access-Control-Allow-Origin': "Origin, X-Requested-With, Content-Type, Accept, Authorization"
         },
         async: true,
-
         success: function (speciesData) {
-
             if (speciesData != null) {
-
                 for (var i in phylo_options.tree.extants) {
-
                     for (var rank in ranks) {
-
-
-                        path = " //TaxId[.//text()='" + phylo_options.tree.extants[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName[1]";
+                        let path = " //TaxId[.//text()='" + phylo_options.tree.extants[i].taxon_id + "']/../LineageEx/Taxon/Rank[.//text()='" + ranks[rank] + "']/../ScientificName[1]";
                         var node = speciesData.evaluate(path, speciesData, null, XPathResult.ANY_TYPE, null);
-
                         try {
                             var thisNode = node.iterateNext();
                             while (thisNode) {
                                 // If taxonomy dict already exists add to it
                                 if ("taxonomy" in phylo_options.tree.extants[i]){
-
                                     phylo_options.tree.extants[i].taxonomy[ranks[rank]] = thisNode.textContent;
                                 }
                                 // Create a new taxonomy dict and annotate it with the available taxonomic ranks
@@ -1830,38 +1660,22 @@ var get_taxonomy = function (taxon_ids) {
                                     for (rank in ranks){
                                         phylo_options.tree.extants[i].taxonomy[rank] == "";
                                     }
-
                                     phylo_options.tree.extants[i].taxonomy[ranks[rank]] = thisNode.textContent;
                                 }
-
                                 thisNode = node.iterateNext();
-
                             }
-
                         } catch (e) {
                             console.log(e)
                         }
                     }
                 }
-
-                // // assign topmost common taxon information for internal nodes
-                // get_common_taxon(phylo_options.tree.root);
-                // refresh_tree();
-                // $('#taxonomy-info-alert').addClass("hidden");
-                // $('#taxonomy-success-alert').removeClass("hidden");
-                // get_obsolete()
-                // redraw_poags();
             }
-
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-
             if (errorThrown == "Bad Request") {
                 // response = XMLHttpRequest.responseText
                 // alert(response.substring(response.indexOf("<ERROR>") +7, response.indexOf("</ERROR>")) + "\n List of IDs was " + idString + "\n" + records.length + " sequences failed as a result of this and have been added to unmappable")
-
             }
-
             else {
 
             }
@@ -1945,7 +1759,6 @@ var redraw_phylo_tree = function() {
             phylo_options.tree.collapse_under[n].terminated = true;
         }
     }
-
 
     draw_phylo_nodes(phylo_options, false);
 

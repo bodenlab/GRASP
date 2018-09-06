@@ -33,4 +33,11 @@ public class Defines {
      */
     public static final int NUM_MONTHS_OLD = 1;
 
+    /**
+     * Help for the taxa component
+     */
+    public static final String UNIPROT = "uniprot";
+    public static final String NCBI = "ncbi";
+    public static final String PDB = "pdb";
+    public static final String[] SUPPORTED_PROT = {UNIPROT, NCBI};
 }

@@ -1,0 +1,64 @@
+package com.asr.grasp.controller;
+
+import com.asr.grasp.model.TaxaModel;
+import json.JSONArray;
+import json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.asr.grasp.utils.Defines;
+import java.util.ArrayList;
+
+@Service
+public class TaxaController {
+
+    @Autowired
+    TaxaModel taxaModel;
+
+    /**
+     * Gets the NCBI taxanomic IDs for a list of protein identifiers.
+     * The identifiers can be either:
+     *      1. NCBI
+     *      2. PDB
+     *      3. UNIPROT
+     * @param ids
+     * @param type
+     * @return
+     */
+    public JSONObject getTaxaIds(JSONArray ids, String type) {
+        return taxaModel.getTaxaIdsFromProtId(ids, type);
+    }
+
+
+    /**
+     * Gets the taxonomic information for a list of the taxonomic identifiers.
+     * @param ids
+     * @return
+     */
+    public JSONObject getTaxaInfo(JSONArray ids) {
+        return taxaModel.getTaxa(ids);
+    }
+
+    /**
+     * Inserts
+     * @param ids
+     * @return
+     */
+    public String insertTaxaIds(JSONObject ids) {
+        for (String type: Defines.SUPPORTED_PROT) {
+            String err = taxaModel.insertTaxaIdToProtId((JSONObject)ids.get(type), type);
+            if (err != null) {
+                return err;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     *          The following are to set the test env.
+     * ------------------------------------------------------------------------
+     */
+    public void setTaxaModel(TaxaModel taxaModel) {
+        this.taxaModel = taxaModel;
+    }
+}

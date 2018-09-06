@@ -1,7 +1,6 @@
 package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
-import com.asr.grasp.model.ShareUsersModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;

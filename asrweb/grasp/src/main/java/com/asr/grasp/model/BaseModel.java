@@ -156,6 +156,28 @@ public class BaseModel {
      * @param query
      * @return
      */
+    public ResultSet queryOnStringIds(String query, ArrayList<String> ids) {
+        try {
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            // Sets the array of ids
+            statement.setArray(1, (Array) ids);
+            ResultSet results = statement.executeQuery();
+            return results;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    /**
+     * Generic execute query that gets a connection to the model and
+     * returns the results set.
+     *
+     * @param query
+     * @return
+     */
     public Boolean deleteOnIds(String query, ArrayList<Integer> ids) {
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,

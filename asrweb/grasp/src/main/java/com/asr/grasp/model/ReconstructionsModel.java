@@ -286,7 +286,6 @@ public class ReconstructionsModel extends BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, reconLabel);
             statement.setInt(2, userId);
-//            statement.setInt(3, userId);
 
             return getId(statement.executeQuery());
         } catch (Exception e) {

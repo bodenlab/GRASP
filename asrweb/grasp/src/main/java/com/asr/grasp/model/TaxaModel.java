@@ -41,19 +41,39 @@ public class TaxaModel extends BaseModel {
         }
     }
 
+
+    /**
+     * Private helper function to build an array from IDs.
+     * @param vals
+     * @return
+     */
+    private String buildStrFromArr(ArrayList vals) {
+        String valStr = "";
+        for (int i = 0; i < vals.size(); i ++) {
+            if (i != 0) {
+                valStr += "',";
+            }
+            valStr += "'" + vals.get(i);
+            if (i == vals.size() - 1) {
+                valStr += "'";
+            }
+        }
+        return valStr;
+    }
+
     /**
      * Gets the taxanomic IDs from a protein identifier.
      * @param ids
      * @param type
      * @return
      */
-    public JSONObject getTaxaIdsFromProtId(ArrayList<String> ids, String type) {
+    public ArrayList<String> getNonExistIdsFromProtId(ArrayList<String> ids, String type) {
         if (type == Defines.UNIPROT) {
-            return getTaxaIds(ids, "SELECT JSON_AGG(util.uniprot2taxa) FROM util.uniprot2taxa WHERE id IN (?);");
+            return getStrList(query("SELECT id FROM util.uniprot2taxa WHERE id IN (" + buildStrFromArr(ids) + ");"));
         } else if (type == Defines.PDB) {
-            return getTaxaIds(ids, "SELECT JSON_AGG(util.pdb2taxa) FROM util.pdb2taxa WHERE id IN (?);");
+            return getStrList(query("SELECT id FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids) + ");"));
         } else if (type == Defines.NCBI) {
-            return getTaxaIds(ids, "SELECT JSON_AGG(util.ncbi2taxa) FROM util.ncbi2taxa WHERE id IN (?);");
+            return getStrList(query("SELECT id FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids) + ");"));
         }
         return null;
     }
@@ -66,11 +86,11 @@ public class TaxaModel extends BaseModel {
      */
     public JSONObject getTaxaInfoFromProtId(ArrayList<String> ids, String type) {
         if (type == Defines.UNIPROT) {
-            return getTaxaIds(ids, "SELECT JSON_AGG(t) FROM util.uniprot2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE id IN (?);");
+            return getTaxaIds("SELECT JSON_AGG(t) FROM util.uniprot2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE p.id IN (" + buildStrFromArr(ids) + ");");
         } else if (type == Defines.PDB) {
-            return getTaxaIds(ids, "SELECT JSON_AGG(t) FROM util.pdb2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE id IN (?);");
+            return getTaxaIds("SELECT JSON_AGG(t) FROM util.pdb2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE p.id IN (" + buildStrFromArr(ids) + ");");
         } else if (type == Defines.NCBI) {
-            return getTaxaIds(ids, "SELECT JSON_AGG(t) FROM util.ncbi2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE id IN (?);");
+            return getTaxaIds("SELECT JSON_AGG(t) FROM util.ncbi2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE p.id IN (" + buildStrFromArr(ids) + ");");
         }
         return null;
     }
@@ -100,11 +120,10 @@ public class TaxaModel extends BaseModel {
      * Gets the taxonomic information for protein ID's via their NCBI, UniProt or PDB
      * identifier.
      *
-     * @param ids
      * @return
      */
-    public JSONObject getTaxaIds(ArrayList<String> ids, String query) {
-        ResultSet results = queryOnStringIds(query, ids);
+    public JSONObject getTaxaIds(String query) {
+        ResultSet results = query(query);
         try {
             return new JSONObject(results.getString(1));
         } catch (Exception e) {

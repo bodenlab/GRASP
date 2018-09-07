@@ -134,13 +134,15 @@ public class BaseModel {
      * @param query
      * @return
      */
-    public ResultSet queryOnIds(String query, ArrayList<Integer> ids) {
+    public ResultSet queryOnStringIds(String query, ArrayList<String> ids) {
+        final String[] data = ids.toArray(new String[ids.size()]);
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
+            final java.sql.Array sqlArray = con.createArrayOf("VARCHAR(12)", data);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the array of ids
-            statement.setArray(1, (Array) ids);
+            statement.setArray(1, sqlArray);
             ResultSet results = statement.executeQuery();
             return results;
         } catch (Exception e) {
@@ -149,6 +151,7 @@ public class BaseModel {
         return null;
     }
 
+
     /**
      * Generic execute query that gets a connection to the model and
      * returns the results set.
@@ -156,13 +159,15 @@ public class BaseModel {
      * @param query
      * @return
      */
-    public ResultSet queryOnStringIds(String query, ArrayList<String> ids) {
+    public ResultSet queryOnIds(String query, ArrayList<Integer> ids) {
+        final Integer[] data = ids.toArray(new Integer[ids.size()]);
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
+            final java.sql.Array sqlArray = con.createArrayOf("INTEGER", data);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the array of ids
-            statement.setArray(1, (Array) ids);
+            statement.setArray(1, sqlArray);
             ResultSet results = statement.executeQuery();
             return results;
         } catch (Exception e) {
@@ -170,6 +175,8 @@ public class BaseModel {
         }
         return null;
     }
+
+
 
     /**
      * Generic execute query that gets a connection to the model and
@@ -363,6 +370,29 @@ public class BaseModel {
             return null;
         }
         return idList;
+    }
+
+    /**
+     * Gets a list of strings from a query.
+     * Returns an empty array if nothing matched the query
+     *
+     * @param results
+     * @return
+     */
+    public ArrayList<String> getStrList(ResultSet results) {
+        ArrayList<String> strList = new ArrayList<>();
+        try {
+            if (results.next()) {
+                while (results.next()) {
+                    // Get the ID stored in the first column
+                    strList.add(results.getString(1));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+        return strList;
     }
 
     /**

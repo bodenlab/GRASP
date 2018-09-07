@@ -225,10 +225,14 @@ public class ASRObject {
             String name = extent.getName();
             // Uniprot names can be identified by the | character in position 2. https://www.uniprot.org/help/fasta-headers
             if (name.substring(2, 3).equals("|")) {
-                extentNamesUniprot.add(name.split("|")[1]);
+                String[] id = name.split("\\|");
+                String idN = id[1];
+                extentNamesUniprot.add(idN);
             } else {
                 // Otherwise assume it is a NCBI id TODO: Have a check that it is NCBI format
-                extentNamesNcbi.add(name.split("\\.")[0]);
+                String[] id = name.split("\\.");
+                String idN = id[0];
+                extentNamesNcbi.add(idN);
             }
         }
         HashMap extentNames = new HashMap<>();

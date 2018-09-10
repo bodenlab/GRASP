@@ -164,7 +164,7 @@ public class BaseModel {
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
-            final java.sql.Array sqlArray = con.createArrayOf("INTEGER", data);
+            final java.sql.Array sqlArray = con.createArrayOf("integer", data);
             PreparedStatement statement = con.prepareStatement(query);
             // Sets the array of ids
             statement.setArray(1, sqlArray);
@@ -357,9 +357,6 @@ public class BaseModel {
         try {
             if (results.next()) {
                 // Check we were only returned a single result
-                if (results.getInt("RECORDCOUNT") != 1) {
-                    return null;
-                }
                 while (results.next()) {
                     // Get the ID stored in the first column
                     idList.add(results.getInt(1));

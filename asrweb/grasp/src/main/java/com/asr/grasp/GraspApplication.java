@@ -537,21 +537,23 @@ public class GraspApplication extends SpringBootServletInitializer {
      * @return
      */
     @RequestMapping(value = "/taxa" , method = RequestMethod.POST)
-    public @ResponseBody String addNewWorker(@RequestBody String jsonString) {
+    public @ResponseBody String getTaxaInfo(@RequestBody String jsonString) {
         JSONObject dataJson = new JSONObject(jsonString);
         String err = taxaController.insertTaxaIds(dataJson);
 
         // Now we want to get the taxonomic information for all the IDs in this dataset.
-        ArrayList<Integer> idsTaxa = new ArrayList<>();
-        JSONObject tmp = (JSONObject) dataJson.get(Defines.NCBI);
-        for (String idProt: tmp.keySet()) {
-            idsTaxa.add(Integer.parseInt(tmp.get(idProt).toString()));
-        }
-        tmp = (JSONObject) dataJson.get(Defines.UNIPROT);
-        for (String idProt: tmp.keySet()) {
-            idsTaxa.add(Integer.parseInt(tmp.get(idProt).toString()));
-        }
-        return taxaController.getTaxaInfo(idsTaxa);
+        // We want to add the new ones to the existing Ids that we calculated before.
+//        ArrayList<Integer> idsTaxa = new ArrayList<>();
+//        JSONObject tmp = (JSONObject) dataJson.get(Defines.NCBI);
+//        for (String idProt: tmp.keySet()) {
+//            idsTaxa.add(Integer.parseInt(tmp.get(idProt).toString()));
+//        }
+//        tmp = (JSONObject) dataJson.get(Defines.UNIPROT);
+//        for (String idProt: tmp.keySet()) {
+//            idsTaxa.add(Integer.parseInt(tmp.get(idProt).toString()));
+//        }
+//        tmp.put("prot2taxa", taxaController.getIdsFromProtId(asr.getExtentNames()));
+        return taxaController.getTaxaInfoFromProtIds(asr.getExtentNames()).toString();
     }
 
     /**
@@ -607,7 +609,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         // NCBI to get the taxonomic iDs.
         HashMap<String, ArrayList<String>> proteinNames = asr.getExtentNames();
         JSONObject ids = taxaController.getNonExistIdsFromProtId(proteinNames);
-
         mav.addObject("ids", ids.toString());
         return mav;
     }

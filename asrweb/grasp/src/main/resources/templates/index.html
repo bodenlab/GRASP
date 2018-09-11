@@ -8,7 +8,7 @@
     <title>GRASP Ancestral Sequence Reconstruction</title>
 
     <!-- Custom Fonts -->
-    <link rel="stylesheet" type="text/css" th:href="@{/css/font-awesome.min.css}"></link>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/lib/font-awesome.min.css}"></link>
     <!--<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"></link>-->
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -18,8 +18,8 @@
     <script type="text/javascript" th:src="@{/js/lib/respond.min.js}"></script>
     <![endif]-->
 
-    <link rel="stylesheet" th:href="@{/css/bootstrap.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/bootstrap-switch.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/lib/bootstrap.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/lib/bootstrap-switch.min.css}"></link>
     <link rel="stylesheet" th:href="@{/css/bootstrap_override.css}"></link>
     <link rel="stylesheet" th:href="@{/css/asr.css}"></link>
 
@@ -35,13 +35,10 @@
         gtag('config', 'UA-116832942-1');
     </script>
 
-
-    <script th:src="@{/css/bootstrap.css}"></script>
-
     <script th:src="@{/js/lib/canvasToBlob.js}"></script>
     <script th:src="@{/js/lib/FileSaver.min.js}"></script>
     <script th:src="@{/js/lib/d3min.js}"></script>
-
+    <script th:src="@{/js/lib/lodash.min.js}"></script>
     <script th:src="@{/js/lib/jquery.min.js}"></script>
     <script th:src="@{/js/lib/jquery-2.2.4.min.js}"></script>
     <script th:src="@{/js/lib/bootstrap.min.js}"></script>
@@ -52,8 +49,12 @@
     <script type="text/javascript" th:src="@{/js/index.js}"></script>
     <script type="text/javascript" th:src="@{/js/actions.js}"></script>
     <script type="text/javascript" th:src="@{/js/asr.js}"></script>
-    <script type="text/javascript" th:src="@{/js/tree_options.js}"></script>
-    <script type="text/javascript" th:src="@{/js/phylo_tree.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree_options.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree_draw.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree_taxa.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree_actions.js}"></script>
+    <script type="text/javascript" th:src="@{/js/phylo_tree_options.js}"></script>
+
 </head>
 <body class="container-fluid">
     <div th:replace="fragments/nav :: nav"></div>

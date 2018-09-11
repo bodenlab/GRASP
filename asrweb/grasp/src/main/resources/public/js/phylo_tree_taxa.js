@@ -8,58 +8,84 @@ var annotate_taxonomy = function () {
   })
 };
 
-const NCBI = 12;
-const UNIPROT = -3;
+const NCBI_VALUE = 12;
+const UNIPROT_VALUE = -3;
+const NCBI = "ncbi";
+const UNIPROT = "uniprot";
 
 /**
  * Stores the ID maping, it is used to collect information while the reconstruction is loading
  */
 let idMapping = {};
-
-
-function queryTaxonIds(ncbiList, uniprotList) {
+let idMappingToSave = {};
+/**
+ * Here we search for the taxonomic Ids of ids we don't know.
+ *
+ * We also store the ID's that we do know.
+ *
+ * @param ncbiList        A list of unknown ncbi ids
+ * @param uniprotList     A list of unknown uniprot ids
+ * @param ncbiMapping     If there are stored id mappings we return these
+ * @param uniprotMapping  If there are stored uniprot mappings these are returned
+ * @returns {PromiseLike<T> | Promise<T> | *}
+ */
+function queryTaxonIds(ncbiList, uniprotList, ncbiMapping, uniprotMapping) {
   let requests = [];
-
-  requests.push(get_taxon_id_from_ncbi(ncbiList.join(","), ncbiList));
-
-  let uniprotNames = "";
-  for (let i = 0; i < uniprotList.length; i++) {
-    uniprotNames += "id:" + uniprotList[i];
-    if (i < uniprotList.length - 1) {
-      uniprotNames += "+OR+";
-    }
+  idMapping[UNIPROT] = uniprotMapping;
+  idMapping[NCBI] = ncbiMapping;
+  if (ncbiList.length > 1) {
+    requests.push(get_taxon_id_from_ncbi(ncbiList.join(","), ncbiList));
   }
-  requests.push(get_taxon_id_from_uniprot(uniprotNames, uniprotList))
-
+  if (uniprotList.length > 1) {
+    let uniprotNames = "";
+    for (let i = 0; i < uniprotList.length; i++) {
+      uniprotNames += "id:" + uniprotList[i];
+      if (i < uniprotList.length - 1) {
+        uniprotNames += "+OR+";
+      }
+    }
+    requests.push(get_taxon_id_from_uniprot(uniprotNames, uniprotList))
+  }
   /**
    * When we get the results back we want to post them to the server and that
    * way we can easily access these multiple times rather than having to
    * re-download the taxon information each time.
    */
-  return $.when.apply(undefined, requests).then(function () {
-    $.ajax({
-      url: "/taxa",
-      type: "POST",
-      dataType: 'json',
-      contentType: "application/json",
-      data: JSON.stringify(idMapping),
-      success: function (data) {
-        console.log(data);
-        applyTaxonInfo(data);
-      }, error: function (err) {
-        console.log(err);
-      }
-    })
-  });
+
+  if (requests.length > 1) {
+    return $.when.apply(undefined, requests).then(function () {
+      runTaxaAjax();
+    });
+  } else {
+    runTaxaAjax();
+  }
 }
 
+/**
+ * Get the taxonomic info from the server.
+ */
+function runTaxaAjax() {
+  $.ajax({
+    url: "/taxa",
+    type: "POST",
+    dataType: 'json',
+    contentType: "application/json",
+    data: JSON.stringify(idMappingToSave),
+    success: function (data) {
+      console.log(data);
+      applyTaxonInfo(data);
+    }, error: function (err) {
+      console.log(err);
+    }
+  })
+}
 /**
  * Helper function to get NCBI or uniprot ID. Modularises it out so it can change.
  */
 function getId(extentId, type) {
-  if (type == NCBI) {
+  if (type == NCBI_VALUE) {
     return phylo_options.tree.extants[extentId].name.split("|")[0].split(".")[0]
-  } else if (type == UNIPROT) {
+  } else if (type == UNIPROT_VALUE) {
     return phylo_options.tree.extants[extentId].name.split("|")[1]
   }
   // Otherwise it hasn't been specified so we need to determine it from the identifier.
@@ -73,8 +99,11 @@ function getId(extentId, type) {
  * Adds the taxonomic info to the tree.
  */
 function applyTaxonInfo(taxonInfo) {
+  let ncbi = JSON.parse(taxonInfo[NCBI]);
+  let allTaxon = ncbi.concat(JSON.parse(taxonInfo[UNIPROT]));
   for (let i in phylo_options.tree.extants) {
-      phylo_options.tree.extants[i].taxonomy = taxonInfo[phylo_options.tree.extants[i].taxon];
+      console.log(getId(i));
+      phylo_options.tree.extants[i].taxonomy = allTaxon[getId(i)];
   }
   get_common_taxon(phylo_options.tree.root);
   refresh_tree();
@@ -87,7 +116,7 @@ function get_taxon_id_from_ncbi(extentNames, extentList) {
   let url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id="
       + extentNames + "&retmode=xml&rettype=docsum";
   console.log(url)
-  idMapping["ncbi"] = {};
+  idMappingToSave[NCBI] = {};
   let idsObsolete = [];
   return promise = $.ajax({
     url: url,
@@ -107,11 +136,17 @@ function get_taxon_id_from_ncbi(extentNames, extentList) {
           try {
             let thisNode = node.iterateNext();
             while (thisNode) {
-              idMapping["ncbi"][extentList[i]] = thisNode.textContent;
+              idMapping[NCBI][extentList[i]] = thisNode.textContent;
+              idMappingToSave[NCBI][extentList[i]] = thisNode.textContent;
               thisNode = node.iterateNext();
             }
           } catch (e) {
-            console.log(e)
+            // If the ID isn't supported then we don't want to keep searching for
+            // the same ID. This means that we add in a dummy ID to keep track of
+            // this and store it in the DB.
+            idMapping[NCBI][extentList[i]] = null;
+            idMappingToSave[NCBI][extentList[i]] = -1;
+            console.log(e);
           }
         }
         let obsoleteCheck = "//DocSum[Item[contains(.," +
@@ -147,7 +182,7 @@ function get_taxon_id_from_uniprot(extantNames, extentList) {
   let url = "https://www.uniprot.org/uniprot/?query=" + extantNames
       + "&format=tab&columns=id,entry%20name,protein%20names,organism,organism%20id,lineage-id(all),reviewed";
   let speciesDict = {}
-  idMapping["uniprot"] = {};
+  idMappingToSave[UNIPROT] = {};
   let idsObsolete = [];
   return promise = $.ajax({
     url: url,
@@ -177,7 +212,16 @@ function get_taxon_id_from_uniprot(extantNames, extentList) {
       }
       for (let i in extentList) {
         if (extentList[i] in speciesDict) {
-          idMapping["uniprot"][extentList[i]] = speciesDict[extentList[i]];
+          // If the ID isn't supported then we don't want to keep searching for
+          // the same ID. This means that we add in a dummy ID to keep track of
+          // this and store it in the DB.
+          if (speciesDict[extentList[i]] == undefined) {
+            idMapping[UNIPROT][extentList[i]] = null;
+            idMappingToSave[UNIPROT][extentList[i]] = -1;
+          } else {
+            idMappingToSave[UNIPROT][extentList[i]] = speciesDict[extentList[i]];
+            idMapping[UNIPROT][extentList[i]] = speciesDict[extentList[i]];
+          }
         }
       }
       return null;

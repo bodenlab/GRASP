@@ -2,6 +2,7 @@ package com.asr.grasp.model;
 
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
+import java.util.HashMap;
 import json.JSONObject;
 import org.springframework.stereotype.Repository;
 
@@ -18,13 +19,10 @@ public class TaxaModel extends BaseModel {
         System.out.println("SELECT JSON_AGG(taxa) FROM util.taxa WHERE id IN (" + buildStrFromArr(ids) + ");");
         try {
             if (results.next()) {
-                String res = results.getString(1);
-                System.out.println(res);
-                return res;
+                return results.getString(1);
             }
         } catch (Exception e) {
             System.out.println(e);
-            return null;
         }
         return null;
     }
@@ -48,20 +46,43 @@ public class TaxaModel extends BaseModel {
     }
 
     /**
+     * Gets a list of strings from a query.
+     * Returns an empty array if nothing matched the query
+     *
+     * @param results
+     * @return
+     */
+    public HashMap<String, Integer> prot2taxaMapping(ResultSet results) {
+        HashMap<String, Integer> mapping = new HashMap<>();
+        try {
+            if (results.next()) {
+                while (results.next()) {
+                    // Get the ID stored in the first column
+                    mapping.put(results.getString(1), results.getInt(2));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+        return mapping;
+    }
+
+    /**
      * Gets the taxanomic IDs from a protein identifier.
      */
-    public ArrayList<String> getNonExistIdsFromProtId(ArrayList<String> ids, String type) {
+    public HashMap<String, Integer> getTaxaIdsFromProtIds(ArrayList<String> ids, String type) {
         if (type == Defines.UNIPROT) {
-            return getStrList(
-                    query("SELECT id FROM util.uniprot2taxa WHERE id IN (" + buildStrFromArr(ids)
+            return prot2taxaMapping(
+                    query("SELECT id, taxa_id FROM util.uniprot2taxa WHERE id IN (" + buildStrFromArr(ids)
                             + ");"));
         } else if (type == Defines.PDB) {
-            return getStrList(
-                    query("SELECT id FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
+            return prot2taxaMapping(
+                    query("SELECT JSON_AGG(pdb2taxa) FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
                             + ");"));
         } else if (type == Defines.NCBI) {
-            return getStrList(
-                    query("SELECT id FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
+            return prot2taxaMapping(
+                    query("SELECT JSON_AGG(ncbi2taxa) FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
                             + ");"));
         }
         return null;
@@ -70,7 +91,7 @@ public class TaxaModel extends BaseModel {
     /**
      * Gets the taxanomic IDs from a protein identifier.
      */
-    public JSONObject getTaxaInfoFromProtId(ArrayList<String> ids, String type) {
+    public String getTaxaInfoFromProtId(ArrayList<String> ids, String type) {
         if (type == Defines.UNIPROT) {
             return getTaxaIds(
                     "SELECT JSON_AGG(t) FROM util.uniprot2taxa AS p LEFT JOIN util.taxa AS t ON t.id=p.taxa_id WHERE p.id IN ("
@@ -107,14 +128,16 @@ public class TaxaModel extends BaseModel {
     /**
      * Gets the taxonomic information for protein ID's via their NCBI, UniProt or PDB identifier.
      */
-    public JSONObject getTaxaIds(String query) {
+    public String getTaxaIds(String query) {
         ResultSet results = query(query);
         try {
-            return new JSONObject(results.getString(1));
+            if (results.next()) {
+                return results.getString(1);
+            }
         } catch (Exception e) {
             System.out.println(e);
-            return null;
         }
+        return null;
     }
 
 

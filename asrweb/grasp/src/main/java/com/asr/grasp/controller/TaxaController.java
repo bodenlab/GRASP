@@ -33,6 +33,9 @@ public class TaxaController {
 
     /**
      * Gets the NCBI taxanomic IDs for a list of protein identifiers.
+     *
+     * We also store the mappings that exist. This allows us to add to it on the front end.
+     * Also ensures we aren't unnecesarily doing inserts or queries for information we already have.
      * The identifiers can be either:
      *      1. NCBI
      *      2. PDB
@@ -42,12 +45,35 @@ public class TaxaController {
      */
     public JSONObject getNonExistIdsFromProtId(HashMap<String, ArrayList<String>> ids) {
         JSONObject taxaInfo = new JSONObject();
+
         for (String key: ids.keySet()) {
-            ArrayList<String> ret = taxaModel.getNonExistIdsFromProtId(ids.get(key), key);
-            ArrayList<String> n = new ArrayList<>(ids.get(key));
-            n.remove(ret);
-            //ids.get(key).removeAll(taxaModel.getNonExistIdsFromProtId(ids.get(key), key));
-            taxaInfo.put(key, n);
+            HashMap<String, Integer> taxaIds = taxaModel.getTaxaIdsFromProtIds(ids.get(key), key);
+            ArrayList<String> oldProtList = new ArrayList<>(ids.get(key));
+            if (taxaIds.size() == oldProtList.size()) {
+                taxaInfo.put(key + "_mapping", taxaIds);
+                taxaInfo.put(key, false);
+            } else {
+                oldProtList.remove(taxaIds.keySet());
+                taxaInfo.put(key + "_mapping", taxaIds);
+                taxaInfo.put(key, oldProtList);
+            }
+        }
+        return taxaInfo;
+    }
+
+    /**
+     * Gets the NCBI taxanomic IDs for a list of protein identifiers.
+     * The identifiers can be either:
+     *      1. NCBI
+     *      2. PDB
+     *      3. UNIPROT
+     * @param ids
+     * @return
+     */
+    public JSONObject getIdsFromProtId(HashMap<String, ArrayList<String>> ids) {
+        JSONObject taxaInfo = new JSONObject();
+        for (String key: ids.keySet()) {
+            taxaInfo.put(key, taxaModel.getTaxaIdsFromProtIds(ids.get(key), key));
         }
         return taxaInfo;
     }
@@ -68,6 +94,7 @@ public class TaxaController {
      */
     public String insertTaxaIds(JSONObject ids) {
         for (String type: Defines.SUPPORTED_PROT) {
+            // We only want to get the mappings that we want to actually save
             String err = taxaModel.insertTaxaIdToProtId((JSONObject)ids.get(type), type);
             if (err != null) {
                 return err;

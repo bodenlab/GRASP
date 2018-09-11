@@ -61,6 +61,7 @@ public class ASRObject {
     private int numAncestors = 0;
     private int numExtantSequences = 0;
     private int numBases = 0;
+    HashMap extentNames = new HashMap<>();
 
     private boolean finishedRecon = false;
 
@@ -219,6 +220,9 @@ public class ASRObject {
                 return null;
             }
         }
+        if (!extentNames.isEmpty()) {
+            return extentNames;
+        }
         ArrayList<String> extentNamesUniprot = new ArrayList<>();
         ArrayList<String> extentNamesNcbi = new ArrayList<>();
         for (EnumSeq.Gappy<Enumerable> extent: extants) {
@@ -235,7 +239,6 @@ public class ASRObject {
                 extentNamesNcbi.add(idN);
             }
         }
-        HashMap extentNames = new HashMap<>();
         extentNames.put(Defines.UNIPROT, extentNamesUniprot);
         extentNames.put(Defines.NCBI, extentNamesNcbi);
         return extentNames;

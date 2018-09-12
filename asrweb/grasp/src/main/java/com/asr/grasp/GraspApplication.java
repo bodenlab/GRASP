@@ -539,20 +539,13 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/taxa" , method = RequestMethod.POST)
     public @ResponseBody String getTaxaInfo(@RequestBody String jsonString) {
         JSONObject dataJson = new JSONObject(jsonString);
-        String err = taxaController.insertTaxaIds(dataJson);
+        // Check if we have anything to save
+        if ((Boolean)dataJson.get("toSave") == true) {
+            String err = taxaController.insertTaxaIds(dataJson);
+        }
 
         // Now we want to get the taxonomic information for all the IDs in this dataset.
-        // We want to add the new ones to the existing Ids that we calculated before.
-//        ArrayList<Integer> idsTaxa = new ArrayList<>();
-//        JSONObject tmp = (JSONObject) dataJson.get(Defines.NCBI);
-//        for (String idProt: tmp.keySet()) {
-//            idsTaxa.add(Integer.parseInt(tmp.get(idProt).toString()));
-//        }
-//        tmp = (JSONObject) dataJson.get(Defines.UNIPROT);
-//        for (String idProt: tmp.keySet()) {
-//            idsTaxa.add(Integer.parseInt(tmp.get(idProt).toString()));
-//        }
-//        tmp.put("prot2taxa", taxaController.getIdsFromProtId(asr.getExtentNames()));
+        // ToDo: could be slightly optimised to use the IDs collected before.
         return taxaController.getTaxaInfoFromProtIds(asr.getExtentNames()).toString();
     }
 

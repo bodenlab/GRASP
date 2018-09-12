@@ -55,11 +55,9 @@ public class TaxaModel extends BaseModel {
     public HashMap<String, Integer> prot2taxaMapping(ResultSet results) {
         HashMap<String, Integer> mapping = new HashMap<>();
         try {
-            if (results.next()) {
-                while (results.next()) {
-                    // Get the ID stored in the first column
-                    mapping.put(results.getString(1), results.getInt(2));
-                }
+            while (results.next()) {
+                // Get the ID stored in the first column
+                mapping.put(results.getString(1), results.getInt(2));
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -78,11 +76,11 @@ public class TaxaModel extends BaseModel {
                             + ");"));
         } else if (type == Defines.PDB) {
             return prot2taxaMapping(
-                    query("SELECT JSON_AGG(pdb2taxa) FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
                             + ");"));
         } else if (type == Defines.NCBI) {
             return prot2taxaMapping(
-                    query("SELECT JSON_AGG(ncbi2taxa) FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
                             + ");"));
         }
         return null;
@@ -153,9 +151,14 @@ public class TaxaModel extends BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
 
             for (String key : ids.keySet()) {
-                statement.setString(1, key);            // Protein ids are strings
-                statement.setInt(2, Integer.parseInt(ids.get(key).toString())); // NCBI ids are ints
-                statement.executeUpdate();
+                try {
+                    statement.setString(1, key);            // Protein ids are strings
+                    statement.setInt(2,
+                            Integer.parseInt(ids.get(key).toString())); // NCBI ids are ints
+                    statement.executeUpdate();
+                } catch (Exception e) {
+                    System.out.println("Unable to execute update for: " + key );
+                }
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());

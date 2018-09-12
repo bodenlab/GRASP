@@ -17,7 +17,8 @@ const UNIPROT = "uniprot";
  * Stores the ID maping, it is used to collect information while the reconstruction is loading
  */
 let idMapping = {};
-let idMappingToSave = {};
+// We use the to save flag to indicate whether or not we have any information to
+let idMappingToSave = {toSave: true, NCBI: [], UNIPROT: []};
 /**
  * Here we search for the taxonomic Ids of ids we don't know.
  *
@@ -31,8 +32,10 @@ let idMappingToSave = {};
  */
 function queryTaxonIds(ncbiList, uniprotList, ncbiMapping, uniprotMapping) {
   let requests = [];
-  idMapping[UNIPROT] = uniprotMapping;
-  idMapping[NCBI] = ncbiMapping;
+  idMapping = uniprotMapping;
+  for (const key in ncbiMapping) {
+    uniprotMapping[key] = ncbiMapping[key];
+  }
   if (ncbiList.length > 1) {
     requests.push(get_taxon_id_from_ncbi(ncbiList.join(","), ncbiList));
   }
@@ -57,6 +60,8 @@ function queryTaxonIds(ncbiList, uniprotList, ncbiMapping, uniprotMapping) {
       runTaxaAjax();
     });
   } else {
+    //  Set that we don't want to save any ids
+    idMappingToSave.toSave = false;
     runTaxaAjax();
   }
 }
@@ -88,8 +93,10 @@ function getId(extentId, type) {
   } else if (type == UNIPROT_VALUE) {
     return phylo_options.tree.extants[extentId].name.split("|")[1]
   }
+  let tmp = phylo_options.tree.extants[extentId].name.substr(2, 1);
   // Otherwise it hasn't been specified so we need to determine it from the identifier.
-  if (phylo_options.tree.extants[extentId].name.substr(2, 3) === '|') {
+  if (phylo_options.tree.extants[extentId].name.substr(2, 1) == "|") {
+    console.log(phylo_options.tree.extants[extentId].name.split("|")[1]);
     return phylo_options.tree.extants[extentId].name.split("|")[1];
   }
   return phylo_options.tree.extants[extentId].name.split("|")[0].split(".")[0];
@@ -99,11 +106,16 @@ function getId(extentId, type) {
  * Adds the taxonomic info to the tree.
  */
 function applyTaxonInfo(taxonInfo) {
-  let ncbi = JSON.parse(taxonInfo[NCBI]);
-  let allTaxon = ncbi.concat(JSON.parse(taxonInfo[UNIPROT]));
+  let ncbiTaxa = JSON.parse(taxonInfo[NCBI]);
+  let uniprotTaxa = JSON.parse(taxonInfo[UNIPROT]);
+  let allTaxa = ncbiTaxa.concat(uniprotTaxa);
+  let taxaInfoDict = {};
+  _.forEach(allTaxa, t => {taxaInfoDict[t.id] = t});
   for (let i in phylo_options.tree.extants) {
-      console.log(getId(i));
-      phylo_options.tree.extants[i].taxonomy = allTaxon[getId(i)];
+    let name = getId(i);
+    let taxaId = parseInt(idMapping[name]);
+    let taxaInfo = taxaInfoDict[taxaId];
+    phylo_options.tree.extants[i].taxonomy = taxaInfo;
   }
   get_common_taxon(phylo_options.tree.root);
   refresh_tree();
@@ -136,7 +148,7 @@ function get_taxon_id_from_ncbi(extentNames, extentList) {
           try {
             let thisNode = node.iterateNext();
             while (thisNode) {
-              idMapping[NCBI][extentList[i]] = thisNode.textContent;
+              idMapping[extentList[i]] = thisNode.textContent;
               idMappingToSave[NCBI][extentList[i]] = thisNode.textContent;
               thisNode = node.iterateNext();
             }
@@ -144,7 +156,7 @@ function get_taxon_id_from_ncbi(extentNames, extentList) {
             // If the ID isn't supported then we don't want to keep searching for
             // the same ID. This means that we add in a dummy ID to keep track of
             // this and store it in the DB.
-            idMapping[NCBI][extentList[i]] = null;
+            idMapping[extentList[i]] = null;
             idMappingToSave[NCBI][extentList[i]] = -1;
             console.log(e);
           }
@@ -216,11 +228,11 @@ function get_taxon_id_from_uniprot(extantNames, extentList) {
           // the same ID. This means that we add in a dummy ID to keep track of
           // this and store it in the DB.
           if (speciesDict[extentList[i]] == undefined) {
-            idMapping[UNIPROT][extentList[i]] = null;
+            idMapping[extentList[i]] = null;
             idMappingToSave[UNIPROT][extentList[i]] = -1;
           } else {
             idMappingToSave[UNIPROT][extentList[i]] = speciesDict[extentList[i]];
-            idMapping[UNIPROT][extentList[i]] = speciesDict[extentList[i]];
+            idMapping[extentList[i]] = speciesDict[extentList[i]];
           }
         }
       }

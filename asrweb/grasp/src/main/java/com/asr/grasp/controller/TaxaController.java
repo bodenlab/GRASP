@@ -1,6 +1,7 @@
 package com.asr.grasp.controller;
 
 import com.asr.grasp.model.TaxaModel;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,8 @@ public class TaxaController {
                 taxaInfo.put(key + "_mapping", taxaIds);
                 taxaInfo.put(key, false);
             } else {
-                oldProtList.remove(taxaIds.keySet());
+                ArrayList<String> existingTaxaIds = new ArrayList<>(taxaIds.keySet());
+                oldProtList.removeAll(existingTaxaIds);
                 taxaInfo.put(key + "_mapping", taxaIds);
                 taxaInfo.put(key, oldProtList);
             }

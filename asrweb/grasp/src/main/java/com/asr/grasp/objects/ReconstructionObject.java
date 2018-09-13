@@ -2,6 +2,13 @@ package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
 
+/**
+ * The reconstruction object is used to pass information between the front end interface and
+ * the Java code. For Spring each form is required to be translated into an Object. This is
+ * used when a user is creating a new reconstruction.
+ *
+ * Created by marnie 11/4/17.
+ */
 public class ReconstructionObject {
     private int id = Defines.UNINIT;
 
@@ -88,19 +95,14 @@ public class ReconstructionObject {
     public String getNode() { return this.node;}
 
     public void setInferenceType(String inferenceType) {
-
         this.inferenceType = inferenceType;
-
     }
 
     public void setJointInferences(String inferences) {
-
         this.jointInferences = inferences;
-
     }
 
     public String getInferenceType() {
-
         return this.inferenceType;
     }
 

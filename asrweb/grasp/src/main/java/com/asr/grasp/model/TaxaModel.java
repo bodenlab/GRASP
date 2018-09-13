@@ -8,6 +8,16 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 
+/**
+ * Interface with the Postgres Database table Taxa, Uniprot2Taxa and Ncbi2Taxa.
+ *
+ * The Taxa table stores taxanomic information. This was downloaded from:
+ * https://gitlab.com/zyxue/ncbitax2lin-lineages/blob/master/
+ *
+ * See the utils/README.md for more information.
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Repository
 public class TaxaModel extends BaseModel {
 
@@ -165,5 +175,26 @@ public class TaxaModel extends BaseModel {
             return "Unable to process all inserts.";
         }
         return null;
+    }
+
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                  Helper to clean up the test environment
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
+    public Boolean deleteTaxaIdsFromProtIds(ArrayList<String> ids, String type) {
+        if (type == Defines.UNIPROT) {
+            return deleteQuery("DELETE FROM util.uniprot2taxa WHERE id IN (" + buildStrFromArr(ids)
+                            + ");");
+        } else if (type == Defines.PDB) {
+            return deleteQuery("DELETE FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
+                            + ");");
+        } else if (type == Defines.NCBI) {
+            return deleteQuery("DELETE FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
+                            + ");");
+        }
+        return false;
     }
 }

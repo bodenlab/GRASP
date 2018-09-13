@@ -2,11 +2,15 @@ package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
+/**
+ * The user object is used to pass information between the front end interface and
+ * the Java code. This enables us to save and register new users.
+ *
+ * Created by marnie on 11/04/17.
+ */
 public class UserObject {
     private int id = Defines.UNINIT; // Ensure we don't use an uninitialised
     // variable.

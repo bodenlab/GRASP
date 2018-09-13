@@ -45,7 +45,7 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     poags.retain_previous_position = true;
     refresh_elements();
     // Once everything is complete we want to start getting the taxonIds
-    queryTaxonIds(proteinIds.ncbi, proteinIds.uniprot, proteinIds.ncbi_mapping, proteinIds.uniprot_mapping);
+    setUpTaxonomy(proteinIds.ncbi, proteinIds.uniprot, proteinIds.ncbi_mapping, proteinIds.uniprot_mapping);
 }
 
 var populate_search_node_list = function (nodes) {

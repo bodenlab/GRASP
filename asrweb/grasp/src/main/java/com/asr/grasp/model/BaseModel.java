@@ -7,6 +7,14 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * Abstraction of Postgres commands. These are called by the Users, Reconstrcution and Taxa model.
+ * The base model handles generic cases of inserts, updates and deletes.
+ *
+ * If a method can be generalised please add it here.
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Repository
 public class BaseModel {
 
@@ -433,6 +441,26 @@ public class BaseModel {
         }
         return false;
     }
+
+    /**
+     * Runs a delete query.
+     *
+     * @return success (> 0) or not -1
+     */
+    public Boolean deleteQuery(String query) {
+        try {
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            // Deletes the record from the model
+            statement.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return false;
+    }
+
 
     /**
      * Gets an entry from a column for a row. The results set is currently

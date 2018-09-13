@@ -9,10 +9,13 @@ import com.asr.grasp.objects.GeneralObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-
+/**
+ * Interface with the Postgres Database table Reconstructions.
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Repository
 public class ReconstructionsModel extends BaseModel {
 

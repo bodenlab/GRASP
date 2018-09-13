@@ -1,7 +1,6 @@
 package com.asr.grasp.controller;
 
 import com.asr.grasp.model.TaxaModel;
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +8,14 @@ import org.springframework.stereotype.Service;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 
+/**
+ * Level of abstraction which is called from the main grasp app.
+ *
+ * This controls the high level interface to provide the user with taxonomic information.
+ * Note taxonomic ID's are not unique to users, and all mappings are centrally stored.
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Service
 public class TaxaController {
 
@@ -50,14 +57,15 @@ public class TaxaController {
         for (String key: ids.keySet()) {
             HashMap<String, Integer> taxaIds = taxaModel.getTaxaIdsFromProtIds(ids.get(key), key);
             ArrayList<String> oldProtList = new ArrayList<>(ids.get(key));
-            if (taxaIds.size() == oldProtList.size()) {
+
+            if (taxaIds == null || taxaIds.size() != oldProtList.size()) {
                 taxaInfo.put(key + "_mapping", taxaIds);
-                taxaInfo.put(key, false);
+                taxaInfo.put(key, oldProtList);
             } else {
                 ArrayList<String> existingTaxaIds = new ArrayList<>(taxaIds.keySet());
                 oldProtList.removeAll(existingTaxaIds);
                 taxaInfo.put(key + "_mapping", taxaIds);
-                taxaInfo.put(key, oldProtList);
+                taxaInfo.put(key, false);
             }
         }
         return taxaInfo;
@@ -112,5 +120,18 @@ public class TaxaController {
      */
     public void setTaxaModel(TaxaModel taxaModel) {
         this.taxaModel = taxaModel;
+    }
+
+    /**
+     * Helper function for the tests to delete the ID's we added during the tests.
+     * @param ids
+     */
+    public Boolean deleteTaxaIds(HashMap<String, ArrayList<String>> ids) {
+        for (String key: ids.keySet()) {
+            if (taxaModel.deleteTaxaIdsFromProtIds(ids.get(key), key) != true) {
+                return false;
+            }
+        }
+        return true;
     }
 }

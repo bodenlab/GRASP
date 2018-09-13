@@ -9,36 +9,40 @@
 
     <!-- Custom Fonts -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/lib/font-awesome.min.css}"></link>
-    <!--<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css"></link>-->
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/lib/html5shiv.js}"></script>
+    <script type="text/javascript" th:src="@{/js/lib/respond.min.js}"></script>
     <![endif]-->
 
-    <link rel="stylesheet" th:href="@{/css/lib/bootstrap.mincss}"></link>
+    <link rel="stylesheet" th:href="@{/css/lib/bootstrap.min.css}"></link>
     <link rel="stylesheet" th:href="@{/css/lib/bootstrap-switch.min.css}"></link>
     <link rel="stylesheet" th:href="@{/css/bootstrap_override.css}"></link>
     <link rel="stylesheet" th:href="@{/css/asr.css}"></link>
-    <script src="https://d3js.org/d3.v3.min.js"></script>
-    <script src="https://cdn.rawgit.com/eligrey/canvas-toBlob.js/f1a01896135ab378aa5c0118eadd81da55e698d8/canvas-toBlob.js"></script>
-    <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
 
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.2/modernizr.js"></script>
-    <script type="text/javascript" th:src="@{/js/bootstrap-switch.min.js}"></script>
-    <!--<script type="text/javascript" th:src="@{/js/d3.tip.v0.6.3.js}"></script>-->
-    <script type="text/javascript" th:src="@{/js/colour_defs.js}"></script>
-    <script type="text/javascript" th:src="@{/js/index.js}"></script>
-    <script type="text/javascript" th:src="@{/js/actions.js}"></script>
-    <script type="text/javascript" th:src="@{/js/asr.js}"></script>
-    <script type="text/javascript" th:src="@{/js/phylo_tree_options.js}"></script>
-    <script type="text/javascript" th:src="@{/js/phylo_tree_draw.js}"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-116832942-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-116832942-1');
+    </script>
+
+    <script th:src="@{/js/lib/canvasToBlob.js}"></script>
+    <script th:src="@{/js/lib/FileSaver.min.js}"></script>
+    <script th:src="@{/js/lib/d3min.js}"></script>
+    <script th:src="@{/js/lib/lodash.min.js}"></script>
+    <script th:src="@{/js/lib/jquery.min.js}"></script>
+    <script th:src="@{/js/lib/jquery-2.2.4.min.js}"></script>
+    <script th:src="@{/js/lib/bootstrap.min.js}"></script>
+    <script th:src="@{/js/lib/moderniser.js}"></script>
+    <script type="text/javascript" th:src="@{/js/lib/bootstrap-switch.min.js}"></script>
+
 </head>
+
 <body class="container-fluid">
 <div th:replace="fragments/nav :: nav"></div>
 

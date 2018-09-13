@@ -1,10 +1,14 @@
 package com.asr.grasp.model;
 
+
+/**
+ * UNUSED at the moment.
+ *
+ * Interfaces with the groups table. However this has not been implemented yet.
+ *
+ * Created by ariane on 13/07/18.
+ */
 public class GroupsModel extends BaseModel {
-
-    GroupsModel() {
-
-    }
 
     public int insert(int ownerId, String groupName) {
         String query = "INSERT INTO GROUPS(owner_id,name) VALUES(" +

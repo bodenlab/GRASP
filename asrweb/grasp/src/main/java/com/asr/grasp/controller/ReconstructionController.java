@@ -13,6 +13,13 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.*;
 
+/**
+ * Level of abstraction which is called from the main grasp app.
+ *
+ * This controls the high level interface with the reconstruction object stored in the database.
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Service
 public class ReconstructionController {
 

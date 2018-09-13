@@ -5,7 +5,11 @@ import com.asr.grasp.utils.Defines;
 import org.springframework.stereotype.Repository;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
-
+/**
+ * Interface with the Postgres Database table Users
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Repository
 public class UsersModel extends BaseModel {
 

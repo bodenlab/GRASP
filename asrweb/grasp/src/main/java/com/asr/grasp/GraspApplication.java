@@ -7,11 +7,9 @@ import com.asr.grasp.controller.UserController;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
-import com.asr.grasp.utils.Defines;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import json.JSONArray;
@@ -253,6 +251,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         mav.addObject("user", loggedInUser);
         mav.addObject("username", loggedInUser.getUsername());
+        // Run reconstruction but first get the extent names so we can asynronously do a lookup with
+        // NCBI to get the taxonomic iDs.
+        JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
+        System.out.println(taxaController.getNonExistIdsFromProtId(asr.getExtentNames()).toString());
+        mav.addObject("ids", ids.toString());
         return mav;
     }
 
@@ -538,6 +541,7 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/taxa" , method = RequestMethod.POST)
     public @ResponseBody String getTaxaInfo(@RequestBody String jsonString) {
+        System.out.println(jsonString);
         JSONObject dataJson = new JSONObject(jsonString);
         // Check if we have anything to save
         if ((Boolean)dataJson.get("toSave") == true) {
@@ -546,6 +550,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Now we want to get the taxonomic information for all the IDs in this dataset.
         // ToDo: could be slightly optimised to use the IDs collected before.
+        System.out.println(taxaController.getTaxaInfoFromProtIds(asr.getExtentNames()).toString());
         return taxaController.getTaxaInfoFromProtIds(asr.getExtentNames()).toString();
     }
 
@@ -600,8 +605,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("username", loggedInUser.getUsername());
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
-        HashMap<String, ArrayList<String>> proteinNames = asr.getExtentNames();
-        JSONObject ids = taxaController.getNonExistIdsFromProtId(proteinNames);
+        JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
         mav.addObject("ids", ids.toString());
         return mav;
     }

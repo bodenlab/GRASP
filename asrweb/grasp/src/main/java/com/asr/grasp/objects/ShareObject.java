@@ -1,10 +1,11 @@
 package com.asr.grasp.objects;
 
-
+/**
+ * Object to pass reconstruction share information between the client and server.
+ *
+ * Created by marnie: 11/04/17
+ */
 public class ShareObject {
-    /**
-     * Object to pass reconstruction share information between the client and server
-     */
 
     private int reconID;
     private String username;

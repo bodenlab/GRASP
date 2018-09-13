@@ -9,11 +9,19 @@ import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
+/**
+ * Level of abstraction which is called from the main grasp app.
+ *
+ * This controls the high level interface to provide the user User functions such as logging in
+ * and registering.
+ *
+ * ToDo: Add in update/reset password
+ *
+ * Created by ariane on 13/07/18.
+ */
 @Service
 public class UserController {
 

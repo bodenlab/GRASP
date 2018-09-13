@@ -1,9 +1,9 @@
 package com.asr.grasp.utils;
 
+/**
+ * Add in any defines that will be used across the platform.
+ */
 public class Defines {
-    /**
-     * Add in any defines that will be used accross the platform.
-     */
 
     /**
      * Add in used datatypes for the model.

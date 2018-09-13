@@ -74,6 +74,7 @@ public class BaseTest {
         reconModel.setDBConfig(dbUrl, dbPassword, dbUser);
 
         taxaModel = new TaxaModel();
+        taxaModel.setDBConfig(dbUrl, dbPassword, dbUser);
 
         userController.setReconModel(reconModel);
         userController.setUsersModel(userModel);
@@ -104,18 +105,23 @@ public class BaseTest {
      * Helper method to create a reconstrcution.
      * Doesn't check it is correct as it assumes this will be picked up in
      * TestCreateReconstrcution
+     * Example config:
+     * @param dataName              "tawfik"
+     * @param inferenceType         "JTT"
+     * @param label                 "example test ds"
+     * @param nodeLabel             "N0"
+     * @return
      */
-    public ASRObject setAsr() {
+    public ASRObject setAsr(String dataName, String inferenceType, String label, String nodeLabel) {
         ASRObject asr = new ASRObject();
-        asr.setData("tawfik");
-        asr.setInferenceType("JTT");
-        asr.setLabel("Afriat-Jurnouv-test");
-        asr.setWorkingNodeLabel("N0");
-        asr.setNodeLabel("N0");
+        asr.setData(dataName);
+        asr.setInferenceType(inferenceType);
+        asr.setLabel(label);
+        asr.setWorkingNodeLabel(nodeLabel);
+        asr.setNodeLabel(nodeLabel);
         asr.runForSession(sessionPath);
         try {
             asr.runReconstruction();
-
         } catch (Exception e) {
             // Fail on error
         }

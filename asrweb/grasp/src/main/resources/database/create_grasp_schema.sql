@@ -1,13 +1,13 @@
 CREATE TABLE util.ncbi2taxa
 (
-  id VARCHAR(12) PRIMARY KEY NOT NULL,
+  id VARCHAR(24) PRIMARY KEY NOT NULL,
   taxa_id int
 );
 CREATE UNIQUE INDEX ncbi2taxa_id_uindex ON util.ncbi2taxa (id);
 
 CREATE TABLE util.uniprot2taxa
 (
-  id VARCHAR(12) PRIMARY KEY NOT NULL,
+  id VARCHAR(24) PRIMARY KEY NOT NULL,
   taxa_id int
 );
 CREATE UNIQUE INDEX uniprot2taxa_id_uindex ON util.uniprot2taxa (id);

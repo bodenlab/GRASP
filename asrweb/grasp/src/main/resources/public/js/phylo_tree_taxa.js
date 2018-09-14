@@ -37,6 +37,13 @@ function setUpTaxonomy(ncbiList, uniprotList, ncbiMapping, uniprotMapping) {
   };
 }
 
+function chunkArray(array, chunkSize) {
+  return Array.from(
+      { length: Math.ceil(array.length / chunkSize) },
+      (_, index) => array.slice(index * chunkSize, (index + 1) * chunkSize)
+  );
+}
+
 /**
  * Here we search for the taxonomic Ids of ids we don't know.
  *
@@ -55,17 +62,32 @@ function queryTaxonIds(ncbiList, uniprotList, ncbiMapping, uniprotMapping) {
     uniprotMapping[key] = ncbiMapping[key];
   }
   if (ncbiList.length > 1) {
-    requests.push(getTaxonIdFromNcbi(ncbiList.join(","), ncbiList));
+    try {
+      const chunks = chunkArray(ncbiList, 10);
+      for(const chunk of chunks) {
+        requests.push(getTaxonIdFromNcbi(chunk.join(","), chunk));
+      }
+    } catch(error) {
+      console.log(error);
+    }
   }
   if (uniprotList.length > 1) {
-    let uniprotNames = "";
-    for (let i = 0; i < uniprotList.length; i++) {
-      uniprotNames += "id:" + uniprotList[i];
-      if (i < uniprotList.length - 1) {
-        uniprotNames += "+OR+";
+    try {
+      const chunks = chunkArray(uniprotList, 10);
+      for(const chunk of chunks) {
+        let uniprotNames = "";
+        for (let i = 0; i < chunk.length; i++) {
+          uniprotNames += "id:" + chunk[i];
+          if (i < chunk.length - 1) {
+            uniprotNames += "+OR+";
+          }
+        }
+        requests.push(getTaxonIdFromUniprot(uniprotNames, chunk))
       }
+    } catch(error) {
+      // Catch en error here
     }
-    requests.push(getTaxonIdFromUniprot(uniprotNames, uniprotList))
+
   }
   /**
    * When we get the results back we want to post them to the server and that

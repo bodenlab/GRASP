@@ -177,7 +177,7 @@ public class ReconstructionControllerTest extends BaseTest {
                 userOwner.getId()),
                 userMember.getUsername(), userOwner);
 
-        // assertThat(err, is(equalTo(null)));
+         assertThat(err, is(equalTo(null)));
 
         // Check the user has the correct access
         assertThat(reconController.getUsersAccess(recon.getId(), userMember),

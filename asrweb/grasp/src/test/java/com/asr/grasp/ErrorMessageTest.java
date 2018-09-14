@@ -32,7 +32,7 @@ public class ErrorMessageTest extends BaseTest {
             asr.runReconstruction();
         } catch (RuntimeException e) {
             // Fail on error
-             assertThat(e, is(equalTo(null)));
+            assertThat(e, is(equalTo(null)));
         }
     }
 

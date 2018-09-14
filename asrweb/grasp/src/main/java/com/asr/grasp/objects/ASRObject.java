@@ -6,6 +6,7 @@ import dat.EnumSeq;
 import dat.Enumerable;
 import java.util.HashMap;
 import json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +31,8 @@ public class ASRObject {
     private int NUM_THREADS = 5;
 
     private ASRController asrController;
+
+    private String dataPath = "data/app/";
 
     private String label = "";
     private String inferenceType = "joint";
@@ -558,13 +561,13 @@ public class ASRObject {
             } else {
                 // performing reconstruction on test data
                 File alnFile = new File(Thread.currentThread()
-                        .getContextClassLoader().getResource(data + ".aln")
+                        .getContextClassLoader().getResource(dataPath + data + ".aln")
                         .toURI());
                 setAlnFilepath(sessionDir + data + ".aln");
                 Files.copy(alnFile.toPath(), (new File(alnFilepath)).toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
                 File treeFile = new File(Thread.currentThread()
-                        .getContextClassLoader().getResource(data + ".nwk")
+                        .getContextClassLoader().getResource(dataPath + data + ".nwk")
                         .toURI());
                 setTreeFilepath(sessionDir + data + ".nwk");
                 Files.copy(treeFile.toPath(), (new File(treeFilepath)).toPath(),
@@ -576,5 +579,17 @@ public class ASRObject {
             System.err.println(e);
             return e;
         }
+    }
+
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                          Methods for test env
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
     }
 }

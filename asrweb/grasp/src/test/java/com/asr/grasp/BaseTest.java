@@ -109,6 +109,7 @@ public class BaseTest {
      */
     public ASRObject setAsr(String data) {
         ASRObject asr = new ASRObject();
+        asr.setDataPath("data/test/");
         asr.setData(data);
         asr.setInferenceType("JTT");
         asr.setLabel("test-test-test");

@@ -10,8 +10,6 @@ import com.asr.grasp.objects.ShareObject;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
-import java.util.ArrayList;
-import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -761,9 +759,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // copy output files to temporary folder, or generate output where needed and save in temporary folder
         File tutorialFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.fasta")
+                Thread.currentThread().getContextClassLoader().getResource(
+                        "data/app/test/GRASPTutorial.fasta")
                         .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.fasta")).toPath(),
+        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/test/GRASPTutorial.fasta")).toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
         // send output folder to client
@@ -799,14 +798,16 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // copy output files to temporary folder, or generate output where needed and save in temporary folder
         File tutorialFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.aln")
+                Thread.currentThread().getContextClassLoader().getResource(
+                        "data/app/test/GRASPTutorial.aln")
                         .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.aln")).toPath(),
+        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/test/GRASPTutorial.aln")).toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
         tutorialFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource("GRASPTutorial.nwk")
+                Thread.currentThread().getContextClassLoader().getResource(
+                        "data/app/test/GRASPTutorial.nwk")
                         .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.nwk")).toPath(),
+        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/test/GRASPTutorial.nwk")).toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
         // send output folder to client

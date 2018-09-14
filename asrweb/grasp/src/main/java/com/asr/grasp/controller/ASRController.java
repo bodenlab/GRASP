@@ -110,9 +110,12 @@ public class ASRController {
     }
 
 
-    /**
-     * Run marginal reconstruction using saved data and specified options
-     */
+//    public void runReconstruction(String treeNewick, List<Gappy<Enumerable>> sequences, boolean jointInference, POGraph msa) throws InterruptedException {
+
+
+        /**
+         * Run marginal reconstruction using saved data and specified options
+         */
     private boolean runReconstructionMarginal(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String nodeLabel) throws InterruptedException {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
             asrMarginal = new ASRPOG(model, NUM_THREADS, nodeLabel);
@@ -315,5 +318,7 @@ public class ASRController {
             return msa.getNumNodes() - asrMarginal.getGraph(node).getNodeIDs().length;
         return -1;
     }
+
+
 
 }

@@ -104,21 +104,16 @@ public class BaseTest {
     /**
      * Helper method to create a reconstrcution.
      * Doesn't check it is correct as it assumes this will be picked up in
-     * TestCreateReconstrcution
-     * Example config:
-     * @param dataName              "tawfik"
-     * @param inferenceType         "JTT"
-     * @param label                 "example test ds"
-     * @param nodeLabel             "N0"
+     * TestCreateReconstrcuion
      * @return
      */
-    public ASRObject setAsr(String dataName, String inferenceType, String label, String nodeLabel) {
+    public ASRObject setAsr(String data) {
         ASRObject asr = new ASRObject();
-        asr.setData(dataName);
-        asr.setInferenceType(inferenceType);
-        asr.setLabel(label);
-        asr.setWorkingNodeLabel(nodeLabel);
-        asr.setNodeLabel(nodeLabel);
+        asr.setData(data);
+        asr.setInferenceType("JTT");
+        asr.setLabel("test-test-test");
+        asr.setWorkingNodeLabel("N0");
+        asr.setNodeLabel("N0");
         asr.runForSession(sessionPath);
         try {
             asr.runReconstruction();

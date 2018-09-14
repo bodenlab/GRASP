@@ -73,7 +73,7 @@ public class ReconstructionControllerTest extends BaseTest {
         setUpEnv();
         UserObject user = createAndRegisterUser("testuser", "testpassword");
 
-        ASRObject asr = setAsr("tawfik", "JTT", "example test ds", "N0");
+        ASRObject asr = setAsr("tawfik");
 
         // Create a reconstruction from an ASR object
         ReconstructionObject recon = reconController.createFromASR(asr);
@@ -123,7 +123,8 @@ public class ReconstructionControllerTest extends BaseTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        ASRObject asr = setAsr("tawfik", "JTT", "example test ds", "N0");
+        ASRObject asr = setAsr("tawfik");
+
         // Create a reconstruction from an ASR object
         ReconstructionObject recon = createRecon(userOwner, asr);
 
@@ -165,7 +166,8 @@ public class ReconstructionControllerTest extends BaseTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        ASRObject asr = setAsr("tawfik", "JTT", "example test ds", "N0");
+        ASRObject asr = setAsr("tawfik");
+
         // Create a reconstruction from an ASR object
         ReconstructionObject recon = createRecon(userOwner, asr);
 
@@ -213,7 +215,8 @@ public class ReconstructionControllerTest extends BaseTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        ASRObject asr = setAsr("tawfik", "JTT", "example test ds", "N0");
+        ASRObject asr = setAsr("tawfik");
+
         // Create a reconstruction from an ASR object
         ReconstructionObject recon = createRecon(userOwner, asr);
 
@@ -279,7 +282,7 @@ public class ReconstructionControllerTest extends BaseTest {
         UserObject userMember = createAndRegisterUser("testmember",
                 "testpassword");
 
-        ASRObject asr = setAsr("tawfik", "JTT", "example test ds", "N0");
+        ASRObject asr = setAsr("tawfik");
         // Create a reconstruction from an ASR object
         ReconstructionObject recon = createRecon(userOwner, asr);
 

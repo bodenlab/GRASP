@@ -25,7 +25,7 @@ public class TaxaControllerTest extends BaseTest {
     public void setUpTaxaEnv() {
         userOwner = createAndRegisterUser("testuser","testpassword");
 
-        asr = setAsr("names", "JTT", "example test ds", "N0");
+        asr = setAsr("names");
 
         // Also want to delete the ID's so we can re-add them each time incase these were added
         // during user testing.

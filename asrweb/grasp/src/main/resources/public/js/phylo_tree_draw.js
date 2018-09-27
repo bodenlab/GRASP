@@ -158,6 +158,7 @@ var make_tree_scale = function (phylo_options) {
   .attr("class", "axis")
   .attr("stroke", phylo_options.branch_stroke)
   .attr("transform", "translate(" + 30 + ",0)")
+  .attr("stroke-width", "0px")
   .call(y_axis)
 
   phylo_options.legend.colour_scale = d3.scale.linear()

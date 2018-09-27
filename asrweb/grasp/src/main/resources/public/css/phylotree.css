@@ -9,6 +9,17 @@
   font: sans-serif;
 }
 
+.y.axis line {
+  stroke: #fff;
+}
+path.domain {
+  display: none;
+}
+
+.domain {
+  display: none;
+}
+
 .tree-scale-bar line,
 .tree-scale-bar path {
   fill: none;

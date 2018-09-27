@@ -104,10 +104,14 @@ public class TaxaController {
      */
     public String insertTaxaIds(JSONObject ids) {
         for (String type: Defines.SUPPORTED_PROT) {
-            // We only want to get the mappings that we want to actually save
-            String err = taxaModel.insertTaxaIdToProtId((JSONObject)ids.get(type), type);
-            if (err != null) {
-                return err;
+            try {
+                // We only want to get the mappings that we want to actually save
+                String err = taxaModel.insertTaxaIdToProtId((JSONObject) ids.get(type), type);
+                if (err != null) {
+                    return err;
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
         }
         return null;

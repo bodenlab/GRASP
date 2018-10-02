@@ -46,7 +46,7 @@ public class ErrorMessageTest extends BaseTest {
             Assert.fail( "Should have thrown an exception about every sequence not having a match" );
         } catch (RuntimeException e) {
             // Fail on error
-            assertThat(e.getMessage().split("\n")[0], is(equalTo("Error: The sequence names in the provided alignment must all have a match in the provided tree." )));
+            assertThat(e.getMessage().split("\n")[0], is(equalTo("Error: Extant node names must be unique." )));
         }
     }
 }

@@ -9,6 +9,8 @@ import com.asr.grasp.objects.GeneralObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
 
+import json.JSONArray;
+import json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -77,6 +79,48 @@ public class ReconstructionsModel extends BaseModel {
         return reconstruction;
     }
 
+
+    /**
+     * Helper function for removing much of the space overhead.
+     *
+     * @param graph
+     * @return
+     */
+    private JSONObject encodeGraph(JSONObject graph) {
+        return graph;
+    }
+
+    /**
+     * Helper function to remove the overhead from storing the seq object.
+     * On front end: {label: "K", value: 1}
+     * On back end: [0,1]
+     * @param seq
+     * @return
+     */
+    private JSONObject encodeSeq(JSONObject seq) {
+        return seq;
+    }
+
+    /**
+     * Convert the reconstruction MSA to an encoded version so we don't store everything.
+     * structure {max_depth:0, nodes:[], edges:[]}
+     * a Node object: {consensus: bool, mutants:[obj], x: int, y:int, label:string, class: empty, lane: int, graph:[obj], seq:[obj]}
+     */
+    private String encodeMSA(String msaStr) {
+        // First convert it to a JSON obj
+        int MAX_DEPTH = 0;
+        int NODES = 1;
+        int EDGES = 2;
+        JSONObject msaObj = new JSONObject(msaStr);
+        JSONArray nodes = msaObj.getJSONArray("nodes");
+        JSONArray edges = msaObj.getJSONArray("edges");
+        // Iterate through and make a JSONArray that doesn't have the overheads of all the
+        // identifier strings.
+        for (Object node: nodes) {
+
+        }
+        return msaStr;
+    }
     /**
      * Creates the insert statement for a reconstruction.
      */

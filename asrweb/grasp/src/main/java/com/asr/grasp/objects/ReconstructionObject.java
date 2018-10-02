@@ -58,7 +58,9 @@ public class ReconstructionObject {
 
     public String getTree() { return this.tree; }
 
-    public String getJointInferences() { return this.jointInferences; }
+    public String getJointInferences() {
+        return this.jointInferences;
+    }
 
     public void setReconTree(String tree) { this.reconTree = tree; }
 

@@ -107,6 +107,7 @@
                 </form>
                 <script type="text/javascript" th:inline="javascript">
                 /*<![CDATA[*/
+                let addedGraphs = false;
                     $("#check-pog-joint").change(function(){
                         check_disabled_state_dlbtn();
                         if ($("#check-pog-joint").prop("checked")) {
@@ -155,20 +156,21 @@
                         check_disabled_state_dlbtn();
                     });
                     var check_disabled_state_dlbtn = function() {
+                      // Check if we have already performed this function
+                      if (addedGraphs == false) {
                         if (!$("#download-btn").hasClass("disabled")) {
-                            $("#download-btn").addClass("disabled");
+                          $("#download-btn").addClass("disabled");
                         }
-                        $(".dlopt").each(function() {
-                            if ($(this).prop("checked")) {
-                                $("#download-btn").removeClass("disabled");
-                                $("#graphs-input").val("");
-                                graphs = [];
-                                graphs = poags.multi.names;
-                                graphs.push(poags.inferred_poag_name);
-                                console.log(graphs);
-                                $("#graphs-input").val(JSON.stringify(graphs));
-                            }
+                        $(".dlopt").each(function () {
+                          if ($(this).prop("checked")) {
+                            $("#download-btn").removeClass("disabled");
+                            $("#graphs-input").val("");
+                            let graphs = getGraphsForDownload();
+                            $("#graphs-input").val(JSON.stringify(graphs));
+                          }
                         });
+                        addedGraphs = true;
+                      }
                     };
                 /*]]>*/
                 </script>

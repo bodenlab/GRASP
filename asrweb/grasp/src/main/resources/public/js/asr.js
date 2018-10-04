@@ -21,17 +21,17 @@ var refresh_labels = function() {
     var label = poags.inferred_poag_name;
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i].textContent = label.split("_")[0];
-        nodeLabels[i].value = label;
+        nodeLabels[i][TEXT_CONTENT] = label.split("_")[0];
+        nodeLabels[i][G_VALUE] = label;
     }
     nodeLabels = document.querySelectorAll(".full-node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i].textContent = selectedNode.split("_")[0];
-        nodeLabels[i].value = selectedNode;
+        nodeLabels[i][TEXT_CONTENT] = selectedNode.split("_")[0];
+        nodeLabels[i][G_VALUE] = selectedNode;
     }
     var reconLabels = document.querySelectorAll(".infer-label");
     for (var i = 0; i < reconLabels.length; i++) {
-        reconLabels[i].textContent = inferType;
+        reconLabels[i][TEXT_CONTENT] = inferType;
     }
 };
 
@@ -156,11 +156,11 @@ function makeNumDistrib(arrLabelValue) {
         ret[i] = 0;
     var sum = 0;
     for (var d in arrLabelValue)
-        sum += arrLabelValue[d].value;
+        sum += arrLabelValue[d][G_VALUE];
     for (var d in arrLabelValue) {
         for (var i = 0; i < alphabet.length; i++) {
-            if (alphabet[i] == arrLabelValue[d].label) {
-                ret[i] = arrLabelValue[d].value / sum;
+            if (alphabet[i] == arrLabelValue[d][G_LABEL]) {
+                ret[i] = arrLabelValue[d][G_VALUE] / sum;
                 break;
             }
         }
@@ -185,7 +185,7 @@ var generate_mutants = function() {
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
         Ns[i] = 1;
-        myPs[i] = makeNumDistrib(node.seq.chars);
+        myPs[i] = makeNumDistrib(node[G_SEQ_CHARS]);
         var myQ1 = getQ(myPs[i], Ns[i]);
         var myQ2 = getQ(myPs[i], Ns[i] + 1);
         KLcur[i] = KL_div(myPs[i], myQ1);
@@ -218,13 +218,15 @@ var generate_mutants = function() {
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
         // update mutant distribution array
-        node.mutants.chars = [];
+        node[G_MUTANTS_CHARS] = [];
         var idx = getTopN(myPs[i], Ns[i]);
         for (var j in idx) {
             var myMutantLabel = alphabet[idx[j]];
             var myMutantValue = 1.0 / Ns[i];
-            var myMutant = {value:myMutantValue,label:myMutantLabel};
-            node.mutants.chars.push(myMutant);
+            var myMutant = []; //{value:myMutantValue,label:myMutantLabel};
+            myMutant[G_VALUE_MUTANT] = myMutantValue;
+            myMutantLabel[G_LABEL_MUTANT] = myMutantLabel;
+            node[G_MUTANTS_CHARS].push(myMutant);
         }
         node.mutant = false;
         if (idx.length > 1) {

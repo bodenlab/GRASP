@@ -21,6 +21,28 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ReconstructionsModel extends BaseModel {
 
+    /**
+     * These control the mappings of the arrays to values for the reconstruction object.
+     * LABELS are ALWAYS stored in position 0 (of first order or second order arrays.
+     * VALUES are always stored in position 1 (of second order arrays).
+     * MUTANTS, GRAPH, & SEQ have been combined
+     */
+    final int LABEL = 0;
+    /* VALUE holds an array that contains a label in the 0tth element and then has
+     * 2 values following: 1: value, 2: seq_num*/
+    final int VALUE = 1;
+    final int SEQ_NUM = 2;
+
+    /* ID on front end */
+    final int ID = 2;
+    /* int X-Coord */
+    final int X = 3;
+    /* int Y-Coord */
+    final int Y = 4;
+    /* bool whether it is part of the consensus or not */
+    final int CONSENSUS = 5;
+
+
     final ColumnEntry id = new ColumnEntry(1, "id", Defines.INT);
     final ColumnEntry ownerId = new ColumnEntry(2, "owner_id", Defines.INT);
     final ColumnEntry anscestor = new ColumnEntry(3, "ancestor", Defines

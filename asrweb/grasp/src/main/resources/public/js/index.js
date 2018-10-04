@@ -535,35 +535,35 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     // draw all not reciprocated edges first
     for (var e in edges) {
         var edge = edges[e];
-        if (!edge.reciprocated && ((edge.to.x > poags.cur_x_min - 1 && edge.to.x < poags.cur_x_max + 1) || (edge.from.x < poags.cur_x_max + 1 && edge.from.x > poags.cur_x_min - 1))) {
+        if (!edge[E_RECIPROCATED] && ((edge[E_TO][E_X] > poags.cur_x_min - 1 && edge[E_TO][E_X] < poags.cur_x_max + 1) || (edge[E_FROM][E_X] < poags.cur_x_max + 1 && edge[E_FROM][E_X] > poags.cur_x_min - 1))) {
             draw_edges(poags, edge, group, scale_y);
         }
     }
     // draw all reciprocated edges so that they are drawn on top of uni-directional ones
     for (var e in edges) {
         var edge = edges[e];
-        if (edge.reciprocated && ((edge.to.x > poags.cur_x_min - 1 && edge.to.x < poags.cur_x_max + 1) || (edge.from.x < poags.cur_x_max + 1 && edge.from.x > poags.cur_x_min - 1))) {
+        if (edge[E_RECIPROCATED] && ((edge[E_TO][E_X] > poags.cur_x_min - 1 && edge[E_TO][E_X] < poags.cur_x_max + 1) || (edge[E_FROM][E_X] < poags.cur_x_max + 1 && edge[E_FROM][E_X] > poags.cur_x_min - 1))) {
            draw_edges(poags, edge, group, scale_y);
         }
     }
 
     for (var n in nodes) {
         var node = nodes[n];
-        var node_x = node.x + 1;
+        var node_x = node[N_X] + 1;
         if (node_x >= poags.cur_x_min - 2 && node_x <= poags.cur_x_max + 2) {
             var node_cx = poags.scale.x(node_x);
-            var node_cy = scale_y(node.y) + poags.y_offset;
-            if (node_x >= poags.cur_x_min && node.x <= poags.cur_x_max) {
+            var node_cy = scale_y(node[N_Y]) + poags.y_offset;
+            if (node_x >= poags.cur_x_min && node[N_X] <= poags.cur_x_max) {
                 if (draw_legend) {
                     draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
                     draw_legend = false;
                 }
-                if (node.label == 'initial' || node.label == 'final') {
+                if (node[G_LABEL] == 'initial' || node[G_LABEL] == 'final') {
                     draw_terminus(poags, group, node_cx, node_cy);
                 } else {
                     var radius = draw_nodes(poags, node, group, node_cx, node_cy);
 
-                    if (poag_name == poags.root_poag_name || node.type == 'marginal' || poagPi) {
+                    if (poag_name == poags.root_poag_name || node[N_TYPE] == 'marginal' || poagPi) {
                         draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
                         // if it is a merged node, we want to draw a layered Pie chart
                         // so we set poagPi to false and re draw a smaller pie chart with
@@ -573,8 +573,8 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                         }
                         // check whether to display a graph
                         var count = 0;
-                        for (var b in node.graph.bars) {
-                            if (node.graph.bars[b].value > poag_options.graph.hist_bar_thresh) {
+                        for (var b in node[G_GRAPH_BARS]) {
+                            if (node[G_GRAPH_BARS][b][G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
                                 count++;
                             }
                         }
@@ -673,18 +673,18 @@ var process_msa_data = function (poags) {
 
     for (var n in nodes) {
         var node = nodes[n]
-        node.type = msa.metadata.type;
-        node.deleted_during_inference = true;
-        node.name = name;
+        node[N_TYPE] = msa.metadata.type;
+        node[N_DEL_DUR_INF] = true; //[N_DEL_DUR_INF]
+        node[N_NAME] = name;
 
-        poags = update_min_max(node.x, node.y, poags);
+        poags = update_min_max(node[G_X], node[G_Y], poags);
 
-        if (node.seq.chars.length > poags.max_seq_len) {
-            poags.max_seq_len = node.seq.chars.length;
+        if (node[G_SEQ_CHARS].length > poags.max_seq_len) {
+            poags.max_seq_len = node[G_SEQ_CHARS].length;
         }
 
         //formatMutants(node, poag);
-        node_dict[name + "-" + node.id] = node;
+        node_dict[name + "-" + node[G_ID]] = node;
         poags.single.nodes[name].push(node);
     }
 
@@ -748,37 +748,37 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         var node = raw_poag.nodes[n];
 
         // Get the msa node as to get the x coords.
-        var msa_node = poags.node_dict[root_name + '-' + node.id]
+        var msa_node = poags.node_dict[root_name + '-' + node[G_ID]]
         node.name = name;
         node.mutant = false;
         // if x positions are not the same, change to be the same, and find the node
-        // with the current msa_node.x and swap co-ordinates
-        if (node.x != msa_node.x) {
+        // with the current msa_node[N_X] and swap co-ordinates
+        if (node[N_X] != msa_node[N_X]) {
             for (var on in raw_poag.nodes) {
-                if (raw_poag.nodes[on].x == msa_node.x) {
-                    raw_poag.nodes[on].x = node.x;
+                if (raw_poag.nodes[on][N_X] == msa_node[N_X]) {
+                    raw_poag.nodes[on][N_X] = node[N_X];
                     break;
                 }
             }
-            node.x = msa_node.x;
+            node[N_X] = msa_node[N_X];
         }
-        node.type = raw_poag.metadata.type;
-        node.unique_id = name + '-' + node.id;
-        poags = update_min_max(node.x, node.y, poags);
+        node[N_TYPE] = raw_poag.metadata.type;
+        node[UNIQUE_ID] = name + '-' + node[G_ID];
+        poags = update_min_max(node[N_X], node[N_Y], poags);
 
         // Set that this msa node wasn't deleted during inference
         // Only set if the poag name is 'inferred'
         if (inferred) {
-            msa_node.deleted_during_inference = false;
+            msa_node[N_DEL_DUR_INF] = false;
             poags.single.nodes[name].push(node);
         } else if (merged) {
-            msa_node.deleted_during_inference = false; // TODO: should merged affect the mini graph?
+            msa_node[N_DEL_DUR_INF] = false; // TODO: should merged affect the mini graph?
             poags.merged.nodes.push(node);
         } else {
             poags.multi.nodes[name].push(node);
         }
 
-        poags.node_dict[node.unique_id] = node;
+        poags.node_dict[node[UNIQUE_ID]] = node;
 
     }
     return poags;
@@ -812,18 +812,18 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
     for (var e in edges) {
         var edge = edges[e];
         var reduced_edge = {};
-        reduced_edge.id = e;
+        reduced_edge[E_ID] = e;
         // From node
-        reduced_edge.from = poags.node_dict[name + '-' + edge.from];
+        reduced_edge[E_FROM] = poags.node_dict[name + '-' + edge[E_FROM]];
         // To node
-        reduced_edge.to = poags.node_dict[name + '-' + edge.to]
+        reduced_edge[E_TO] = poags.node_dict[name + '-' + edge[E_TO]]
 
-        reduced_edge.consensus = edge.consensus;
-        reduced_edge.reciprocated = edge.reciprocated;
-        reduced_edge.weight = edge.weight;
-        reduced_edge.name = name;
-        reduced_edge.single = edge.single;
-        reduced_edge.sequences = edge.sequences;
+        reduced_edge[E_CONSENSUS] = edge[E_CONSENSUS];
+        reduced_edge[E_RECIPROCATED] = edge[E_RECIPROCATED];
+        reduced_edge[E_WEIGHT] = edge[E_WEIGHT];
+        reduced_edge[E_NAME] = name;
+        reduced_edge[E_SINGLE] = edge[E_SINGLE];
+        reduced_edge[E_SEQS] = edge[E_SEQS];
 
         if (inferred) {
             poags.single.edges[name].push(reduced_edge);
@@ -1069,7 +1069,7 @@ var draw_terminus = function (poags, group, node_cx, node_cy) {
  */
 var draw_nodes = function (poags, node, group, node_cx, node_cy) {
     var node_opt = poags.options.node;
-    var radius = (poags.scale.x(node.x + 1) - poags.scale.x(node.x)) / 4;
+    var radius = (poags.scale.x(node[N_X] + 1) - poags.scale.x(node[N_X])) / 4;
 
     if (radius > node_opt.max_radius) {
         radius = node_opt.max_radius;
@@ -1079,20 +1079,20 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
 
     group.append('circle')
             .attr("class", 'poag')
-            .attr("id", "node-" + node.unique_id)
+            .attr("id", "node-" + node[UNIQUE_ID])
             .attr('cx', node_cx)
             .attr('cy', node_cy)
             .attr('r', radius)
             .attr("stroke-width", node_opt.stroke_width)
             .attr("stroke", node_opt.stroke)
             .attr("opacity", node_opt.default_opacity)
-            .attr("fill", poags.options.display.colours[node.label]);
+            .attr("fill", poags.options.display.colours[node[G_LABEL]]);
 
 
-    if (radius > node_opt.min_radius && node.label.length == 1) {
+    if (radius > node_opt.min_radius && node[G_LABEL].length == 1) {
         group.append("text")
                 .attr("class", "poag")
-                .attr("id", "ptext-" + node.unique_id)
+                .attr("id", "ptext-" + node[UNIQUE_ID])
                 .attr('x', node_cx)
                 .attr('y', function () {
                     var tmp = node_cy + node_opt.text_padding;
@@ -1103,9 +1103,9 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
                 .style("font-family", poags.options.style.font_family)
                 .style("font-size", poags.options.style.font_size)
                 .attr("stroke", function () {
-                    return getNodeTextColour(poags.options.display.colours[(node.label)]);
+                    return getNodeTextColour(poags.options.display.colours[(node[G_LABEL])]);
                 })
-                .text(node.label);
+                .text(node[G_LABEL]);
     }
 
     return radius;
@@ -1142,13 +1142,13 @@ var draw_mini_msa = function (poags) {
         var node = nodes[n];
         var node_inferred = null;
         for (var m in nodes_inferred) {
-            if (nodes_inferred[m].id == node.id) {
+            if (nodes_inferred[m][G_ID] == node[G_ID]) {
                 node_inferred = nodes_inferred[m];
                 break;
             }
         }
-        var line_y = (y_scale(node.y) + (y_scale(node.y + 1)) / 2);
-        var line_x = x_scale(node.x + 1);
+        var line_y = (y_scale(node[N_Y]) + (y_scale(node[N_Y] + 1)) / 2);
+        var line_x = x_scale(node[N_X] + 1);
         line_points.push(combine_points(line_x, line_y));
 
         // find node out edges
@@ -1156,13 +1156,13 @@ var draw_mini_msa = function (poags) {
         if (node_inferred != null) {
             if (poags.merged.edges.length > 0) {
                 for (var e in poags.merged.edges) {
-                    if (poags.merged.edges[e].from.id == node_inferred.id) {
+                    if (poags.merged.edges[e][E_FROM][G_ID] == node_inferred[G_ID]) {
                         out_edge_count++;
                     }
                 }
             } else {
                 for (var e in poags.single.edges[poags.inferred_poag_name]) {
-                    if (poags.single.edges[poags.inferred_poag_name][e].from.id == node_inferred.id) {
+                    if (poags.single.edges[poags.inferred_poag_name][e][E_FROM][G_ID] == node_inferred[G_ID]) {
                         out_edge_count++;
                     }
                 }
@@ -1184,19 +1184,19 @@ var draw_mini_msa = function (poags) {
                     .attr("fill", options.diff_colour);
             rect.moveToBack();
         }
-        if (node.deleted_during_inference == true) {
+        if (node[N_DEL_DUR_INF] == true) {
              group.append("circle")
                     .attr("class", "poag")
-                    .attr("id", "node_" + node.label + n)
+                    .attr("id", "node_" + node[G_LABEL] + n)
                     .attr('cx', line_x)
                     .attr('cy', line_y)
                     .attr('r', mini_opt.radius)
                     .attr("opacity", options.diff_opacity)
                     .attr("fill", options.interesting_many_edges_colour);
-            d3.select("#node_"+node.label+n).moveToBack();
+            d3.select("#node_"+node[G_LABEL]+n).moveToBack();
             //circle.moveToBack();
         }
-        if (node_inferred != null && poags.options.mutants.draw == true && node_inferred.mutant == true) {
+        if (node_inferred != null && poags.options.mutants.draw == true && node_inferred[N_MUTANT] == true) {
             var tri = group.append("path")
                     .attr("class", "poag")
                     .attr('transform', 'translate(' + (line_x - mini_opt.x_padding) + ',' + (y_scale(0) - 10) + ')')
@@ -1236,14 +1236,14 @@ var draw_edges = function (poags, edge, group, scale_y) {
     var y_len = edge_opt.y_curve_amount;
 
     var line_points = new Array();
-    var x_start = scale_x(edge.from.x + 1);
-    var x_end = scale_x(edge.to.x + 1);
+    var x_start = scale_x(edge[E_FROM][N_X] + 1);
+    var x_end = scale_x(edge[E_TO][N_X] + 1);
     var x_mid = x_start - ((x_start - x_end) / 2);
 
-    var x_diff = Math.abs(edge.from.x - edge.to.x);
+    var x_diff = Math.abs(edge[E_FROM][N_X] - edge[E_TO][N_X]);
 
-    var y_start = scale_y(edge.from.y) + poags.y_offset;
-    var y_end = scale_y(edge.to.y) + poags.y_offset;
+    var y_start = scale_y(edge[E_FROM][N_Y]) + poags.y_offset;
+    var y_end = scale_y(edge[E_TO][N_Y]) + poags.y_offset;
 
     // If y start and y end are the same we want a nice curve
     var y_jump_buffer = same_level_buffer * x_diff + poags.node_radius + 10;
@@ -1280,20 +1280,20 @@ var draw_edges = function (poags, edge, group, scale_y) {
     // if not the consensus, then identify whether a single sequence on the edge or not
     var stroke_width = edge_opt.stroke_width;
     var stroke = edge_opt.stroke;
-    if (edge.reciprocated) {
+    if (edge[E_RECIPROCATED]) {
         stroke = edge_opt.reciprocated_stroke;
     }
-    if (edge.consensus && poags.options.display.draw_consensus) {
+    if (edge[E_CONSENSUS] && poags.options.display.draw_consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
     }
     group.append("path")
             .attr("d", line_function(line_points))
             .attr("class", 'poag')
-            .attr("id", 'edge-' + edge.from.unique_id + '-' + edge.to.unique_id)
+            .attr("id", 'edge-' + edge[E_FROM][UNIQUE_ID] + '-' + edge[E_TO][UNIQUE_ID])
             .attr("stroke-width", stroke_width)
             .attr("stroke", stroke)
             .attr("stroke-dasharray", function() {
-                if (edge.single) {
+                if (edge[E_SINGLE]) {
                     return "3,3";
                 } else {
                     return "0,0";
@@ -1314,8 +1314,8 @@ var draw_edges = function (poags, edge, group, scale_y) {
 
                     $(this).attr("stroke-width", stroke_width*2)
                     $(this).attr("opacity", 1)
-                    for (var s in edge.sequences){
-                        search_tree(edge.sequences[s], false, true);
+                    for (var s in edge[E_SEQS]){
+                        search_tree(edge[E_SEQS][s], false, true);
                     }
 
     }
@@ -1325,8 +1325,8 @@ var draw_edges = function (poags, edge, group, scale_y) {
             // .on("mouseover", function() {
             //     $(this).attr("stroke-width", stroke_width*2)
             //     $(this).attr("opacity", 1)
-            //     for (var s in edge.sequences){
-            //         search_tree(edge.sequences[s], false, true);
+            //     for (var s in edge[E_SEQS]){
+            //         search_tree(edge[E_SEQS][s], false, true);
             //     }
             // })
             // .on("mouseout", function() {
@@ -1346,7 +1346,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
 //            .attr("stroke-width", edge_opt.stroke_width)
 //            .attr("stroke", edge_opt.stroke)
 //            .attr("opacity", edge_opt.opacity)
-//            .attr("fill", poags.options.display.colours[edge.label]);
+//            .attr("fill", poags.options.display.colours[edge[G_LABEL]]);
 //    
 //    group.append("circle")
 //            .attr("class", 'poag')
@@ -1356,7 +1356,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
 //            .attr("stroke-width", edge_opt.stroke_width)
 //            .attr("stroke", edge_opt.stroke)
 //            .attr("opacity", edge_opt.opacity)
-//            .attr("fill", poags.options.display.colours[edge.label]);
+//            .attr("fill", poags.options.display.colours[edge[G_LABEL]]);
 
 }
 
@@ -1367,18 +1367,18 @@ var draw_edges = function (poags, edge, group, scale_y) {
  */
 var line_function = d3.svg.line()
         .x(function (d) {
-            return d.x;
+            return d[0];
         })
         .y(function (d) {
-            return d.y;
+            return d[1];
         })
         .interpolate("basis");
 
 /**
  * Create tmp x, y for interpolation
  */
-combine_points = function (x_var, y_var) {
-    return {x: x_var, y: y_var};
+combine_points = function (x_var, y_var) {;
+    return [x_var, y_var];
 };
 
 /**
@@ -1389,14 +1389,14 @@ combine_points = function (x_var, y_var) {
  */
 var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, colour) {
     var rect_opt = poags.options.legend_rect;
-    var node_cx = poags.scale.x(node.x + 1);
-    var node_cy = scale_y(node.y);
+    var node_cx = poags.scale.x(node[N_X] + 1);
+    var node_cy = scale_y(node[N_Y]);
     //var width = poags.scale.x(node_end.x) - node_cx;
     // TODO need to update the height to be based on the height
     // TODO need to make the width based on the last node
     // of the POAG i.e. diff between least y and max y.
     if (colour != "none" && colour != undefined) {
-        var gradient_id = "gradient" + node.unique_id;
+        var gradient_id = "gradient" + node[UNIQUE_ID];
         var legend = group.append("defs")
                 .attr("class", "poag")
                 .append("svg:linearGradient")
@@ -1413,7 +1413,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
 
         group.append('rect')
                 .attr("class", 'poag')
-                .attr("id", "rect-" + node.unique_id)
+                .attr("id", "rect-" + node[UNIQUE_ID])
                 .attr('x', node_cx - poags.options.style.margin.left / 2)
                 .attr('y', node_cy - height / 2)
                 .attr('width', poags.options.style.width)
@@ -1425,7 +1425,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
 
         group.append('rect')
                 .attr("class", 'poag')
-                .attr("id", "rect-" + node.unique_id)
+                .attr("id", "rect-" + node[UNIQUE_ID])
                 .attr('x', node_cx - poags.options.style.margin.left / 2)
                 .attr('y', node_cy - height / 2)
                 .attr('width', poags.options.style.width)
@@ -1436,13 +1436,13 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
                 .attr("fill", colour);
     }
 
-    var tax = poags.taxonomy[node.name];
+    var tax = poags.taxonomy[node[N_NAME]];
     if (tax === undefined) {
         tax = "";
     }
     group.append("text")
             .attr("class", "poag")
-            .attr("id", "rtext-" + node.unique_id)
+            .attr("id", "rtext-" + node[UNIQUE_ID])
             .attr('x', node_cx - poags.options.style.margin.left / 2 + 10)
             .attr('y', function () {
                 var tmp = node_cy + rect_opt.text_padding - height / 4;
@@ -1452,9 +1452,9 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
             .style("font-family", poags.options.style.font_family)
             .style("font-size", poags.options.style.font_size)
             .attr("stroke", function () {
-                return getNodeTextColour(poags.options.display.colours[(node.label)]);
+                return getNodeTextColour(poags.options.display.colours[(node[G_LABEL])]);
             })
-            .text(node.name.split("_")[0] + " " + tax);
+            .text(node[N_NAME].split("_")[0] + " " + tax);
 
 }
 
@@ -1475,7 +1475,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 
     var stroke_width = options.pie.stroke_width;
 
-    if (radius < options.node.min_radius || (!poagPi && node.name == "Merged")) {
+    if (radius < options.node.min_radius || (!poagPi && node[N_NAME] == "Merged")) {
         stroke_width = 0;
     }
 
@@ -1485,13 +1485,13 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     }
 
     var pie_group = group.append("g")
-            .attr("id", "pie" + node.name)
+            .attr("id", "pie" + node[N_NAME])
             .attr("class", "poag")
             .attr('transform', 'translate(' + node_cx + "," + node_cy + ")")
 
     var pie = d3.layout.pie()
             .value(function (d) {
-                return d.value;
+                return d[G_VALUE_BAR];
             });
 
     var path_pie = d3.svg.arc()
@@ -1502,11 +1502,11 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
             .outerRadius(radius - options.pie.label_position)
             .innerRadius(radius - options.pie.label_position);
 
-    var pie_data = node.seq.chars;
+    var pie_data = node[G_SEQ_CHARS];
     radius -= 10;
 
-    if (node.name != 'MSA' && node.name != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
-        pie_data = node.mutants.chars;
+    if (node[N_NAME] != 'MSA' && node[N_NAME] != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
+        pie_data = node[G_MUTANTS_CHARS];
     } else if (node.seq.hasOwnProperty("poagValues")) {
         var pie_data = node.seq.poagValues;
         radius += 10;
@@ -1515,9 +1515,9 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     var max = 0;
     var lbl = "";
     for (var d in pie_data) {
-        if (pie_data[d].value > max){
-            lbl = pie_data[d].label;
-            max = pie_data[d].value;
+        if (pie_data[d][G_VALUE_BAR] > max){
+            lbl = pie_data[d][G_LABEL];
+            max = pie_data[d][G_VALUE_BAR];
         }
     }
 
@@ -1534,13 +1534,13 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
             .attr("fill", function (d, i) {
                 //"poag" in data suggest fused type pi should be draw
                 if (!d.data.hasOwnProperty("poag")) {
-                    return options.display.colours[(d.data.label)];
+                    return options.display.colours[(d.data[G_LABEL])];
 
                 } else {
                     if (!poagPi) {
-                        if (d.data.label != "0") {
+                        if (d.data[G_LABEL] != "0") {
                             //other labels in the inner fused pi chart
-                            return options.display.colours[(d.data.label)];
+                            return options.display.colours[(d.data[G_LABEL])];
                         } else {
                             //the slice in inner fused pi chart
                             return "white";
@@ -1557,7 +1557,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
         //Appending single big label to node if in consensus
         group.append("text")
                 .attr("class", "poag")
-                .attr("id", "ptext-" + node.unique_id)
+                .attr("id", "ptext-" + node[UNIQUE_ID])
                 .attr('x', node_cx)
                 .attr('y', function () {
                     var tmp = node_cy + options.node.text_padding;
@@ -1568,15 +1568,15 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .style("font-family", options.style.font_family)
                 .style("font-size", options.style.font_size)
                 .attr("stroke", function () {
-                    return getNodeTextColour(options.display.colours[(node.label)]);
+                    return getNodeTextColour(options.display.colours[(node[G_LABEL])]);
                 })
                 .text(lbl);
     }
 
-    if (node.name == "MSA") {
+    if (node[N_NAME] == "MSA") {
          group.append("text")
                 .attr("class", "poag")
-                .attr("id", "idtext-" + node.unique_id)
+                .attr("id", "idtext-" + node[UNIQUE_ID])
                 .attr('x', node_cx)
                 .attr('y', function () {
                     var tmp = node_cy + 3*options.node.text_padding + options.node.position_label_padding;
@@ -1589,8 +1589,8 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .attr("stroke", options.style.node_position_colour)
                 .text(function() {
                     var spacing = Math.floor((poags.cur_x_max - poags.cur_x_min)/10);
-                    if (poags.node_radius > 2*options.node.min_radius || node.id % spacing == 0) {
-                        return node.id + 1;
+                    if (poags.node_radius > 2*options.node.min_radius || node[G_ID] % spacing == 0) {
+                        return node[G_ID] + 1;
                     }
                     return "";
                 });
@@ -1718,7 +1718,7 @@ setup_graph_overlay = function (options, graph_group) {
 
 function create_outer_circle(node, options, graph_group) {
     var circle = graph_group.append("circle")
-            .attr("class", "outside" + node.name + " movable")
+            .attr("class", "outside" + node[N_NAME] + " movable")
             .attr("id", function () {
                 return "node-" + node;
             })
@@ -1765,7 +1765,7 @@ function create_axis(node, options, graph_group) {
             .attr("y", -20)
             .attr("x", options.offset_graph_width + 40)
             .attr("dy", ".71em")
-            .text(node.name + "   ID: " + (node.id + 1));
+            .text(node[N_NAME] + "   ID: " + (node[G_ID] + 1));
 }
 
 function create_modal_axis(node, options, modal_group) {
@@ -1780,11 +1780,11 @@ function create_modal_axis(node, options, modal_group) {
         .attr("y", -20)
         .attr("x", options.offset_graph_width + 40)
         .attr("dy", ".71em")
-        .text(node.name + "   ID: " + (node.id + 1));
+        .text(node[N_NAME] + "   ID: " + (node[G_ID] + 1));
 }
 
 function create_bars(node, options, graph_group) {
-    var num_bars = Object.keys(node.graph.bars).length; //options.max_bar_count;
+    var num_bars = Object.keys(node[G_GRAPH_BARS]).length; //options.max_bar_count;
     var size = options.size;
     var y = options.y;
     var padding_x = (size/num_bars)/2 - 4;
@@ -1796,10 +1796,10 @@ function create_bars(node, options, graph_group) {
     }
 
     var bars = [];
-    for (var bar in node.graph.bars) {
-        var bar_info = node.graph.bars[bar];
-        if (bar_info.value > poag_options.graph.hist_bar_thresh) {
-            bars.push(node.graph.bars[bar]);
+    for (var bar in node[G_GRAPH_BARS]) {
+        var bar_info = node[G_GRAPH_BARS][bar];
+        if (bar_info[G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
+            bars.push(node[G_GRAPH_BARS][bar]);
         }
     }
     num_bars = Object.keys(bars).length;
@@ -1814,13 +1814,13 @@ function create_bars(node, options, graph_group) {
                 }) //Need to determine algoritm for determining this
                 .attr("width", (size / num_bars) - outer_padding/2)
                 .attr("y", function () {
-                    return y(bar_info.value/100.0);
+                    return y(bar_info[G_VALUE_BAR]/100.0);
                 })
                 .attr("height", function () {
                     // As the number is out of 100 need to modulate it
-                    return options.graph_height - y(bar_info.value/100.0);
+                    return options.graph_height - y(bar_info[G_VALUE_BAR]/100.0);
                 })
-                .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
+                .attr("fill", options.colours[(bar_info[G_X_LABEL] == undefined) ? bar_info[G_LABEL] : bar_info[G_X_LABEL]]);
 
 
         graph_group.append("text")
@@ -1829,7 +1829,7 @@ function create_bars(node, options, graph_group) {
                     return padding_x + bar * (options.size / num_bars);
                 }) //Need to determine algorithm for determining this
                 .attr("y", options.graph_height + 20)
-                .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
+                .text((bar_info[G_X_LABEL] == undefined) ? bar_info[G_LABEL] : bar_info[G_X_LABEL]);
 
     }
 }
@@ -1840,7 +1840,7 @@ function create_bars(node, options, graph_group) {
  */
 
 function create_modal_bars(node, options, modal_group) {
-    var num_bars = Object.keys(node.graph.bars).length; //options.max_bar_count;
+    var num_bars = Object.keys(node[G_GRAPH_BARS]).length; //options.max_bar_count;
     var size = options.size*2;
     var y = options.yModal;
     var padding_x = (size/num_bars)/2 - 6;;
@@ -1852,10 +1852,10 @@ function create_modal_bars(node, options, modal_group) {
     }
 
     var bars = [];
-    for (var bar in node.graph.bars) {
-        var bar_info = node.graph.bars[bar];
-        if (bar_info.value > poag_options.graph.hist_bar_thresh) {
-            bars.push(node.graph.bars[bar]);
+    for (var bar in node[G_GRAPH_BARS]) {
+        var bar_info = node[G_GRAPH_BARS][bar];
+        if (bar_info[G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
+            bars.push(node[G_GRAPH_BARS][bar]);
         }
     }
     num_bars = Object.keys(bars).length;
@@ -1870,13 +1870,13 @@ function create_modal_bars(node, options, modal_group) {
             }) //Need to determine algoritm for determining this
             .attr("width", (size / num_bars) - 2*outer_padding)
             .attr("y", function () {
-                return y(bar_info.value/100.0);
+                return y(bar_info[G_VALUE_BAR]/100.0);
             })
             .attr("height", function () {
                 // As the number is out of 100 need to modulate it
-                return 2*options.graph_height - y(bar_info.value/100.0);
+                return 2*options.graph_height - y(bar_info[G_VALUE_BAR]/100.0);
             })
-            .attr("fill", options.colours[(bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label]);
+            .attr("fill", options.colours[(bar_info[G_X_LABEL] == undefined) ? bar_info[G_LABEL] : bar_info[G_X_LABEL]]);
 
 
         modal_group.append("text")
@@ -1885,7 +1885,7 @@ function create_modal_bars(node, options, modal_group) {
                 return (padding_x) + bar * (size / num_bars + 2*outer_padding);
             }) //Need to determine algorithm for determining this
             .attr("y", 2*options.graph_height + 20)
-            .text((bar_info.x_label == undefined) ? bar_info.label : bar_info.x_label);
+            .text((bar_info[G_X_LABEL] == undefined) ? bar_info[G_LABEL] : bar_info[G_X_LABEL]);
 
     }
 }
@@ -1953,8 +1953,8 @@ function create_pointer_line(node, options, graph_group) {
                     {"x": (options.offset_graph_width+105), "y": 110}];
 
     var lineFunction = d3.svg.line()
-                        .x(function(d) { return d.x; })
-                        .y(function(d) { return d.y; })
+                        .x(function(d) { return d[N_X]; })
+                        .y(function(d) { return d[N_Y]; })
                         .interpolate("linear");
 
     graph_group.append("path")
@@ -1985,7 +1985,7 @@ function guid() {
  * Creating the graphs
  */
 create_new_graph = function (node, options, group, node_cx, node_cy) {
-    //var node_cx = scale_x_graph(options, node.x);
+    //var node_cx = scale_x_graph(options, node[N_X]);
     //var node_cy = scale_y_graph(options, node.y) - options.graph_height / 2;
     options.metabolite_count++;
     var x_pos = node_cx + options.offset_graph_width;
@@ -2104,12 +2104,12 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
 
 function formatMutants(node, poag) {
 
-    if (node.type != "fused") {
+    if (node[N_TYPE] != "fused") {
         node.graph = {};
         if (graph.options.mutants.count > 0) {
-            node.graph.bars = node.mutants.chars;
+            node[G_GRAPH_BARS] = node[G_MUTANTS_CHARS];
         } else {
-            node.graph.bars = node.seq.chars;
+            node[G_GRAPH_BARS] = node[G_SEQ_CHARS];
         }
     } else {
         //adding number of poags fused
@@ -2120,1141 +2120,11 @@ function formatMutants(node, poag) {
         if (node.subtype == "marginal") {
 
             node.graph = {};
-            node.graph.bars = node.mutants.chars;
+            node[G_GRAPH_BARS] = node[G_MUTANTS_CHARS];
 
         }
     }
 }
 
-
-
-/*
- * Fuses the information from two controller containing edge controller
- * params = edges1 and edges2 are controller containing edge controller
- *	   from two different POAGS.
- *
- * returns object containing the unique edges from each edge object, and
- * for each edge in common a fused edge will be stored in the object with
- * the same information as the two original edges but with y-values
- * corresponding to the highest y-value between the two edges fused.
- */
-function getFusedEdges(edges1, edges2, newNodes, metadata1, metadata2) {
-    //object to store fused edges
-    var newEdges = {};
-
-    //pairwise comparison of edges, fusing if same edge name
-    for (var edge1 in edges1) {
-        for (var edge2 in edges2) {
-
-            if (edge1 == edge2) {
-
-                var newEdge = fuse_edges(edges1[edge1], edges2[edge2],
-                        metadata1, metadata2);
-                newEdges[edge1] = newEdge;
-
-                break;
-            }
-        }
-    }
-
-    //add uncommon edges
-    add_uncommonEdges(edges1, newEdges, newNodes, metadata1);
-    add_uncommonEdges(edges2, newEdges, newNodes, metadata2);
-
-    return newEdges;
-}
-
-/*
- * Gets unique edges and appends them to newEdge
- *
- * params = -> edges - object containing edges desired to get its
- *		      unique edges.
- * 	       -> edgesFused - array of edge names added to newEdges.
- *	       -> newEdges - array containing all the fused edges
- *			 already proccessed
- *
- * ensures -> All of the unique edges in edges will be added to
- *	     newEdges.
- *	      -> Edges added to newEdges are a deep copy version of
- *	     the edge.
- */
-function add_uncommonEdges(edges, newEdges, newNodes, metadata) {
-
-    //adding edges in edges not in newEdges
-    for (var edge in edges) {
-
-        if (!(edge in newEdges)) {
-
-            var edgeCopy = {};
-            var edgeInfo = edges[edge];
-
-            for (var property in edgeInfo) {
-                edgeCopy[property] = edgeInfo[property];
-            }
-
-            //setting the new y-values
-            setY(edgeCopy, newNodes);
-
-            newEdges[edge] = edgeCopy;
-        }
-    }
-}
-
-/*
- * Sets the y-values for the edges based off the nodes already
- * created due to fusing the graphs
- *
- * params: -> edgeCopy - deepCopy of the edge being created to
- *			be added to the new edges.
- *	      -> newNodes - array of nodes created due to fusing
- *			the two graphs.
- *
- * ensures: -> The edgeCopy has it's y-values set so the edge
- *	      goes from the y specified as the starting node
- *	      in new nodes and goes to the ending nodes y in
- *	      newNodes.
- */
-function setY(edgeCopy, newNodes) {
-
-    //looping through each node and checking if involved in edge
-    for (var i = 0; i < newNodes.length; i++) {
-        var node = newNodes[i];
-
-        //no. of nodes corresponding to edgeCopy
-        var hits = 0;
-
-        //Setting the y for the from node
-        if (node.id == edgeCopy.from) {
-            edgeCopy.y1 = node.y;
-            hits++;
-
-            //setting the y for the to node
-        } else if (node.id == edgeCopy.to) {
-            edgeCopy.y2 = node.y;
-            hits++;
-        }
-
-        //edge can only have two nodes, so:
-        if (hits == 2) {
-            break;
-        }
-    }
-}
-
-/*
- * Fuse the two inputted edges
- *
- * params = two inputted edges with equivalent names from two
- *	   different POAGs
- *
- * returns = A new edge with the same details of both input
- *	    edges but y1 for the edge is equal to the largest
- *	    y1 of the two edges, same for y2.
- */
-function fuse_edges(edge1Info, edge2Info, metadata1, metadata2) {
-
-    //initialising new edge with equivalent information to edge1
-    var newEdge = {"x1": edge1Info.x1, "weight": edge1Info.weight,
-        "from": edge1Info.from, "x2": edge1Info.x2,
-        "to": edge1Info.to};
-
-    newEdge.consensus = edge1Info.consensus || edge2Info.consensus;
-    newEdge.reciprocated = edge1Info.reciprocated || edge2Info.reciprocated;
-
-    //making y1 for new edge be equal to edge with largest y1
-    if (edge1Info.y1 > edge2Info.y1) {
-        newEdge.y1 = edge1Info.y1;
-    } else {
-        newEdge.y1 = edge2Info.y1;
-    }
-
-    //making y2 for new edge be equal to edge with largest y2
-    if (edge1Info.y2 > edge2Info.y2) {
-        newEdge.y2 = edge1Info.y2;
-    } else {
-        newEdge.y2 = edge2Info.y2;
-    }
-
-    return newEdge;
-}
-
-
-
-
-/*
- * Fuses inputted two list of nodes from two different POAGs
- *
- * param = -> nodes1 and nodes2 are arrays containing node controller from
- *	     different POAGS.
- *	  -> nodes1 can be from a fused type poag, marginal type, or
- *	     joint type.
- *	  -> nodes2 must be from either a marginal type, or joint type
- *	     poag.
- *	  -> metadata1 is the metadata from the nodes1 poag.
- *	  -> metadata2 is the metadata from the nodes2 poag.
- *
- * returns -> list of nodes with the information from the two different
- *						 lists of nodes fused.
- */
-function getFusedNodes(nodes1, nodes2, metadata1, metadata2) {
-
-    //fusing the common nodes
-    var commonNodeInfo = add_commonNodes(nodes1, nodes2, metadata1,
-            metadata2);
-    var idNodesFused = commonNodeInfo[0];
-    var newNodes = commonNodeInfo[1];
-
-    //adding the uncommon nodes to newNodes in fused format
-    add_uncommonNodes(nodes1, idNodesFused, newNodes, metadata1);
-    add_uncommonNodes(nodes2, idNodesFused, newNodes, metadata2);
-
-    return newNodes;
-}
-
-/*
- * Get common nodes IDs and fuse common nodes
- *
- * params = same as for function 'getFusedNodes'
- *
- * returns -> commonNodeInfo - array containing idNodesFused and newNodes.
- *		-> idNodesFused is an array of ids of common nodes
- *		-> newNodes is an array of the common nodes fused
- */
-function add_commonNodes(nodes1, nodes2, metadata1, metadata2) {
-    //array to store new, fused nodes
-    var newNodes = [];
-
-    //IDs of the nodes already fused
-    var idNodesFused = [];
-
-    //pairwise comparison of nodes, fusing if same id
-    for (var i = 0; i < nodes1.length; i++) {
-
-        var nodes1Id = nodes1[i].id;
-
-        for (var j = 0; j < nodes2.length; j++) {
-            var nodes2Id = nodes2[j].id;
-
-            if (nodes1Id == nodes2Id) {
-
-                idNodesFused.push(nodes1Id);
-
-                var newNode = fuse_nodes(nodes1[i], nodes2[j], newNodes,
-                        metadata1, metadata2);
-                newNodes.push(newNode);
-
-                break;
-            }
-
-        }
-    }
-
-    var commonNodeInfo = [idNodesFused, newNodes];
-    return commonNodeInfo;
-}
-
-/*
- * Gets nodes unique to nodes, adds them in ordered way to idNodesFused
- * and newNodes
- *
- * params = -> nodes is an array of nodes.
- *	       -> idNodesFused is an array of ids from nodes present in
- *	                        newNodes.
- * 	       -> newNodes is an array of nodes already fused/added.
- *	       -> metadata is the metadata object from the same poag as
- *	                    nodes.
- *
- * ensures = -> All of the nodes unique to nodes will be added in ascending
- *	      order in both idNodesFused and newNodes depending on node ID.
- *	        -> Nodes added to newNodes are a deep copy version of the nodes,
- *	      (are converted to fused format if not already.
- */
-function add_uncommonNodes(nodes, idNodesFused, newNodes, metadata) {
-
-    //adding nodes from first graph not contained in the other graph
-    for (var i = 0; i < nodes.length; i++) {
-
-        //checking if node already in newNodes, if not then add
-        if (idNodesFused.indexOf(nodes[i].id) == -1) {
-
-            //adding to idNodesFused in ordered way
-            idNodesFused.push(nodes[i].id);
-            idNodesFused.sort(d3.ascending);
-
-            var nodeCopy = node_DeepCopy(nodes[i], metadata);
-
-            //using ordering in idNodesFused to add node to newNodes
-            newNodes.splice(idNodesFused.indexOf(nodes[i].id), 0, nodeCopy);
-        }
-    }
-}
-
-
-/*
- * Returns deep copy of inputted node, if from an unfused type will return in
- * a fused type format
- *
- * params = -> node is an inputted node from a POAG
- *	       -> metadata is the metdata from the same poag as node
- *
- * returns = -> newNode - is is exactly the same(if node is fused type),
- *	       else returns copy of node in fused type format.
- */
-function node_DeepCopy(node, metadata) {
-    //need to check what the point of class, lane, and seq are.
-    var newNode = {"id": node.id, "x": node.x, "y": node.y, "label": node.label,
-        "num_out_edges": node.num_out_edges};
-
-    //checking if node from fused poag and
-    if (metadata.type == "fused" && node.graph.bars[0]
-            .hasOwnProperty("poagValues")) {
-
-        //already in fused format, just add deep copies of graph and seq
-        newNode.graph = graph_deepCopy(node);
-        newNode.seq = seq_deepCopy(node);
-
-    } else if (metadata.type != "marginal") {
-
-        //putting in details in fused type format
-        newNode.seq = {"chars": [{"label": newNode.label, "value": 1}],
-            "poagValues": []};
-
-        newNode.seq.poagValues.push({"label": newNode.label, "value": 1,
-            "poag": "poag" + (metadata.npoags + 1)});
-
-        newNode.graph = {"bars": [{"label": newNode.label, "value": 100,
-                    "poagValues": {}}]};
-
-        newNode.graph.bars[0].poagValues["poag" + (metadata.npoags + 1)] = 100;
-
-    } else {
-
-        //putting in details in fused type format
-        newNode.seq = {"chars": [{"label": newNode.label, "value": 1}],
-            "poagValues": []};
-
-        newNode.seq.poagValues.push({"label": newNode.label, "value": 1,
-            "poag": "poag" + (metadata.npoags + 1)});
-
-        //need to treat the marginal graph object differently
-        newNode.graph = add_poagValues(node.graph, metadata.npoags);
-    }
-
-    return newNode;
-}
-
-/*
- * Creates a fused poag version of the marginal poags graph object
- * (i.e. has poag information)
- *
- * params: -> graph - marginal poags graph object
- *
- * returns: -> fusedGraphObject - fused poag version of graph object
- */
-function add_poagValues(graph, npoags) {
-
-    var bars = graph.bars;
-
-    var fusedGraphObject = {"bars": []};
-
-    for (var bari in bars) {
-
-        var bar = bars[bari];
-
-        //copying over graph information and adding poag info
-        var newBar = {"label": bar.x_label, "value": bar.value,
-            "poagValues": {}};
-
-        newBar.poagValues["poag" + (npoags + 1)] = bar.value;
-
-        fusedGraphObject.bars.push(newBar);
-    }
-
-    return fusedGraphObject;
-}
-
-
-/*
- * Fuses two inputted nodes
- *
- * params = -> node1, node2, metadata1 & metadata2 same as described
- *	      for 'getFusedNodes' method
- *	       -> newNodes is an array of the fused nodes
- *
- * returns = -> newNode - A single node with attributes of both nodes
- *			 fused.
- */
-function fuse_nodes(node1, node2, newNodes, metadata1, metadata2) {
-    //need to check what the point of class, lane, and seq are.
-    var newNode = {"id": node1.id, "lane": 0, "x": node1.x};
-
-    //fusing the nodes appropriately depending on the poags they are from
-    if (metadata1.type == "joint" && metadata2.type == "joint") {
-
-        //need to create new graph and seq controller when fusing joint types
-        newNode.seq = create_seqObject(node1, node2);
-        newNode.graph = createGraphObject(newNode.seq, node1, node2);
-
-    } else if (metadata1.type == "fused" && metadata2.type == "joint") {
-
-        //adding the label information from the joint node (node2) to node1
-        newNode.seq = add_labelToSeq(node1, node2, metadata1.npoags);
-        newNode.graph = add_labelToGraph(newNode.seq, node1, node2,
-                metadata1.npoags);
-
-    } else if (metadata1.type == "marginal" && metadata2.type == "marginal") {
-
-        //Need to create new seq object with the marginal but fuse distributions
-        newNode.seq = create_seqObject(node1, node2);
-        newNode.graph = fuse_marginalGraphs(node1, node2, metadata1.npoags,
-                metadata2.npoags);
-
-    } else if (metadata1.type == "fused" && metadata2.type == "marginal") {
-
-        //need to add label information to seq, but still fuse distributions
-        newNode.seq = add_labelToSeq(node1, node2);
-        newNode.graph = fuse_marginalGraphs(node1, node2, metadata1.npoags,
-                metadata2.npoags);
-    }
-
-    //node with highest y becomes y of new node
-    if (node1.y > node2.y) {
-        newNode.y = node1.y;
-    } else {
-        newNode.y = node2.y;
-    }
-
-    //label with highest frequency becomes new label
-    newNode.label = getNodeLabel(newNode.seq);
-
-    return newNode;
-}
-
-/*
- * Fuses the graph information present in two marginal poags or a fused poag
- * and marginal poag
- *
- * params: -> node1 must either be a node from a fused or marginal poag
- *	      -> node2 must be a node from a marginal poag
- *	      -> npoags is the total number of nodes fused thus far
- *	        (refer to fuse_multiplegraphs)
- *
- * returns: -> fusedGraph - fused graph object of the two inputted nodes
- *			   and returns a new graphh object in the fused
- *			   graph format (i.e. has poagValues).
- */
-function fuse_marginalGraphs(node1, node2, npoags1, npoags2) {
-
-    var bars1 = node1.graph.bars;
-    var bars2 = node2.graph.bars;
-
-    var fusedGraph = {"bars": []};
-
-    //pairwise comparison of the bars, fusing if have the same label
-    for (var bar1i in bars1) {
-
-        var bar1 = bars1[bar1i];
-
-        for (var bar2i in bars2) {
-            var bar2 = bars2[bar2i];
-
-            if (bar1.x_label == bar2.x_label) {
-
-                var newBar = fuse_Bar(bar1, bar2, npoags1, npoags2);
-                fusedGraph.bars.push(newBar);
-            }
-        }
-    }
-    return fusedGraph;
-}
-
-/*
- * Fuses two bar controller with the same label
- *
- * params: -> bar1 must be from a graph object from either a fused or
- *	     marginal poag
- *	      -> bar2 must be from a graph object from a marginal poag
- *	         Both bar controller must have the same label.
- *	     -> npoags1 and 2 is the same as described in params for
- *	        'fused_marginalGraphs'
- *
- * returns: -> newBar - object containing information between the
- *		       two bars fused. If bar1 is from a fused graph,
- *		       will appropriately normalise poagValues and add
- *		       the extra poagValue from bar2.
- */
-function fuse_Bar(bar1, bar2, npoags1, npoags2) {
-
-    var newValue = (bar1.value + bar2.value) / 2;
-    var newBar = {"label": bar1.x_label, "value": newValue,
-        "poagValues": {}};
-
-    //if has "poagValues", bar1 is from fused type
-    if (bar1.hasOwnProperty("poagValues")) {
-
-        //Copying over the poagValues from bar1 and normalising
-        for (var poag in bar1.poagValues) {
-
-            newBar.poagValues[poag] = bar1.poagValues[poag] / 2;
-        }
-
-    } else {
-
-        //adding new poagValue information since must be marginal type here
-        newBar.poagValues["poag" + (npoags1 + 1)] = bar1.value / 2;
-    }
-
-    //bar2 is always from marginal type so just add the barValue for that poag
-    newBar.poagValues["poag" + (npoags2 + 1)] = bar2.value / 2;
-
-    return newBar;
-}
-
-/*
- * Creates a seq object based off the labels of two inputted nodes
- *
- * params: Nodes 1 and 2 are both nodes with the same id from two
- *	      different POAGs which are unfused and represent a
- *	      sequence at an intermediate node in the tree.
- *
- * return: seq object created based off the labels of the inputted nodes
- */
-function create_seqObject(node1, node2) {
-
-    var newSeq = {"chars": [], "poagValues": []};
-
-    if (node1.label != node2.label) {
-
-        //creating two new seperate char controller
-        newSeq.chars[0] = {"label": node1.label, "value": 1};
-        newSeq.chars[1] = {"label": node2.label, "value": 1};
-    } else {
-
-        //just adding one new char object, but with a value of 2
-        newSeq.chars[0] = {"label": node1.label, "value": 2};
-    }
-
-    //adding the different values for the poags
-    newSeq.poagValues[0] = {"label": node1.label, "value": 1,
-        "poag": "poag1"};
-
-    newSeq.poagValues[1] = {"label": node2.label, "value": 1,
-        "poag": "poag2"};
-
-    return newSeq;
-}
-
-/*
- * Adds to the existing seq object in node1 based off the seq label in
- * node2
- *
- * params: -> node1 - is from a POAG which is fused
- *	      -> node2 - has the same ID as node1, and is from either
- *	                 joint or marginal poag
- *	      -> npoags - same as described in 'fused_marginalGraphs'
- *
- * returns: -> seq - A seq object in node1 updated to include node2's
- *		    label details. Added if label already present in chars,
- *		    otherwise label added as new char with value of 1.
- */
-function add_labelToSeq(node1, node2, npoags) {
-
-    //getting deep copy of characters in seq object
-    var newSeq = seq_deepCopy(node1);
-    var chars = newSeq.chars;
-
-    var foundMatch = false;
-    for (var i = 0; i < chars.length; i++) {
-
-        //if found match, increment character value
-        if (node2.label == chars[i].label) {
-            chars[i].value += 1;
-            foundMatch = true;
-            break;
-        }
-
-    }
-
-    //adding new char object if no match found
-    if (!foundMatch) {
-        chars.push({});
-        chars[chars.length - 1].label = node2.label
-        chars[chars.length - 1].value = 1;
-    }
-
-    //adding the poagValue in
-    newSeq.poagValues.push({"label": node2.label, "value": 1,
-        "poag": ("poag" + (npoags + 1))});
-
-    return newSeq;
-}
-
-/*
- * Creates deep copy of seq object in inputted node
- *
- * params: node -> node wish to make deep copy of its seq object,
- *		          must be fused type
- *
- * returns: -> newSeq - Deep copy of node seq, is identical to node.seq.
- */
-function seq_deepCopy(node) {
-    //to store all the sequence information
-    var newSeq = {"chars": [], "poagValues": []};
-
-    for (var i = 0; i < node.seq.chars.length; i++) {
-
-        //adding seq details from inputted node to seq object of new node
-        newSeq.chars.push({});
-        newSeq.chars[i].label = node.seq.chars[i].label;
-        newSeq.chars[i].value = node.seq.chars[i].value;
-    }
-
-    //copying over the poagValue details
-    var poagValues = node.seq.poagValues;
-    for (var j = 0; j < poagValues.length; j++) {
-        newSeq.poagValues.push({"label": poagValues[j].label, "value":
-                    poagValues[j].value, "poag": poagValues[j].poag});
-    }
-
-    return newSeq;
-}
-
-/*
- * Gets the label in a given seq object with the highest value.
- *
- * params: -> seq - seq object from a node from any type of poag
- *
- * returns: -> label with the highest associated value in the seq object
- */
-function getNodeLabel(seq) {
-    //getting the characters
-    var chars = seq.chars;
-
-    //initially assigning chars with max freq as the first
-    var charMaxFreq = chars[0];
-
-    //getting char with max freq
-    for (var i = 1; i < seq.chars.length; i++) {
-        if (chars[i].value > chars[chars.indexOf(charMaxFreq)].value) {
-            charMaxFreq = chars[i];
-        }
-    }
-
-    return charMaxFreq.label;
-}
-
-/*
- * Creates node graph object from inputted seq object and
- * nodes from joint type poags. Called on initial graph fusion.
- *
- * params = -> seq - fused seq object generated from
- *		     create_seqObject(node1, node2).
- *	       -> node1 - node from joint type poag
- *	       -> node2 - node from joint type poag
- *
- * require = -> node1.label == node2.label
- *	        -> node1 and node2 from different poags
- *
- * returns = -> newGraph - A new graph object generated from
- *			  the seq and node data
- */
-function createGraphObject(seq, node1, node2) {
-    var overallCharCount = 0;
-    var chars = seq.chars;
-
-    var newGraph = {"bars": []};
-
-    //getting total character count
-    for (var i = 0; i < chars.length; i++) {
-        overallCharCount += chars[i].value;
-    }
-
-    //calculating freq of each character relative to total
-    for (var i = 0; i < chars.length; i++) {
-
-        var char = chars[i];
-        var graphValue = (char.value / overallCharCount) * 100;
-
-        //adding the char label and value
-        newGraph.bars.push({"label": char.label, "value":
-                    graphValue, "poagValues": {}});
-
-        if (char.label == node1.label && char.label == node2.label) {
-
-            //add both the poags to poag values since match char
-            newGraph.bars[i].poagValues["poag1"] =
-                    (1 / overallCharCount) * 100;
-
-            newGraph.bars[i].poagValues["poag2"] =
-                    (1 / overallCharCount) * 100;
-
-        } else if (char.label == node1.label) {
-
-            //add just node1s poag to graph object
-            newGraph.bars[i].poagValues["poag1"] =
-                    (1 / overallCharCount) * 100;
-
-        } else {
-
-            //add just node2s poag to graph object
-            newGraph.bars[i].poagValues["poag2"] =
-                    (1 / overallCharCount) * 100;
-
-        }
-    }
-    return newGraph;
-}
-
-/*
- * Adds the information from node2 to the graph in node1
- *
- * params = -> seq - fused seq object from nodes inputted
- *	       -> node1 - node from fused poag
- *	       -> node2 - node from joint poag
- *	       -> npoags - number of poags fused in the poag from
- *		       which node1 is derived.
- *
- * returns = -> newGraph - new graph object which is the same as
- *			  node1s graph but with the extra label
- *			  information incorporated from node2.
- */
-function add_labelToGraph(seq, node1, node2, npoags) {
-    var overallCharCount = 0;
-    var chars = seq.chars;
-
-    var newGraph = graph_deepCopy(node1);
-
-    //getting total character count
-    for (var i = 0; i < chars.length; i++) {
-        overallCharCount += chars[i].value;
-    }
-
-    //calculating freq of each character relative to total
-    for (var i = 0; i < chars.length; i++) {
-        var char = chars[i];
-
-        var graphValue = (char.value / overallCharCount) * 100;
-
-        var graphBars = newGraph.bars;
-
-        var labelIndex = -1;
-
-        for (var k = 0; k < graphBars.length; k++) {
-
-            if (graphBars[k].label == node2.label &&
-                    node2.label == char.label) {
-
-                graphBars[k].value = graphValue;
-
-                labelIndex = k;
-                break;
-            }
-        }
-
-        /****updating the poag values for every poagvalue*****/
-        for (var k = 0; k < graphBars.length; k++) {
-
-            //for updating the whole bars value
-            graphBars[k].value = 0;
-
-            for (var poagValue in graphBars[k].poagValues) {
-
-                graphBars[k].poagValues[poagValue] =
-                        (1 / overallCharCount) * 100;
-
-                graphBars[k].value += (1 / overallCharCount) * 100;
-            }
-        }
-
-        /*********adding new graph poag info *************/
-        if (labelIndex != -1) {
-
-            graphBars[labelIndex].poagValues["poag" +
-                    (npoags + 1)] = (1 / overallCharCount) * 100;
-
-            graphBars[labelIndex].value += (1 / overallCharCount) * 100;
-
-        } else if (char.label == node2.label) {
-
-            graphBars.push({"label": char.label, "value": graphValue,
-                "poagValues": {}});
-
-            graphBars[graphBars.length - 1].poagValues["poag" +
-                    (npoags + 1)] = (1 / overallCharCount) * 100;
-
-        }
-    }
-
-    return newGraph;
-}
-
-/*
- * Creates deep copy of graph object in node, graph must be fused type
- * param: node object of fused type
- * returns deep copy of graph in node
- */
-function graph_deepCopy(node, npoags) {
-
-    //to store graph information
-    var newGraph = {"bars": []};
-
-    for (var i = 0; i < node.seq.chars.length; i++) {
-        //adding graph details from node to graph object of new node
-        if (i >= node.graph.bars.length) {
-            return newGraph;
-        }
-        newGraph.bars.push({});
-
-        newBars = newGraph.bars;
-        nodeBars = node.graph.bars;
-        newBars[i].value = nodeBars[i].value;
-        newBars[i].label = nodeBars[i].label;
-
-        newBars[i]["poagValues"] = {};
-
-        for (var poagValue in nodeBars[i].poagValues) {
-
-            newBars[i].poagValues[poagValue] = nodeBars[i]
-                    .poagValues[poagValue];
-        }
-    }
-    return newGraph;
-}
-
-//  Have moved the following code to results.html line 140
-
-//var graph1 = JSON.parse(json_str);
-//var graph2 = JSON.parse(poag_json_n4);
-//var graph3 = JSON.parse(poag_json_n9);
-//var graph5 = JSON.parse(joint4);
-//var graph6 = JSON.parse(joint5);
-
-//var graphs = graph.poags;//[graph1, graph2, graph3, graph5, graph6];
-
-//var marginalGraph1 = JSON.parse(marginal1);
-//var marginalGraph2 = JSON.parse(marginal2);
-
-//var marginalGraphs = [marginalGraph1, marginalGraph2];
-
-//var newGraph = fuse_multipleGraphs(graphs);
-//console.log(newGraph);
-
-/*
- * Fuses multiple poags of either marginal or joint type
- *
- * params: -> graphs - an array of either marginal or joint poags
- *	  -> innerNodeGrouped - boolean whether the user wants
- *				the nodes displayed with the inner
- *				colours grouped or not.
- *
- * returns: string JSON object (of fused poag object)
- *	   of all the poags in the array.
- */
-function fuse_multipleGraphs(graphs, innerNodeGrouped) {
-
-    var innerNodeGrouped = innerNodeGrouped || false;
-
-    //assigning each poag a no. to identify it
-    for (var j = 0; j < graphs.length; j++) {
-
-        graphs[j].bottom.metadata["npoags"] = j;
-
-    }
-
-    //initial graph fusion
-    var fusedGraph = fuse_graphs(graphs[0], graphs[1]);
-
-    fusedGraph.bottom.metadata.npoags = 2;
-
-    //if list of poags >2, fused next poag with the current fused poag
-    if (graphs.length > 2) {
-
-        for (var i = 2; i < graphs.length; i++) {
-
-            fusedGraph = fuse_graphs(fusedGraph, graphs[i]);
-            fusedGraph.bottom.metadata.npoags += 1;
-
-        }
-    }
-
-    //adding the poags which aren't described into seq
-    for (var node in fusedGraph.bottom.nodes) {
-
-        var seq = fusedGraph.bottom.nodes[node].seq;
-        add_poagsToSeq(seq, fusedGraph.bottom.metadata.npoags,
-                innerNodeGrouped);
-    }
-
-    //adding the mutant information if fusing marginal poags
-    if (fusedGraph.bottom.metadata.subtype == "marginal") {
-
-        // Need to fix when integrate to grasp
-        var fusedGraphBottom = generate_mutants(fusedGraph.bottom);
-        add_poagValuesToMutants(fusedGraph.bottom.nodes);
-
-    }
-
-    return JSON.stringify(fusedGraph);
-}
-
-/*
- * Add normalised poagValue information to each mutant object in
- * nodes[nodei]
- *
- * params: nodes are nodes from a fused poag
- *
- * ensures: for each node in the list of nodes, poagValues are
- *	   added so that the degree each poag contributes to
- *	    the mutant frequency is present.
- */
-function add_poagValuesToMutants(nodes) {
-
-    for (var nodei in nodes) {
-
-        var node = nodes[nodei];
-
-        for (var chari in node.mutants.chars) {
-
-            var char = node.mutants.chars[chari];
-
-            for (var bari in node.graph.bars) {
-
-                var bar = node.graph.bars[bari];
-
-                if (char.label == bar.label) {
-
-                    //adding normalised poagValues
-                    char["poagValues"] = {};
-                    for (var poag in bar.poagValues) {
-
-                        char.poagValues[poag] =
-                                (bar.poagValues[poag] / bar.value) * char.value;
-                    }
-                }
-            }
-        }
-    }
-}
-
-/*
- * Adds to the seq object the poags which were not present with a label of "0"
- *
- * params: -> seq - seq object from the final fused poag
- *	  -> npoags - number of poags fused to created the final fused poag.
- *	  -> innerNodeGrouped - *optional* boolean as to whether the seq
- *				poagValues should be order so that the
- *				kind of labels in the inner pi chart are
- *				grouped.
- *
- * ensures: -> All poags not present in the seq object added with label "0"
- *	      to indicate that poag does not have that node. If
- *	      innerNodeGrouped then poags added so labels grouped together
- *	      in pi chart, else added so pi chart ordered based off poag
- *	      number.
- */
-function add_poagsToSeq(seq, npoags, innerNodeGrouped) {
-
-    var poagValues = seq.poagValues;
-
-    //getting poags which don't have node
-    var poagsAbsent = getPoagsAbsent(npoags, poagValues);
-
-    //updating seq appropriately to contain poag with label "0"
-    if (poagsAbsent.length > 0) {
-
-        //inserting absent poags into seq object with label "0"
-        seq.chars.push({"label": "0", "value": 0});
-
-        //for determining location of already added poags
-        var firstPoagi = -1;
-
-        //getting poagValues length before append extra poags
-        var originalLength = poagValues.length;
-
-        //add absent poags with label "0" for pi chart display
-        for (var poagAbsenti in poagsAbsent) {
-
-            var poagAbsent = poagsAbsent[poagAbsenti];
-
-            var newPoagObject = {"label": "0",
-                "value": 1, "poag": poagAbsent};
-
-            //getting poag number from poag name (e.g 1 from 'poag1')
-            var poagNumber = poagAbsent.charAt(poagAbsent.length - 1) - 1;
-
-            //poag order in poagValues determines pi chart slice order
-            if ((!innerNodeGrouped) || originalLength == 1 || poagsAbsent.length == 1) {
-
-                //nodes ordered according to poagNumber
-                poagValues.splice(poagNumber, 0, newPoagObject);
-
-            } else {
-
-                //groups according to character when pi displayed
-                firstpoagi = addpoag_InnerOrdered(firstpoagi, poagNumber,
-                        poagValues, newPoagObject);
-            }
-
-            seq.chars[seq.chars.length - 1].value += 1;
-        }
-    }
-}
-
-/*
- * Gets the poags not already described in poagValues
- *
- * params: npoags -> number of poags fused in the fused graph object
- *         poagValues -> seq.poagValues from the fused graph object
- *
- * returns: poagsAbsent -> array containing names of poags not present in
- *                         poagValues.
- */
-function getPoagsAbsent(npoags, poagValues) {
-
-    var poagsAbsent = [];
-
-    //getting poags no present in poag values
-    for (var poagi = 1; poagi < npoags + 1; poagi++) {
-
-        var poagPresent = false;
-        for (var poag in poagValues) {
-
-            if (poagValues[poag].poag == ("poag" + poagi)) {
-
-                poagPresent = true;
-                break;
-            }
-        }
-
-        if (!poagPresent) {
-
-            poagsAbsent.push(("poag" + poagi));
-        }
-    }
-
-    return poagsAbsent;
-}
-
-/*
- * Adds the newPoagObject in the appropriate position in poagValues
- * params: firstpoagi -> index in poagValues first poagAbsent was added to.
- *                       firstpoagi == -1 if absent poag not yet added.
- *         poagNumber -> poags number (e.g. 1 from 'poag1') minus 1 for indexing.
- *         poagValues -> same as described in getPoagsAbsent.
- *         newPoagObject -> poagObject describing absent poag corresponding to poagNumber.
- * returns: firstpoagi -> same as described above.
- */
-function addpoag_InnerOrdered(firstpoagi, poagNumber, poagValues, newPoagObject) {
-
-    //groups according to character when pi displayed
-    if (firstpoagi == -1 && poagNumber > 0 && poagNumber < poagValues.length - 1) {
-
-        for (var i = poagNumber; i < poagValues.length; i++) {
-
-            //adding poag at nearest site to poagNumber between poags with different labels
-            if (poagValues[i - 1].label != poagValues[i].label) {
-                poagValues.splice(i, 0, newPoagObject);
-                firstpoagi = i;
-                break;
-            }
-        }
-
-        //means all of the poags in seq have same label, so don't want to split up
-        if (firstpoagi == -1) {
-
-            //to check whether poag should be inserted at end or start
-            var endDist = poagValues.length - poagNumber;
-
-            //if poag closer to end, insert there, else at start
-            if (endDist < poagNumber) {
-                poagValues.push(newPoagObject);
-                firstpoagi = poagValues.length - 1;
-
-            } else {
-
-                poagValues.splice(0, 0, newPoagObject);
-                firstpoagi = 0;
-            }
-        }
-
-    } else if (firstpoagi == -1 && poagNumber == 0) {
-
-        //poag can just go at the start, won't split up poags with same labels
-        poagValues.splice(0, 0, newPoagObject);
-        firstpoagi = 0;
-
-
-    } else if (firstpoagi == -1 && poagNumber == poagValues.length - 1) {
-
-        //poag can just go at the end, won't split up poags with same labels
-        poagValues.push(newPoagObject);
-        firstpoagi = poagValues.length - 1;
-
-    } else {
-
-        //just adding in front of last added absent poag
-        poagValues.splice(firstpoagi + 1, 0, newPoagObject);
-    }
-
-    return firstpoagi;
-}
-
-/*
- * Fuses two inputted POAG graphs
- * params = two graphs aligned and aligned nodes have the same ids
- * returns single graph with attributes of both graphs fused.
- */
-function fuse_graphs(graph1, graph2) {
-    //getting nodes from inputted graphs
-    var nodes1 = graph1.bottom.nodes;
-    var nodes2 = graph2.bottom.nodes;
-
-    //graph metadata
-    var metadata1 = graph1.bottom.metadata;
-    var metadata2 = graph2.bottom.metadata;
-
-    var newNodes = getFusedNodes(nodes1, nodes2, metadata1,
-            metadata2);
-
-    //Getting edges from inputted graphs
-    var edges1 = graph1.bottom.edges;
-    var edges2 = graph2.bottom.edges;
-
-    var fusedEdges = getFusedEdges(edges1, edges2, newNodes,
-            metadata1, metadata2);
-
-    //Creating the newGraph
-    var newGraph = {};
-    newGraph.top = graph1.top;
-    newGraph.bottom = {};
-    newGraph.bottom.metadata = metadata_DeepCopy(graph1.bottom.metadata);
-
-    newGraph.bottom.metadata.type = 'fused';
-    newGraph.bottom.metadata["subtype"] =
-            graph2.bottom.metadata.type;
-
-    newGraph.bottom.max_depth = graph1.bottom.max_depth;
-    newGraph.bottom.edges = fusedEdges;
-    newGraph.bottom.nodes = newNodes;
-
-    return newGraph;
-}
-
-/*
- * Creates a deep copy of a metadata object
- * params: -> metadata - e.g. from graph.bottom.metadata
- * returns: -> metadataCopy - a deep copy of metadata.
- */
-function metadata_DeepCopy(metadata) {
-
-    var metadataCopy = {};
-
-    //copying over all properties from metadata to metadataCopy
-    for (var property in metadata) {
-        metadataCopy[property] = metadata[property];
-    }
-
-    return metadataCopy;
-}
 
 

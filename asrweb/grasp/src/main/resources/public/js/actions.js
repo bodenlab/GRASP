@@ -31,16 +31,16 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     set_inf_type(inf);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
-    phylo_options.tree.selected_node.name = node;
+    phylo_options.tree.selected_node[N_NAME] = node;
     refresh_tree(); // to set height properly
-    selectedNode = phylo_options.tree.selected_node.name;
+    selectedNode = phylo_options.tree.selected_node[N_NAME];
     refresh_elements();
     populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
-    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node.name)
+    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[N_NAME])
     poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name.split("_")[0]];
-    poags.options.name_to_merged_id[phylo_options.tree.selected_node.name.split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+    poags.options.name_to_merged_id[phylo_options.tree.selected_node[N_NAME].split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
     redraw_poags();
     poags.retain_previous_position = true;
     refresh_elements();
@@ -53,7 +53,7 @@ var populate_search_node_list = function (nodes) {
     var ul = $('#node-id-menu');
     ul.empty();
     for (var n in nodes) {
-        var lbl = nodes[n].id.split("-")[1];
+        var lbl = nodes[n][G_ID].split("-")[1];
         var els = lbl.split("N");
         if (lbl[0] == 'N' && els.length > 1 && !isNaN(Number(els[1]))) {
             // add to list
@@ -333,14 +333,14 @@ var reset_poag_stack = function () {
     document.getElementById('reset-button').disabled = true;
     for (var n in phylo_options.tree.all_nodes) {
         var node = phylo_options.tree.all_nodes[n];
-        if (!node.extent) {
-            d3.select('#fill-' + node.id).attr("stroke", phylo_options.legend.colour_scale(node.y));
-            d3.select('#fill-' + node.id).attr("fill", phylo_options.legend.colour_scale(node.y));
+        if (!node[N_EXTANT]) {
+            d3.select('#fill-' + node[G_ID]).attr("stroke", phylo_options.legend.colour_scale(node[N_Y]));
+            d3.select('#fill-' + node[G_ID]).attr("fill", phylo_options.legend.colour_scale(node[N_Y]));
         }
     }
     var cur_node = phylo_options.tree.selected_node;
-    d3.select('#fill-' + cur_node.id).attr("stroke", phylo_options.style.select_colour);
-    d3.select('#fill-' + cur_node.id).attr("fill", phylo_options.style.select_colour);
+    d3.select('#fill-' + cur_node[G_ID]).attr("stroke", phylo_options.style.select_colour);
+    d3.select('#fill-' + cur_node[G_ID]).attr("fill", phylo_options.style.select_colour);
     poags.multi.nodes = {};
     poags.multi.names = [];
     poags.merged.nodes = [];
@@ -349,8 +349,8 @@ var reset_poag_stack = function () {
     poags.single.nodes = {};
     poags = process_msa_data(poags);
     poags = process_edges(poags, poags.single.raw.msa, poags.root_poag_name, true);
-    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
-    poags = process_edges(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
+    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node[N_NAME].split("_")[0], true, false);
+    poags = process_edges(poags, poags.single.raw.inferred, cur_node[N_NAME].split("_")[0], true, false);
     redraw_poags();
 }
 
@@ -435,7 +435,7 @@ function getSVGString(svgNode) {
         // Add Children element Ids and Classes to the list
         var nodes = parentElement.getElementsByTagName("*");
         for (var i = 0; i < nodes.length; i++) {
-            var id = nodes[i].id;
+            var id = nodes[i][G_ID];
             if (!contains('#' + id, selectorTextArr))
                 selectorTextArr.push('#' + id);
             var classes = nodes[i].classList;

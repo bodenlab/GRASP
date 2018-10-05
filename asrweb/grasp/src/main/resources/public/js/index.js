@@ -611,6 +611,8 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
  */
 var process_poags = function (json_str, poags, inferred, set_msa, merged, name) {
     var data = JSON.parse(json_str);
+    data.bottom = convertToArray(data.bottom);
+    data.top = convertToArray(data.top);
 
     poags.options = poag_options;
 
@@ -640,6 +642,42 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
     }
 
     return poags;
+}
+
+/**
+ * A temporary helper function that converts the JSON object to an ordered array
+ * to save on space.
+ * @param data
+ */
+let convertToArray = function (data) {
+    let arr = [];
+    for (let d in data) {
+        let node = data[d];
+        let tmp = Array(12).fill(0);
+        tmp[G_ID] = node.id;
+        tmp[G_LABEL] = node.label;
+
+        tmp[G_GRAPH_BARS] = convertDictToArr(node.graph.bars);
+        tmp[G_SEQ_CHARS] = convertDictToArr(node.seq.chars);
+        tmp[G_X] = node.x;
+        tmp[G_Y] = node.y;
+        tmp[G_ID] = node.id;
+        tmp[G_CONSENSUS] = node.consensus;
+        arr.push(tmp);
+    }
+    return tmp;
+}
+
+
+let convertDictToArr = function (data) {
+    let arr = [];
+    for (let d in data) {
+        let tmp = Array(2).fill(0);
+        tmp[G_VALUE] = data[d].value;
+        tmp[G_LABEL] = data[d].label;
+        arr.push(tmp);
+    }
+    return arr;
 }
 
 /**
@@ -676,7 +714,7 @@ var process_msa_data = function (poags) {
         node[N_TYPE] = msa.metadata.type;
         node[N_DEL_DUR_INF] = true; //[N_DEL_DUR_INF]
         node[N_NAME] = name;
-
+        node[N_CLASS] = "";
         poags = update_min_max(node[G_X], node[G_Y], poags);
 
         if (node[G_SEQ_CHARS].length > poags.max_seq_len) {

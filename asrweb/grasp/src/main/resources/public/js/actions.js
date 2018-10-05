@@ -31,16 +31,16 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     set_inf_type(inf);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
-    phylo_options.tree.selected_node[N_NAME] = node;
+    phylo_options.tree.selected_node[T_ID] = node;
     refresh_tree(); // to set height properly
-    selectedNode = phylo_options.tree.selected_node[N_NAME];
+    selectedNode = phylo_options.tree.selected_node[T_ID];
     refresh_elements();
     populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
-    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[N_NAME])
-    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name.split("_")[0]];
-    poags.options.name_to_merged_id[phylo_options.tree.selected_node[N_NAME].split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID])
+    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name.split("_")[1]];
+    poags.options.name_to_merged_id[phylo_options.tree.selected_node[T_NAME].split("_")[1]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
     redraw_poags();
     poags.retain_previous_position = true;
     refresh_elements();
@@ -53,7 +53,7 @@ var populate_search_node_list = function (nodes) {
     var ul = $('#node-id-menu');
     ul.empty();
     for (var n in nodes) {
-        var lbl = nodes[n][G_ID].split("-")[1];
+        var lbl = nodes[n][T_NAME].split("-")[1];
         var els = lbl.split("N");
         if (lbl[0] == 'N' && els.length > 1 && !isNaN(Number(els[1]))) {
             // add to list
@@ -333,9 +333,9 @@ var reset_poag_stack = function () {
     document.getElementById('reset-button').disabled = true;
     for (var n in phylo_options.tree.all_nodes) {
         var node = phylo_options.tree.all_nodes[n];
-        if (!node[N_EXTANT]) {
-            d3.select('#fill-' + node[G_ID]).attr("stroke", phylo_options.legend.colour_scale(node[N_Y]));
-            d3.select('#fill-' + node[G_ID]).attr("fill", phylo_options.legend.colour_scale(node[N_Y]));
+        if (!node[T_EXTANT]) {
+            d3.select('#fill-' + node[G_ID]).attr("stroke", phylo_options.legend.colour_scale(node[T_Y]));
+            d3.select('#fill-' + node[G_ID]).attr("fill", phylo_options.legend.colour_scale(node[T_Y]));
         }
     }
     var cur_node = phylo_options.tree.selected_node;

@@ -31,7 +31,7 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     set_inf_type(inf);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
-    phylo_options.tree.selected_node[T_ID] = node;
+    // phylo_options.tree.selected_node[T_ID] = node;
     refresh_tree(); // to set height properly
     selectedNode = phylo_options.tree.selected_node[T_ID];
     refresh_elements();
@@ -53,9 +53,8 @@ var populate_search_node_list = function (nodes) {
     var ul = $('#node-id-menu');
     ul.empty();
     for (var n in nodes) {
-        var lbl = nodes[n][T_NAME].split("-")[1];
-        var els = lbl.split("N");
-        if (lbl[0] == 'N' && els.length > 1 && !isNaN(Number(els[1]))) {
+        var lbl = nodes[n][T_NAME];
+        if (lbl.length > 1) {
             // add to list
             var li = $('<li/>');
             var a = $('<a/>');

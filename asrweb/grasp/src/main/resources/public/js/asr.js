@@ -17,16 +17,19 @@ var refresh_elements = function() {
     }
 };
 
+/**
+ * ToDo: Have a look at this...
+ */
 var refresh_labels = function() {
     var label = poags.inferred_poag_name;
     var nodeLabels = document.querySelectorAll(".node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i][TEXT_CONTENT] = label.split("_")[0];
+        nodeLabels[i][TEXT_CONTENT] = label;
         nodeLabels[i][G_VALUE] = label;
     }
     nodeLabels = document.querySelectorAll(".full-node-label");
     for (var i = 0; i < nodeLabels.length; i++) {
-        nodeLabels[i][TEXT_CONTENT] = selectedNode.split("_")[0];
+        nodeLabels[i][TEXT_CONTENT] = selectedNode;
         nodeLabels[i][G_VALUE] = selectedNode;
     }
     var reconLabels = document.querySelectorAll(".infer-label");

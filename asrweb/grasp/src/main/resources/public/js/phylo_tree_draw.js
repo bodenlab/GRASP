@@ -366,7 +366,7 @@ var draw_phylo_circle = function (group, node, n) {
     if (node[T_NAME] === phylo_options.tree.selected_node[T_NAME]) {
       return options.select_colour;
     }
-    if (poags.multi.names.includes(node[T_NAME].split("_")[0])) {
+    if (poags.multi.names.includes(node[T_NAME])) {
       return options.stacked_colour;
     }
     if (node[T_IS_ROOT]) {
@@ -425,11 +425,12 @@ var draw_phylo_circle = function (group, node, n) {
     .attr("opacity", 1)
     .attr("transform", "translate(0,20)")
     .text(function () {
-      if (node[T_EXTANT]) {
-        return node[T_NAME];
-      } else {
-        return node[T_NAME].split("_")[0];
-      }
+      return node[T_NAME];
+      // if (node[T_EXTANT]) {
+      //   return node[T_NAME];
+      // } else {
+      //   return node[T_NAME];
+      // }
     });
 
     // find number in histogram (only want modal large if there are many items in the histogram)
@@ -515,11 +516,7 @@ var draw_phylo_text = function (group, node, n) {
   .attr("transform", "translate(" + x + "," + y + ") rotate(" + deg
       + ") translate(2,2)")
   .text(function () {
-    if (node[T_EXTANT]) {
-      return node[T_NAME];
-    } else {
-      return node[T_NAME].split("_")[0];
-    }
+    return node[T_NAME];
   });
 }
 
@@ -910,13 +907,11 @@ var run_phylo_tree = function () {
   tree_json[T_Y] = phylo_options.y_scale(0);
 
   tree_json[T_X] = phylo_options.x_scale(tree_json[T_RAW_X]);
-  tree_json[T_PARENT_Y] = 0;
 
   //phylo_options.tree.node_depth_dict[1] = [];
   //phylo_options.tree.node_depth_dict[1].push(tree_json);
   phylo_options.tree.all_nodes.push(tree_json);
   phylo_options.tree.node_dict[tree_json[T_ID]] = tree_json;
-  phylo_options.tree.root = tree_json;
 
   assign_node_coords(tree_json, false, 0);
 
@@ -1155,10 +1150,9 @@ var redraw_phylo_tree = function () {
   phylo_options.tree.max_x = phylo_options.leaf_count;
 
   phylo_options = make_tree_scale(phylo_options);
-  root.y = phylo_options.y_scale(0);
+  root[T_Y] = phylo_options.y_scale(0);
 
-  root.x = phylo_options.x_scale(root[T_RAW_X]);
-  root.parent_y = 0;
+  root[T_X] = phylo_options.x_scale(root[T_RAW_X]);
 
   assign_node_coords(root, 0);
 
@@ -1262,7 +1256,7 @@ var assign_leaf_x_coords = function (node, phylo_options) {
  * Make the root node
  */
 let makeRootNode = function (node) {
-  node[T_ID] = "N_0";
+  node[T_ID] = 0;
   node[T_LEFT] = false;
 
   if (node[T_COMMON_TAXA] === undefined) {
@@ -1286,7 +1280,7 @@ let makeRootNode = function (node) {
  */
 var make_child = function (node, left, id) {
   var child = [];
-  child[T_ID] = "N_" + id;
+  child[T_ID] = id;
   child[T_LEFT] = left;
   child[T_NAME] = node[T_NAME];
   child[T_Y] = node[T_Y];
@@ -1329,7 +1323,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
   // Make a node id based on name and node count
   // only assign on initial load
   if (initial) {
-    node[T_ID] = "N_" + phylo_options.tree.node_count;//+ node[T_NAME].split(/[._-]+/)[0];
+    node[T_ID] = phylo_options.tree.node_count;//+ node[T_NAME].split(/[._-]+/)[0];
     node[T_COLLAPSED] = false;
     //phylo_options.tree.node_dict[node[T_ID]] = node;
     depth += 1;

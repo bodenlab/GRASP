@@ -39,8 +39,8 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
 
     // draw poags
     setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID])
-    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name.split("_")[1]];
-    poags.options.name_to_merged_id[phylo_options.tree.selected_node[T_NAME].split("_")[1]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node[T_NAME]];
+    poags.options.name_to_merged_id[phylo_options.tree.selected_node[T_NAME]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
     redraw_poags();
     poags.retain_previous_position = true;
     refresh_elements();
@@ -348,8 +348,8 @@ var reset_poag_stack = function () {
     poags.single.nodes = {};
     poags = process_msa_data(poags);
     poags = process_edges(poags, poags.single.raw.msa, poags.root_poag_name, true);
-    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node[N_NAME].split("_")[0], true, false);
-    poags = process_edges(poags, poags.single.raw.inferred, cur_node[N_NAME].split("_")[0], true, false);
+    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node[N_NAME], true, false);
+    poags = process_edges(poags, poags.single.raw.inferred, cur_node[N_NAME], true, false);
     redraw_poags();
 }
 

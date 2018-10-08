@@ -535,14 +535,14 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     // draw all not reciprocated edges first
     for (var e in edges) {
         var edge = edges[e];
-        if (!edge[E_RECIPROCATED] && ((edge[E_TO][E_X] > poags.cur_x_min - 1 && edge[E_TO][E_X] < poags.cur_x_max + 1) || (edge[E_FROM][E_X] < poags.cur_x_max + 1 && edge[E_FROM][E_X] > poags.cur_x_min - 1))) {
+        if (!edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1 && edge[E_TO][N_X] < poags.cur_x_max + 1) || (edge[E_FROM][N_X] < poags.cur_x_max + 1 && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
             draw_edges(poags, edge, group, scale_y);
         }
     }
     // draw all reciprocated edges so that they are drawn on top of uni-directional ones
     for (var e in edges) {
         var edge = edges[e];
-        if (edge[E_RECIPROCATED] && ((edge[E_TO][E_X] > poags.cur_x_min - 1 && edge[E_TO][E_X] < poags.cur_x_max + 1) || (edge[E_FROM][E_X] < poags.cur_x_max + 1 && edge[E_FROM][E_X] > poags.cur_x_min - 1))) {
+        if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1 && edge[E_TO][N_X] < poags.cur_x_max + 1) || (edge[E_FROM][N_X] < poags.cur_x_max + 1 && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
            draw_edges(poags, edge, group, scale_y);
         }
     }
@@ -611,9 +611,10 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
  */
 var process_poags = function (json_str, poags, inferred, set_msa, merged, name) {
     var data = JSON.parse(json_str);
-    data.bottom = convertToArray(data.bottom);
-    data.top = convertToArray(data.top);
-
+    data.bottom.nodes = convertToArray(data.bottom.nodes);
+    data.bottom.edges = convertEdgesToArray(data.bottom.edges);
+    data.top.nodes = convertToArray(data.top.nodes);
+    data.top.edges = convertEdgesToArray(data.top.edges);
     poags.options = poag_options;
 
     // If a new inference, empty the stack of graphs
@@ -644,6 +645,28 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
     return poags;
 }
 
+
+let convertEdgesToArray = function (data) {
+  let arr = [];
+  for (let d in data) {
+    let edge = data[d];
+    let tmp = [];
+    tmp[E_FROM] = edge.from;
+    tmp[E_TO] = edge.to;
+    tmp[E_CONSENSUS] = edge.consensus;
+    tmp[E_SINGLE] = edge.single;
+    tmp[E_RECIPROCATED] = edge.reciprocated;
+    tmp[E_WEIGHT] = edge.weight;
+    tmp[E_X1] = edge.x1;
+    tmp[E_X2] = edge.x2;
+    tmp[E_Y1] = edge.y1;
+    tmp[E_Y2] = edge.y2;
+    arr.push(tmp);
+  }
+  return arr;
+}
+
+
 /**
  * A temporary helper function that converts the JSON object to an ordered array
  * to save on space.
@@ -652,21 +675,25 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
 let convertToArray = function (data) {
     let arr = [];
     for (let d in data) {
-        let node = data[d];
-        let tmp = Array(12).fill(0);
-        tmp[G_ID] = node.id;
-        tmp[G_LABEL] = node.label;
-
+      let node = data[d];
+      let tmp = [];
+      tmp[G_ID] = node.id;
+      tmp[G_LABEL] = node.label;
+      if (node.graph !== undefined) {
         tmp[G_GRAPH_BARS] = convertDictToArr(node.graph.bars);
-        tmp[G_SEQ_CHARS] = convertDictToArr(node.seq.chars);
-        tmp[G_X] = node.x;
-        tmp[G_Y] = node.y;
-        tmp[G_ID] = node.id;
-        tmp[G_CONSENSUS] = node.consensus;
-        arr.push(tmp);
+      }
+      if (node.mutants !== undefined) {
+        tmp[G_MUTANTS_CHARS] = convertDictToArr(node.mutants.chars);
+      }
+      tmp[G_SEQ_CHARS] = convertDictToArr(node.seq.chars);
+      tmp[G_X] = node.x;
+      tmp[G_Y] = node.y;
+      tmp[G_CONSENSUS] = node.consensus;
+      arr.push(tmp);
     }
-    return tmp;
+    return arr;
 }
+
 
 
 let convertDictToArr = function (data) {
@@ -674,7 +701,11 @@ let convertDictToArr = function (data) {
     for (let d in data) {
         let tmp = Array(2).fill(0);
         tmp[G_VALUE] = data[d].value;
-        tmp[G_LABEL] = data[d].label;
+        if (data[d].label !== undefined) {
+          tmp[G_LABEL] = data[d].label;
+        } else {
+          tmp[G_LABEL] = data[d].x_label;
+        }
         arr.push(tmp);
     }
     return arr;
@@ -1545,8 +1576,8 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 
     if (node[N_NAME] != 'MSA' && node[N_NAME] != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
         pie_data = node[G_MUTANTS_CHARS];
-    } else if (node.seq.hasOwnProperty("poagValues")) {
-        var pie_data = node.seq.poagValues;
+    } else if (node[POAG_VALUES] !== undefined) {
+        var pie_data = node[POAG_VALUES];
         radius += 10;
     }
 
@@ -1571,7 +1602,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
             .attr("stroke", pie_opt.stroke)
             .attr("fill", function (d, i) {
                 //"poag" in data suggest fused type pi should be draw
-                if (!d.data.hasOwnProperty("poag")) {
+                if (d.data[POAG_VALUES] == undefined) {
                     return options.display.colours[(d.data[G_LABEL])];
 
                 } else {
@@ -1991,8 +2022,12 @@ function create_pointer_line(node, options, graph_group) {
                     {"x": (options.offset_graph_width+105), "y": 110}];
 
     var lineFunction = d3.svg.line()
-                        .x(function(d) { return d[N_X]; })
-                        .y(function(d) { return d[N_Y]; })
+                        .x(function(d) {
+                            return d.x;
+                        })
+                        .y(function(d) {
+                            return d.y;
+                        })
                         .interpolate("linear");
 
     graph_group.append("path")

@@ -479,8 +479,8 @@ var draw_phylo_text = function (group, node, n) {
   var options = phylo_options.style;
   var class_label = "node";
   var deg = 0;
-  var x = node.x;
-  var y = node.y;
+  var x = node[T_X];
+  var y = node[T_Y];
   if (node[T_EXTANT]) {
     class_label = "extent";
     deg = 90;

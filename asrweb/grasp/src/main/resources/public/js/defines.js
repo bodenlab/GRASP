@@ -14,13 +14,11 @@
 
 
 const G_X_LABEL = 0;
-const G_LABEL_SEQ = 0;
 const G_LABEL = 0;
 /* VALUE holds an array that contains a label in the 0tth element and then has
  * 2 values following: 1: value, 2: seq_num*/
 const G_VALUE = 1;
 const G_VALUE_BAR = 1;
-const G_VALUE_SEQ = 3;
 const G_LABEL_MUTANT = 0;
 const G_VALUE_MUTANT = 1;
 
@@ -35,8 +33,7 @@ const G_Y = 4;
 /* bool whether it is part of the consensus or not */
 const G_CONSENSUS = 5;
 
-
-//const G_SEQ_CHARS = 6;
+const G_SEQ = 6;
 const G_GRAPH = 7;
 
 const G_MUTANTS = 8;
@@ -52,7 +49,6 @@ const N_DEL_DUR_INF = 11;
 const N_MUTANT = 12;
 const N_NUM_OUT_EDGES = 13;
 
-const G_SEQ = 6;
 const G_CHARS = 0;
 const M_VALUE = 1;
 

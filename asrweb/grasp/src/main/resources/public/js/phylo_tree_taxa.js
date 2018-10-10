@@ -135,7 +135,6 @@ function getId(extentId, type) {
   }
   // Otherwise it hasn't been specified so we need to determine it from the identifier.
   if (phylo_options.tree.extants[extentId][T_NAME].substr(2, 1) == "|") {
-    console.log(phylo_options.tree.extants[extentId][T_NAME].split("|")[1]);
     return phylo_options.tree.extants[extentId][T_NAME].split("|")[1];
   }
   return phylo_options.tree.extants[extentId][T_NAME].split("|")[0].split(".")[0];
@@ -401,38 +400,6 @@ var set_common_tax_node = function (node) {
       return;
     }
   }
-//
-//   var common = {};
-//   if (common_rank === null) {
-//     common[T_COMMON_RANK] = null;
-//   } else {
-//     common[T_COMMON_RANK] = ranks[common_rank];
-//   }
-//   common[T_COMMON_TAXA] = common_tax;
-//   common[T_DIFFER_RANK] = ranks[r];
-//   node[T_COMMON_TAXA] = common;
-//   node[T_TAXA] = taxonomy;
-//
-//   // update node for drawing
-//   set_common_tax_node(node);
-// }
-//
-// var set_common_tax_node = function (node) {
-//   for (var n in phylo_options.tree.all_nodes) {
-//     var phylo_node = phylo_options.tree.all_nodes[n];
-//     if (phylo_node[T_ID] === node[T_ID]) {
-//       phylo_node[T_COMMON_RANK] = node[T_COMMON_TAXA][T_COMMON_RANK];
-//       phylo_node[T_COMMON_TAXA] = node[T_COMMON_TAXA][T_COMMON_TAXA];
-//       // add common_taxonomy to poags info for name labelling
-//       if (phylo_node[T_COMMON_TAXA] != undefined) {
-//         poags.taxonomy[node[T_NAME]] = node[T_COMMON_TAXA][T_COMMON_RANK].charAt(0).toUpperCase()
-//             +
-//             node[T_COMMON_TAXA][T_COMMON_RANK].slice(1) + ": "
-//             + node[T_COMMON_TAXA][T_COMMON_TAXA];
-//       }
-//       return;
-//     }
-//   }
 }
 
 /**

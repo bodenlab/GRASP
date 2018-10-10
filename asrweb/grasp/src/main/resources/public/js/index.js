@@ -268,7 +268,7 @@ var setup_poags = function (json_str, set_inferred, set_msa, set_merged, name) {
     poags = process_poags(json_str, poags, set_inferred, set_msa, set_merged, name);
 
     // Create the SVG element
-    poag = setup_poag_svg(poags);
+    poags = setup_poag_svg(poags);
 
     // Make the scales
     poags = setup_poag_scales(poags);
@@ -573,8 +573,8 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                         }
                         // check whether to display a graph
                         var count = 0;
-                        for (var b in node[G_GRAPH_BARS]) {
-                            if (node[G_GRAPH_BARS][b][G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
+                        for (var b in node[G_GRAPH]) {
+                            if (node[G_GRAPH][b][G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
                                 count++;
                             }
                         }
@@ -611,10 +611,13 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
  */
 var process_poags = function (json_str, poags, inferred, set_msa, merged, name) {
     var data = JSON.parse(json_str);
-    data.bottom.nodes = convertToArray(data.bottom.nodes);
-    data.bottom.edges = convertEdgesToArray(data.bottom.edges);
-    data.top.nodes = convertToArray(data.top.nodes);
-    data.top.edges = convertEdgesToArray(data.top.edges);
+    if (data["new_ds"] !== true) {
+        data.bottom.nodes = convertToArray(data.bottom.nodes);
+        data.bottom.edges = convertEdgesToArray(data.bottom.edges);
+        data.top.nodes = convertToArray(data.top.nodes);
+        data.top.edges = convertEdgesToArray(data.top.edges);
+        data["new_ds"] = true;
+    }
     poags.options = poag_options;
 
     // If a new inference, empty the stack of graphs
@@ -680,12 +683,14 @@ let convertToArray = function (data) {
       tmp[G_ID] = node.id;
       tmp[G_LABEL] = node.label;
       if (node.graph !== undefined) {
-        tmp[G_GRAPH_BARS] = convertDictToArr(node.graph.bars);
+        tmp[G_GRAPH] = convertDictToArr(node.graph.bars);
       }
       if (node.mutants !== undefined) {
-        tmp[G_MUTANTS_CHARS] = convertDictToArr(node.mutants.chars);
+        tmp[G_MUTANTS] = [];
+        tmp[G_MUTANTS][G_CHARS] = convertDictToArr(node.mutants.chars);
       }
-      tmp[G_SEQ_CHARS] = convertDictToArr(node.seq.chars);
+      tmp[G_SEQ] = [];
+      tmp[G_SEQ][G_CHARS] = convertDictToArr(node.seq.chars);
       tmp[G_X] = node.x;
       tmp[G_Y] = node.y;
       tmp[G_CONSENSUS] = node.consensus;
@@ -748,8 +753,8 @@ var process_msa_data = function (poags) {
         node[N_CLASS] = "";
         poags = update_min_max(node[G_X], node[G_Y], poags);
 
-        if (node[G_SEQ_CHARS].length > poags.max_seq_len) {
-            poags.max_seq_len = node[G_SEQ_CHARS].length;
+        if (node[G_SEQ][G_CHARS].length > poags.max_seq_len) {
+            poags.max_seq_len = node[G_SEQ][G_CHARS].length;
         }
 
         //formatMutants(node, poag);
@@ -1571,13 +1576,13 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
             .outerRadius(radius - options.pie.label_position)
             .innerRadius(radius - options.pie.label_position);
 
-    var pie_data = node[G_SEQ_CHARS];
+    var pie_data = node[G_SEQ][G_CHARS];
     radius -= 10;
 
     if (node[N_NAME] != 'MSA' && node[N_NAME] != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
-        pie_data = node[G_MUTANTS_CHARS];
-    } else if (node[POAG_VALUES] !== undefined) {
-        var pie_data = node[POAG_VALUES];
+        pie_data = node[G_MUTANTS];
+    } else if (node[N_MERGED_SEQ] !== undefined) {
+        var pie_data = node[N_MERGED_SEQ];
         radius += 10;
     }
 
@@ -1602,7 +1607,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
             .attr("stroke", pie_opt.stroke)
             .attr("fill", function (d, i) {
                 //"poag" in data suggest fused type pi should be draw
-                if (d.data[POAG_VALUES] == undefined) {
+                if (d.data[N_MERGED_SEQ] == undefined) {
                     return options.display.colours[(d.data[G_LABEL])];
 
                 } else {
@@ -1853,7 +1858,7 @@ function create_modal_axis(node, options, modal_group) {
 }
 
 function create_bars(node, options, graph_group) {
-    var num_bars = Object.keys(node[G_GRAPH_BARS]).length; //options.max_bar_count;
+    var num_bars = Object.keys(node[G_GRAPH]).length; //options.max_bar_count;
     var size = options.size;
     var y = options.y;
     var padding_x = (size/num_bars)/2 - 4;
@@ -1865,10 +1870,10 @@ function create_bars(node, options, graph_group) {
     }
 
     var bars = [];
-    for (var bar in node[G_GRAPH_BARS]) {
-        var bar_info = node[G_GRAPH_BARS][bar];
+    for (var bar in node[G_GRAPH]) {
+        var bar_info = node[G_GRAPH][bar];
         if (bar_info[G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
-            bars.push(node[G_GRAPH_BARS][bar]);
+            bars.push(node[G_GRAPH][bar]);
         }
     }
     num_bars = Object.keys(bars).length;
@@ -1909,7 +1914,7 @@ function create_bars(node, options, graph_group) {
  */
 
 function create_modal_bars(node, options, modal_group) {
-    var num_bars = Object.keys(node[G_GRAPH_BARS]).length; //options.max_bar_count;
+    var num_bars = Object.keys(node[G_GRAPH]).length; //options.max_bar_count;
     var size = options.size*2;
     var y = options.yModal;
     var padding_x = (size/num_bars)/2 - 6;;
@@ -1921,10 +1926,10 @@ function create_modal_bars(node, options, modal_group) {
     }
 
     var bars = [];
-    for (var bar in node[G_GRAPH_BARS]) {
-        var bar_info = node[G_GRAPH_BARS][bar];
+    for (var bar in node[G_GRAPH]) {
+        var bar_info = node[G_GRAPH][bar];
         if (bar_info[G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
-            bars.push(node[G_GRAPH_BARS][bar]);
+            bars.push(node[G_GRAPH][bar]);
         }
     }
     num_bars = Object.keys(bars).length;
@@ -2180,9 +2185,9 @@ function formatMutants(node, poag) {
     if (node[N_TYPE] != "fused") {
         node.graph = {};
         if (graph.options.mutants.count > 0) {
-            node[G_GRAPH_BARS] = node[G_MUTANTS_CHARS];
+            node[G_GRAPH] = node[G_MUTANTS];
         } else {
-            node[G_GRAPH_BARS] = node[G_SEQ_CHARS];
+            node[G_GRAPH] = node[G_SEQ][G_CHARS];
         }
     } else {
         //adding number of poags fused
@@ -2193,7 +2198,7 @@ function formatMutants(node, poag) {
         if (node.subtype == "marginal") {
 
             node.graph = {};
-            node[G_GRAPH_BARS] = node[G_MUTANTS_CHARS];
+            node[G_GRAPH] = node[G_MUTANTS];
 
         }
     }

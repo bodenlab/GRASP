@@ -188,7 +188,7 @@ var generate_mutants = function() {
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
         Ns[i] = 1;
-        myPs[i] = makeNumDistrib(node[G_SEQ_CHARS]);
+        myPs[i] = makeNumDistrib(node[G_SEQ][G_CHARS]);
         var myQ1 = getQ(myPs[i], Ns[i]);
         var myQ2 = getQ(myPs[i], Ns[i] + 1);
         KLcur[i] = KL_div(myPs[i], myQ1);
@@ -221,7 +221,7 @@ var generate_mutants = function() {
     for (var i = 0; i < nodes.length; i ++) {
         var node = nodes[i];
         // update mutant distribution array
-        node[G_MUTANTS_CHARS] = [];
+        node[G_MUTANTS] = [];
         var idx = getTopN(myPs[i], Ns[i]);
         for (var j in idx) {
             var myMutantLabel = alphabet[idx[j]];
@@ -229,7 +229,7 @@ var generate_mutants = function() {
             var myMutant = []; //{value:myMutantValue,label:myMutantLabel};
             myMutant[G_VALUE_MUTANT] = myMutantValue;
             myMutantLabel[G_LABEL_MUTANT] = myMutantLabel;
-            node[G_MUTANTS_CHARS].push(myMutant);
+            node[G_MUTANTS].push(myMutant);
         }
         node.mutant = false;
         if (idx.length > 1) {

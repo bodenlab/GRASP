@@ -438,7 +438,7 @@ var draw_phylo_circle = function (group, node, n) {
 
     if ($(window).width() > options.modal_min_width && node_info[T_COMMON_TAXA]
         !== undefined) {
-      var tax_diff = node_info.taxonomy[node_info[T_COMMON_TAXA][T_DIFFER_RANK]];
+      var tax_diff = node_info[T_TAXA][node_info[T_COMMON_TAXA].differ_rank];
       options.modal_width = 0.8 * $(window).width() - 2
           * options.modal_min_width / Object.keys(tax_diff).length;
     } else {
@@ -1160,8 +1160,7 @@ var redraw_phylo_tree = function () {
   phylo_options.tree.all_nodes_taxonomy = [];
   phylo_options.tree.all_branches = [];
   phylo_options.tree.all_nodes = [];
-  phylo_options.tree.all_nodes.push(
-      make_child(root, false, phylo_options.tree.all_nodes.length));
+  phylo_options.tree.all_nodes.push(make_child(root, false, phylo_options.tree.all_nodes.length));
   add_children_nodes(root, false);
 
   // Draw the branches and the nodes
@@ -1256,15 +1255,17 @@ var assign_leaf_x_coords = function (node, phylo_options) {
  * Make the root node
  */
 let makeRootNode = function (node) {
-  node[T_ID] = 0;
+  node[T_ID] = node[T_NAME].split(/[._-]+/)[0];
   node[T_LEFT] = false;
 
   if (node[T_COMMON_TAXA] === undefined) {
     node[T_COMMON_RANK] = undefined;
     node[T_COMMON_TAXA] = undefined;
   } else {
-    node[T_COMMON_RANK] = node[T_COMMON_TAXA][T_COMMON_RANK];
-    node[T_COMMON_TAXA] = node[T_COMMON_TAXA][T_COMMON_TAXA];
+    node[T_COMMON_RANK] = node[T_COMMON_TAXA].common_rank;
+    node[T_COMMON_TAXA] = node[T_COMMON_TAXA].common_taxonomy;
+    node[T_DIFFER_RANK] = node[T_COMMON_TAXA].differ_rank;
+    node[T_TAXA] = node[T_TAXA];
   }
   if (node[T_CHILDREN] === undefined) {
     node[T_EXTANT] = true;
@@ -1280,7 +1281,7 @@ let makeRootNode = function (node) {
  */
 var make_child = function (node, left, id) {
   var child = [];
-  child[T_ID] = id;
+  child[T_ID] = node[T_NAME].split(/[._-]+/)[0];
   child[T_LEFT] = left;
   child[T_NAME] = node[T_NAME];
   child[T_Y] = node[T_Y];
@@ -1293,8 +1294,10 @@ var make_child = function (node, left, id) {
     child[T_COMMON_RANK] = undefined;
     child[T_COMMON_TAXA] = undefined;
   } else {
-    child[T_COMMON_RANK] = node[T_COMMON_TAXA][T_COMMON_RANK];
-    child[T_COMMON_TAXA] = node[T_COMMON_TAXA][T_COMMON_TAXA];
+    child[T_COMMON_RANK] = node[T_COMMON_TAXA].common_rank;
+    child[T_COMMON_TAXA] = node[T_COMMON_TAXA].common_taxonomy;
+    child[T_DIFFER_RANK] = node[T_COMMON_TAXA].differ_rank;
+    child[T_TAXA] = node[T_TAXA];
   }
   if (node[T_CHILDREN] === undefined) {
     child[T_EXTANT] = true;
@@ -1323,9 +1326,9 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
   // Make a node id based on name and node count
   // only assign on initial load
   if (initial) {
-    node[T_ID] = phylo_options.tree.node_count;//+ node[T_NAME].split(/[._-]+/)[0];
+    node[T_ID] = node[T_NAME].split(/[._-]+/)[0]; //phylo_options.tree.node_count;//+ node[T_NAME].split(/[._-]+/)[0];
     node[T_COLLAPSED] = false;
-    //phylo_options.tree.node_dict[node[T_ID]] = node;
+    phylo_options.tree.node_dict[node[T_ID]] = node;
     depth += 1;
     phylo_options.tree.node_count += 1;
   }
@@ -1430,7 +1433,7 @@ var add_children_nodes = function (node, initial) {
         phylo_options.tree.all_branches.push(branch_left_child);
 
         var left_child = make_child(node[T_CHILDREN][0], true, phylo_options.tree.all_nodes.length);
-        phylo_options.tree.node_dict[left_child[T_ID]] = left_child;
+        // phylo_options.tree.node_dict[left_child[T_ID]] = left_child;
         phylo_options.tree.all_nodes.push(left_child);
       } else {
         var branch_right_child = [
@@ -1445,7 +1448,7 @@ var add_children_nodes = function (node, initial) {
         phylo_options.tree.all_branches.push(branch_right_child);
         var right_child = make_child(node[T_CHILDREN][n], false,
             phylo_options.tree.all_nodes.length);
-        phylo_options.tree.node_dict[right_child[T_ID]] = right_child;
+        // phylo_options.tree.node_dict[right_child[T_ID]] = right_child;
         phylo_options.tree.all_nodes.push(right_child);
       }
     }

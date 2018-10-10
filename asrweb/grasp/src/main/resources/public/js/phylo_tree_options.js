@@ -130,8 +130,8 @@ var displayJointGraph = function (node_name, node_fill, reset_graphs = false) {
                     setup_poags(json_str, true, false, false, node_name);
                   } else {
                     setup_poags(json_str, false, false, false, node_name);
-                    var new_graph = fuse_multipleGraphs(graph_array);
-                    setup_poags(new_graph, false, false, true, 'Merged');
+                    //var new_graph = fuse_multipleGraphs(graph_array);
+                    //setup_poags(new_graph, false, false, true, 'Merged');
                   }
                   refresh_elements();
                   redraw_poags();

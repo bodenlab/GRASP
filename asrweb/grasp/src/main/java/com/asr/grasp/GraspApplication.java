@@ -710,6 +710,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = new ModelAndView("processing");
 
         // run reconstruction
+
         recon = new ASRThread(asr, infer, node, addGraph, logger);
 
         mav.addObject("username", loggedInUser.getUsername());

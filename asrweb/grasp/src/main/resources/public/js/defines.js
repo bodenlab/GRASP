@@ -3,9 +3,6 @@
  * @type {number}
  */
 
-const NCBI = 12;
-const UNIPROT = -3;
-
 
 /* The G prefix indictes this is GRASP specific notation - note that other
  * included libraries have similar notations (e.g. X in jquery).
@@ -39,9 +36,10 @@ const G_Y = 4;
 const G_CONSENSUS = 5;
 
 
-const G_SEQ_CHARS = 6;
-const G_GRAPH_BARS = 7;
-const G_MUTANTS_CHARS = 8;
+//const G_SEQ_CHARS = 6;
+const G_GRAPH = 7;
+
+const G_MUTANTS = 8;
 // NODE defines
 const N_NAME = 0;
 const N_X = 3;
@@ -54,10 +52,24 @@ const N_DEL_DUR_INF = 11;
 const N_MUTANT = 12;
 const N_NUM_OUT_EDGES = 13;
 
+const G_SEQ = 6;
+const G_CHARS = 0;
+const M_VALUE = 1;
+
+const MERGED_ID = 2;
+
+
+
+const M_CHAR = 0;
+const M_POAG = 1;
+const M_LABEL = 0;
+const M_BAR_LABEL = 2;
+const M_BAR_VALUE = 3;
 
 // Used for the fused graph
-const POAG_VALUES = 14;
-const POAG = 2;
+const N_MERGED_SEQ = 14;
+const N_MERGED_GRAPH = 15;
+const N_VALUE_MERGED = 3;
 
 // EDGE defines
 const E_ID = 0;

@@ -25,28 +25,28 @@ const G_VALUE_MUTANT = 1;
 const G_SEQ_NUM = 2;
 
 /* ID on front end */
-const G_ID = 2;
+const G_ID = 1;
 /* int X-Coord */
-const G_X = 3;
+const G_X = 2;
+const G_MUTANTS = 4;
+const G_CONSENSUS = 4;
+const G_SEQ = 5;
+const G_GRAPH = 6;
 /* int Y-Coord */
-const G_Y = 4;
+const G_Y = 8;
 /* bool whether it is part of the consensus or not */
-const G_CONSENSUS = 5;
 
-const G_SEQ = 6;
-const G_GRAPH = 7;
-
-const G_MUTANTS = 8;
+const N_MUTANT = 12; //ToDo: CHECK THIS DOESN"T CONFLICT WITH THE OTHER MUTANT
 // NODE defines
 const N_NAME = 0;
-const N_X = 3;
-const N_Y = 4;
+const N_X = 2;
+const N_Y = 8;
 const N_CLASS = 9;
-
+const N_GROUP = 14;
 
 const N_TYPE = 10;
 const N_DEL_DUR_INF = 11;
-const N_MUTANT = 12;
+
 const N_NUM_OUT_EDGES = 13;
 
 const G_CHARS = 0;
@@ -63,19 +63,21 @@ const M_BAR_LABEL = 2;
 const M_BAR_VALUE = 3;
 
 // Used for the fused graph
-const N_MERGED_SEQ = 14;
-const N_MERGED_GRAPH = 15;
+const N_MERGED_SEQ = 15;
+const N_MERGED_GRAPH = 16;
 const N_VALUE_MERGED = 3;
 
 // EDGE defines
-const E_ID = 0;
-const E_NAME = 1;
-const E_CONSENSUS = 2;
-const E_RECIPROCATED = 3;
-const E_FROM = 4;
-const E_TO = 5;
-const E_WEIGHT = 6;
-const E_SINGLE = 7;
+const E_CONSENSUS = 0;
+const E_RECIPROCATED = 1;
+const E_FROM = 2;
+const E_TO = 3;
+const E_WEIGHT = 4;
+const E_SINGLE = 5;
+
+const E_ID = 6;
+const E_NAME = 7;
+
 const E_SEQS = 8;
 
 
@@ -143,3 +145,9 @@ const T_THREAD = 20;
 const T_TAXA = 21;
 const T_DIFFER_RANK = 22;
 const T_DEPTH = 23;
+
+
+const TRUE = 1;
+const FALSE = 0;
+const INITIAL = 'o';
+const FINAL = 'f';

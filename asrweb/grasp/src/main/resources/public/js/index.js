@@ -535,15 +535,26 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     // draw all not reciprocated edges first
     for (var e in edges) {
         var edge = edges[e];
-        if (!edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1 && edge[E_TO][N_X] < poags.cur_x_max + 1) || (edge[E_FROM][N_X] < poags.cur_x_max + 1 && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
-            draw_edges(poags, edge, group, scale_y);
+      if (edge[E_TO] !== undefined) {
+        if (!edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
+                && edge[E_TO][N_X] < poags.cur_x_max + 1) || (edge[E_FROM][N_X]
+                < poags.cur_x_max + 1 && edge[E_FROM][N_X] > poags.cur_x_min
+                - 1))) {
+          draw_edges(poags, edge, group, scale_y);
         }
+      }
     }
     // draw all reciprocated edges so that they are drawn on top of uni-directional ones
     for (var e in edges) {
         var edge = edges[e];
-        if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1 && edge[E_TO][N_X] < poags.cur_x_max + 1) || (edge[E_FROM][N_X] < poags.cur_x_max + 1 && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
-           draw_edges(poags, edge, group, scale_y);
+        //if we have an out going edge
+        if (edge[E_TO] !== undefined) {
+          if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
+                  && edge[E_TO][N_X] < poags.cur_x_max + 1)
+                  || (edge[E_FROM][N_X] < poags.cur_x_max + 1
+                      && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
+            draw_edges(poags, edge, group, scale_y);
+          }
         }
     }
 
@@ -558,12 +569,12 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                     draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
                     draw_legend = false;
                 }
-                if (node[G_LABEL] == 'initial' || node[G_LABEL] == 'final') {
+                if (node[G_LABEL] === INITIAL || node[G_LABEL] === FINAL) {
                     draw_terminus(poags, group, node_cx, node_cy);
                 } else {
                     var radius = draw_nodes(poags, node, group, node_cx, node_cy);
 
-                    if (poag_name == poags.root_poag_name || node[N_TYPE] == 'marginal' || poagPi) {
+                    if (poag_name === poags.root_poag_name || node[N_TYPE] === 'marginal' || poagPi) {
                         draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
                         // if it is a merged node, we want to draw a layered Pie chart
                         // so we set poagPi to false and re draw a smaller pie chart with
@@ -747,10 +758,12 @@ var process_msa_data = function (poags) {
 
     for (var n in nodes) {
         var node = nodes[n]
+        node[G_LABEL] = String.fromCharCode(node[G_LABEL]);
         node[N_TYPE] = msa.metadata.type;
         node[N_DEL_DUR_INF] = true; //[N_DEL_DUR_INF]
-        node[N_NAME] = name;
+        node[N_GROUP] = name;
         node[N_CLASS] = "";
+        node[N_Y] = 0;
         poags = update_min_max(node[G_X], node[G_Y], poags);
 
         if (node[G_SEQ][G_CHARS].length > poags.max_seq_len) {
@@ -823,11 +836,13 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
 
         // Get the msa node as to get the x coords.
         var msa_node = poags.node_dict[root_name + '-' + node[G_ID]]
-        node.name = name;
-        node.mutant = false;
+        node[N_MUTANT] = false;
+        node[N_GROUP] = name;
+        node[N_CLASS] = "";
+        node[N_Y] = 0;
         // if x positions are not the same, change to be the same, and find the node
         // with the current msa_node[N_X] and swap co-ordinates
-        if (node[N_X] != msa_node[N_X]) {
+        if (node[N_X] !== msa_node[N_X]) {
             for (var on in raw_poag.nodes) {
                 if (raw_poag.nodes[on][N_X] == msa_node[N_X]) {
                     raw_poag.nodes[on][N_X] = node[N_X];
@@ -892,11 +907,11 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         // To node
         reduced_edge[E_TO] = poags.node_dict[name + '-' + edge[E_TO]]
 
-        reduced_edge[E_CONSENSUS] = edge[E_CONSENSUS];
-        reduced_edge[E_RECIPROCATED] = edge[E_RECIPROCATED];
+        reduced_edge[E_CONSENSUS] = edge[E_CONSENSUS] === 1;
+        reduced_edge[E_RECIPROCATED] = edge[E_RECIPROCATED] === 1;
         reduced_edge[E_WEIGHT] = edge[E_WEIGHT];
         reduced_edge[E_NAME] = name;
-        reduced_edge[E_SINGLE] = edge[E_SINGLE];
+        reduced_edge[E_SINGLE] = edge[E_SINGLE] === 1;
         reduced_edge[E_SEQS] = edge[E_SEQS];
 
         if (inferred) {
@@ -1549,7 +1564,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
 
     var stroke_width = options.pie.stroke_width;
 
-    if (radius < options.node.min_radius || (!poagPi && node[N_NAME] == "Merged")) {
+    if (radius < options.node.min_radius || (!poagPi && node[N_GROUP] == "Merged")) {
         stroke_width = 0;
     }
 
@@ -1559,7 +1574,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     }
 
     var pie_group = group.append("g")
-            .attr("id", "pie" + node[N_NAME])
+            .attr("id", "pie" + node[N_GROUP])
             .attr("class", "poag")
             .attr('transform', 'translate(' + node_cx + "," + node_cy + ")")
 
@@ -1579,7 +1594,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     var pie_data = node[G_SEQ][G_CHARS];
     radius -= 10;
 
-    if (node[N_NAME] != 'MSA' && node[N_NAME] != "Merged" && options.mutants.count > 0 && options.mutants.draw == true) {
+    if (node[N_GROUP] !== "MSA" && node[N_GROUP] !== "Merged" && options.mutants.count > 0 && options.mutants.draw === true) {
         pie_data = node[G_MUTANTS];
     } else if (node[N_MERGED_SEQ] !== undefined) {
         var pie_data = node[N_MERGED_SEQ];
@@ -1647,7 +1662,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .text(lbl);
     }
 
-    if (node[N_NAME] == "MSA") {
+    if (node[N_GROUP] == "MSA") {
          group.append("text")
                 .attr("class", "poag")
                 .attr("id", "idtext-" + node[UNIQUE_ID])
@@ -1792,7 +1807,7 @@ setup_graph_overlay = function (options, graph_group) {
 
 function create_outer_circle(node, options, graph_group) {
     var circle = graph_group.append("circle")
-            .attr("class", "outside" + node[N_NAME] + " movable")
+            .attr("class", "outside" + node[N_GROUP] + " movable")
             .attr("id", function () {
                 return "node-" + node;
             })

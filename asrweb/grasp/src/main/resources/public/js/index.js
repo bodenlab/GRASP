@@ -569,7 +569,7 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
                     draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
                     draw_legend = false;
                 }
-                if (node[G_LABEL] === INITIAL || node[G_LABEL] === FINAL) {
+                if (node[G_X] === poags.min_x || node[G_X] === poags.max_x) {
                     draw_terminus(poags, group, node_cx, node_cy);
                 } else {
                     var radius = draw_nodes(poags, node, group, node_cx, node_cy);
@@ -691,7 +691,6 @@ let convertToArray = function (data) {
     for (let d in data) {
       let node = data[d];
       let tmp = [];
-      tmp[G_ID] = node.id;
       tmp[G_LABEL] = node.label;
       if (node.graph !== undefined) {
         tmp[G_GRAPH] = convertDictToArr(node.graph.bars);
@@ -727,6 +726,15 @@ let convertDictToArr = function (data) {
     return arr;
 }
 
+let convertCharValToStr = function(arr) {
+    for (let c in arr) {
+        if (!isNaN(arr[c][G_LABEL])) {
+          arr[c][G_LABEL] = String.fromCharCode(arr[c][G_LABEL])
+        }
+    }
+    return arr;
+}
+
 /**
  * Proceses the MSA data.
  *
@@ -758,20 +766,31 @@ var process_msa_data = function (poags) {
 
     for (var n in nodes) {
         var node = nodes[n]
-        node[G_LABEL] = String.fromCharCode(node[G_LABEL]);
+        if (!isNaN(node[G_LABEL])) {
+            node[G_LABEL] = String.fromCharCode(node[G_LABEL]);
+        }
         node[N_TYPE] = msa.metadata.type;
         node[N_DEL_DUR_INF] = true; //[N_DEL_DUR_INF]
         node[N_GROUP] = name;
         node[N_CLASS] = "";
         node[N_Y] = 0;
+        node[UNIQUE_ID] = name + '-' + node[N_X];
         poags = update_min_max(node[G_X], node[G_Y], poags);
-
+        node[G_SEQ][G_CHARS] = convertCharValToStr(node[G_SEQ][G_CHARS]);
+        node[G_GRAPH] = convertCharValToStr(node[G_GRAPH]);
+        node[G_MUTANTS] = convertCharValToStr(node[G_GRAPH]);
         if (node[G_SEQ][G_CHARS].length > poags.max_seq_len) {
             poags.max_seq_len = node[G_SEQ][G_CHARS].length;
         }
 
         //formatMutants(node, poag);
-        node_dict[name + "-" + node[G_ID]] = node;
+        if (node[G_X] < poags.min_x) {
+            poags.min_x = node[G_X];
+        }
+        if (node[G_X] > poags.max_x) {
+            poags.max_x = node[G_X];
+        }
+        node_dict[name + "-" + node[N_X]] = node;
         poags.single.nodes[name].push(node);
     }
 
@@ -835,13 +854,19 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         var node = raw_poag.nodes[n];
 
         // Get the msa node as to get the x coords.
-        var msa_node = poags.node_dict[root_name + '-' + node[G_ID]]
+        var msa_node = poags.node_dict[root_name + '-' + node[N_X]]
         node[N_MUTANT] = false;
         node[N_GROUP] = name;
         node[N_CLASS] = "";
         node[N_Y] = 0;
+        if (!isNaN(node[G_LABEL])) {
+          node[G_LABEL] = String.fromCharCode(node[G_LABEL]);
+        }
         // if x positions are not the same, change to be the same, and find the node
         // with the current msa_node[N_X] and swap co-ordinates
+        node[G_SEQ][G_CHARS] = convertCharValToStr(node[G_SEQ][G_CHARS]);
+        node[G_GRAPH] = convertCharValToStr(node[G_GRAPH]);
+        node[G_MUTANTS] = convertCharValToStr(node[G_GRAPH]);
         if (node[N_X] !== msa_node[N_X]) {
             for (var on in raw_poag.nodes) {
                 if (raw_poag.nodes[on][N_X] == msa_node[N_X]) {
@@ -852,7 +877,7 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
             node[N_X] = msa_node[N_X];
         }
         node[N_TYPE] = raw_poag.metadata.type;
-        node[UNIQUE_ID] = name + '-' + node[G_ID];
+        node[UNIQUE_ID] = name + '-' + node[N_X];
         poags = update_min_max(node[N_X], node[N_Y], poags);
 
         // Set that this msa node wasn't deleted during inference
@@ -1231,7 +1256,7 @@ var draw_mini_msa = function (poags) {
         var node = nodes[n];
         var node_inferred = null;
         for (var m in nodes_inferred) {
-            if (nodes_inferred[m][G_ID] == node[G_ID]) {
+            if (nodes_inferred[m][N_X] == node[N_X]) {
                 node_inferred = nodes_inferred[m];
                 break;
             }
@@ -1245,13 +1270,13 @@ var draw_mini_msa = function (poags) {
         if (node_inferred != null) {
             if (poags.merged.edges.length > 0) {
                 for (var e in poags.merged.edges) {
-                    if (poags.merged.edges[e][E_FROM][G_ID] == node_inferred[G_ID]) {
+                    if (poags.merged.edges[e][E_FROM][N_X] == node_inferred[N_X]) {
                         out_edge_count++;
                     }
                 }
             } else {
                 for (var e in poags.single.edges[poags.inferred_poag_name]) {
-                    if (poags.single.edges[poags.inferred_poag_name][e][E_FROM][G_ID] == node_inferred[G_ID]) {
+                    if (poags.single.edges[poags.inferred_poag_name][e][E_FROM][N_X] == node_inferred[N_X]) {
                         out_edge_count++;
                     }
                 }
@@ -1525,7 +1550,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
                 .attr("fill", colour);
     }
 
-    var tax = poags.taxonomy[node[N_NAME]];
+    var tax = poags.taxonomy[node[UNIQUE_ID]];
     if (tax === undefined) {
         tax = "";
     }
@@ -1543,7 +1568,7 @@ var draw_legend_rect = function (poags, node, node_end, group, height, scale_y, 
             .attr("stroke", function () {
                 return getNodeTextColour(poags.options.display.colours[(node[G_LABEL])]);
             })
-            .text(node[N_NAME].split("_")[0] + " " + tax);
+            .text(node[UNIQUE_ID].split("-")[0] + " " + tax);
 
 }
 
@@ -1678,8 +1703,8 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
                 .attr("stroke", options.style.node_position_colour)
                 .text(function() {
                     var spacing = Math.floor((poags.cur_x_max - poags.cur_x_min)/10);
-                    if (poags.node_radius > 2*options.node.min_radius || node[G_ID] % spacing == 0) {
-                        return node[G_ID] + 1;
+                    if (poags.node_radius > 2*options.node.min_radius || node[N_X] % spacing == 0) {
+                        return node[N_X] + 1;
                     }
                     return "";
                 });
@@ -1854,7 +1879,7 @@ function create_axis(node, options, graph_group) {
             .attr("y", -20)
             .attr("x", options.offset_graph_width + 40)
             .attr("dy", ".71em")
-            .text(node[N_NAME] + "   ID: " + (node[G_ID] + 1));
+            .text(node[N_GROUP] + "   ID: " + (node[N_X] + 1));
 }
 
 function create_modal_axis(node, options, modal_group) {
@@ -1869,7 +1894,7 @@ function create_modal_axis(node, options, modal_group) {
         .attr("y", -20)
         .attr("x", options.offset_graph_width + 40)
         .attr("dy", ".71em")
-        .text(node[N_NAME] + "   ID: " + (node[G_ID] + 1));
+        .text(node[N_GROUP] + "   ID: " + (node[N_X] + 1));
 }
 
 function create_bars(node, options, graph_group) {

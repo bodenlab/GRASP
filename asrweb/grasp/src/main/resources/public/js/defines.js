@@ -38,7 +38,7 @@ const G_Y = 8;
 
 const N_MUTANT = 12; //ToDo: CHECK THIS DOESN"T CONFLICT WITH THE OTHER MUTANT
 // NODE defines
-const N_NAME = 0;
+const UNIQUE_ID = 16;
 const N_X = 2;
 const N_Y = 8;
 const N_CLASS = 9;
@@ -64,7 +64,7 @@ const M_BAR_VALUE = 3;
 
 // Used for the fused graph
 const N_MERGED_SEQ = 15;
-const N_MERGED_GRAPH = 16;
+const N_MERGED_GRAPH = 17;
 const N_VALUE_MERGED = 3;
 
 // EDGE defines
@@ -129,7 +129,7 @@ const T_LEFT = 15; // Whether it is a left or right child bool
 const T_RAW_X = 16;
 const T_PARENT = 17;
 const T_IS_ROOT = 18;
-const UNIQUE_ID = 20;
+
 const T_LI = 0;
 const T_RI = 1;
 const T_MAX_OFFSET = 2;

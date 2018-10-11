@@ -145,11 +145,21 @@ function getId(extentId, type) {
  * Adds the taxonomic info to the tree.
  */
 function applyTaxonInfo(taxonInfo) {
-  let ncbiTaxa = JSON.parse(taxonInfo[NCBI]);
-  let uniprotTaxa = JSON.parse(taxonInfo[UNIPROT]);
+  let ncbiTaxa = [];
+  let uniprotTaxa = [];
+  if (taxonInfo[NCBI] !== undefined) {
+    ncbiTaxa = JSON.parse(taxonInfo[NCBI]);
+  }
+  if (taxonInfo[UNIPROT] !== undefined) {
+    uniprotTaxa = JSON.parse(taxonInfo[UNIPROT]);
+  }
   let allTaxa = ncbiTaxa.concat(uniprotTaxa);
   let taxaInfoDict = {};
-  _.forEach(allTaxa, t => {taxaInfoDict[t.id] = t});
+  _.forEach(allTaxa, t => {
+    if (t !== null) {
+      taxaInfoDict[t.id] = t;
+    }
+  });
   for (let i in phylo_options.tree.extants) {
     let name = getId(i);
     let taxaId = parseInt(idMapping[name]);

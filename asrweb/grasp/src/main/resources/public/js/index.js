@@ -622,12 +622,12 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
  */
 var process_poags = function (json_str, poags, inferred, set_msa, merged, name) {
     var data = JSON.parse(json_str);
-    if (data["new_ds"] !== true) {
-        data.bottom.nodes = convertToArray(data.bottom.nodes);
-        data.bottom.edges = convertEdgesToArray(data.bottom.edges);
-        data.top.nodes = convertToArray(data.top.nodes);
-        data.top.edges = convertEdgesToArray(data.top.edges);
-        data["new_ds"] = true;
+    if (data.bottom.nodes[0].id !== undefined) {
+      data.bottom.nodes = convertToArray(data.bottom.nodes);
+      data.bottom.edges = convertEdgesToArray(data.bottom.edges);
+      data.top.nodes = convertToArray(data.top.nodes);
+      data.top.edges = convertEdgesToArray(data.top.edges);
+      data["new_ds"] = true;
     }
     poags.options = poag_options;
 

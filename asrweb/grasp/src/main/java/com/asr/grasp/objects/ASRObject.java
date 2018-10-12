@@ -514,7 +514,7 @@ public class ASRObject {
         // Where the graph is put in relation to each other
         combinedPoags.put("top", graphMSA);
         combinedPoags.put("bottom", graphInferred);
-        combinedPoags.put("new_ds", true);
+
         // Return a string representation of this
         return combinedPoags.toString();
     }

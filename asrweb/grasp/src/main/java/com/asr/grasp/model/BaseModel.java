@@ -1,6 +1,7 @@
 package com.asr.grasp.model;
 
 import com.asr.grasp.utils.Defines;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -193,7 +194,7 @@ public class BaseModel {
      * @param query
      * @return
      */
-    public Boolean deleteOnIds(String query, ArrayList<Integer> ids) {
+    public Boolean deleteOnIds(String query, Object ids) {
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
@@ -363,12 +364,10 @@ public class BaseModel {
     public ArrayList<Integer> getIdList(ResultSet results) {
         ArrayList<Integer> idList = new ArrayList<>();
         try {
-            if (results.next()) {
-                // Check we were only returned a single result
-                while (results.next()) {
-                    // Get the ID stored in the first column
-                    idList.add(results.getInt(1));
-                }
+            // Check we were only returned a single result
+            while (results.next()) {
+                // Get the ID stored in the first column
+                idList.add(results.getInt(1));
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -394,10 +393,32 @@ public class BaseModel {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Unable to get a string list from results set");
             return null;
         }
         return strList;
+    }
+
+    /**
+     * Gets a String/String Hash map of results from a query.
+     *
+     * @param results
+     * @return
+     */
+    public HashMap<String, String> getStrStrMap(ResultSet results, int keyIdx, int valIdx) {
+        HashMap<String, String> strMap = new HashMap<>();
+        try {
+            if (results.next()) {
+                while (results.next()) {
+                    // Get the ID stored in the first column
+                    strMap.put(results.getString(keyIdx), results.getString(valIdx));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to get String Map from results set");
+            return null;
+        }
+        return strMap;
     }
 
     /**

@@ -54,6 +54,7 @@ public class ASRThread implements Runnable {
                 logger.log(Level.SEVERE, "ERR, error: " + message);
             status = "error\t"+message;
         }
+        System.out.println(asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
 
     }
 

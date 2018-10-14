@@ -43,6 +43,24 @@ public class ASRController {
         this.sessionId = "grasp" + System.currentTimeMillis();
     }
 
+    /**
+     * To allow us to perform logic such as getting all joints from the ASRPOG joint
+     * and save these to the database.
+     * @return
+     */
+    public ASRPOG getJointASRPOG () {
+        return asrJoint;
+    }
+
+    /**
+     * Similar to above, it returns the marginal reconstruction so that we can perform
+     * other logic - such as motif searching - on the marginal reconstructions.
+     * @return
+     */
+    public ASRPOG getMarginalASRPOG () {
+        return asrMarginal;
+    }
+
     /*******************************************************************************************************************
      ****** Setters and getters for ASR attributes
      ******************************************************************************************************************/
@@ -58,6 +76,7 @@ public class ASRController {
     public void performAlignment(String filepath) throws IOException {
         msa = new MSA(filepath);
     }
+
 
     public String getJointInferences() {
         if (asrJoint != null)

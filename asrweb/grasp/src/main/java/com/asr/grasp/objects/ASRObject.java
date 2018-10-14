@@ -6,7 +6,6 @@ import dat.EnumSeq;
 import dat.Enumerable;
 import java.util.HashMap;
 import json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import reconstruction.ASRPOG;
 
 /**
  * ASR API for integration in the Swing web form
@@ -78,6 +78,20 @@ public class ASRObject {
     /*******************************************************************************************************************
      ****** Setters and getters for ASR attributes (forms, etc, automatically call these)
      ******************************************************************************************************************/
+
+    /**
+     * To allow us to perform logic such as getting all joints from the ASRPOG joint
+     * and save these to the database.
+     * @return
+     */
+    public ASRPOG getASRPOG (int asrType) {
+        if (asrType == Defines.JOINT) {
+            return asrController.getJointASRPOG();
+        } else if (asrType == Defines.MARGINAL) {
+            return asrController.getMarginalASRPOG();
+        }
+        return null;
+    }
 
     public String getLabel() {
         return this.label;
@@ -433,6 +447,7 @@ public class ASRObject {
      */
     public void saveMarginalDistribution(String filepath, String node) throws IOException {
         asrController.saveMarginalDistribution(filepath, node);
+
     }
 
     /**

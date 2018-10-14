@@ -10,6 +10,7 @@ import com.asr.grasp.objects.ShareObject;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
+import java.util.List;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -578,8 +579,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Set some of the features that we'll need to be able to reconstruct
         // it correctly.
-        JSONObject ancestorJson = asr.getAncestralGraphJSON(asr
-                .getWorkingNodeLabel());
+        JSONObject ancestorJson = asr.getAncestralGraphJSON(asr.getWorkingNodeLabel());
         JSONObject msaGraph = asr.getMSAGraphJSON();
 
         // Set the current reconstruction
@@ -603,6 +603,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         // NCBI to get the taxonomic iDs.
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
         mav.addObject("ids", ids.toString());
+
         return mav;
     }
 
@@ -617,8 +618,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("tree", asr.getReconstructedNewickString());
 
         // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(),
-                asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
+        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
         model.addAttribute("graph", graphs);
 
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -828,7 +828,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         String[] ancs = new String[graphs.length()];
         for (int i = 0; i < graphs.length(); i++) {
             ancs[i] = graphs.getString(i);
-            System.out.println(ancs[i]);
+            //System.out.println(ancs[i]);
         }
 
         response.setStatus(HttpServletResponse.SC_OK);

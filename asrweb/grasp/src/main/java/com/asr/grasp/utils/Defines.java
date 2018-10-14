@@ -40,4 +40,12 @@ public class Defines {
     public static final String NCBI = "ncbi";
     public static final String PDB = "pdb";
     public static final String[] SUPPORTED_PROT = {UNIPROT, NCBI};
+
+    /**
+     * Help for the JOINT and MARGINAL tags in the database used
+     * for saving the sequences.
+     */
+    public static final int MARGINAL = 0;
+    public static final int JOINT = 1;
+    public static final int ALL = 2;
 }

@@ -2,6 +2,7 @@ package com.asr.grasp.model;
 
 import java.sql.ResultSet;
 import com.asr.grasp.utils.Defines;
+import java.util.ArrayList;
 import org.springframework.stereotype.Repository;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -116,10 +117,24 @@ public class UsersModel extends BaseModel {
         if (deleteOnId(queryDeleteShareUsers, userId) != true) {
             return false;
         }
-        String queryDeleteRecon = "DELETE FROM web.reconstructions WHERE " +
-                "owner_id=?;";
-        if (deleteOnId(queryDeleteRecon, userId) != true) {
-            return false;
+        // We need to first get all reconstructions that the user owns so
+        // we can delete all the associated consensus sequences.
+        String queryGetReconIds = "SELECT id FROM web.reconstructions WHERE owner_id=?";
+        ResultSet results = queryOnId(queryGetReconIds, userId);
+        if (results != null) {
+            ArrayList<Integer> reconIds = getIdList(results);
+            // Delete all consensus seqs
+            String queryDeleteConsensus = "DELETE FROM web.consensus where r_id=?;";
+            for (Integer rId: reconIds) {
+                if (!deleteOnId(queryDeleteConsensus, rId)) {
+                    return false;
+                }
+            }
+            String queryDeleteRecon = "DELETE FROM web.reconstructions WHERE " +
+                    "owner_id=?;";
+            if (deleteOnId(queryDeleteRecon, userId) != true) {
+                return false;
+            }
         }
         String queryDeleteUser = "DELETE FROM web.users WHERE id=?;";
         if (deleteOnId(queryDeleteUser, userId) != true) {

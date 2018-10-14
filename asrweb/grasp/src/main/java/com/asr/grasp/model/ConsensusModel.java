@@ -155,14 +155,16 @@ public class ConsensusModel extends BaseModel {
      * @return
      */
     public ArrayList<String> findNodesWithMotif (int reconId, String motif) {
-        motif = "'%" + motif + "%'"; // Add in the wild cards
-        String query = "SELECT node_label FROM web.consensus WHERE rid=? AND seq LIKE ?;";
+        motif = "%" + motif + "%"; // Add in the wild cards
+        String query = "SELECT node_label FROM web.consensus WHERE r_id=? AND seq LIKE ?;";
+        System.out.println(query);
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, motif);
+            System.out.println(statement);
             ResultSet results = statement.executeQuery();
             if (results == null) {
                 return null;

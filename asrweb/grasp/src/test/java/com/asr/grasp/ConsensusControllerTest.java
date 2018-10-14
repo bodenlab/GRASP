@@ -76,6 +76,38 @@ public class ConsensusControllerTest extends BaseTest {
 
     @Test
     public void testDeleteAllJoints () {
+        setUpEnv();
+        ASRObject asr = setAsr("tawfik");
+        UserObject user = createAndRegisterUser("testuser", "testpassword");
+
+        // Create a reconstruction from an ASR object
+        ReconstructionObject recon = reconController.createFromASR(asr);
+
+        // Set the user to own the reconstruction
+        recon.setOwnerId(userController.getId(user));
+
+        // Test we can save the recon to the database
+        String err = reconController.save(user, recon);
+
+        assertThat(err, is(equalTo(null)));
+
+        ASRPOG joint = asr.getASRPOG(Defines.JOINT);
+
+        // Check saving it to the DB
+        consensusController.insertAllJointsToDb(recon.getId(), joint);
+        HashMap<String, String> seqs = consensusController.getAllConsensus(recon.getId(), Defines.ALL);
+
+        // Confirm we have matches
+        assertThat(seqs.size(), equalTo(26));
+
+        // Test deleting them
+        consensusController.deleteAllSeqsForRecon(recon.getId());
+
+        // Check that none of them exist any more
+        seqs = consensusController.getAllConsensus(recon.getId(), Defines.ALL);
+        assertThat(seqs.size(), equalTo(0));
+
+        userModel.deleteUser(userController.getId(user));
 
     }
 
@@ -103,31 +135,28 @@ public class ConsensusControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        System.out.println(consensusController.insertAllJointsToDb(recon.getId(), joint));
+        consensusController.insertAllJointsToDb(recon.getId(), joint);
 
         // Check these were saved in the DB
         HashMap<String, String> seqMap = consensusController.getAllConsensus(recon.getId(), Defines.JOINT);
 
-        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
-
-        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
-
-        // Delete the user to clean up the database will automatically delete
-        // any reconstructions associated with the user and any consensus sequences.
         String motif1 = "YPPD";
 
         String motif2 = "GFLR";
+
         ArrayList<String> motif1Match = consensusController.findAllWithMotif(recon.getId(), motif1);
-        for (String nodeLabel: motif1Match) {
-            System.out.println(nodeLabel);
-        }
-        System.out.println(motif1Match.size());
+
+        assertThat(motif1Match.contains("N4_98"), equalTo(true));
+        assertThat(motif1Match.contains("N13_97"), equalTo(false));
 
         ArrayList<String> motif2Match = consensusController.findAllWithMotif(recon.getId(), motif2);
-        for (String nodeLabel: motif2Match) {
-            System.out.println(nodeLabel);
-        }
-        System.out.println(motif1Match.size());
+
+        assertThat(motif1Match.size(), equalTo(2));
+
+        assertThat(motif2Match.size(), equalTo(3));
+
+        assertThat(motif2Match.contains("N4_98"), equalTo(false));
+        assertThat(motif2Match.contains("N13_97"), equalTo(true));
 
         userModel.deleteUser(userController.getId(user));
 

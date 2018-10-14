@@ -386,11 +386,9 @@ public class BaseModel {
     public ArrayList<String> getStrList(ResultSet results) {
         ArrayList<String> strList = new ArrayList<>();
         try {
-            if (results.next()) {
-                while (results.next()) {
-                    // Get the ID stored in the first column
-                    strList.add(results.getString(1));
-                }
+            while (results.next()) {
+                // Get the ID stored in the first column
+                strList.add(results.getString(1));
             }
         } catch (Exception e) {
             System.out.println("Unable to get a string list from results set");

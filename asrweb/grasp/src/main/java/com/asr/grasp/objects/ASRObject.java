@@ -383,6 +383,20 @@ public class ASRObject {
         return sequences;
     }
 
+    /**
+     * Gets all the extant sequences with their labels. This is used so we can save them to
+     * the database - used for motif searching etc.
+     *
+     * @return
+     */
+    public HashMap<String, String> getSequencesAsNamedMap () {
+        HashMap<String, String> sequences = new HashMap<>();
+        for (EnumSeq seq : extants)
+            sequences.put(seq.getName(), seq.toString());
+        return sequences;
+    }
+
+
     public void loadSequences(String sequences) {
         extants = new ArrayList<>();
         for (String s : sequences.split("[,]"))

@@ -1309,6 +1309,15 @@ var make_child = function (node, left, id) {
 }
 
 /**
+ * Helper function that formats a node ID.
+ * @param nodeLabel
+ * @returns {*|string}
+ */
+let formatTreeNodeId = function (nodeLabel) {
+  return nodeLabel.split(/[._-]+/)[0];
+}
+
+/**
  * Before we can assign depths need to first determine the longest
  * branch length.
  *
@@ -1326,7 +1335,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
   // Make a node id based on name and node count
   // only assign on initial load
   if (initial) {
-    node[T_ID] = node[T_NAME].split(/[._-]+/)[0]; //phylo_options.tree.node_count;//+ node[T_NAME].split(/[._-]+/)[0];
+    node[T_ID] = formatTreeNodeId(node[T_NAME]); //phylo_options.tree.node_count;//+ node[T_NAME].split(/[._-]+/)[0];
     node[T_COLLAPSED] = false;
     phylo_options.tree.node_dict[node[T_ID]] = node;
     depth += 1;

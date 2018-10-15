@@ -1,13 +1,12 @@
 package com.asr.grasp;
 
 import com.asr.grasp.controller.ASRController;
-import com.asr.grasp.controller.ConsensusController;
+import com.asr.grasp.controller.SeqController;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.TaxaController;
 import com.asr.grasp.controller.UserController;
-import com.asr.grasp.model.ConsensusModel;
+import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.model.ReconstructionsModel;
-import com.asr.grasp.model.ShareUsersModel;
 import com.asr.grasp.model.TaxaModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.ASRObject;
@@ -39,8 +38,8 @@ public class BaseTest {
     ReconstructionsModel reconModel;
     UsersModel userModel;
     TaxaModel taxaModel;
-    ConsensusController consensusController;
-    ConsensusModel consensusModel;
+    SeqController seqController;
+    SeqModel seqModel;
 
     public UserObject createUser(String username, String password) {
         UserObject user = new UserObject();
@@ -86,11 +85,11 @@ public class BaseTest {
         reconController.setUsersModel(userModel);
 
         taxaController.setTaxaModel(taxaModel);
-        consensusController = new ConsensusController();
+        seqController = new SeqController();
 
-        consensusModel = new ConsensusModel();
-        consensusModel.setDBConfig(dbUrl, dbPassword, dbUser);
-        consensusController.setConsensusModel(consensusModel);
+        seqModel = new SeqModel();
+        seqModel.setDBConfig(dbUrl, dbPassword, dbUser);
+        seqController.setSeqModel(seqModel);
     }
 
     /**

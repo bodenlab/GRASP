@@ -1,6 +1,6 @@
 package com.asr.grasp;
 
-import com.asr.grasp.controller.ConsensusController;
+import com.asr.grasp.controller.SeqController;
 import com.asr.grasp.controller.TaxaController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
@@ -12,7 +12,6 @@ import com.asr.grasp.utils.Defines;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
-import java.util.List;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -75,7 +74,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     private TaxaController taxaController;
 
     @Autowired
-    private ConsensusController consensusController;
+    private SeqController seqController;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -274,9 +273,19 @@ public class GraspApplication extends SpringBootServletInitializer {
         // owner id
         currRecon.setOwnerId(loggedInUser.getId());
 
+        // Save the reconstruction
         String err = reconController.save(loggedInUser, currRecon);
+
+        // We also want to save all joint recons
+        seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT));
+
+        // Also want to save all the extents into the db
+        seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap());
+
         // Reset the current recon
         currRecon = new ReconstructionObject();
+
+
         return err;
     }
 
@@ -470,11 +479,8 @@ public class GraspApplication extends SpringBootServletInitializer {
             return mav;
         }
 
-        // Set the owner to be the logged in user
-        currRecon.setOwnerId(loggedInUser.getId());
-
         // Save the reconstruction
-        String err = reconController.save(loggedInUser, currRecon);
+        String err = saveCurrRecon();
 
         // Check if we were able to save it
         if (err != null) {
@@ -575,7 +581,7 @@ public class GraspApplication extends SpringBootServletInitializer {
             return new JSONObject().put("error", "You need to save your reconstruction before performing this action.").toString();
         }
         // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
-        if (!consensusController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
+        if (!seqController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
             return new JSONObject().put("error", "Apologies but you need to re-run your reconstruction as we've made alot of changes to make this feature possible! Please re-run it (and save your reconstruction) and then this will be possible. Also please delete your old reconstruction so we have more space in our database, thank you :) ").toString();
         }
         // Otherwise we're able to run it
@@ -585,7 +591,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         String motif = dataJson.getString("motif");
 
         //Return the list of matching node ids as a json array
-        return consensusController.findAllWithMotifJSON(reconController.getUsersAccess(currRecon.getId(), loggedInUser), currRecon.getId(), motif).toString();
+        return seqController
+                .findAllWithMotifJSON(reconController.getUsersAccess(currRecon.getId(), loggedInUser), currRecon.getId(), motif).toString();
     }
 
     /**
@@ -638,6 +645,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("username", loggedInUser.getUsername());
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
+
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
         mav.addObject("ids", ids.toString());
 

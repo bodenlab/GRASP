@@ -124,7 +124,7 @@ public class UsersModel extends BaseModel {
         if (results != null) {
             ArrayList<Integer> reconIds = getIdList(results);
             // Delete all consensus seqs
-            String queryDeleteConsensus = "DELETE FROM web.consensus where r_id=?;";
+            String queryDeleteConsensus = "DELETE FROM web.sequences where r_id=?;";
             for (Integer rId: reconIds) {
                 if (!deleteOnId(queryDeleteConsensus, rId)) {
                     return false;

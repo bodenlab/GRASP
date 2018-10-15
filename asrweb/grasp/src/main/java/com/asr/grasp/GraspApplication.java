@@ -1,5 +1,6 @@
 package com.asr.grasp;
 
+import com.asr.grasp.controller.ConsensusController;
 import com.asr.grasp.controller.TaxaController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
@@ -7,6 +8,7 @@ import com.asr.grasp.controller.UserController;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
+import com.asr.grasp.utils.Defines;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
@@ -71,6 +73,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     @Autowired
     private TaxaController taxaController;
+
+    @Autowired
+    private ConsensusController consensusController;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -552,6 +557,38 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
+     * Gets the node ids that contain a certain motif. This updates the tree.
+     *
+     * Returns
+     * @param jsonString
+     * @return
+     */
+    @RequestMapping(value = "/motif" , method = RequestMethod.POST)
+    public @ResponseBody String getAncestorsMatchingMotif(@RequestBody String jsonString) {
+        // If there is no user logged in return that they need to log in and save a recon before
+        // performing motif searching.
+        if (loggedInUser == null) {
+            return new JSONObject().put("error", "User must be logged in to perform this action.").toString();
+        }
+        // If they don't have a saved reconstruction return that they need to save the reconstruction
+        if (currRecon.getId() == Defines.FALSE) {
+            return new JSONObject().put("error", "You need to save your reconstruction before performing this action.").toString();
+        }
+        // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
+        if (!consensusController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
+            return new JSONObject().put("error", "Apologies but you need to re-run your reconstruction as we've made alot of changes to make this feature possible! Please re-run it (and save your reconstruction) and then this will be possible. Also please delete your old reconstruction so we have more space in our database, thank you :) ").toString();
+        }
+        // Otherwise we're able to run it
+        JSONObject dataJson = new JSONObject(jsonString);
+
+        // Check for the motif
+        String motif = dataJson.getString("motif");
+
+        //Return the list of matching node ids as a json array
+        return consensusController.findAllWithMotifJSON(reconController.getUsersAccess(currRecon.getId(), loggedInUser), currRecon.getId(), motif).toString();
+    }
+
+    /**
      * Helper function to set the current reconstruction.
      */
     public void setReconFromASR(ASRObject asr, JSONObject ancestor, JSONObject msa) {
@@ -606,6 +643,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         return mav;
     }
+
 
     @RequestMapping(value = "/", method = RequestMethod.POST, params = {"getrecongraph"})
     public @ResponseBody

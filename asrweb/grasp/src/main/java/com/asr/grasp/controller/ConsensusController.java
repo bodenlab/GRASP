@@ -6,7 +6,9 @@ import dat.POGraph;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
 
 /**
@@ -20,6 +22,7 @@ import reconstruction.ASRPOG;
  *
  * Created by ariane on 14/10/18.
  */
+@Service
 public class ConsensusController {
 
     @Autowired
@@ -39,7 +42,6 @@ public class ConsensusController {
         List<String> insertedLabels = new ArrayList<>();
         for (String label: labels) {
             POGraph ancestor = asrInstance.getAncestor(label);
-            System.out.println("LABEL: " + label + " ");
             // Insert it into the database
             boolean inserted = consensusModel.insertIntoDb(reconId, label, ancestor.getSupportedSequence(true), Defines.JOINT);
             if (inserted) {
@@ -71,6 +73,24 @@ public class ConsensusController {
     }
 
     /**
+     * Returns the nodes with motifs in JSON format so that these can be updated on the front end.
+     * @param reconId
+     * @param motif
+     * @return
+     */
+    public JSONArray findAllWithMotifJSON (int userAccess, int reconId, String motif) {
+        if (userAccess == Defines.NO_ACCESS) {
+            return new JSONArray().put("NO ACCESS");
+        }
+        ArrayList<String> ancestorLabelsWithMotif = findAllWithMotif(reconId, motif);
+        JSONArray ancestorLabelsWithMotifJSON = new JSONArray();
+        for (String label: ancestorLabelsWithMotif) {
+            ancestorLabelsWithMotifJSON.put(label);
+        }
+        return ancestorLabelsWithMotifJSON;
+    }
+
+    /**
      * Gets all the consensus sequences for a given reconstruction.
      * @param reconId
      * @param method
@@ -82,11 +102,22 @@ public class ConsensusController {
 
 
     /**
+     * Returns whether a user has saved the reconstruction in the new format or not.
+     *
+     * @param reconId
+     * @return
+     */
+    public boolean hasReconsAncestorsBeenSaved (int reconId) {
+        return consensusModel.hasReconsAncestorsBeenSaved(reconId);
+    }
+
+
+    /**
      * ------------------------------------------------------------------------
      *          The following are to set the test env.
      * ------------------------------------------------------------------------
      */
-    public void setConsensusModel(ConsensusModel consensusModel) {
+    public void setConsensusModel (ConsensusModel consensusModel) {
         this.consensusModel = consensusModel;
     }
 

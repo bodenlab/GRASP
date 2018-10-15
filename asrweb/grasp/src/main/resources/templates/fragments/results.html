@@ -87,9 +87,15 @@
           </button>
         </div>
         <div>
-          <input type="text" class="form-input col-xs-8 no-padding" style="height: 2.1em;"
+          <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
                  placeholder="Search for terms (use wildcard *)" id="search" name="search"
                  oninput="search_tree(this.value, true, false);"/>
+          <button type="button" id="find-motif" class="btn btn-default col-xs-2"
+                  onclick="getNodesWithMotif()">Find motif
+          </button>
+          <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
+                 placeholder="Motif (use wildcard *)" id="find-motif-value" name="motif-value"/>
+
           <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2"
                   onclick="annotateTaxonomy()">Annotate taxonomy
           </button>

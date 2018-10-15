@@ -124,6 +124,7 @@ function runTaxaAjax() {
     }
   })
 }
+
 /**
  * Helper function to get NCBI or uniprot ID. Modularises it out so it can change.
  */

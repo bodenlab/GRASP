@@ -80,17 +80,21 @@ public class TaxaModel extends BaseModel {
      * Gets the taxanomic IDs from a protein identifier.
      */
     public HashMap<String, Integer> getTaxaIdsFromProtIds(ArrayList<String> ids, String type) {
+        String values = buildStrFromArr(ids);
+        if (values.length() < 2) {
+            return null;
+        }
         if (type == Defines.UNIPROT) {
             return prot2taxaMapping(
-                    query("SELECT id, taxa_id FROM util.uniprot2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.uniprot2taxa WHERE id IN (" + values
                             + ");"));
         } else if (type == Defines.PDB) {
             return prot2taxaMapping(
-                    query("SELECT id, taxa_id FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.pdb2taxa WHERE id IN (" + values
                             + ");"));
         } else if (type == Defines.NCBI) {
             return prot2taxaMapping(
-                    query("SELECT id, taxa_id FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.ncbi2taxa WHERE id IN (" + values
                             + ");"));
         }
         return null;

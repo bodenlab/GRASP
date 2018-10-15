@@ -7,7 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class ConsensusModel extends BaseModel {
     /**
      * Tells us where we can expect each value for the results from the
@@ -157,14 +159,12 @@ public class ConsensusModel extends BaseModel {
     public ArrayList<String> findNodesWithMotif (int reconId, String motif) {
         motif = "%" + motif + "%"; // Add in the wild cards
         String query = "SELECT node_label FROM web.consensus WHERE r_id=? AND seq LIKE ?;";
-        System.out.println(query);
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, motif);
-            System.out.println(statement);
             ResultSet results = statement.executeQuery();
             if (results == null) {
                 return null;
@@ -174,6 +174,18 @@ public class ConsensusModel extends BaseModel {
             System.out.println("Unable to get matches for motifs: " + motif);
             return null;
         }
+    }
+
+    /**
+     * Method to check if the user has performed a new reconstruction - as such - have
+     * they had all their consensus seqs saved.
+     *
+     * @param reconId
+     * @return
+     */
+    public boolean hasReconsAncestorsBeenSaved (int reconId) {
+        String query = "SELECT id FROM web.consensus WHERE r_id=? LIMIT 1;";
+        return getId(queryOnId(query, reconId)) != Defines.FALSE;
     }
 }
 

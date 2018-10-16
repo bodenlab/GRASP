@@ -46,6 +46,7 @@ public class SeqModel extends BaseModel {
             statement.setString(3, seq);
             statement.setInt(4, method);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
@@ -70,6 +71,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(2, Defines.EXTANT);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
+            con.close();
             if (results != null) {
                 /* The node label is in position 1 which we want to be the key and the
                  * sequence is in position 2 of the query above which we want to be the value */
@@ -110,6 +112,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(2, method);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
+            con.close();
             if (results != null) {
                 /* The node label is in position 1 which we want to be the key and the
                  * sequence is in position 2 of the query above which we want to be the value */
@@ -137,6 +140,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(1, reconId);
             statement.setString(2, nodeLabel);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             return false;
@@ -172,6 +176,7 @@ public class SeqModel extends BaseModel {
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.executeUpdate();
+            con.close();
         } catch (Exception e) {
         }
     }
@@ -197,6 +202,7 @@ public class SeqModel extends BaseModel {
             if (results == null) {
                 return null;
             }
+            con.close();
             return getStrList(results);
         } catch (Exception e) {
             System.out.println("Unable to get matches for motifs: " + motif);

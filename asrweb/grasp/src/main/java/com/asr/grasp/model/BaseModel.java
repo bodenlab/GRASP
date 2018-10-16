@@ -40,6 +40,7 @@ public class BaseModel {
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -62,6 +63,7 @@ public class BaseModel {
             // Sets the
             statement.setInt(1, id);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -83,6 +85,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, value);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -104,6 +107,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, id);
             ResultSet results = statement.executeQuery();
+            con.close();
             return getId(results);
         } catch (Exception e) {
             System.out.println(e);
@@ -129,6 +133,7 @@ public class BaseModel {
                 idx ++;
             }
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -153,6 +158,7 @@ public class BaseModel {
             // Sets the array of ids
             statement.setArray(1, sqlArray);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -178,6 +184,7 @@ public class BaseModel {
             // Sets the array of ids
             statement.setArray(1, sqlArray);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -202,6 +209,7 @@ public class BaseModel {
             // Sets the array of ids
             statement.setArray(1, (Array) ids);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -231,6 +239,7 @@ public class BaseModel {
             // ID is in the where clause thus at the end.
             statement.setInt(index, id);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -256,6 +265,7 @@ public class BaseModel {
             statement.setString(1, value);
             statement.setInt(2, id);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -319,6 +329,7 @@ public class BaseModel {
             statement.setInt(values.size() + 1, id);
             // Execute the query
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -346,6 +357,7 @@ public class BaseModel {
             statement.setString(values.size() + 1, id);
             // Execute the query
             statement.executeQuery();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -454,6 +466,7 @@ public class BaseModel {
             statement.setInt(1, id);
             // Deletes the record from the model
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -473,6 +486,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             // Deletes the record from the model
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -516,7 +530,9 @@ public class BaseModel {
             // Sets the
             statement.setInt(userIdx, userId);
             statement.setInt(reconIdx, reconId);
-            return statement.executeQuery();
+            ResultSet results = statement.executeQuery();
+            con.close();
+            return results;
         } catch (Exception e) {
             System.out.println(e);
             return null;
@@ -534,6 +550,7 @@ public class BaseModel {
             statement.setInt(userIdx, userId);
             statement.setInt(reconIdx, reconId);
             statement.executeUpdate();
+            con.close();
             return null;
         } catch (Exception e) {
             System.out.println(e);

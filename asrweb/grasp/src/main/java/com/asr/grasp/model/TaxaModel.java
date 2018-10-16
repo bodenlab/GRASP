@@ -26,7 +26,6 @@ public class TaxaModel extends BaseModel {
      */
     public String getTaxa(ArrayList<Integer> ids) {
         ResultSet results = query("SELECT JSON_AGG(taxa) FROM util.taxa WHERE id IN (" + buildStrFromArr(ids) + ");");
-        System.out.println("SELECT JSON_AGG(taxa) FROM util.taxa WHERE id IN (" + buildStrFromArr(ids) + ");");
         try {
             if (results.next()) {
                 return results.getString(1);
@@ -174,6 +173,7 @@ public class TaxaModel extends BaseModel {
                     System.out.println("Unable to execute update for: " + key );
                 }
             }
+            con.close();
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return "Unable to process all inserts.";

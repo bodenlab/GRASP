@@ -176,6 +176,7 @@ public class ReconstructionsModel extends BaseModel {
 
             // Deletes the record from the model
             statement.executeUpdate();
+            con.close();
             return null;
         } catch (Exception e) {
             return "recon.insert.fail";
@@ -324,6 +325,7 @@ public class ReconstructionsModel extends BaseModel {
             statement.setInt(2, userId);
 
             ResultSet rawRecons = statement.executeQuery();
+            con.close();
             // If we have an entry convert it to the correct format.
             if (rawRecons.next()) {
                 return createFromDB(rawRecons);
@@ -355,8 +357,9 @@ public class ReconstructionsModel extends BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, reconLabel);
             statement.setInt(2, userId);
-
-            return getId(statement.executeQuery());
+            int reconId = getId(statement.executeQuery());
+            con.close();
+            return reconId;
         } catch (Exception e) {
             System.out.println(e);
         }

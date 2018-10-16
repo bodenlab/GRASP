@@ -1341,7 +1341,9 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
     depth += 1;
     phylo_options.tree.node_count += 1;
   }
+  node[T_EXTANT] = false;
   if (node[T_CHILDREN] == undefined) {
+    node[T_EXTANT] = true;
     // Check if this is the longest branch
     if (node[T_DIST_FROM_ROOT]
         > phylo_options.tree.longest_distance_from_root_to_extant) {

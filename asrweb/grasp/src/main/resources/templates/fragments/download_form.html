@@ -70,6 +70,7 @@
                                 </div>
 
                                 <div class="col-sm-10" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                    <input id="check-seq-joint" name="check-seq-joint" class="dlopt" type="checkbox"></input>
                                     <label>
                                         Consensus sequences of Joint Reconstructions (.fasta)
                                     </label>
@@ -137,7 +138,11 @@
                     });
                     $("#check-seq-joint").change(function(){
                         check_disabled_state_dlbtn();
+                          graphs = getSelectedValuesForDownload("multiselect-download"); //$('select#multiselect-download').val();
+                          console.log(graphs);
+                          $("#graphs-input").val(JSON.stringify(graphs));
                         if ($("#check-seq-joint").prop("checked")) {
+
                             if (graph_array.length > 5) {
                                 $("#download-warning").removeClass('collapse');
                             }
@@ -164,7 +169,8 @@
                           if ($(this).prop("checked")) {
                             $("#download-btn").removeClass("disabled");
                             $("#graphs-input").val("");
-                            let graphs = getGraphsForDownload();
+                            graphs = getSelectedValuesForDownload("multiselect-download"); //$('select#multiselect-download').val();
+                            console.log(graphs);
                             $("#graphs-input").val(JSON.stringify(graphs));
                           }
                         });

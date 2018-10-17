@@ -3,6 +3,9 @@ package com.asr.grasp.controller;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.utils.Defines;
 import dat.POGraph;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -141,6 +144,25 @@ public class SeqController {
      */
     public ArrayList<String> getAllSeqLabels(int reconId, int method) {
        return seqModel.getAllSeqLabels(reconId, method);
+    }
+
+    /**
+     * Saves an ancestor node to a file.
+     * @param fileWriter
+     * @param label
+     * @param reconId
+     * @param reconMethod
+     * @throws IOException
+     */
+    public void saveAncestorToFile(BufferedWriter fileWriter, String label, int reconId, int reconMethod) throws IOException {
+
+        String seq = seqModel.getSeqByLabel(label, reconId, reconMethod);
+        if (seq != null) {
+            fileWriter.write(">" + label);
+            fileWriter.newLine();
+            fileWriter.write(seq);
+            fileWriter.newLine();
+        }
     }
 
     /**

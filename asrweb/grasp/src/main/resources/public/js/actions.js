@@ -18,6 +18,11 @@ $(function() {
   })
 });
 
+let getSelectedValuesForDownload = function (elemId) {
+    let vals = $('select#' + elemId).val();
+    return vals;
+}
+
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
 
     /**

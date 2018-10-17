@@ -12,6 +12,8 @@ import com.asr.grasp.utils.Defines;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -935,18 +937,25 @@ public class GraspApplication extends SpringBootServletInitializer {
             asr.saveConsensusMarginal(
                     tempDir + "/" + request.getParameter("joint-node") + "_consensus");
         }
-        if (request.getParameter("check-seq-joint-single") != null && request
-                .getParameter("check-seq-joint-single").equalsIgnoreCase("on")) {
-            asr.saveConsensusJoint(
-                    tempDir + "/" + request.getParameter("joint-node") + "_consensus",
-                    request.getParameter("joint-node"));
+        if (ancs.length > 0) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/joint_recon.fa", false));
+            for (String nodeLabel: ancs) {
+                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT);
+            }
+            bw.close();
         }
-//		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
-//			asr.saveMarginalDistribution(tempDir + "/", "msa");
-        if (request.getParameter("check-seq-joint") != null && request
-                .getParameter("check-seq-joint").equalsIgnoreCase("on")) {
-            asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
-        }
+//        if (request.getParameter("check-seq-joint-single") != null && request
+//                .getParameter("check-seq-joint-single").equalsIgnoreCase("on")) {
+//            asr.saveConsensusJoint(
+//                    tempDir + "/" + request.getParameter("joint-node") + "_consensus",
+//                    request.getParameter("joint-node"));
+//        }
+////		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
+////			asr.saveMarginalDistribution(tempDir + "/", "msa");
+//        if (request.getParameter("check-seq-joint") != null && request
+//                .getParameter("check-seq-joint").equalsIgnoreCase("on")) {
+//            asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
+//        }
 //		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
 //			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
 

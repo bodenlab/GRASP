@@ -68,18 +68,13 @@
                                     </label>
                                     <input type="hidden" name="node-label" class="full-node-label disabled margopt" value="root" />
                                 </div>
-                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of inferred ancestor (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                    <input id="check-seq-joint-single" class="dlopt" name="check-seq-joint-single" type="checkbox"></input>
-                                    <label for="check-seq-joint-single">
-                                        Consensus sequence of joint <span class="node-label">Root</span> (.fasta)
+
+                                <div class="col-sm-10" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                    <label>
+                                        Consensus sequences of Joint Reconstructions (.fasta)
                                     </label>
-                                    <input type="hidden" name="joint-node" class="full-node-label" value="root" />
-                                </div>
-                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                    <input id="check-seq-joint" name="check-seq-joint" class="dlopt" type="checkbox"></input>
-                                    <label for="check-seq-joint">
-                                        Consensus sequences of added joint reconstructions (.fasta)
-                                    </label>
+                                    <select id="multiselect-download" multiple="multiple">
+                                    </select>
                                 </div>
                                <!-- <hr />
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the alignment sequence graph.">
@@ -104,9 +99,13 @@
                     <div class="row col-xs-12">
                         <div class="col-xs-12 alert alert-warning collapse" role="alert" id="download-warning"><label>These results may take some time to download...</label><br></br><br></br><label>Downloading all ancestral joint graphs can result in a large download and may take time.</label></div>
                     </div>
+
                 </form>
+
                 <script type="text/javascript" th:inline="javascript">
                 /*<![CDATA[*/
+
+
                 let addedGraphs = false;
                     $("#check-pog-joint").change(function(){
                         check_disabled_state_dlbtn();

@@ -28,7 +28,7 @@ public class SeqModel extends BaseModel {
 
 
     /**
-     * Saves a consensus sequency
+     * Saves a consensus sequence
      * @param reconId
      * @param nodeLabel
      * @param seq
@@ -83,7 +83,45 @@ public class SeqModel extends BaseModel {
         return null;
     }
 
-
+    /**
+     * Function that gets all consensus sequences for a given reconstruction and
+     * method. Method can either be Joint, Marginal or All.
+     *
+     * @param reconId
+     * @param method
+     * @return
+     */
+    public ArrayList<String> getAllSeqLabels (int reconId, int method) {
+        String query;
+        try {
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement;
+            // If they haven't defined a method then we want to return both joint and marginal
+            if (method == Defines.ALL) {
+                query = "SELECT node_label FROM web.sequences WHERE r_id=? AND s_type!=?;";
+                method = Defines.EXTANT;
+            } else if (method == Defines.JOINT || method == Defines.MARGINAL || method == Defines.EXTANT) {
+                query = "SELECT node_label FROM web.sequences WHERE r_id=? AND s_type=?;";
+            } else {
+                return null;
+            }
+            statement = con.prepareStatement(query);
+            statement.setInt(1, reconId);
+            statement.setInt(2, method);
+            // Run the query and return a HashMap with nodeLabels as keys and String as values
+            ResultSet results = statement.executeQuery();
+            con.close();
+            if (results != null) {
+                /* The node label is in position 1 which we want to be the key and the
+                 * sequence is in position 2 of the query above which we want to be the value */
+                return getStrList(results);
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to get String Map, issue with Statment in getAllConsensus");
+        }
+        return null;
+    }
     /**
      * Function that gets all consensus sequences for a given reconstruction and
      * method. Method can either be Joint, Marginal or All.

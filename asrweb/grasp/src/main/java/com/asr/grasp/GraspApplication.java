@@ -259,6 +259,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
 
         mav.addObject("ids", ids.toString());
+        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+
         return mav;
     }
 
@@ -648,7 +650,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
         mav.addObject("ids", ids.toString());
-
+        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
         return mav;
     }
 

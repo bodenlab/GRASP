@@ -133,6 +133,15 @@ public class SeqController {
         return seqModel.hasReconsAncestorsBeenSaved(reconId);
     }
 
+    /**
+     * Gets all the labels so they can be displayed for download.
+     * @param reconId
+     * @param method
+     * @return
+     */
+    public ArrayList<String> getAllSeqLabels(int reconId, int method) {
+       return seqModel.getAllSeqLabels(reconId, method);
+    }
 
     /**
      * ------------------------------------------------------------------------

@@ -6,6 +6,18 @@
  *  ------------------------------------------------------------------
  */
 
+$(function() {
+  $('#multiselect-download').multiselect({
+    includeSelectAllOption: true,
+    selectAllJustVisible: false,
+    enableFiltering: true,
+    selectAllValue: 'select-all-value',
+    onSelectAll: function() {
+      alert('This may take longer and will be a larger file.');
+    }
+  })
+});
+
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
 
     /**

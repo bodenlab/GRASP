@@ -22,11 +22,11 @@ var phylo_options = {
     collapse_under: [],
     selected_node: null,
     collapsed_selection: null,
-    all_nodes: new Array(),
-    all_nodes_taxonomy: new Array(),
-    all_branches: new Array(),
+    all_nodes: [],
+    all_nodes_taxonomy: [],
+    all_branches: [],
     nodes_sorted: [], // keeps track of sorted nodes (based on increasing evolutionary distance)
-    extants: new Array(),
+    extants: [],
     min_x: 0,
     additive: true, // Whether or not we want to display the branches as additive
     node_instep: 0,
@@ -102,7 +102,7 @@ var phylo_options = {
       "#A3628D", "#83AC9C", "#F1CC96", "#3486C2", "#9E6288"],
     hist_height: 200,
   }
-}
+};
 
 /**
  * The context menu, has the names for the events that a user can perform.
@@ -152,14 +152,14 @@ var make_tree_scale = function (phylo_options) {
   .attr("x", 25)
   .attr("y", 0)
   .attr("height", phylo_options.svg_info.height)
-  .style("fill", "url(#gradient)")
+  .style("fill", "url(#gradient)");
 
   phylo_options.group.append("g")
   .attr("class", "axis")
   .attr("stroke", phylo_options.branch_stroke)
   .attr("transform", "translate(" + 30 + ",0)")
   .attr("stroke-width", "0px")
-  .call(y_axis)
+  .call(y_axis);
 
   phylo_options.legend.colour_scale = d3.scale.linear()
   .domain(linspace(0, phylo_options.svg_info.height, 2))
@@ -168,7 +168,7 @@ var make_tree_scale = function (phylo_options) {
   phylo_options.y_scale = y_scale;
   phylo_options.x_scale = x_scale;
   return phylo_options;
-}
+};
 
 /**
  * Helper function for the scaling from:
@@ -208,7 +208,7 @@ var setup_phylo_svg = function (phylo_options) {
   phylo_options.svg = svg;
 
   return phylo_options;
-}
+};
 
 var resize_phylo_height = function () {
   for (var e in phylo_options.tree.extants) {
@@ -223,7 +223,7 @@ var resize_phylo_height = function () {
   phylo_options.legend.height = phylo_options.svg_info.height + 0.25
       * phylo_options.tree.extant_label_height;
 
-}
+};
 
 /**
  * Appends a circle to the group element.
@@ -460,7 +460,7 @@ var draw_phylo_circle = function (group, node, n) {
 
   });
 
-}
+};
 
 /**
  * Appends node text to the group element.
@@ -518,7 +518,7 @@ var draw_phylo_text = function (group, node, n) {
   .text(function () {
     return node[T_NAME];
   });
-}
+};
 
 /**
  * Appends a circle to the group element to allow for the
@@ -566,7 +566,7 @@ var draw_phylo_under_circle = function (group, node, n) {
     }
   })
   .attr("stroke_width", options.stroke_width);
-}
+};
 
 /**
  * Draws the nodes for the phylo tree.
@@ -595,7 +595,7 @@ var draw_phylo_nodes = function (phylo_options, initial) {
     }
 
   }
-}
+};
 
 /**
  * Changes the node text to be visible when a user hovers over a node.
@@ -628,7 +628,7 @@ var on_node_mouseover = function (node_selected) {
     node_selected.attr("stroke-width", "0px");
     d3.select("#text-" + id).attr("opacity", 1);
   }
-}
+};
 
 /**
  * Changes the node back to the original colour and size.
@@ -670,7 +670,7 @@ var on_node_mouseout = function (node_selected) {
     d3.select("#text-" + id).attr("opacity", 0);
   }
 
-}
+};
 
 /**
  * Gets called when a user right clicks on a node.
@@ -685,7 +685,7 @@ var on_node_mouseout = function (node_selected) {
 var on_contextmenu = function (node_name, node_fill, node_id) {
   d3.event.preventDefault();
   menu(d3.mouse(this)[0], d3.mouse(this)[1], node_id);
-}
+};
 
 /**
  * Appends text to the branch as it is an additive tree element.
@@ -710,7 +710,7 @@ var draw_branch_text = function (group, branch) {
   .attr("transform", "translate(" + branch[B_X1] + 5 + "," + (branch[B_Y1]
       + branch[B_Y2]) / 2 + ") rotate(90) translate(1,-5)")
   .attr("opacity", 0);
-}
+};
 
 /**
  * User can select to toggle the branch text on or off
@@ -729,7 +729,7 @@ var toggle_branch_text = function () {
     document.getElementById(
         'branch-text-toggle').innerHTML = "View branch length | ON";
   }
-}
+};
 
 var toggle_node_text = function () {
   var button_text = document.getElementById('node-text-toggle').innerHTML.split(
@@ -747,7 +747,7 @@ var toggle_node_text = function () {
     document.getElementById(
         'node-text-toggle').innerHTML = "View node labels | ON";
   }
-}
+};
 
 var toggle_additive = function () {
   var additive = document.getElementById('additive-toggle').innerHTML.split(
@@ -761,7 +761,7 @@ var toggle_additive = function () {
   }
   clear_svg();
   refresh_tree();
-}
+};
 
 var toggle_extant_text = function () {
   var button_text = document.getElementById(
@@ -777,7 +777,7 @@ var toggle_extant_text = function () {
     document.getElementById(
         'extant-text-toggle').innerHTML = "View extant labels | ON";
   }
-}
+};
 
 /**
  * Draws the branches of the phylo tree
@@ -804,7 +804,7 @@ var draw_phylo_branches = function (phylo_options, initial) {
       }
     }
   }
-}
+};
 
 /**
  * Makes an array of "depths" from the logest distance
@@ -823,14 +823,14 @@ var make_depth_array = function (phylo_options) {
 
   phylo_options.depth_array = depth_array;
   return phylo_options;
-}
+};
 
 var set_phylo_params = function (tree_div, tree_string) {
   phylo_options.svg_info.div_id = tree_div;
   phylo_options.svg_info.width = '100%';//window.innerWidth - 200;
   phylo_options.tree_string = tree_string;
   phylo_options = setup_phylo_svg(phylo_options);
-}
+};
 
 var clear_svg = function () {
   var group = phylo_options.group;
@@ -840,7 +840,7 @@ var clear_svg = function () {
   group.selectAll("rect").remove();
   group.selectAll("circle").remove();
 
-}
+};
 
 /**
  * Sets up the tree and calls the other functions
@@ -925,11 +925,22 @@ var run_phylo_tree = function () {
   draw_phylo_branches(phylo_options, true);
   draw_phylo_nodes(phylo_options, true);
   assign_num_children(phylo_options.tree.root);
-  collapse_subtree(phylo_options.tree.root,
-      phylo_options.tree.initial_node_num);
+  collapse_subtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 
+  let ansc = [];
+  for (let n in phylo_options.tree.all_nodes) {
+    if (!phylo_options.tree.all_nodes[n][T_EXTANT]) {
+      ansc.push(phylo_options.tree.all_nodes[n][T_NAME]);
+    }
+  }
+  initDownloadOptions(ansc);
+};
+
+let initDownloadOptions = function (options) {
+  $.map(options, function (x) {
+    return $('#multiselect-download').append("<option>" + x + "</option>");
+  });
 }
-
 
 /**
  *  Collapse the subtree from node, leaving num_expanded leaves or collapsed nodes in total
@@ -992,7 +1003,7 @@ var populate_node_list = function (node, nodes) {
     nodes = populate_node_list(node[T_CHILDREN][c], nodes);
   }
   return nodes;
-}
+};
 
 var quicksort_evol_dist = function (list, left, right) {
 
@@ -1007,7 +1018,7 @@ var quicksort_evol_dist = function (list, left, right) {
   }
 
   return list;
-}
+};
 
 var partition = function (list, pivot, left, right) {
   var pivot_value = list[pivot];
@@ -1021,13 +1032,13 @@ var partition = function (list, pivot, left, right) {
   }
   swap(list, right, index);
   return index;
-}
+};
 
 var swap = function (list, i, j) {
   var tmp = list[i];
   list[i] = list[j];
   list[j] = tmp;
-}
+};
 
 /**
  * Iterate through tree from node, collapsing any nodes not in collapse_list
@@ -1040,7 +1051,7 @@ var inorder_collapse = function (node, collapse_list) {
       // If this node isn't in the expand list
 
       if (collapse_list.indexOf(node[N_NAME]) == -1) {
-        set_children_collapsed(node)
+        set_children_collapsed(node);
         phylo_options.tree.collapse_under.push(node);
       } else {
         for (var c in node[T_CHILDREN]) {
@@ -1051,17 +1062,17 @@ var inorder_collapse = function (node, collapse_list) {
     }
   }
 
-}
+};
 
 /**
  * Expand under a certain node while collapsing all the other nodes
  */
 
 var expand_and_collapse_others = function (node) {
-  var parent_list = []
+  var parent_list = [];
   var expand_list = get_parents_to_root(node, parent_list);
 
-  inorder_collapse(phylo_options.tree.root, expand_list)
+  inorder_collapse(phylo_options.tree.root, expand_list);
   var ind = phylo_options.tree.collapse_under.indexOf(node);
   if (ind == -1) {
     return;
@@ -1071,10 +1082,10 @@ var expand_and_collapse_others = function (node) {
   node[T_TERMINATED] = false;
   node[T_COLLAPSED] = false;
 
-  collapse_subtree(node, phylo_options.tree.expand_node_num)
+  collapse_subtree(node, phylo_options.tree.expand_node_num);
   refresh_tree()
 
-}
+};
 
 /**
  * Get a list of the nodes leading to the root from a certain node
@@ -1086,11 +1097,11 @@ var get_parents_to_root = function (node, parent_list) {
   if (node.parent == undefined) {
   }
   else {
-    parent_list.push(node.parent.name)
+    parent_list.push(node.parent.name);
     get_parents_to_root(node.parent, parent_list)
   }
   return parent_list
-}
+};
 
 /**
  * Returns if there exists values that intersect arr1 and arr2
@@ -1110,7 +1121,7 @@ var is_intersect = function (arr1, arr2) {
     }
   }
   return false;
-}
+};
 
 /**
  *  Redraw the tree structure stored in phylo_options.tree
@@ -1175,7 +1186,7 @@ var redraw_phylo_tree = function () {
 
   draw_phylo_nodes(phylo_options, false);
 
-}
+};
 
 /**
  * Assigns the parent nodes based on the x coords of the children.
@@ -1191,7 +1202,7 @@ var assign_inner_x_coords = function (node, phylo_options) {
   if (node[T_IS_ROOT] != true) {
     assign_inner_x_coords(node[T_PARENT], phylo_options);
   }
-}
+};
 
 var assign_extant_count = function (node) {
   /* Assign the number of extants under this node by cumulatively adding from it's children */
@@ -1211,7 +1222,7 @@ var assign_extant_count = function (node) {
   }
   node[T_NUM_EXTANTS] = num_extants;
   return node[T_NUM_EXTANTS];
-}
+};
 
 /**
  * Assigns the x coords of leafs/terminating nodes.
@@ -1249,7 +1260,7 @@ var assign_leaf_x_coords = function (node, phylo_options) {
     node[T_CHILDREN][n][T_PARENT] = node;
     assign_leaf_x_coords(node[T_CHILDREN][n], phylo_options);
   }
-}
+};
 
 /**
  * Make the root node
@@ -1273,7 +1284,7 @@ let makeRootNode = function (node) {
     node[T_EXTANT] = false;
   }
   return node;
-}
+};
 
 
 /**
@@ -1281,7 +1292,7 @@ let makeRootNode = function (node) {
  */
 var make_child = function (node, left, id) {
   var child = [];
-  child[T_ID] = node[T_NAME].split(/[._-]+/)[0];
+  child[T_ID] = formatTreeNodeId(node[T_NAME]);
   child[T_LEFT] = left;
   child[T_NAME] = node[T_NAME];
   child[T_Y] = node[T_Y];
@@ -1306,7 +1317,7 @@ var make_child = function (node, left, id) {
   }
 
   return child;
-}
+};
 
 /**
  * Helper function that formats a node ID.
@@ -1314,8 +1325,10 @@ var make_child = function (node, left, id) {
  * @returns {*|string}
  */
 let formatTreeNodeId = function (nodeLabel) {
-  return nodeLabel.split(/[._-]+/)[0];
-}
+  let h = nodeLabel.split(/[._-|]+/);
+  let k = h.join('');
+  return k;
+};
 
 /**
  * Before we can assign depths need to first determine the longest
@@ -1374,7 +1387,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
 
     get_distance_from_root(node[T_CHILDREN][n], depth, phylo_options, initial);
   }
-}
+};
 
 /**
  *
@@ -1410,7 +1423,7 @@ var assign_num_children = function (node) {
     }
     return assign_num_children(node[T_PARENT]);
   }
-}
+};
 
 /**
  * Recur one more time and add all the children.
@@ -1469,7 +1482,7 @@ var add_children_nodes = function (node, initial) {
   for (var n in node[T_CHILDREN]) {
     add_children_nodes(node[T_CHILDREN][n], initial);
   }
-}
+};
 
 /**
  * Assign node coods updates the node x and y coords
@@ -1522,8 +1535,8 @@ var assign_node_coords = function (node, depth) {
     }
   }
   // Return after recurring.
-  return;
-}
+
+};
 
 /**
  * Parsing the newick format of a tree to JSON.
@@ -1665,7 +1678,7 @@ function contextMenu() {
     }
     rescale = true;
     return menu;
-  }
+  };
 
   // Automatically set width, height, and margin;
   function scaleItems() {
@@ -1759,7 +1772,7 @@ var context_menu_action = function (call, node_fill, node_id) {
     perform_marginal(call.attr("id"), node_fill);
   }
 
-}
+};
 
 /*
 var show_expand_collapse_node = function (node) {
@@ -1792,7 +1805,7 @@ var set_children_collapsed = function (node) {
   for (var n in node[T_CHILDREN]) {
     set_children_collapsed(node[T_CHILDREN][n]);
   }
-}
+};
 
 /**
  * Sets all the children of a node back to being not collapsed.
@@ -1805,7 +1818,7 @@ var set_children_un_collapsed = function (node) {
     }
     set_children_un_collapsed(node[T_CHILDREN][n]);
   }
-}
+};
 
 var set_children_un_terminated = function (node) {
   node[T_TERMINATED] = false;
@@ -1813,7 +1826,7 @@ var set_children_un_terminated = function (node) {
   for (var n in node[T_CHILDREN]) {
     set_children_un_terminated(node[T_CHILDREN][n]);
   }
-}
+};
 
 /**
  * Indicate that the node has been selected, and set all other nodes to be not selected (boolean flag node param).
@@ -1828,7 +1841,7 @@ var select_node = function (node) {
       return;
     }
   }
-}
+};
 
 /**
  * Tress Drawing algorithm using buchheim method.
@@ -1878,7 +1891,7 @@ var assign_depth_from_y = function (num, arr) {
   }
   return curr;
 
-}
+};
 
 /**
  * The main function which assigns the node x and y coords.
@@ -1931,7 +1944,7 @@ var setup = function (node, depth) {
   }
 
   return node;
-}
+};
 
 /**
  * add mods is a second walk through of the tree.
@@ -1967,8 +1980,8 @@ var add_mods = function (node, modsum) {
   // Add the node to a list of nodes so that we can just draw all
   // in a single function that itterates over the array.
   phylo_options.tree.tree_nodes.push(node);
-  return;
-}
+
+};
 
 var contour = function (left, right, max_offset, left_offset, right_offset,
     left_outer, right_outer) {
@@ -2015,7 +2028,7 @@ var contour = function (left, right, max_offset, left_offset, right_offset,
   //   'lo': left_outer,
   //   'ro': right_outer
   // };
-}
+};
 
 /**
  * Helper function which returns the thread of the next node
@@ -2033,7 +2046,7 @@ var next_left = function (node) {
     return node[T_CHILDREN][0];
   }
   return undefined;
-}
+};
 
 /**
  * Similar to the next_left function.
@@ -2046,7 +2059,7 @@ var next_right = function (node) {
     return node[T_CHILDREN][1];
   }
   return undefined;
-}
+};
 
 /**
  * fix_subtrees updates the subtrees of a node.
@@ -2074,8 +2087,8 @@ var fix_subtrees = function (left, right) {
   var ro = contours[T_RO];
   var lo = contours[T_LO];
   var li = contours[T_LI];
-  var left_offset = contours[T_LEFT_OFFSET]
-  var right_offset = contours[T_RIGHT_OFFSET]
+  var left_offset = contours[T_LEFT_OFFSET];
+  var right_offset = contours[T_RIGHT_OFFSET];
 
   diff += 1;
   diff += (right[T_RAW_X] + diff + left[T_RAW_X]) % 2;
@@ -2095,7 +2108,7 @@ var fix_subtrees = function (left, right) {
   }
 
   return (left[T_RAW_X] + right[T_RAW_X]) / 2;
-}
+};
 
 var refresh_tree = function () {
   if (document.getElementById("additive-toggle").innerHTML.split(" | ")[1] != "Additive") {
@@ -2133,4 +2146,4 @@ var refresh_tree = function () {
       $(this).attr("opacity", 1);
     });
   }
-}
+};

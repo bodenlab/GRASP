@@ -20,7 +20,13 @@ $(function() {
 
 let getSelectedValuesForDownload = function (elemId) {
     let vals = $('select#' + elemId).val();
-    return vals;
+    var allSelected = $("#multiselect-download option:not(:selected)").length == 0;
+    if (allSelected) {
+        graphs = "all";
+    } else {
+        graphs = JSON.stringify(graphs);
+    }
+    return graphs;
 }
 
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {

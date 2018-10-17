@@ -170,8 +170,9 @@
                             $("#download-btn").removeClass("disabled");
                             $("#graphs-input").val("");
                             graphs = getSelectedValuesForDownload("multiselect-download"); //$('select#multiselect-download').val();
+
                             console.log(graphs);
-                            $("#graphs-input").val(JSON.stringify(graphs));
+                            $("#graphs-input").val(graphs);
                           }
                         });
                         addedGraphs = true;

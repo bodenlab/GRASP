@@ -165,6 +165,32 @@ public class SeqController {
         }
     }
 
+
+    /**
+     * Gets a sequence and returns a JSON formatted version. This enables us to use it on
+     * the front end.
+     *
+     * @param reconId
+     * @param label
+     * @param reconMethod
+     */
+    public JSONArray getSeqAsJson(int reconId, String label, int reconMethod) {
+        String seq = seqModel.getSeqByLabel(label, reconId, reconMethod);
+        if (seq != null) {
+            JSONArray seqJSON = new JSONArray();
+            for (int x = 0; x < seq.length(); x ++) {
+                JSONArray position = new JSONArray();
+                if (seq.charAt(x) != '-') {
+                    position.put(Defines.G_LABEL, seq.charAt(x));
+                    position.put(Defines.G_X, x);
+                    position.put(Defines.G_ID, x);
+                    position.put(Defines.G_CONSENSUS, true);
+                }
+            }
+            return seqJSON;
+        }
+        return null;
+    }
     /**
      * ------------------------------------------------------------------------
      *          The following are to set the test env.

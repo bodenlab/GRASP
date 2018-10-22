@@ -29,33 +29,39 @@
       </div>
     </div>
     <div id="results" class="container-fluid">
-
+      <div id="motif-warning-alert" class="alert alert-warning alert-dismissible hidden"
+           role="alert">
+        <button type="button" class="close" onClick="onMsgClose('#motif-warning-alert')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <p id="motif-warning-text"></p>
+      </div>
       <div id="taxonomy-info-alert" class="alert alert-info hidden" role="alert">
         <p>Attempting to get taxonomic information from NCBI...</p>
       </div>
       <div id="taxonomy-success-alert" class="alert alert-success alert-dismissible hidden"
            role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <button type="button" class="close" onClick="onMsgClose('#taxonomy-success-alert')">
           <span aria-hidden="true">&times;</span>
         </button>
         <p>Success! Left-click on phylogenetic nodes to see taxonomic information.</p>
       </div>
       <div id="taxonomy-warning-alert" class="alert alert-warning alert-dismissible hidden"
            role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <button type="button" class="close" onClick="onMsgClose('#taxonomy-warning-alert')">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div id="obsolete-warning-alert" class="alert alert-warning alert-dismissible hidden"
            role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <button type="button" class="close" onClick="onMsgClose('#obsolete-warning-alert')">
           <span aria-hidden="true">&times;</span>
         </button>
         <hr></hr>
       </div>
       <div id="taxonomy-failed-alert" class="alert alert-danger alert-dismissible hidden"
            role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <button type="button" class="close" onClick="onMsgClose('#taxonomy-failed-alert')">
           <span aria-hidden="true">&times;</span>
         </button>
         <p>Could not find taxonomic information.</p>
@@ -87,9 +93,15 @@
           </button>
         </div>
         <div>
-          <input type="text" class="form-input col-xs-8 no-padding" style="height: 2.1em;"
+          <input type="text" class="form-input col-xs-4 no-padding" style="height: 2.1em;"
                  placeholder="Search for terms (use wildcard *)" id="search" name="search"
                  oninput="search_tree(this.value, true, false);"/>
+          <button type="button" id="find-motif" class="btn btn-default col-xs-2"
+                  onclick="getNodesWithMotif()">Find motif
+          </button>
+          <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
+                 placeholder="Motif (use wildcard *)" id="find-motif-value" name="motif-value"/>
+
           <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2"
                   onclick="annotateTaxonomy()">Annotate taxonomy
           </button>
@@ -227,6 +239,7 @@
       </div>
     </div>
   </div>
+
   <div style="display: none;">
     <script type="text/javascript" th:inline="javascript">
 

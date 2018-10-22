@@ -70,6 +70,52 @@ create table if not exists web.users
 );
 
 
+create table if not exists web.consensus
+(
+  id serial not null
+    constraint consensus_pkey
+    primary key,
+  r_id serial not null
+    constraint consensus_reconstructions_id_key
+    references web.reconstructions,
+  node_label varchar not null,
+  seq varchar not null,
+  method integer default 1,
+  updated_at timestamp with time zone default timezone('AEST'::text, now())
+
+)
+;
+
+alter table web.consensus owner to dev
+;
+
+create unique index if not exists consensus_id_uindex
+  on web.consensus (id)
+;
+
+create or replace function web.updated_at_reset() returns trigger
+language plpgsql
+as $$
+BEGIN
+  NEW.updated_at = timezone('AEST' :: text, now());
+  RETURN NEW;
+END;
+$$
+;
+
+alter function web.updated_at_reset() owner to web
+;
+
+create trigger web.updated_at_reset
+  before update
+  on web.consensus
+  for each row
+execute procedure web.updated_at_reset()
+;
+
+
+
+
 create table if not exists web.groups
 (
   id         serial       not null

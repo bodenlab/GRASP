@@ -6,6 +6,39 @@
  *  ------------------------------------------------------------------
  */
 
+$(function() {
+  $('#multiselect-download').multiselect({
+    includeSelectAllOption: true,
+    selectAllJustVisible: false,
+    enableFiltering: true,
+    selectAllValue: 'select-all-value'
+  })
+});
+
+/**
+ * Gets the items that a user has selected for download.
+ * Currently this just consists of the values in the Select Box (that the user
+ * has checked) for the joint reconstructions.
+ *
+ * @param elemId
+ * @returns {string}
+ */
+let getSelectedValuesForDownload = function (elemId) {
+    let vals = $('select#' + elemId).val();
+    for (let v in vals) {
+        if (vals[v] === "All") {
+            return "all";
+        }
+    }
+
+    if (vals.length > 20) {
+      alert('If you are selecting more than 20 please choose the select all option.');
+      return "all";
+    }
+    return JSON.stringify(vals);
+
+}
+
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
 
     /**
@@ -31,16 +64,16 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     set_inf_type(inf);
     set_phylo_params("#phylo-tree", recon);
     run_phylo_tree();
-    phylo_options.tree.selected_node.name = node;
+    // phylo_options.tree.selected_node[T_ID] = node;
     refresh_tree(); // to set height properly
-    selectedNode = phylo_options.tree.selected_node.name;
+    selectedNode = phylo_options.tree.selected_node[T_ID];
     refresh_elements();
     populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
-    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node.name)
-    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node.name.split("_")[0]];
-    poags.options.name_to_merged_id[phylo_options.tree.selected_node.name.split("_")[0]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID])
+    poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node[T_NAME]];
+    poags.options.name_to_merged_id[phylo_options.tree.selected_node[T_NAME]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
     redraw_poags();
     poags.retain_previous_position = true;
     refresh_elements();
@@ -53,9 +86,8 @@ var populate_search_node_list = function (nodes) {
     var ul = $('#node-id-menu');
     ul.empty();
     for (var n in nodes) {
-        var lbl = nodes[n].id.split("-")[1];
-        var els = lbl.split("N");
-        if (lbl[0] == 'N' && els.length > 1 && !isNaN(Number(els[1]))) {
+        var lbl = nodes[n][T_NAME];
+        if (lbl.length > 1) {
             // add to list
             var li = $('<li/>');
             var a = $('<a/>');
@@ -333,14 +365,14 @@ var reset_poag_stack = function () {
     document.getElementById('reset-button').disabled = true;
     for (var n in phylo_options.tree.all_nodes) {
         var node = phylo_options.tree.all_nodes[n];
-        if (!node.extent) {
-            d3.select('#fill-' + node.id).attr("stroke", phylo_options.legend.colour_scale(node.y));
-            d3.select('#fill-' + node.id).attr("fill", phylo_options.legend.colour_scale(node.y));
+        if (!node[T_EXTANT]) {
+            d3.select('#fill-' + node[G_ID]).attr("stroke", phylo_options.legend.colour_scale(node[T_Y]));
+            d3.select('#fill-' + node[G_ID]).attr("fill", phylo_options.legend.colour_scale(node[T_Y]));
         }
     }
     var cur_node = phylo_options.tree.selected_node;
-    d3.select('#fill-' + cur_node.id).attr("stroke", phylo_options.style.select_colour);
-    d3.select('#fill-' + cur_node.id).attr("fill", phylo_options.style.select_colour);
+    d3.select('#fill-' + cur_node[G_ID]).attr("stroke", phylo_options.style.select_colour);
+    d3.select('#fill-' + cur_node[G_ID]).attr("fill", phylo_options.style.select_colour);
     poags.multi.nodes = {};
     poags.multi.names = [];
     poags.merged.nodes = [];
@@ -349,8 +381,8 @@ var reset_poag_stack = function () {
     poags.single.nodes = {};
     poags = process_msa_data(poags);
     poags = process_edges(poags, poags.single.raw.msa, poags.root_poag_name, true);
-    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
-    poags = process_edges(poags, poags.single.raw.inferred, cur_node.name.split("_")[0], true, false);
+    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node[N_NAME], true, false);
+    poags = process_edges(poags, poags.single.raw.inferred, cur_node[N_NAME], true, false);
     redraw_poags();
 }
 
@@ -435,7 +467,7 @@ function getSVGString(svgNode) {
         // Add Children element Ids and Classes to the list
         var nodes = parentElement.getElementsByTagName("*");
         for (var i = 0; i < nodes.length; i++) {
-            var id = nodes[i].id;
+            var id = nodes[i][G_ID];
             if (!contains('#' + id, selectorTextArr))
                 selectorTextArr.push('#' + id);
             var classes = nodes[i].classList;

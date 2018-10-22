@@ -1,5 +1,6 @@
 package com.asr.grasp;
 
+import com.asr.grasp.controller.SeqController;
 import com.asr.grasp.controller.TaxaController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
@@ -7,9 +8,14 @@ import com.asr.grasp.controller.UserController;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
+import com.asr.grasp.utils.Defines;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import javax.print.DocFlavor.STRING;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -70,6 +76,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     @Autowired
     private TaxaController taxaController;
+
+    @Autowired
+    private SeqController seqController;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -254,6 +263,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
 
         mav.addObject("ids", ids.toString());
+        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+
         return mav;
     }
 
@@ -268,9 +279,19 @@ public class GraspApplication extends SpringBootServletInitializer {
         // owner id
         currRecon.setOwnerId(loggedInUser.getId());
 
+        // Save the reconstruction
         String err = reconController.save(loggedInUser, currRecon);
+
+        // We also want to save all joint recons
+        seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT));
+
+        // Also want to save all the extents into the db
+        seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap());
+
         // Reset the current recon
         currRecon = new ReconstructionObject();
+
+
         return err;
     }
 
@@ -464,11 +485,8 @@ public class GraspApplication extends SpringBootServletInitializer {
             return mav;
         }
 
-        // Set the owner to be the logged in user
-        currRecon.setOwnerId(loggedInUser.getId());
-
         // Save the reconstruction
-        String err = reconController.save(loggedInUser, currRecon);
+        String err = saveCurrRecon();
 
         // Check if we were able to save it
         if (err != null) {
@@ -550,6 +568,67 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(asr.getExtentNames()).toString();
     }
 
+
+    /**
+     * Gets a joint reconstruction to add to the recon graph.
+     *
+     * Returns a JSON string representation of the consensus sequence
+     * @param jsonString
+     * @return
+     */
+    @RequestMapping(value = "/getrecon" , method = RequestMethod.POST)
+    public @ResponseBody String getRecon(@RequestBody String jsonString) {
+        JSONObject dataJson = new JSONObject(jsonString);
+        // Check if we have anything to save
+        int reconMethod = Defines.JOINT;
+        if ((Boolean)dataJson.get("joint") != true) {
+            reconMethod = Defines.MARGINAL;
+        }
+        if (dataJson.getString("nodeLabel").equals(null)) {
+            return "You need to have a label.";
+        }
+        // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
+        JSONArray reconstructedAnsc = seqController.getSeqAsJson(currRecon.getId(), dataJson.getString("nodeLabel"), reconMethod);
+        if (reconstructedAnsc.equals(null)) {
+            // This means we weren't able to dine it in the DB so we need to run the recon as usual
+            return "Need to do this...";
+        }
+        return reconstructedAnsc.toString();
+    }
+
+    /**
+     * Gets the node ids that contain a certain motif. This updates the tree.
+     *
+     * Returns
+     * @param jsonString
+     * @return
+     */
+    @RequestMapping(value = "/motif" , method = RequestMethod.POST)
+    public @ResponseBody String getAncestorsMatchingMotif(@RequestBody String jsonString) {
+        // If there is no user logged in return that they need to log in and save a recon before
+        // performing motif searching.
+        if (loggedInUser == null) {
+            return new JSONObject().put("error", "User must be logged in to perform this action.").toString();
+        }
+        // If they don't have a saved reconstruction return that they need to save the reconstruction
+        if (currRecon.getId() == Defines.FALSE) {
+            return new JSONObject().put("error", "You need to save your reconstruction before performing this action.").toString();
+        }
+        // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
+        if (!seqController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
+            return new JSONObject().put("error", "Apologies but you need to re-run your reconstruction as we've made alot of changes to make this feature possible! Please re-run it (and save your reconstruction) and then this will be possible. Also please delete your old reconstruction so we have more space in our database, thank you :) ").toString();
+        }
+        // Otherwise we're able to run it
+        JSONObject dataJson = new JSONObject(jsonString);
+
+        // Check for the motif
+        String motif = dataJson.getString("motif");
+
+        //Return the list of matching node ids as a json array
+        return seqController
+                .findAllWithMotifJSON(reconController.getUsersAccess(currRecon.getId(), loggedInUser), currRecon.getId(), motif).toString();
+    }
+
     /**
      * Helper function to set the current reconstruction.
      */
@@ -578,8 +657,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Set some of the features that we'll need to be able to reconstruct
         // it correctly.
-        JSONObject ancestorJson = asr.getAncestralGraphJSON(asr
-                .getWorkingNodeLabel());
+        JSONObject ancestorJson = asr.getAncestralGraphJSON(asr.getWorkingNodeLabel());
         JSONObject msaGraph = asr.getMSAGraphJSON();
 
         // Set the current reconstruction
@@ -601,10 +679,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("username", loggedInUser.getUsername());
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
+
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
         mav.addObject("ids", ids.toString());
+        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
         return mav;
     }
+
 
     @RequestMapping(value = "/", method = RequestMethod.POST, params = {"getrecongraph"})
     public @ResponseBody
@@ -617,8 +698,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("tree", asr.getReconstructedNewickString());
 
         // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(),
-                asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
+        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
         model.addAttribute("graph", graphs);
 
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
@@ -710,6 +790,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = new ModelAndView("processing");
 
         // run reconstruction
+
         recon = new ASRThread(asr, infer, node, addGraph, logger);
 
         mav.addObject("username", loggedInUser.getUsername());
@@ -823,11 +904,16 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/", method = RequestMethod.GET, params = "download", produces = "application/zip")
     public void showForm(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        JSONArray graphs = new JSONArray(request.getParameter("graphs-input"));
-        String[] ancs = new String[graphs.length()];
-        for (int i = 0; i < graphs.length(); i++) {
-            ancs[i] = graphs.getString(i);
-            System.out.println(ancs[i]);
+        // Check if we are getting all the joint reconstructions
+        ArrayList<String> ancs = new ArrayList<>();
+        if (request.getParameter("graphs-input").equals("all")) {
+            ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
+        } else {
+            String tmp = request.getParameter("graphs-input");
+            JSONArray graphs = new JSONArray(tmp);
+            for (int i = 0; i < graphs.length(); i++) {
+                ancs.add(graphs.getString(i));
+            }
         }
 
         response.setStatus(HttpServletResponse.SC_OK);
@@ -873,10 +959,10 @@ public class GraspApplication extends SpringBootServletInitializer {
                 .getParameter("check-marg-dist").equalsIgnoreCase("on")) {
             asr.saveMarginalDistribution(tempDir, request.getParameter("joint-node"));
         }
-        if (request.getParameter("check-pog-joint") != null && request
-                .getParameter("check-pog-joint").equalsIgnoreCase("on")) {
-            asr.saveAncestors(tempDir + "/", ancs);
-        }
+//        if (request.getParameter("check-pog-joint") != null && request
+//                .getParameter("check-pog-joint").equalsIgnoreCase("on")) {
+//            asr.saveAncestors(tempDir + "/", ancs);
+//        }
         if (request.getParameter("check-pog-joint-single") != null && request
                 .getParameter("check-pog-joint-single").equalsIgnoreCase("on")) {
             asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
@@ -886,18 +972,25 @@ public class GraspApplication extends SpringBootServletInitializer {
             asr.saveConsensusMarginal(
                     tempDir + "/" + request.getParameter("joint-node") + "_consensus");
         }
-        if (request.getParameter("check-seq-joint-single") != null && request
-                .getParameter("check-seq-joint-single").equalsIgnoreCase("on")) {
-            asr.saveConsensusJoint(
-                    tempDir + "/" + request.getParameter("joint-node") + "_consensus",
-                    request.getParameter("joint-node"));
+        if (ancs.size() > 0) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/joint_recon.fa", false));
+            for (String nodeLabel: ancs) {
+                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT);
+            }
+            bw.close();
         }
-//		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
-//			asr.saveMarginalDistribution(tempDir + "/", "msa");
-        if (request.getParameter("check-seq-joint") != null && request
-                .getParameter("check-seq-joint").equalsIgnoreCase("on")) {
-            asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
-        }
+//        if (request.getParameter("check-seq-joint-single") != null && request
+//                .getParameter("check-seq-joint-single").equalsIgnoreCase("on")) {
+//            asr.saveConsensusJoint(
+//                    tempDir + "/" + request.getParameter("joint-node") + "_consensus",
+//                    request.getParameter("joint-node"));
+//        }
+////		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
+////			asr.saveMarginalDistribution(tempDir + "/", "msa");
+//        if (request.getParameter("check-seq-joint") != null && request
+//                .getParameter("check-seq-joint").equalsIgnoreCase("on")) {
+//            asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
+//        }
 //		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
 //			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
 
@@ -907,6 +1000,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         zout.close();
 
     }
+
+
 
     /**
      * Helper functions to zip files/directories

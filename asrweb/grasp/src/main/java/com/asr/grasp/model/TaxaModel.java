@@ -26,7 +26,6 @@ public class TaxaModel extends BaseModel {
      */
     public String getTaxa(ArrayList<Integer> ids) {
         ResultSet results = query("SELECT JSON_AGG(taxa) FROM util.taxa WHERE id IN (" + buildStrFromArr(ids) + ");");
-        System.out.println("SELECT JSON_AGG(taxa) FROM util.taxa WHERE id IN (" + buildStrFromArr(ids) + ");");
         try {
             if (results.next()) {
                 return results.getString(1);
@@ -80,17 +79,21 @@ public class TaxaModel extends BaseModel {
      * Gets the taxanomic IDs from a protein identifier.
      */
     public HashMap<String, Integer> getTaxaIdsFromProtIds(ArrayList<String> ids, String type) {
+        String values = buildStrFromArr(ids);
+        if (values.length() < 2) {
+            return null;
+        }
         if (type == Defines.UNIPROT) {
             return prot2taxaMapping(
-                    query("SELECT id, taxa_id FROM util.uniprot2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.uniprot2taxa WHERE id IN (" + values
                             + ");"));
         } else if (type == Defines.PDB) {
             return prot2taxaMapping(
-                    query("SELECT id, taxa_id FROM util.pdb2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.pdb2taxa WHERE id IN (" + values
                             + ");"));
         } else if (type == Defines.NCBI) {
             return prot2taxaMapping(
-                    query("SELECT id, taxa_id FROM util.ncbi2taxa WHERE id IN (" + buildStrFromArr(ids)
+                    query("SELECT id, taxa_id FROM util.ncbi2taxa WHERE id IN (" + values
                             + ");"));
         }
         return null;
@@ -170,6 +173,7 @@ public class TaxaModel extends BaseModel {
                     System.out.println("Unable to execute update for: " + key );
                 }
             }
+            con.close();
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return "Unable to process all inserts.";

@@ -18,19 +18,19 @@ var search_tree = function (search, clear, exact) {
     if (search != "") {
       var ind = 0;
       for (var s in terms) {
-        if ((!exact && extant.name.substring(ind,
-                extant.name.length).toLowerCase().includes(
+        if ((!exact && extant[T_NAME].substring(ind,
+                extant[T_NAME].length).toLowerCase().includes(
                 terms[s].toLowerCase()))
-            || (exact && extant.name == search)) {
-          ind = extant.name.indexOf(terms[s]) + terms[s].length - 1;
+            || (exact && extant[T_NAME] == search)) {
+          ind = extant[T_NAME].indexOf(terms[s]) + terms[s].length - 1;
           found = true;
         } else {
-          if (extant.taxonomy !== undefined && extant.taxonomy !== null) {
+          if (extant[T_TAXA] !== undefined && extant[T_TAXA] !== null) {
             var ranks = ["domain", "kingdom", "phylum", "class", "order",
               "family", "genus", "species"]
 
             for (var rank in ranks) {
-              var tax = extant.taxonomy[ranks[rank]];
+              var tax = extant[T_TAXA][ranks[rank]];
               if (tax !== undefined && tax !== null) {
                 if ((!exact && tax.substring(ind,
                         tax.length).toLowerCase().includes(
@@ -52,9 +52,9 @@ var search_tree = function (search, clear, exact) {
         }
       }
     }
-    if (clear === true || found === true || extant.contains_search
+    if (clear === true || found === true || extant[T_CONTAINS_SEARCH]
         == undefined) {
-      extant.contains_search = found;
+      extant[T_CONTAINS_SEARCH] = found;
     }
   }
   // if extant contains a search term, then iterate up the tree to indicate to all ancestral nodes that a child
@@ -63,13 +63,13 @@ var search_tree = function (search, clear, exact) {
   set_all_contains_search(phylo_options.tree.root, false);
   for (var n in phylo_options.tree.extants) {
     var extant = phylo_options.tree.extants[n];
-    if (extant.contains_search) {
-      var parent = extant.parent_node;
+    if (extant[T_CONTAINS_SEARCH]) {
+      var parent = extant[T_PARENT];
       // only search until constains_search is true (may have been set from a different extant)
-      while (parent != undefined && (parent.contains_search == undefined
-          || !parent.contains_search)) {
-        parent.contains_search = true;
-        parent = parent.parent_node;
+      while (parent != undefined && (parent[T_CONTAINS_SEARCH] == undefined
+          || !parent[T_CONTAINS_SEARCH])) {
+        parent[T_CONTAINS_SEARCH] = true;
+        parent = parent[T_PARENT];
       }
     }
   }
@@ -83,10 +83,10 @@ var search_tree = function (search, clear, exact) {
  * @param flag
  */
 var set_all_contains_search = function (node, flag) {
-  if (node.children != undefined) {
-    node.contains_search = flag;
-    for (var n in node.children) {
-      set_all_contains_search(node.children[n], flag);
+  if (node[T_CHILDREN] != undefined) {
+    node[T_CONTAINS_SEARCH] = flag;
+    for (var n in node[T_CHILDREN]) {
+      set_all_contains_search(node[T_CHILDREN][n], flag);
     }
   }
 }

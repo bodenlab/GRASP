@@ -189,3 +189,7 @@ fieldset {
     padding-top: 12em;
     margin: 0;
 }
+
+.multiselect dropdown-toggle btn btn-default {
+    min-width: 200px;
+}

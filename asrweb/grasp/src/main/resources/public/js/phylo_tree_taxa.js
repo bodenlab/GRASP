@@ -124,21 +124,21 @@ function runTaxaAjax() {
     }
   })
 }
+
 /**
  * Helper function to get NCBI or uniprot ID. Modularises it out so it can change.
  */
 function getId(extentId, type) {
   if (type == NCBI_VALUE) {
-    return phylo_options.tree.extants[extentId].name.split("|")[0].split(".")[0]
+    return phylo_options.tree.extants[extentId][T_NAME].split("|")[0].split(".")[0]
   } else if (type == UNIPROT_VALUE) {
-    return phylo_options.tree.extants[extentId].name.split("|")[1]
+    return phylo_options.tree.extants[extentId][T_NAME].split("|")[1]
   }
   // Otherwise it hasn't been specified so we need to determine it from the identifier.
-  if (phylo_options.tree.extants[extentId].name.substr(2, 1) == "|") {
-    console.log(phylo_options.tree.extants[extentId].name.split("|")[1]);
-    return phylo_options.tree.extants[extentId].name.split("|")[1];
+  if (phylo_options.tree.extants[extentId][T_NAME].substr(2, 1) == "|") {
+    return phylo_options.tree.extants[extentId][T_NAME].split("|")[1];
   }
-  return phylo_options.tree.extants[extentId].name.split("|")[0].split(".")[0];
+  return phylo_options.tree.extants[extentId][T_NAME].split("|")[0].split(".")[0];
 }
 
 /**
@@ -164,7 +164,7 @@ function applyTaxonInfo(taxonInfo) {
     let name = getId(i);
     let taxaId = parseInt(idMapping[name]);
     let taxaInfo = taxaInfoDict[taxaId];
-    phylo_options.tree.extants[i].taxonomy = taxaInfo;
+    phylo_options.tree.extants[i][T_TAXA] = taxaInfo;
   }
   getCommonTaxon(phylo_options.tree.root);
   $('#taxonomy-info-alert').addClass("hidden");
@@ -324,7 +324,7 @@ var add_warning = function (list, type, msg) {
  * and ranking based on highest number
  */
 var getCommonTaxon = function (node) {
-  if (node.children == undefined) {
+  if (node[T_CHILDREN] == undefined) {
     return;
   }
   // var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
@@ -334,22 +334,22 @@ var getCommonTaxon = function (node) {
   for (var rank in ranks) {
     taxonomy[ranks[rank]] = {};
   }
-  for (var n in node.children) {
-    var child = node.children[n];
-    if (child.taxonomy == undefined) {
+  for (var n in node[T_CHILDREN]) {
+    var child = node[T_CHILDREN][n];
+    if (child[T_TAXA] == undefined) {
       getCommonTaxon(child);
     }
 
-    if (child.taxonomy != undefined && child.taxonomy != null) {
+    if (child[T_TAXA] != undefined && child[T_TAXA] != null) {
       for (var rank in ranks) {
         var tax = taxonomy[ranks[rank]];
         var child_labels = {};
-        if (!(child.children == undefined)) {
-          for (var r in child.taxonomy[ranks[rank]]) {
-            child_labels[r] = child.taxonomy[ranks[rank]][r];
+        if (!(child[T_CHILDREN] == undefined)) {
+          for (var r in child[T_TAXA][ranks[rank]]) {
+            child_labels[r] = child[T_TAXA][ranks[rank]][r];
           }
         } else {
-          child_labels[child.taxonomy[ranks[rank]]] = 1;
+          child_labels[child[T_TAXA][ranks[rank]]] = 1;
         }
         for (var label in child_labels) {
           var count = child_labels[label];
@@ -387,8 +387,8 @@ var getCommonTaxon = function (node) {
   }
   common.common_taxonomy = common_tax;
   common.differ_rank = ranks[r];
-  node.common_taxonomy = common;
-  node.taxonomy = taxonomy;
+  node[T_COMMON_TAXA] = common;
+  node[T_TAXA] = taxonomy;
 
   // update node for drawing
   set_common_tax_node(node);
@@ -397,16 +397,16 @@ var getCommonTaxon = function (node) {
 var set_common_tax_node = function (node) {
   for (var n in phylo_options.tree.all_nodes) {
     var phylo_node = phylo_options.tree.all_nodes[n];
-    if (phylo_node.id === node.id) {
-      phylo_node.common_rank = node.common_taxonomy.common_rank;
-      phylo_node.common_taxonomy = node.common_taxonomy.common_taxonomy;
+    if (phylo_node[T_ID] === node[T_ID]) {
+      phylo_node[T_COMMON_RANK] = node[T_COMMON_TAXA].common_rank;
+      phylo_node[T_COMMON_TAXA] = node[T_COMMON_TAXA].common_taxonomy;
+      phylo_options.tree.node_dict[node[T_ID]][T_COMMON_TAXA] = node[T_COMMON_TAXA];
       // add common_taxonomy to poags info for name labelling
-      if (phylo_node.common_taxonomy != undefined) {
-        poags.taxonomy[node.name.split(
-            "_")[0]] = node.common_taxonomy.common_rank.charAt(0).toUpperCase()
+      if (phylo_node[T_COMMON_TAXA] != undefined) {
+        poags.taxonomy[node[T_NAME]] = node[T_COMMON_TAXA].common_rank.charAt(0).toUpperCase()
             +
-            node.common_taxonomy.common_rank.slice(1) + ": "
-            + node.common_taxonomy.common_taxonomy;
+            node[T_COMMON_TAXA].common_rank.slice(1) + ": "
+            + node[T_COMMON_TAXA].common_taxonomy;
       }
       return;
     }
@@ -429,9 +429,9 @@ var add_taxonomy_modal_info = function (node, group, options) {
   var x = 0;
   var y = 20;
 
-  if (node.common_rank === undefined && !node.extent) {
+  if (node[T_COMMON_RANK] === undefined && !node[T_EXTANT]) {
     group.append("text")
-    .attr("id", "text-modal-tax-" + node.id)
+    .attr("id", "text-modal-tax-" + node[T_ID])
     .attr("name", node.name)
     .attr("font-family", options.font_family)
     .attr("font-size", options.font_size)
@@ -445,22 +445,43 @@ var add_taxonomy_modal_info = function (node, group, options) {
     return;
   }
 
-  var node_info = phylo_options.tree.node_dict[node.id];
-  var tax_info = node_info.taxonomy;
+  var node_info = phylo_options.tree.node_dict[node[T_ID]];
+  var tax_info = node_info[T_TAXA];
 
   var counter = 0;
   var padding = 20;
   for (var rank in tax_info) {
     var tax = tax_info[rank];
-    if (node.extent || rank !== node_info.common_taxonomy.differ_rank) {
-      if (!node.extent) {
-        tax = Object.keys(tax_info[rank])[0];
-      }
-      if (tax !== "undefined" && tax !== undefined) {
-        // Add taxonomy text info
+    if ( node_info[T_COMMON_TAXA] !== undefined) {
+      if (node[T_EXTANT] || rank !== node_info[T_COMMON_TAXA].differ_rank) {
+        if (!node[T_EXTANT]) {
+          tax = Object.keys(tax_info[rank])[0];
+        }
+        if (tax !== "undefined" && tax !== undefined) {
+          // Add taxonomy text info
+          var y_text = y + counter * padding;
+          group.append("text")
+          .attr("id", "text-modal-tax-" + node[T_ID] + "-" + counter)
+          .attr("name", node[T_NAME])
+          .attr("font-family", options.font_family)
+          .attr("font-size", options.font_size)
+          .attr("fill", "black")
+          .attr("text-anchor", "start")
+          .attr("opacity", 1)
+          .attr("transform", "translate(" + x + "," + y_text + ")")
+          .text(function () {
+            return rank.charAt(0).toUpperCase() + rank.slice(1).split("_")[0]
+                + ": " + tax;
+          });
+          counter++;
+        }
+      } else {
+        // Draw histogram of the different taxonomic rank
+        // #extants in rank
         var y_text = y + counter * padding;
+        var rank_differ = node_info[T_COMMON_TAXA].differ_rank;
         group.append("text")
-        .attr("id", "text-modal-tax-" + node.id + "-" + counter)
+        .attr("id", "text-modal-tax-" + node[T_ID] + "-" + counter)
         .attr("name", node.name)
         .attr("font-family", options.font_family)
         .attr("font-size", options.font_size)
@@ -469,31 +490,14 @@ var add_taxonomy_modal_info = function (node, group, options) {
         .attr("opacity", 1)
         .attr("transform", "translate(" + x + "," + y_text + ")")
         .text(function () {
-          return rank.charAt(0).toUpperCase() + rank.slice(1).split("_")[0] + ": " + tax;
+          return rank_differ.charAt(0).toUpperCase() + rank_differ.slice(
+              1).split("_")[0]
+              + ": ";
         });
-        counter++;
+        tax = tax_info[rank_differ];
+        draw_histogram_taxonomy(node, tax, group, options, 0, y_text);
+        return;
       }
-    } else {
-      // Draw histogram of the different taxonomic rank
-      // #extants in rank
-      var y_text = y + counter * padding;
-      var rank_differ = node_info.common_taxonomy.differ_rank;
-      group.append("text")
-      .attr("id", "text-modal-tax-" + node.id + "-" + counter)
-      .attr("name", node.name)
-      .attr("font-family", options.font_family)
-      .attr("font-size", options.font_size)
-      .attr("fill", "black")
-      .attr("text-anchor", "start")
-      .attr("opacity", 1)
-      .attr("transform", "translate(" + x + "," + y_text + ")")
-      .text(function () {
-        return rank_differ.charAt(0).toUpperCase() + rank_differ.slice(1).split("_")[0]
-            + ": ";
-      });
-      tax = tax_info[rank_differ];
-      draw_histogram_taxonomy(node, tax, group, options, 0, y_text);
-      return;
     }
   }
 }
@@ -512,7 +516,7 @@ var draw_histogram_taxonomy = function (node, taxonomy, group, options, x, y) {
 
   for (var tax in taxonomy) {
     var height = rect_height * (taxonomy[tax]
-        / phylo_options.tree.node_dict[node.id].num_extants);
+        / phylo_options.tree.node_dict[node[T_ID]][T_NUM_EXTANTS]);
     var x_t = x + count * col_width;
     var y_t = y + rect_height - height;
     var c = options.hist_colours[count % options.hist_colours.length]

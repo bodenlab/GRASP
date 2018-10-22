@@ -1,6 +1,7 @@
 package com.asr.grasp.model;
 
 import com.asr.grasp.utils.Defines;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -39,6 +40,7 @@ public class BaseModel {
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -61,6 +63,7 @@ public class BaseModel {
             // Sets the
             statement.setInt(1, id);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -82,6 +85,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, value);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -103,6 +107,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, id);
             ResultSet results = statement.executeQuery();
+            con.close();
             return getId(results);
         } catch (Exception e) {
             System.out.println(e);
@@ -128,6 +133,7 @@ public class BaseModel {
                 idx ++;
             }
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -152,6 +158,7 @@ public class BaseModel {
             // Sets the array of ids
             statement.setArray(1, sqlArray);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -177,6 +184,7 @@ public class BaseModel {
             // Sets the array of ids
             statement.setArray(1, sqlArray);
             ResultSet results = statement.executeQuery();
+            con.close();
             return results;
         } catch (Exception e) {
             System.out.println(e);
@@ -193,7 +201,7 @@ public class BaseModel {
      * @param query
      * @return
      */
-    public Boolean deleteOnIds(String query, ArrayList<Integer> ids) {
+    public Boolean deleteOnIds(String query, Object ids) {
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
@@ -201,6 +209,7 @@ public class BaseModel {
             // Sets the array of ids
             statement.setArray(1, (Array) ids);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -230,6 +239,7 @@ public class BaseModel {
             // ID is in the where clause thus at the end.
             statement.setInt(index, id);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -255,6 +265,7 @@ public class BaseModel {
             statement.setString(1, value);
             statement.setInt(2, id);
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -318,6 +329,7 @@ public class BaseModel {
             statement.setInt(values.size() + 1, id);
             // Execute the query
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -345,6 +357,7 @@ public class BaseModel {
             statement.setString(values.size() + 1, id);
             // Execute the query
             statement.executeQuery();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -363,12 +376,10 @@ public class BaseModel {
     public ArrayList<Integer> getIdList(ResultSet results) {
         ArrayList<Integer> idList = new ArrayList<>();
         try {
-            if (results.next()) {
-                // Check we were only returned a single result
-                while (results.next()) {
-                    // Get the ID stored in the first column
-                    idList.add(results.getInt(1));
-                }
+            // Check we were only returned a single result
+            while (results.next()) {
+                // Get the ID stored in the first column
+                idList.add(results.getInt(1));
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -387,17 +398,35 @@ public class BaseModel {
     public ArrayList<String> getStrList(ResultSet results) {
         ArrayList<String> strList = new ArrayList<>();
         try {
-            if (results.next()) {
-                while (results.next()) {
-                    // Get the ID stored in the first column
-                    strList.add(results.getString(1));
-                }
+            while (results.next()) {
+                // Get the ID stored in the first column
+                strList.add(results.getString(1));
             }
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Unable to get a string list from results set");
             return null;
         }
         return strList;
+    }
+
+    /**
+     * Gets a String/String Hash map of results from a query.
+     *
+     * @param results
+     * @return
+     */
+    public HashMap<String, String> getStrStrMap(ResultSet results, int keyIdx, int valIdx) {
+        HashMap<String, String> strMap = new HashMap<>();
+        try {
+            while (results.next()) {
+                // Get the ID stored in the first column
+                strMap.put(results.getString(keyIdx), results.getString(valIdx));
+            }
+        } catch (Exception e) {
+            System.out.println("Unable to get String Map from results set");
+            return null;
+        }
+        return strMap;
     }
 
     /**
@@ -435,6 +464,7 @@ public class BaseModel {
             statement.setInt(1, id);
             // Deletes the record from the model
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -454,6 +484,7 @@ public class BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             // Deletes the record from the model
             statement.executeUpdate();
+            con.close();
             return true;
         } catch (Exception e) {
             System.out.println(e);
@@ -497,7 +528,9 @@ public class BaseModel {
             // Sets the
             statement.setInt(userIdx, userId);
             statement.setInt(reconIdx, reconId);
-            return statement.executeQuery();
+            ResultSet results = statement.executeQuery();
+            con.close();
+            return results;
         } catch (Exception e) {
             System.out.println(e);
             return null;
@@ -515,6 +548,7 @@ public class BaseModel {
             statement.setInt(userIdx, userId);
             statement.setInt(reconIdx, reconId);
             statement.executeUpdate();
+            con.close();
             return null;
         } catch (Exception e) {
             System.out.println(e);

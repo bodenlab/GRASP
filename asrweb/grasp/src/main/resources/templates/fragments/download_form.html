@@ -74,7 +74,8 @@
                                     <label>
                                         Consensus sequences of Joint Reconstructions (.fasta)
                                     </label>
-                                    <select id="multiselect-download" multiple="multiple">
+                                    <select id="multiselect-download" class="selectpicker" multiple="true" data-live-search="true">
+                                        <option>All</option>
                                     </select>
                                 </div>
                                <!-- <hr />
@@ -140,7 +141,7 @@
                         check_disabled_state_dlbtn();
                           graphs = getSelectedValuesForDownload("multiselect-download"); //$('select#multiselect-download').val();
                           console.log(graphs);
-                          $("#graphs-input").val(JSON.stringify(graphs));
+                          $("#graphs-input").val(graphs);
                         if ($("#check-seq-joint").prop("checked")) {
 
                             if (graph_array.length > 5) {

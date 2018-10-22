@@ -11,22 +11,32 @@ $(function() {
     includeSelectAllOption: true,
     selectAllJustVisible: false,
     enableFiltering: true,
-    selectAllValue: 'select-all-value',
-    onSelectAll: function() {
-      alert('This may take longer and will be a larger file.');
-    }
+    selectAllValue: 'select-all-value'
   })
 });
 
+/**
+ * Gets the items that a user has selected for download.
+ * Currently this just consists of the values in the Select Box (that the user
+ * has checked) for the joint reconstructions.
+ *
+ * @param elemId
+ * @returns {string}
+ */
 let getSelectedValuesForDownload = function (elemId) {
     let vals = $('select#' + elemId).val();
-    var allSelected = $("#multiselect-download option:not(:selected)").length == 0;
-    if (allSelected) {
-        graphs = "all";
-    } else {
-        graphs = JSON.stringify(graphs);
+    for (let v in vals) {
+        if (vals[v] === "All") {
+            return "all";
+        }
     }
-    return graphs;
+
+    if (vals.length > 20) {
+      alert('If you are selecting more than 20 please choose the select all option.');
+      return "all";
+    }
+    return JSON.stringify(vals);
+
 }
 
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {

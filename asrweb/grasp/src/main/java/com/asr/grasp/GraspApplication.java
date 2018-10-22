@@ -909,7 +909,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (request.getParameter("graphs-input").equals("all")) {
             ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
         } else {
-            JSONArray graphs = new JSONArray(request.getParameter("graphs-input"));
+            String tmp = request.getParameter("graphs-input");
+            JSONArray graphs = new JSONArray(tmp);
             for (int i = 0; i < graphs.length(); i++) {
                 ancs.add(graphs.getString(i));
             }

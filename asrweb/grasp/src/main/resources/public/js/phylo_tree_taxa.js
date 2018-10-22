@@ -154,7 +154,7 @@ function applyTaxonInfo(taxonInfo) {
     let name = getId(i);
     let taxaId = parseInt(idMapping[name]);
     let taxaInfo = taxaInfoDict[taxaId];
-    phylo_options.tree.extants[i][[T_TAXA]] = taxaInfo;
+    phylo_options.tree.extants[i][T_TAXA] = taxaInfo;
   }
   getCommonTaxon(phylo_options.tree.root);
   $('#taxonomy-info-alert').addClass("hidden");

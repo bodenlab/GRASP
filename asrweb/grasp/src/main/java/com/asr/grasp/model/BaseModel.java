@@ -418,11 +418,9 @@ public class BaseModel {
     public HashMap<String, String> getStrStrMap(ResultSet results, int keyIdx, int valIdx) {
         HashMap<String, String> strMap = new HashMap<>();
         try {
-            if (results.next()) {
-                while (results.next()) {
-                    // Get the ID stored in the first column
-                    strMap.put(results.getString(keyIdx), results.getString(valIdx));
-                }
+            while (results.next()) {
+                // Get the ID stored in the first column
+                strMap.put(results.getString(keyIdx), results.getString(valIdx));
             }
         } catch (Exception e) {
             System.out.println("Unable to get String Map from results set");

@@ -29,7 +29,7 @@ public class ReconstructionsModel extends BaseModel {
      */
     final int LABEL = 0;
     /* VALUE holds an array that contains a label in the 0tth element and then has
-     * 2 values following: 1: value, 2: seq_num*/
+     * 2 values following: 1: value, 2: seq_num */
     final int VALUE = 1;
     final int SEQ_NUM = 2;
 

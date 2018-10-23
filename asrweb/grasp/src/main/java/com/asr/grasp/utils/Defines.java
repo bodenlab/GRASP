@@ -49,6 +49,7 @@ public class Defines {
     public static final int JOINT = 1;
     public static final int ALL = 2;
     public static final int EXTANT = 3;
+    public static final int ANCESTOR = 4;
 
     /**
      * ---------------------------------------------------------------------------------------------

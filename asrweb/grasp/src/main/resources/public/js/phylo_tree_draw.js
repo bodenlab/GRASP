@@ -28,7 +28,7 @@ var phylo_options = {
     nodes_sorted: [], // keeps track of sorted nodes (based on increasing evolutionary distance)
     extants: [],
     min_x: 0,
-    additive: true, // Whether or not we want to display the branches as additive
+    additive: false, // Whether or not we want to display the branches as additive
     node_instep: 0,
     root: null,
     node_dict: {}, // Keeps track of the node IDs as a dict
@@ -119,7 +119,7 @@ var make_tree_scale = function (phylo_options) {
   var additive = phylo_options.tree.additive;
 
   var max_y = phylo_options.tree.max_depth;
-  if (additive) {
+  if (additive === true) {
     max_y = phylo_options.tree.longest_distance_from_root_to_extant;
   }
 
@@ -2111,7 +2111,7 @@ var fix_subtrees = function (left, right) {
 };
 
 var refresh_tree = function () {
-  if (document.getElementById("additive-toggle").innerHTML.split(" | ")[1] != "Additive") {
+  if (document.getElementById("additive-toggle").innerHTML.split(" | ")[1] === "Additive") {
     phylo_options.tree.additive = false;
   } else {
     phylo_options.tree.additive = true;

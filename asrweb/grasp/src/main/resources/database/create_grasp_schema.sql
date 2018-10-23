@@ -70,28 +70,27 @@ create table if not exists web.users
 );
 
 
-create table if not exists web.consensus
+create table web.sequences
 (
   id serial not null
-    constraint consensus_pkey
+    constraint sequences_pkey
     primary key,
   r_id serial not null
-    constraint consensus_reconstructions_id_key
+    constraint sequences_reconstructions_id_key
     references web.reconstructions,
   node_label varchar not null,
   seq varchar not null,
-  method integer default 1,
+  s_type integer default 1,
   updated_at timestamp with time zone default timezone('AEST'::text, now())
-
 )
 ;
-
-alter table web.consensus owner to dev
+alter table web.sequences owner to web
 ;
 
-create unique index if not exists consensus_id_uindex
-  on web.consensus (id)
+create unique index sequences_id_uindex
+  on web.sequences (id)
 ;
+
 
 create or replace function web.updated_at_reset() returns trigger
 language plpgsql
@@ -106,14 +105,12 @@ $$
 alter function web.updated_at_reset() owner to web
 ;
 
-create trigger web.updated_at_reset
+create trigger updated_at_reset
   before update
-  on web.consensus
+  on web.sequences
   for each row
 execute procedure web.updated_at_reset()
 ;
-
-
 
 
 create table if not exists web.groups

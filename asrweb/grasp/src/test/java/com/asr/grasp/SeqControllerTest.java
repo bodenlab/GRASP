@@ -71,7 +71,7 @@ public class SeqControllerTest extends BaseTest {
 
         assertThat(seqMap.get("PTEFlavob"), equalTo("DRINTVRG-PITISEAGFTLTHEHICGSSA-----------GFLRAWPEFFG---------------SRKALAEKAVRGLRRARAAGVRTIVDVSTFDIGRDVSLLAEVSRAA-DVHIVAATGLW-F-DPPLSMRLR-----------SVEELTQFFLREIQYGIKDTGIRAGII-KVATTG-KATPFQELVLKAAARASLATGVPVTTHTAASQRDGEQQAAIFE-SEGLSPSRVCIGHSD-DTDDLSYLTALAARGYLIGLDHIPHSAIGLEDNASASALLGIRSWQTRALLIKALIDQGYMKQILVSNDWLFGFSSYVTNIMDVMDRVNPD-GMAFIPLRVIPFLREKGVPQETLAGITVTNPARFLSPTLRAS"));
 
-        assertThat(seqMap.size(), equalTo(28));
+        assertThat(seqMap.size(), equalTo(29));
 
         userModel.deleteUser(userController.getId(user));
     }
@@ -139,7 +139,7 @@ public class SeqControllerTest extends BaseTest {
         HashMap<String, String> seqs = seqController.getAllSeqs(recon.getId(), Defines.ALL);
 
         // Confirm we have matches
-        assertThat(seqs.size(), equalTo(26));
+        assertThat(seqs.size(), equalTo(27));
 
         // Test deleting them
         seqController.deleteAllSeqsForRecon(recon.getId());

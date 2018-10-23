@@ -363,7 +363,7 @@ public class ReconstructionsModel extends BaseModel {
         } catch (Exception e) {
             System.out.println(e);
         }
-        return Defines.ERROR;
+        return Defines.FALSE;
     }
 
     /**

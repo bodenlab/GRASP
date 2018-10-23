@@ -1,5 +1,6 @@
 package com.asr.grasp.controller;
 
+import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.TreeModel;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
@@ -17,8 +18,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TreeController {
+
     @Autowired
     TreeModel treeModel;
+    @Autowired
+    ReconstructionsModel reconModel;
+
     private PriorityQueue<TreeNodeObject> orderedNodes;
 
     /**
@@ -39,13 +44,43 @@ public class TreeController {
 
 
     /**
-     * Returns a list of node IDs that give similar
-     * @param treeMinimal
-     * @param treeMaximal
-     * @param ancestorMinimalLabel
+     * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
+     *
+     * @param userId
+     * @param reconKnownAncsLabel
+     * @param reconUnknownAncsLabel
+     * @param ancsestorLabel
      * @return
      */
-    public ArrayList<String> getSimilarNodes(TreeObject treeMinimal, TreeObject treeMaximal, String ancestorMinimalLabel) {
+    public ArrayList<String> getSimilarNodes(int userId, String reconKnownAncsLabel, String reconUnknownAncsLabel, String ancsestorLabel) {
+        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, userId);
+        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, userId);
+
+        // If either of the labels are incorrect then return
+        if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+            return null;
+        }
+
+        // Otherwise get the trees
+        TreeObject treeKnownAncs = getById(reconKnownAncsId, userId);
+        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, userId);
+
+        // If either of the trees weren't able to be parsed return
+        if (treeKnownAncs == null || treeUnknownAncs == null) {
+            return null;
+        }
+
+        return getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
+    }
+
+    /**
+     * Returns a list of node IDs that give similar
+     * @param treeKnownAncs
+     * @param treeUnknownAncs
+     * @param ancsestorLabel
+     * @return
+     */
+    public ArrayList<String> getSimilarNodes(TreeObject treeKnownAncs, TreeObject treeUnknownAncs, String ancsestorLabel) {
 
         /**
          * ToDo

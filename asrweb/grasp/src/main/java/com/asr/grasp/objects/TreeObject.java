@@ -2,10 +2,18 @@ package com.asr.grasp.objects;
 
 import java.util.ArrayList;
 
+/**
+ * Tree Object that is used to find intersection between two reconstructed trees.
+ *
+ * written by ariane @ 22/10/2018
+ */
 public class TreeObject {
 
     private TreeNodeObject root;
     private ArrayList<TreeNodeObject> nodeList;
+
+    /* We keep track of the extents so that we can find the intersection between two trees easily */
+    private ArrayList<String> extantLabelList;
 
     public TreeObject(String treeAsNewick) {
         this.nodeList = new ArrayList<>();
@@ -75,6 +83,7 @@ public class TreeObject {
 
     /**
      * Helper function to parse a leaf (extent sequence) in a Newick file.
+     *
      * @param str           The Newick String
      * @param parent        Parent Node
      * @return
@@ -84,7 +93,7 @@ public class TreeObject {
         String label;
         int splitIdx = str.indexOf(':'); // check if a distance is specified
         if (splitIdx == -1) {// no distance
-            return new TreeNodeObject(str, parent, null);
+            node = new TreeNodeObject(str, parent, null);
         } else { // there's a distance
             label = str.substring(0, splitIdx).trim();
             try {
@@ -97,12 +106,14 @@ public class TreeObject {
                 if (root == null) {
                     root = node;
                 }
-                return node;
             }
             catch (NumberFormatException ex) {
                 throw new RuntimeException("Error: A distance value in your Newick file couldn't be parsed as a number  \n \nThe value was - "  + str.substring(splitIdx + 1, str.length()));
             }
         }
+        // Add this to our list of extant sequences.
+        extantLabelList.add(node.getLabel());
+        return node;
     }
 
 

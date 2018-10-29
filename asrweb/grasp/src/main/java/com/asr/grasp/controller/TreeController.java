@@ -5,11 +5,9 @@ import com.asr.grasp.model.TreeModel;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
-import dat.POGraph.Node;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
-import javax.swing.tree.TreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +22,7 @@ public class TreeController {
 
     @Autowired
     TreeModel treeModel;
+
     @Autowired
     ReconstructionsModel reconModel;
 
@@ -108,7 +107,18 @@ public class TreeController {
         } else {
             sharedLeaves = getIntersection(leaves, intersection);
         }
-        scoreNodes(sharedLeaves, treeKnownAncs.getRoot());
+        System.out.println(node.getDistanceToRoot());
+        scoreNodes(sharedLeaves, treeUnknownAncs.getRoot(), node.getDistanceToRoot());
+
+        for (TreeNodeObject l: sharedLeaves) {
+            System.out.println("LEAF: " + l.getLabel());
+        }
+        ArrayList<String> topNodes = new ArrayList<>();
+        for (int i = 0; i < orderedNodes.size(); i ++) {
+            TreeNodeObject n = orderedNodes.poll();
+            topNodes.add(n.getLabel());
+            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot() + " orig-dist: " + node.getDistanceToRoot());
+        }
         return null;
     }
 
@@ -174,15 +184,17 @@ public class TreeController {
      */
     public TreeNodeObject updateNode(ArrayList<TreeNodeObject> extentList, TreeNodeObject node) {
         ArrayList<TreeNodeObject> extentChildren = new ArrayList<>();
-        if (node.getChildren() == null) {
-            return node;
+        if (node.isExtent()) {
+            if (extentList.contains(node)) {
+                return node;
+            } else {
+                return null;
+            }
         }
         for (TreeNodeObject child: node.getChildren()) {
-            TreeNodeObject tmp = updateNode(extentList, child);
-            if (tmp.isExtent()) {
-                if (!extentList.contains(child)) {
-                    extentChildren.add(child);
-                }
+            TreeNodeObject childNode = updateNode(extentList, child);
+            if (childNode != null) {
+                extentChildren.add(child);
             }
         }
         // If we have 0 children we need to remove this node as it is redundant
@@ -203,20 +215,23 @@ public class TreeController {
      * @param extentList
      * @param node
      */
-    public void scoreNodes(ArrayList<TreeNodeObject> extentList, TreeNodeObject node) {
-        if (node.getChildren() == null) {
+    public double scoreNodes(ArrayList<TreeNodeObject> extentList, TreeNodeObject node, Double distance) {
+        if (node.isExtent()) {
             if (!extentList.contains(node)) {
                 // Add a negative score for a mismatch
-                node.addToScore(-1000);
+                node.addToScore(10);
+                return 10;// + Math.abs(distance - node.getDistanceToRoot());
             } else {
                 // Add a positive score for a match
-                node.addToScore(1000);
+                node.addToScore(-10);// + Math.abs(distance - node.getDistanceToRoot()));
+                return -10;// + Math.abs(distance - node.getDistanceToRoot());
             }
         }
         for (TreeNodeObject child: node.getChildren()) {
-            scoreNodes(extentList, child);
+            node.addToScore(scoreNodes(extentList, child, distance));
         }
         orderedNodes.add(node);
+        return node.getScore();
     }
 
 
@@ -227,15 +242,36 @@ public class TreeController {
         {
             if (x.getScore() < y.getScore())
             {
-                return -1000;
+                return -1;
             }
             if (x.getScore() > y.getScore())
             {
-                return 1000;
+                return 1;
             }
             // If both have the same score we want to return the distance difference
             // ToDo: check if this is correct
-            return x.getDistance() - y.getDistance();
+            if (x.getDistanceToRoot() < y.getDistanceToRoot())
+            {
+                return -1;
+            }
+            if (x.getDistanceToRoot() > y.getDistanceToRoot())
+            {
+                return 1;
+            }
+            return 0;
         }
+    }
+
+    /**
+     * ------------------------------------------------------------------------
+     *          The following are to set the test env.
+     * ------------------------------------------------------------------------
+     */
+    public void setTreeModel(TreeModel treeModel) {
+        this.treeModel = treeModel;
+    }
+
+    public void setReconModel(ReconstructionsModel reconModel) {
+        this.reconModel = reconModel;
     }
 }

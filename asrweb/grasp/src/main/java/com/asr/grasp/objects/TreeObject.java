@@ -17,6 +17,7 @@ public class TreeObject {
     private ArrayList<String> extantLabelList;
 
     public TreeObject(String treeAsNewick) {
+        System.out.println(treeAsNewick);
         this.nodeList = new ArrayList<>();
         this.leafNodeList = new ArrayList<>();
         this.extantLabelList = new ArrayList<>();

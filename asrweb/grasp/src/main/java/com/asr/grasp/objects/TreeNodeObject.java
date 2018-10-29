@@ -14,8 +14,9 @@ public class TreeNodeObject {
     private ArrayList<TreeNodeObject> children;
     private ArrayList<TreeNodeObject> leaves;
     private String label;
-    private int score;
+    private double score;
     private Double distance;
+    private double distanceFromRoot = 0.0;
     private TreeNodeObject parent;
 
     public TreeNodeObject(String label, TreeNodeObject parent, Double distance) {
@@ -24,7 +25,20 @@ public class TreeNodeObject {
         this.label = label;
         this.score = 0;
         this.distance = distance;
+        if (distance == null) {
+            this.distance = 0.0;
+        }
         this.parent = parent;
+    }
+
+    public double getDistanceToRoot() {
+        if (distanceFromRoot != 0) {
+            return distanceFromRoot + distance;
+        }
+        if (parent != null) {
+            distanceFromRoot += parent.getDistanceToRoot();
+        }
+        return distanceFromRoot + distance;
     }
 
     /**
@@ -32,9 +46,8 @@ public class TreeNodeObject {
      * integer in the comparator.
      * @return
      */
-    public int getDistance() {
-        Double dist1000 = distance * 1000;
-        return dist1000.intValue();
+    public double getDistance() {
+        return distance;
     }
 
     /**
@@ -44,7 +57,7 @@ public class TreeNodeObject {
      *      should've been or visa versa.
      * @param value
      */
-   public void addToScore(int value) {
+   public void addToScore(double value) {
         this.score += value;
    }
 
@@ -54,7 +67,7 @@ public class TreeNodeObject {
      * want to find the congruent ancestor in a larger tree.
      * @return
      */
-    public int getScore() {
+    public double getScore() {
         return this.score;
     }
 
@@ -108,7 +121,7 @@ public class TreeNodeObject {
      * @return
      */
     public boolean isExtent() {
-        return this.children == null;
+        return this.children.size() == 0;
     }
 
 

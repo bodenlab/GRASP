@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class TreeNodeObject {
 
     private ArrayList<TreeNodeObject> children;
+    private ArrayList<TreeNodeObject> leaves;
     private String label;
     private int score;
     private Double distance;
@@ -19,10 +20,21 @@ public class TreeNodeObject {
 
     public TreeNodeObject(String label, TreeNodeObject parent, Double distance) {
         this.children = new ArrayList<>();
+        this.leaves = new ArrayList<>();
         this.label = label;
         this.score = 0;
         this.distance = distance;
         this.parent = parent;
+    }
+
+    /**
+     * Gets the distance value - note this is 1000 * larger so we can use an
+     * integer in the comparator.
+     * @return
+     */
+    public int getDistance() {
+        Double dist1000 = distance * 1000;
+        return dist1000.intValue();
     }
 
     /**
@@ -56,6 +68,33 @@ public class TreeNodeObject {
     }
 
     /**
+     * Returns the leafs under a particular node. This allows us to
+     * determine similarity between nodes.
+     * @return
+     */
+    public ArrayList<TreeNodeObject> getLeaves() {
+        if (leaves.size() > 0) {
+            return leaves;
+        }
+        getLeaves(this);
+        return leaves;
+    }
+
+    /**
+     * Recursively adds the leaves.
+     * @param node
+     */
+    public void getLeaves(TreeNodeObject node) {
+        for (TreeNodeObject child: node.getChildren()) {
+            if (child.isExtent()) {
+                leaves.add(child);
+            } else {
+                getLeaves(child);
+            }
+        }
+    }
+
+    /**
      * Returns the id of the node.
      * @return
      */
@@ -81,5 +120,27 @@ public class TreeNodeObject {
         this.children.add(child);
     }
 
+    /**
+     * Ensure the equals method is only on the label.
+     * @param obj
+     * @return
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (!TreeNodeObject.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+
+        final TreeNodeObject other = (TreeNodeObject) obj;
+        if ((this.getLabel() == null) ? (other.getLabel() != null) : !this.getLabel().equals(other.getLabel())) {
+            return false;
+        }
+
+        return true;
+    }
 
 }

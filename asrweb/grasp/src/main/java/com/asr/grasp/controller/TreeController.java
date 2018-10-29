@@ -5,8 +5,11 @@ import com.asr.grasp.model.TreeModel;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
+import dat.POGraph.Node;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.PriorityQueue;
+import javax.swing.tree.TreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +64,7 @@ public class TreeController {
             return null;
         }
 
+
         // Otherwise get the trees
         TreeObject treeKnownAncs = getById(reconKnownAncsId, userId);
         TreeObject treeUnknownAncs = getById(reconUnknownAncsId, userId);
@@ -69,6 +73,9 @@ public class TreeController {
         if (treeKnownAncs == null || treeUnknownAncs == null) {
             return null;
         }
+
+        // Setup the ordered nodes
+        orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
 
         return getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
     }
@@ -81,12 +88,81 @@ public class TreeController {
      * @return
      */
     public ArrayList<String> getSimilarNodes(TreeObject treeKnownAncs, TreeObject treeUnknownAncs, String ancsestorLabel) {
-
         /**
-         * ToDo
+         * First we want to upadate each node of the tree to only include the intersection of
+         * both trees in terms of ancestor labels.
          */
+        ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs, treeUnknownAncs);
+        // Prune each tree to only contain the intersection
+        updateNode(intersection, treeKnownAncs.getRoot());
+        updateNode(intersection, treeUnknownAncs.getRoot());
 
+        // Now that we have the intersection we want to get the leaf nodes in the known ancestor
+        // that lie under the node of interest - these must also be in the intersection obj
+        TreeNodeObject node = treeKnownAncs.getNodeByLabel(ancsestorLabel);
+        ArrayList<TreeNodeObject> leaves = node.getLeaves();
+        ArrayList<TreeNodeObject> sharedLeaves;
+        // Get the intersection of the leaves and the intersection
+        if (leaves.size() > intersection.size()) {
+            sharedLeaves = getIntersection(intersection, leaves);
+        } else {
+            sharedLeaves = getIntersection(leaves, intersection);
+        }
+        scoreNodes(sharedLeaves, treeKnownAncs.getRoot());
         return null;
+    }
+
+    /**
+     * Gets the intersection of two tree objects. Returns the nodes they have in common.
+     *
+     * @param treeKnownAncs
+     * @param treeUnknownAncs
+     * @return
+     */
+    public ArrayList<TreeNodeObject> getIntersection(TreeObject treeKnownAncs, TreeObject treeUnknownAncs) {
+        // iterate through the smaller one
+        ArrayList<String> knownExtentLabelList = treeKnownAncs.getExtantLabelList();
+        ArrayList<String> unknownExtentLabelList = treeUnknownAncs.getExtantLabelList();
+        if (knownExtentLabelList.size() > unknownExtentLabelList.size()) {
+            return getIntersection(unknownExtentLabelList, knownExtentLabelList, treeUnknownAncs);
+        } else {
+            return getIntersection(knownExtentLabelList, unknownExtentLabelList, treeKnownAncs);
+        }
+    }
+
+    /**
+     * Helper to iterate through the smaller list.
+     * @param smallList
+     * @param largeList
+     * @param tree
+     * @return
+     */
+    public ArrayList<TreeNodeObject> getIntersection(ArrayList<String> smallList, ArrayList<String> largeList, TreeObject tree) {
+        ArrayList<TreeNodeObject> extentIntersection = new ArrayList<>();
+
+        for (String extent: smallList) {
+            if (largeList.contains(extent)) {
+                extentIntersection.add(tree.getNodeByLabel(extent));
+            }
+        }
+        return extentIntersection;
+    }
+
+    /**
+     * Helper to iterate through the smaller list.
+     * @param smallList
+     * @param largeList
+     * @return
+     */
+    public ArrayList<TreeNodeObject> getIntersection(ArrayList<TreeNodeObject> smallList, ArrayList<TreeNodeObject> largeList) {
+        ArrayList<TreeNodeObject> extentIntersection = new ArrayList<>();
+
+        for (TreeNodeObject extent: smallList) {
+            if (largeList.contains(extent)) {
+                extentIntersection.add(extent);
+            }
+        }
+        return extentIntersection;
     }
 
     /**
@@ -127,26 +203,39 @@ public class TreeController {
      * @param extentList
      * @param node
      */
-    public int scoreNodes(ArrayList<TreeNodeObject> extentList, TreeNodeObject node) {
+    public void scoreNodes(ArrayList<TreeNodeObject> extentList, TreeNodeObject node) {
         if (node.getChildren() == null) {
-            return Defines.EXTANT;
-        }
-        for (TreeNodeObject child: node.getChildren()) {
-            int tmp = scoreNodes(extentList, child);
-            if (tmp == Defines.EXTANT) {
-                if (!extentList.contains(child)) {
-                    // Add a negative score for a mismatch
-                    node.addToScore(-1);
-                } else {
-                    // Add a positive score for a match
-                    node.addToScore(1);
-                }
+            if (!extentList.contains(node)) {
+                // Add a negative score for a mismatch
+                node.addToScore(-1000);
             } else {
-                // Add the childs' score to the parent.
-                node.addToScore(child.getScore());
+                // Add a positive score for a match
+                node.addToScore(1000);
             }
         }
+        for (TreeNodeObject child: node.getChildren()) {
+            scoreNodes(extentList, child);
+        }
         orderedNodes.add(node);
-        return Defines.ANCESTOR;
+    }
+
+
+    public class TreeNodeComparator implements Comparator<TreeNodeObject>
+    {
+        @Override
+        public int compare(TreeNodeObject x, TreeNodeObject y)
+        {
+            if (x.getScore() < y.getScore())
+            {
+                return -1000;
+            }
+            if (x.getScore() > y.getScore())
+            {
+                return 1000;
+            }
+            // If both have the same score we want to return the distance difference
+            // ToDo: check if this is correct
+            return x.getDistance() - y.getDistance();
+        }
     }
 }

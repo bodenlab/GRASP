@@ -11,12 +11,15 @@ public class TreeObject {
 
     private TreeNodeObject root;
     private ArrayList<TreeNodeObject> nodeList;
+    private ArrayList<TreeNodeObject> leafNodeList;
 
     /* We keep track of the extents so that we can find the intersection between two trees easily */
     private ArrayList<String> extantLabelList;
 
     public TreeObject(String treeAsNewick) {
         this.nodeList = new ArrayList<>();
+        this.leafNodeList = new ArrayList<>();
+        this.extantLabelList = new ArrayList<>();
         parseNewick(treeAsNewick, root);
     }
 
@@ -43,6 +46,22 @@ public class TreeObject {
             }
         }
         return null;
+    }
+
+    /**
+     * Retures the extent nodes.
+     * @return
+     */
+    public ArrayList<TreeNodeObject> getLeafNodeList() {
+        return leafNodeList;
+    }
+
+    /**
+     * Returns a list of extent labels.
+     * @return
+     */
+    public ArrayList<String> getExtantLabelList() {
+        return this.extantLabelList;
     }
 
     /**
@@ -113,6 +132,7 @@ public class TreeObject {
         }
         // Add this to our list of extant sequences.
         extantLabelList.add(node.getLabel());
+        leafNodeList.add(node);
         return node;
     }
 

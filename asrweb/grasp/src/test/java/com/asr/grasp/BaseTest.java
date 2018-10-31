@@ -100,6 +100,7 @@ public class BaseTest {
         seqModel = new SeqModel();
         seqModel.setDBConfig(dbUrl, dbPassword, dbUser);
         seqController.setSeqModel(seqModel);
+        seqController.setInfModel(infModel);
 
         treeModel = new TreeModel();
         treeModel.setDBConfig(dbUrl, dbPassword, dbUser);

@@ -321,6 +321,7 @@ var sort_added_poags = function () {
  *
  */
 var draw_all_poags = function (poags) {
+    setup_poag_svg(poags)
     // For each of the poags draw the nodes, pass in the group
     // to append to.
     // Draw the mini msa first
@@ -621,7 +622,10 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
  *      graph       -> contains information re the poag.
  */
 var process_poags = function (json_str, poags, inferred, set_msa, merged, name) {
-    var data = JSON.parse(json_str);
+    let data = json_str;
+    if (typeof json_str === "string") {
+      data = JSON.parse(json_str);
+    }
     if (data.bottom.nodes[0].id !== undefined) {
       data.bottom.nodes = convertToArray(data.bottom.nodes);
       data.bottom.edges = convertEdgesToArray(data.bottom.edges);
@@ -655,8 +659,19 @@ var process_poags = function (json_str, poags, inferred, set_msa, merged, name) 
     if (poags.single.nodes[poags.root_poag_name].length < poags.options.display.num_start_nodes) {
         poags.options.display.num_start_nodes = Math.floor(poags.single.nodes[poags.root_poag_name].length*0.8);
     }
-
     return poags;
+}
+
+
+var process_poags_joint = function (data, poags, inferred, set_msa, merged, name) {
+
+  poags = process_poag_data(poags, data, name, inferred, merged);
+  poags = process_edges(poags, data, name, inferred, merged);
+
+  if (poags.single.nodes[poags.root_poag_name].length < poags.options.display.num_start_nodes) {
+    poags.options.display.num_start_nodes = Math.floor(poags.single.nodes[poags.root_poag_name].length*0.8);
+  }
+  return poags;
 }
 
 
@@ -876,7 +891,11 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
             }
             node[N_X] = msa_node[N_X];
         }
-        node[N_TYPE] = raw_poag.metadata.type;
+        if (raw_poag.metadata !== undefined) {
+          node[N_TYPE] = raw_poag.metadata.type;
+        } else {
+          node[N_TYPE] = 'joint';
+        }
         node[UNIQUE_ID] = name + '-' + node[N_X];
         poags = update_min_max(node[N_X], node[N_Y], poags);
 

@@ -92,7 +92,7 @@ public class ReconstructionController {
      */
     public ReconstructionObject getByIdForMarginal(int reconId, UserObject user) {
         // Check we can get the reconsrtcution
-        ReconstructionObject reconstruction = reconModel.getMiniById(reconId, user
+        ReconstructionObject reconstruction = reconModel.getById(reconId, user
                 .getId());
         return reconstruction;
     }

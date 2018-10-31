@@ -1,6 +1,7 @@
 package com.asr.grasp.model;
 
 import com.asr.grasp.utils.Defines;
+import com.sun.java.swing.plaf.motif.resources.motif;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -37,7 +38,7 @@ public class SeqModel extends BaseModel {
      * @param seq
      * @return
      */
-    public boolean insertIntoDb (int reconId, String nodeLabel, String seq, int method) {
+    public boolean insertIntoDb (int reconId, String nodeLabel, String seq, int method, boolean gappy) {
         String query = "INSERT INTO web.sequences(r_id, node_label, " +
                 "seq, s_type) VALUES(?,?,?,?);";
         try {
@@ -46,7 +47,11 @@ public class SeqModel extends BaseModel {
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, nodeLabel);
-            statement.setString(3, seq);
+            if (!gappy) {
+                statement.setString(3, seq.replaceAll("-", ""));
+            } else {
+                statement.setString(3, seq);
+            }
             statement.setInt(4, method);
             statement.executeUpdate();
             con.close();
@@ -76,9 +81,11 @@ public class SeqModel extends BaseModel {
             ResultSet results = statement.executeQuery();
             con.close();
             if (results != null) {
-                /* The node label is in position 1 which we want to be the key and the
-                 * sequence is in position 2 of the query above which we want to be the value */
-                return getStrStrMap(results, 1, 2);
+                while (results.next()) {
+                    /* The node label is in position 1 which we want to be the key and the
+                     * sequence is in position 2 of the query above which we want to be the value */
+                    return getStrStrMap(results, 1, 2);
+                }
             }
         } catch (Exception e) {
             System.out.println("Unable to get String Map, issue with Statment in getAllExtents");
@@ -273,8 +280,7 @@ public class SeqModel extends BaseModel {
      * @return
      */
     public ArrayList<String> findNodesWithMotif (int reconId, String motif) {
-        motif = "%" + motif + "%"; // Add in the wild cards
-        String query = "SELECT node_label FROM web.sequences WHERE r_id=? AND seq LIKE ?;";
+        String query = "SELECT node_label FROM web.sequences WHERE r_id=? AND seq SIMILAR TO ?;";
         try {
             Connection con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
@@ -300,7 +306,7 @@ public class SeqModel extends BaseModel {
      * @param reconId
      * @return
      */
-    public boolean insertListIntoDb (int reconId, HashMap<String, String> sequences) {
+    public boolean insertListIntoDb (int reconId, HashMap<String, String> sequences, boolean gappy) {
         String query = "INSERT INTO web.sequences(r_id, node_label, seq, s_type) VALUES(?,?,?,?);";
 
         try {
@@ -311,7 +317,11 @@ public class SeqModel extends BaseModel {
             for (String label: sequences.keySet()) {
                 statement.setInt(1, reconId);
                 statement.setString(2, label);
-                statement.setString(3, sequences.get(label));
+                if (!gappy) {
+                    statement.setString(3, sequences.get(label).replaceAll("-", ""));
+                } else {
+                    statement.setString(3, sequences.get(label));
+                }
                 statement.setInt(4, Defines.EXTANT);
                 statement.addBatch();
             }

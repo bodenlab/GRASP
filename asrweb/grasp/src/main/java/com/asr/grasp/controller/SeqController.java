@@ -1,20 +1,20 @@
 package com.asr.grasp.controller;
 
+import api.PartialOrderGraph;
+import com.asr.grasp.model.InferenceModel;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.utils.Defines;
-import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
+import vis.POAGJson;
 
 //import org.biojava.nbio.alignment.Alignments.PairwiseSequenceAlignerType;
 //import org.biojava.nbio.alignment.template.SequencePair;
@@ -39,6 +39,9 @@ public class SeqController {
     @Autowired
     private SeqModel seqModel;
 
+    @Autowired
+    private InferenceModel infModel;
+
     /**
      * Inserts all the joint reconstructions into the database.
      * Returns the list of insterted node labels.
@@ -48,13 +51,22 @@ public class SeqController {
      * @param asrInstance
      * @return
      */
-    public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance) {
+    public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy) {
         List<String> labels = asrInstance.getAncestralSeqLabels();
         List<String> insertedLabels = new ArrayList<>();
         for (String label: labels) {
-            POGraph ancestor = asrInstance.getAncestor(label);
+            PartialOrderGraph ancestor = asrInstance.getGraph(label);
             // Insert it into the database
-            boolean inserted = seqModel.insertIntoDb(reconId, label, ancestor.getSupportedSequence(true), Defines.JOINT);
+            // What we want to do here is perform two inserts -> one for the sequence so we can do
+            // motif searching
+            POAGJson ancsJson = new POAGJson(ancestor, gappy);
+            String ancsStr = ancsJson.toJSON().toString();
+            System.out.println(ancsStr);
+            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+            if (! inserted) {
+                return null;
+            }
+            inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
             if (inserted) {
                 insertedLabels.add(label);
             }
@@ -70,12 +82,12 @@ public class SeqController {
      * @param asrInstance
      * @return
      */
-    public String insertJointToDb(int reconId, String label, ASRPOG asrInstance) {
+    public String insertJointToDb(int reconId, String label, ASRPOG asrInstance, boolean gappy) {
         List<String> labels = asrInstance.getAncestralSeqLabels();
         POGraph ancestor = asrInstance.getAncestor(label);
         // Insert it into the database
-        String insertedAncs = ancestor.getSupportedSequence(true);
-        boolean inserted = seqModel.insertIntoDb(reconId, label, insertedAncs, Defines.JOINT);
+        String insertedAncs = ancestor.getSupportedSequence(gappy);
+        boolean inserted = seqModel.insertIntoDb(reconId, label, insertedAncs, Defines.JOINT, gappy);
         if (inserted) {
             return insertedAncs;
         }
@@ -91,8 +103,8 @@ public class SeqController {
      * @param extantSeqs
      * @return
      */
-    public String insertAllExtantsToDb (int reconId, HashMap<String, String> extantSeqs) {
-        if (! seqModel.insertListIntoDb(reconId, extantSeqs)) {
+    public String insertAllExtantsToDb (int reconId, HashMap<String, String> extantSeqs, boolean gappy) {
+        if (! seqModel.insertListIntoDb(reconId, extantSeqs, gappy)) {
             return "unable to insert all extents.";
         }
         return null;
@@ -194,6 +206,18 @@ public class SeqController {
      *
      * @param reconId
      * @param label
+     */
+    public String getInfAsJson(int reconId, String label) {
+        return infModel.getInferenceForLabel(reconId, label);
+    }
+
+
+    /**
+     * Gets a sequence and returns a JSON formatted version. This enables us to use it on
+     * the front end.
+     *
+     * @param reconId
+     * @param label
      * @param reconMethod
      */
     public JSONArray getSeqAsJson(int reconId, String label, int reconMethod) {
@@ -207,6 +231,7 @@ public class SeqController {
                     position.put(Defines.G_X, x);
                     position.put(Defines.G_ID, x);
                     position.put(Defines.G_CONSENSUS, true);
+                    seqJSON.put(position);
                 }
             }
             return seqJSON;
@@ -245,5 +270,7 @@ public class SeqController {
     public void setSeqModel(SeqModel seqModel) {
         this.seqModel = seqModel;
     }
-
+    public void setInfModel(InferenceModel infModel) {
+        this.infModel = infModel;
+    }
 }

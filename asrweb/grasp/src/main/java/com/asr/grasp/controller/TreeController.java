@@ -104,7 +104,7 @@ public class TreeController {
             asr.loadParameters();
             for (int i = 0; i < 50; i ++) {
                 TreeNodeObject n = orderedNodes.poll();
-                seqController.insertJointToDb(reconUnknownAncsId, n.getOriginalLabel(), asr.getASRPOG(Defines.JOINT));
+                seqController.insertJointToDb(reconUnknownAncsId, n.getOriginalLabel(), asr.getASRPOG(Defines.JOINT), false);
                 System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
             }
 

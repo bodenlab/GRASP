@@ -89,70 +89,39 @@ var displayJointGraph = function (node_name, node_fill, reset_graphs = false) {
       }
     }
   }
-  $("#status").text("");
-  $('#progress-status').fadeIn();
-  $('#progress').removeClass('disable');
-  set_inf_type("joint");
   $.ajax({
-    url: window.location.pathname.split("?")[0],
+    url: "/getrecon",
     type: 'POST',
-    data: {infer: inferType, node: node_name, addgraph: reset_graphs == false},
+    dataType: 'json',
+    contentType: "application/json",
+    data: JSON.stringify({joint: true, nodeLabel: node_name, addgraph: reset_graphs == false}),
     success: function (data) {
-      var inter = setInterval(function () {
-        $.ajax({
-          url: window.location.pathname.split("?")[0],
-          type: 'GET',
-          data: {request: "status"},
-          success: function (data) {
-            // redirect to results if finished.. otherwise, update user...
-            if (data == "done") {
-              $.ajax({
-                url: window.location.pathname.split("?")[0],
-                type: 'POST',
-                data: {getrecongraph: node_name},
-                success: function (data) {
-                  var json_str = data;
-                  drawMutants = false;
-                  if (reset_graphs) {
-                    graph_array = [];
-                    merged_graphs = [];
-                  }
-                  graph_array.push(JSON.parse(json_str));
-                  poags.options.poagColours["poag" + (Object.keys(
-                      poags.options.poagColours).length + 1)] = node_fill;
-                  poags.options.name_to_merged_id[node_name.split(
-                      "_")[0]] = ["poag" + (Object.keys(
-                      poags.options.poagColours).length + 1)];
-                  poags.options.names_to_colour[node_name.split(
-                      "_")[0]] = node_fill;
-                  if (reset_graphs) {
-                    selectedNode = node_name;
-                    setup_poags(json_str, true, false, false, node_name);
-                  } else {
-                    setup_poags(json_str, false, false, false, node_name);
-                    //var new_graph = fuse_multipleGraphs(graph_array);
-                    //setup_poags(new_graph, false, false, true, 'Merged');
-                  }
-                  refresh_elements();
-                  redraw_poags();
-                }
-              });
-              clearInterval(inter);
-              $('#progress-status').fadeOut();
-              $('#progress').addClass('disable');
-            } else if (data.includes("error")) {
-              clearInterval(inter);
-              $('#progress-status').fadeOut();
-              $('#progress').addClass('disable');
-              $("#warning").attr('style', "display: block;");
-              $("#warning-text").text(data.split("\t")[1]);
-              //window.location.replace(window.location.pathname.split("?")[0] + "error");
-            } else {
-              $("#status").text(data);
-            }
-          }
-        });
-      }, 1000);
+      drawMutants = false;
+      if (reset_graphs) {
+        graph_array = [];
+        merged_graphs = [];
+      }
+      graph_array.push(data);
+      poags.options.poagColours["poag" + (Object.keys(
+          poags.options.poagColours).length + 1)] = node_fill;
+      poags.options.name_to_merged_id[node_name.split(
+          "_")[0]] = ["poag" + (Object.keys(
+          poags.options.poagColours).length + 1)];
+      poags.options.names_to_colour[node_name.split(
+          "_")[0]] = node_fill;
+      if (reset_graphs) {
+        selectedNode = node_name;
+        /**
+         * ToDo: May need to look into this!
+         */
+        poags = process_poags_joint(data, poags, false, false, false, node_name);
+      } else {
+        poags = process_poags_joint(data, poags, false, false, false, node_name);
+        //var new_graph = fuse_multipleGraphs(graph_array);
+        //setup_poags(new_graph, false, false, true, 'Merged');
+      }
+      refresh_elements();
+      redraw_poags();
     }
   });
   redraw_poags();

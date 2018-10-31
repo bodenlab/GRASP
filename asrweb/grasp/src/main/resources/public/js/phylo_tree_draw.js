@@ -1731,8 +1731,9 @@ var context_menu_action = function (call, node_fill, node_id) {
   if (call_type == "View joint reconstruction") {
     select_node(call.attr("id"));
     refresh_tree();
-    reset_poag_stack();
+
     displayJointGraph(call.attr("id"), node_fill, true);
+    reset_poag_stack();
   } else if (call_type == "Add joint reconstruction") {
     document.getElementById('reset-button').disabled = false;
     d3.select("#fill-" + node_id).attr("stroke",
@@ -1768,8 +1769,12 @@ var context_menu_action = function (call, node_fill, node_id) {
     expand_and_collapse_others(node);
   } else {
     select_node(call.attr("id"));
-    reset_poag_stack();
     perform_marginal(call.attr("id"), node_fill);
+    reset_poag_stack();
+
+    /**
+     * ToDo : may need to move the reset POAG stack function back above.
+     */
   }
 
 };

@@ -236,7 +236,7 @@ public class ReconstructionsModel extends BaseModel {
      */
     public void saveInferences(ReconstructionObject recon) {
         Map<String, List<Inference>> inferences = recon.getJointInferences();
-        infModel.insertListIntoDb(recon.getId(), inferences);
+        // infModel.insertListIntoDb(recon.getId(), inferences);
     }
 
     /**
@@ -380,7 +380,7 @@ public class ReconstructionsModel extends BaseModel {
             con.close();
             // If we have an entry convert it to the correct format.
             if (rawRecons.next()) {
-                return createFromDB(rawRecons);
+                return createMiniFromDB(rawRecons);
             }
             return null;
         } catch (Exception e) {

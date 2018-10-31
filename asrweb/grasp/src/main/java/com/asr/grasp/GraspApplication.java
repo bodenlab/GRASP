@@ -96,6 +96,8 @@ public class GraspApplication extends SpringBootServletInitializer {
     @Autowired
     private ASRObject asr;
 
+    private boolean saveGappySeq = true;
+
     @RequestMapping(value = "/register", method = RequestMethod.GET)
     public ModelAndView showRegistrationForm(WebRequest request, Model model) {
         model.addAttribute("user", loggedInUser);
@@ -226,43 +228,44 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         currRecon = loggedInUser.getCurrRecon();
 
-        asr = new ASRObject();
-        asr.setLabel(currRecon.getLabel());
-        asr.setInferenceType(currRecon.getInferenceType());
-        asr.setModel(currRecon.getModel());
-        asr.setNodeLabel(currRecon.getNode());
-        asr.setTree(currRecon.getTree());
-        asr.setReconstructedTree(currRecon.getReconTree());
-        asr.setMSA(currRecon.getMsa());
-        asr.setAncestor(currRecon.getAncestor());
-        asr.loadSequences(currRecon.getSequences());
-        asr.setJointInferences(currRecon.getJointInferences());
-        asr.loadParameters();
+//        asr = new ASRObject();
+//        asr.setLabel(currRecon.getLabel());
+//        asr.setInferenceType(currRecon.getInferenceType());
+//        asr.setModel(currRecon.getModel());
+//        asr.setNodeLabel(currRecon.getNode());
+//        asr.setTree(currRecon.getTree());
+//        asr.setReconstructedTree(currRecon.getReconTree());
+//        asr.setMSA(currRecon.getMsa());
+//        asr.setAncestor(currRecon.getAncestor());
+//        asr.loadSequences(currRecon.getSequences());
+//        asr.setJointInferences(currRecon.getJointInferences());
+//        asr.loadParameters();
 
         ModelAndView mav = new ModelAndView("index");
 
-        mav.addObject("label", asr.getLabel());
+        mav.addObject("label", currRecon.getLabel());
 
         // add reconstructed newick string to send to javascript
-        mav.addObject("tree", asr.getReconstructedNewickString());
+        mav.addObject("tree", currRecon.getReconTree());
 
         // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraph(), asr.getAncestorGraph());
+        String graphs = asr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(recon.getAncestor()));
 
         mav.addObject("graph", graphs);
 
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
-        mav.addObject("inferenceType", asr.getInferenceType());
-        mav.addObject("node", asr.getNodeLabel());
+        mav.addObject("inferenceType", recon.getInferenceType());
+        mav.addObject("node", recon.getNode());
         mav.addObject("results", true);
 
         mav.addObject("user", loggedInUser);
         mav.addObject("username", loggedInUser.getUsername());
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
-        JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
+        // ToDo: add in the IDs
+        // JSONObject ids = taxaController.getNonExistIdsFromProtId(seqController.getAllSeqLabels(currRecon.getId(), Defines.EXTANT));
 
-        mav.addObject("ids", ids.toString());
+        //mav.addObject("ids", ids.toString());
         mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
 
         return mav;
@@ -283,13 +286,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         String err = reconController.save(loggedInUser, currRecon);
 
         // We also want to save all joint recons
-        seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT));
+        seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT), saveGappySeq);
 
         // Also want to save all the extents into the db
-        seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap());
+        seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap(), saveGappySeq);
 
         // Reset the current recon
-        currRecon = new ReconstructionObject();
+        // currRecon = new ReconstructionObject();
 
 
         return err;
@@ -601,12 +604,13 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
-        JSONArray reconstructedAnsc = seqController.getSeqAsJson(currRecon.getId(), dataJson.getString("nodeLabel"), reconMethod);
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), dataJson.getString("nodeLabel"));
         if (reconstructedAnsc.equals(null)) {
             // This means we weren't able to dine it in the DB so we need to run the recon as usual
             return "Need to do this...";
         }
-        return reconstructedAnsc.toString();
+        System.out.println(reconstructedAnsc);
+        return reconstructedAnsc;
     }
 
     /**
@@ -809,9 +813,34 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = new ModelAndView("processing");
 
         // run reconstruction
+        // ToDo: look and run the recon for marginal otherwise just get the joint from the database
+        if (!infer.equals("joint")) {
+            /**
+             * Here is where we need to load the whole reconstruction i.e. all the seqs etc
+             *
+             */
+            currRecon = reconController.getByIdForMarginal(currRecon.getId(),
+                    loggedInUser);
 
-        recon = new ASRThread(asr, infer, node, addGraph, logger, loggedInUser, reconController);
+            asr = new ASRObject();
+            asr.setLabel(currRecon.getLabel());
+            asr.setInferenceType(currRecon.getInferenceType());
+            asr.setModel(currRecon.getModel());
+            asr.setNodeLabel(currRecon.getNode());
+            asr.setTree(currRecon.getTree());
+            asr.setReconstructedTree(currRecon.getReconTree());
+            asr.setMSA(currRecon.getMsa());
+            asr.setAncestor(currRecon.getAncestor());
+            asr.loadSequences(currRecon.getSequences());
+            asr.setJointInferences(currRecon.getJointInferences());
+            asr.loadParameters();
 
+            recon = new ASRThread(asr, infer, node, addGraph, logger, loggedInUser,
+                    reconController);
+        } else {
+            System.out.println(seqController.getSeqAsJson(currRecon.getId(), node, Defines.JOINT));
+            // ToDo: we want to change this to an AJAX call and return the string here
+        }
         mav.addObject("username", loggedInUser.getUsername());
         return mav;
     }

@@ -1813,7 +1813,7 @@ var set_children_collapsed = function (node) {
 var set_children_un_collapsed = function (node) {
   node[T_COLLAPSED] = false;
   for (var n in node[T_CHILDREN]) {
-    if (node.children[n][T_TERMINATED]) {
+    if (node[T_CHILDREN][n][T_TERMINATED]) {
       return;
     }
     set_children_un_collapsed(node[T_CHILDREN][n]);

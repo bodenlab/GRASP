@@ -67,18 +67,36 @@ public class ReconstructionController {
     }
 
     /**
-     * Gets a reconstruction by its ID.
+     * Gets a reconstruction by its ID. Loads a cut down version of a reconstruction.
      * This is used to load a saved reconstruction.
+     *
      * @param reconId
      * @param user
      * @return
      */
     public ReconstructionObject getById(int reconId, UserObject user) {
         // Check we can get the reconsrtcution
-        ReconstructionObject reconstruction = reconModel.getById(reconId, user
+        ReconstructionObject reconstruction = reconModel.getMiniById(reconId, user
                 .getId());
         return reconstruction;
     }
+
+    /**
+     * Gets a reconstruction by its ID.
+     *
+     * This is used to load a saved reconstruction. We need all the parameters in this case
+     * as we want to be able to fully reconstruct the ASR.
+     * @param reconId
+     * @param user
+     * @return
+     */
+    public ReconstructionObject getByIdForMarginal(int reconId, UserObject user) {
+        // Check we can get the reconsrtcution
+        ReconstructionObject reconstruction = reconModel.getMiniById(reconId, user
+                .getId());
+        return reconstruction;
+    }
+
 
     /**
      * Save a users reconstruction to the model.
@@ -107,6 +125,8 @@ public class ReconstructionController {
             if (err == null) {
                 user.addToOwnerdReconIds(recon.getId(), recon.getLabel(),
                         "Not Available", "today");
+                reconModel.saveInferences(recon);
+
                 return null;
             }
             return err;

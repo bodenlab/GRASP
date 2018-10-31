@@ -1,6 +1,11 @@
 package com.asr.grasp.objects;
 
 import com.asr.grasp.utils.Defines;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import reconstruction.Inference;
+
 
 /**
  * The reconstruction object is used to pass information between the front end interface and
@@ -26,7 +31,7 @@ public class ReconstructionObject {
 
     private String sequences;
 
-    private String jointInferences;
+    private Map<String, List<Inference>> jointInferences;
 
     private String ancestor;
 
@@ -58,7 +63,7 @@ public class ReconstructionObject {
 
     public String getTree() { return this.tree; }
 
-    public String getJointInferences() {
+    public Map<String, List<Inference>> getJointInferences() {
         return this.jointInferences;
     }
 
@@ -100,7 +105,7 @@ public class ReconstructionObject {
         this.inferenceType = inferenceType;
     }
 
-    public void setJointInferences(String inferences) {
+    public void setJointInferences(Map<String, List<Inference>> inferences) {
         this.jointInferences = inferences;
     }
 

@@ -17,11 +17,26 @@ public class TreeObject {
     private ArrayList<String> extantLabelList;
 
     public TreeObject(String treeAsNewick) {
-        System.out.println(treeAsNewick);
         this.nodeList = new ArrayList<>();
         this.leafNodeList = new ArrayList<>();
         this.extantLabelList = new ArrayList<>();
         parseNewick(treeAsNewick, root);
+    }
+
+    /**
+     * Corrects for if we have labels which do or don't have the pipe from uniprot
+     * @param rawLabel
+     */
+    private String formatLabel(String rawLabel) {
+        if (rawLabel.split("|").length > 1) {
+            return rawLabel.split("|")[1];
+        } else {
+            if (rawLabel.split("_").length > 1) {
+                return rawLabel.split("_")[0];
+            } else {
+                return rawLabel;
+            }
+        }
     }
 
     /**
@@ -156,13 +171,13 @@ public class TreeObject {
         if (splitIdx == -1) { // no distance
             if(!tail.isEmpty() && tail.substring(0, tail.length() - 1) != null && !tail.substring(0, tail.length() - 1).isEmpty()) {
                 label = tail.substring(splitIdx + 1, tail.length()).replace(";", "");
-                node = new TreeNodeObject("N" + count + "_" + label, parent, null);
+                node = new TreeNodeObject(label, parent, null);
             } else {
                 node = new TreeNodeObject("N" + count, parent, null);
             }
         } else { // there's a distance
             if(tail.substring(0, splitIdx) != null && !tail.substring(0, splitIdx).isEmpty()) {
-                label = "N" + count + "_" + tail.substring(0, splitIdx);
+                label = tail.substring(0, splitIdx);
             } else {
                 label = "N" + count;
             }

@@ -341,6 +341,19 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("type", "saved");
         }
 
+        if (user.getUsername().equals("arianemora")) {
+//            for (int j=500; j < 1300; j += 500) {
+//                String baseDir = "/Users/ariane/Documents/boden/data/dhad/generated_random_sampling/";
+//                String filenameAln = baseDir + j + "_" + (j + 1258) + "_dhad_25102018.aln";
+//                String filenameNwk = baseDir + "r_" + j + "_" + (j + 1258) + "_dhad_25102018.nwk";
+//                asr.setInferenceType("Joint");
+//                asr.setAlnFilepath(filenameAln);
+//                asr.setTreeFilepath(filenameNwk);
+//                asr.setLabel(j + '_' + (j + 1258) + "_dhad_auto");
+//                recon = new ASRThread(asr, asr.getInferenceType(), asr.getNodeLabel(), false, logger, user, reconController);
+//
+//            }
+        }
         return mav;
     }
 
@@ -683,6 +696,12 @@ public class GraspApplication extends SpringBootServletInitializer {
         JSONObject ids = taxaController.getNonExistIdsFromProtId(asr.getExtentNames());
         mav.addObject("ids", ids.toString());
         mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+
+        /**
+         * Temp want to save the recon.
+         */
+        saveCurrRecon();
+
         return mav;
     }
 
@@ -764,7 +783,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
             return mav;
         }
-        recon = new ASRThread(asr, asr.getInferenceType(), asr.getNodeLabel(), false, logger);
+        recon = new ASRThread(asr, asr.getInferenceType(), asr.getNodeLabel(), false, logger, loggedInUser, reconController);
 
         ModelAndView mav = new ModelAndView("processing");
         mav.addObject("user", loggedInUser);
@@ -791,7 +810,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // run reconstruction
 
-        recon = new ASRThread(asr, infer, node, addGraph, logger);
+        recon = new ASRThread(asr, infer, node, addGraph, logger, loggedInUser, reconController);
 
         mav.addObject("username", loggedInUser.getUsername());
         return mav;
@@ -975,7 +994,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (ancs.size() > 0) {
             BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/joint_recon.fa", false));
             for (String nodeLabel: ancs) {
-                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT);
+                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT, "");
             }
             bw.close();
         }

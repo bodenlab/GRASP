@@ -7,7 +7,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Repository;
+import reconstruction.Inference;
 
 @Repository
 public class SeqModel extends BaseModel {
@@ -287,6 +290,38 @@ public class SeqModel extends BaseModel {
         } catch (Exception e) {
             System.out.println("Unable to get matches for motifs: " + motif);
             return null;
+        }
+    }
+
+
+
+    /**
+     * Saves a consensus sequence
+     * @param reconId
+     * @return
+     */
+    public boolean insertListIntoDb (int reconId, HashMap<String, String> sequences) {
+        String query = "INSERT INTO web.sequences(r_id, node_label, seq, s_type) VALUES(?,?,?,?);";
+
+        try {
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            con.setAutoCommit(false);
+            PreparedStatement statement = con.prepareStatement(query);
+            for (String label: sequences.keySet()) {
+                statement.setInt(1, reconId);
+                statement.setString(2, label);
+                statement.setString(3, sequences.get(label));
+                statement.setInt(4, Defines.EXTANT);
+                statement.addBatch();
+            }
+            int[] count = statement.executeBatch();
+            con.commit();
+            con.close();
+            return true;
+        } catch (Exception e) {
+            System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
+            return false;
         }
     }
 

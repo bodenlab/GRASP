@@ -5,6 +5,7 @@ import com.asr.grasp.utils.Defines;
 import dat.EnumSeq;
 import dat.Enumerable;
 import java.util.HashMap;
+import java.util.Map;
 import json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -19,6 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import reconstruction.ASRPOG;
+import reconstruction.Inference;
 
 /**
  * ASR API for integration in the Swing web form
@@ -57,7 +59,7 @@ public class ASRObject {
     private List<EnumSeq.Gappy<Enumerable>> extants = null;
     private String msa = null;
     private String ancestor = null;
-    private String jointInferences = null;
+    private Map<String, List<Inference>> jointInferences = null;
 
     // for logging
     private int numAlnCols = 0;
@@ -329,13 +331,13 @@ public class ASRObject {
         return reconstructedTree;
     }
 
-    public String getJointInferences() {
+    public Map<String, List<Inference>> getJointInferences() {
         if (jointInferences == null)
             jointInferences = asrController.getJointInferences();
         return jointInferences;
     }
 
-    public void setJointInferences(String inference) {
+    public void setJointInferences(Map<String, List<Inference>>  inference) {
         jointInferences = inference;
         if (inference != null)
             asrController.setJointInferences(inference);

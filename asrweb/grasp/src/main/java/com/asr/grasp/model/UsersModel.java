@@ -130,6 +130,12 @@ public class UsersModel extends BaseModel {
                     return false;
                 }
             }
+            String queryDeleteInferences = "DELETE FROM web.inferences where r_id=?;";
+            for (Integer rId: reconIds) {
+                if (!deleteOnId(queryDeleteInferences, rId)) {
+                    return false;
+                }
+            }
             String queryDeleteRecon = "DELETE FROM web.reconstructions WHERE " +
                     "owner_id=?;";
             if (deleteOnId(queryDeleteRecon, userId) != true) {

@@ -2,6 +2,7 @@ package com.asr.grasp.controller;
 
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.utils.Defines;
+import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -11,9 +12,16 @@ import java.util.HashMap;
 import java.util.List;
 import json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
 
+//import org.biojava.nbio.alignment.Alignments.PairwiseSequenceAlignerType;
+//import org.biojava.nbio.alignment.template.SequencePair;
+//import org.biojava.nbio.alignment.template.SubstitutionMatrix;
+//import org.biojava.nbio.core.sequence.ProteinSequence;
+//import org.biojava.nbio.core.sequence.compound.AminoAcidCompound;
+//import org.biojava.nbio.core.sequence.io.FastaReaderHelper;
 /**
  * Class that keeps track of the consensus sequences stored in the database.
  * Currently all joint reconstructions are saved.
@@ -46,13 +54,32 @@ public class SeqController {
         for (String label: labels) {
             POGraph ancestor = asrInstance.getAncestor(label);
             // Insert it into the database
-            boolean inserted = seqModel
-                    .insertIntoDb(reconId, label, ancestor.getSupportedSequence(true), Defines.JOINT);
+            boolean inserted = seqModel.insertIntoDb(reconId, label, ancestor.getSupportedSequence(true), Defines.JOINT);
             if (inserted) {
                 insertedLabels.add(label);
             }
         }
         return insertedLabels;
+    }
+
+    /**
+     * Insert a single joint instance into the database.
+     *
+     * @param reconId
+     * @param label
+     * @param asrInstance
+     * @return
+     */
+    public String insertJointToDb(int reconId, String label, ASRPOG asrInstance) {
+        List<String> labels = asrInstance.getAncestralSeqLabels();
+        POGraph ancestor = asrInstance.getAncestor(label);
+        // Insert it into the database
+        String insertedAncs = ancestor.getSupportedSequence(true);
+        boolean inserted = seqModel.insertIntoDb(reconId, label, insertedAncs, Defines.JOINT);
+        if (inserted) {
+            return insertedAncs;
+        }
+        return null;
     }
 
     /**
@@ -64,16 +91,11 @@ public class SeqController {
      * @param extantSeqs
      * @return
      */
-    public List<String> insertAllExtantsToDb (int reconId, HashMap<String, String> extantSeqs) {
-        List<String> insertedLabels = new ArrayList<>();
-        for (String label: extantSeqs.keySet()) {
-            // Insert it into the database
-            boolean inserted = seqModel.insertIntoDb(reconId, label, extantSeqs.get(label), Defines.EXTANT);
-            if (inserted) {
-                insertedLabels.add(label);
-            }
+    public String insertAllExtantsToDb (int reconId, HashMap<String, String> extantSeqs) {
+        if (! seqModel.insertListIntoDb(reconId, extantSeqs)) {
+            return "unable to insert all extents.";
         }
-        return insertedLabels;
+        return null;
     }
 
     /**
@@ -154,11 +176,11 @@ public class SeqController {
      * @param reconMethod
      * @throws IOException
      */
-    public void saveAncestorToFile(BufferedWriter fileWriter, String label, int reconId, int reconMethod) throws IOException {
+    public void saveAncestorToFile(BufferedWriter fileWriter, String label, int reconId, int reconMethod, String extraLabelInfo) throws IOException {
 
         String seq = seqModel.getSeqByLabel(label, reconId, reconMethod);
         if (seq != null) {
-            fileWriter.write(">" + label);
+            fileWriter.write(">" + label + extraLabelInfo);
             fileWriter.newLine();
             fileWriter.write(seq);
             fileWriter.newLine();
@@ -191,6 +213,30 @@ public class SeqController {
         }
         return null;
     }
+
+
+//    private void alignPairGlobal(String seq1, String seq2) throws Exception {
+//        ProteinSequence s1 = new ProteinSequence(seq1);
+//        ProteinSequence s2 = new ProteinSequence(seq2);
+//        SubstitutionMatrix<AminoAcidCompound> matrix = new SimpleSubstitutionMatrix<AminoAcidCompound>();
+//        SequencePair<ProteinSequence, AminoAcidCompound> pair = Alignments.getPairwiseAlignment(s1, s2,
+//                PairwiseSequenceAlignerType.GLOBAL, new SimpleGapPenalty(), matrix);
+//        System.out.printf("%n%s vs %s%n%s", pair.getQuery().getAccession(), pair.getTarget().getAccession(), pair);
+//    }
+
+    private int getHammingDistance(String seq1, String seq2) {
+        if (seq1.length() != seq2.length())
+            return -1;
+
+        int counter = 0;
+        for (int i = 0; i < seq1.length(); i++) {
+            if (seq1.charAt(i) != seq2.charAt(i)) {
+                counter++;
+            }
+        }
+        return counter;
+    }
+
     /**
      * ------------------------------------------------------------------------
      *          The following are to set the test env.

@@ -18,11 +18,13 @@ public class TreeNodeObject {
     private Double distance;
     private double distanceFromRoot = 0.0;
     private TreeNodeObject parent;
+    private String originalLabel;
 
     public TreeNodeObject(String label, TreeNodeObject parent, Double distance) {
         this.children = new ArrayList<>();
         this.leaves = new ArrayList<>();
-        this.label = label;
+        this.originalLabel = label;
+        formatLabel(label);
         this.score = 0;
         this.distance = distance;
         if (distance == null) {
@@ -31,6 +33,39 @@ public class TreeNodeObject {
         this.parent = parent;
     }
 
+    /**
+     * Get the unformatted label.
+     * @return
+     */
+    public String getOriginalLabel() {
+        return this.originalLabel;
+    }
+
+    /**
+     * Corrects for if we have labels which do or don't have the pipe from uniprot
+     * @param rawLabel
+     */
+    private void formatLabel(String rawLabel) {
+        if (rawLabel.split("\\|").length > 1) {
+            String[] splitOnPipe = rawLabel.split("\\|");
+            if (splitOnPipe[0].length() == 2) {
+                this.label = splitOnPipe[1];
+            } else {
+                this.label = splitOnPipe[0];
+            }
+        } else {
+            if (rawLabel.split("_").length > 1) {
+                this.label = rawLabel.split("_")[0];
+            } else {
+                this.label = rawLabel;
+            }
+        }
+    }
+
+    /**
+     * Gets the distance to the root from a node - includes own distance.
+     * @return
+     */
     public double getDistanceToRoot() {
         if (distanceFromRoot != 0) {
             return distanceFromRoot + distance;
@@ -92,6 +127,20 @@ public class TreeNodeObject {
         getLeaves(this);
         return leaves;
     }
+
+    /**
+     * Returns the leafs under a particular node. This allows us to
+     * determine similarity between nodes.
+     * @return
+     */
+    public int getLeafCount() {
+        if (leaves.size() > 0) {
+            return leaves.size();
+        }
+        getLeaves(this);
+        return leaves.size();
+    }
+
 
     /**
      * Recursively adds the leaves.

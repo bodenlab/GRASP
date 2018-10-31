@@ -5,8 +5,10 @@ import api.PartialOrderGraph;
 import dat.EnumSeq;
 import dat.Enumerable;
 import dat.POGraph;
+import java.util.Map;
 import json.JSONObject;
 import reconstruction.ASRPOG;
+import reconstruction.Inference;
 import vis.POAGJson;
 
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class ASRController {
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
     private ASRPOG asrJoint = null;
-    private JSONObject jointInferences = null;
+    private Map<String, List<Inference>>  jointInferences = null;
 
     // ASR object to store marginal reconstruction of current node (if given)
     private ASRPOG asrMarginal = null;
@@ -78,9 +80,13 @@ public class ASRController {
     }
 
 
-    public String getJointInferences() {
+    /**
+     * Return the list of joint inferences these can then be iterated through
+     * @return
+     */
+    public Map<String, List<Inference>> getJointInferences() {
         if (asrJoint != null)
-            return asrJoint.exportInferencesToJSON().toString();
+            return asrJoint.getAncestralInferences();
         return null;
     }
 
@@ -95,8 +101,8 @@ public class ASRController {
         msaGraph = new POGraph(extants);
     }
 
-    public void setJointInferences(String inferences) {
-        jointInferences = new JSONObject(inferences);
+    public void setJointInferences(Map<String, List<Inference>>  inferences) {
+        jointInferences = inferences;
     }
 
     /**

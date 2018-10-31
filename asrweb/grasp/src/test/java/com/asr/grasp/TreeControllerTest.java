@@ -3,6 +3,10 @@ package com.asr.grasp;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
+import com.asr.grasp.utils.Defines;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.util.ArrayList;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -30,30 +34,51 @@ public class TreeControllerTest extends BaseTest {
     @Test
     public void testNodeSimilaritySearcher() {
         /**
-         * Tests being able to get similar nodes.
-         */
-        // Load two recons that are subsets of each other
+//         * Tests being able to get similar nodes.
+//         */
+//        // Load two recons that are subsets of each other
         int ownerId = 213;
 
-        String sml = "10_samples_test";
-        String mid = "20_samples_test";
+        String sml = "sp_cured3_wguide2";
+        String mid = "500_1758_dhad_29102018";
         String lrg = "40_samples_test";
         setUpEnv();
-//        ASRObject asrSml = setAsr(smallest);
-//        ASRObject asrMid = setAsr(mid);
-//        ASRObject asrLrg = setAsr(lrg);
-//        UserObject user = createAndRegisterUser("testuser", "testpassword");
+        UserObject user = new UserObject();
+        user.setId(213);
+////        ASRObject asrSml = setAsr(smallest);
+////        ASRObject asrMid = setAsr(mid);
+////        ASRObject asrLrg = setAsr(lrg);
+////        UserObject user = createAndRegisterUser("testuser", "testpassword");
+////
+////        ReconstructionObject reconSml = saveRecons(asrSml, user);
+////        ReconstructionObject reconMid = saveRecons(asrMid, user);
+////        ReconstructionObject reconLrg = saveRecons(asrLrg, user);
+////
+////        String baseTestName = "test-test-test-";
 //
-//        ReconstructionObject reconSml = saveRecons(asrSml, user);
-//        ReconstructionObject reconMid = saveRecons(asrMid, user);
-//        ReconstructionObject reconLrg = saveRecons(asrLrg, user);
-//
-//        String baseTestName = "test-test-test-";
+        String ancs1 = "N1";
+        String ancs2 = "N423";
+        String ancs3 = "N560";
+        treeController.getSimilarNodes(user, sml, mid, ancs1, true);
+        treeController.getSimilarNodes(user, sml, mid, ancs2, true);
+        treeController.getSimilarNodes(user, sml, mid, ancs3, true);
 
-        String ancs1 = "N1_N1_0.924";
-        String ansc2 = "tr|A0A0D1F6V2|A0A0D1F6V2_VIBPH ilvD";
 
-        treeController.getSimilarNodes(213, sml, mid, ancs1);
+    }
 
+    public void save(ArrayList<String> ancs, String ancsLabel) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(
+                    "/Users/ariane/Documents/boden/apps/ASR/asrweb/grasp/test_output/" + ancsLabel + "_ancs.fa",
+                    false));
+            // First want to save the original
+            seqController.saveAncestorToFile(bw, ancsLabel, 575, Defines.JOINT, "_original:sp_cured3_wguide2");
+            for (String nodeLabel : ancs) {
+                seqController.saveAncestorToFile(bw, nodeLabel.split("@")[0], 570, Defines.JOINT, nodeLabel.split("@")[1]);
+            }
+            bw.close();
+        } catch (Exception e) {
+            System.out.println("coultn't write:" + e.getMessage());
+        }
     }
 }

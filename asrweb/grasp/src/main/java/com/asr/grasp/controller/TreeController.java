@@ -2,8 +2,11 @@ package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.TreeModel;
+import com.asr.grasp.objects.ASRObject;
+import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
+import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,6 +28,12 @@ public class TreeController {
 
     @Autowired
     ReconstructionsModel reconModel;
+
+    @Autowired
+    SeqController seqController;
+
+    @Autowired
+    ReconstructionController reconController;
 
     private PriorityQueue<TreeNodeObject> orderedNodes;
 
@@ -48,15 +57,16 @@ public class TreeController {
     /**
      * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
      *
-     * @param userId
+     * @param user
      * @param reconKnownAncsLabel
      * @param reconUnknownAncsLabel
      * @param ancsestorLabel
      * @return
      */
-    public ArrayList<String> getSimilarNodes(int userId, String reconKnownAncsLabel, String reconUnknownAncsLabel, String ancsestorLabel) {
-        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, userId);
-        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, userId);
+    public ArrayList<String> getSimilarNodes(UserObject user, String reconKnownAncsLabel, String reconUnknownAncsLabel, String ancsestorLabel, Boolean save) {
+        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+
 
         // If either of the labels are incorrect then return
         if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
@@ -65,8 +75,8 @@ public class TreeController {
 
 
         // Otherwise get the trees
-        TreeObject treeKnownAncs = getById(reconKnownAncsId, userId);
-        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, userId);
+        TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
+        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
 
         // If either of the trees weren't able to be parsed return
         if (treeKnownAncs == null || treeUnknownAncs == null) {
@@ -76,7 +86,38 @@ public class TreeController {
         // Setup the ordered nodes
         orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
 
-        return getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
+        getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
+
+        if (save) {
+            ReconstructionObject recon = reconController.getById(reconUnknownAncsId, user);
+            ASRObject asr = new ASRObject();
+            asr.setLabel(recon.getLabel());
+            asr.setInferenceType(recon.getInferenceType());
+            asr.setModel(recon.getModel());
+            asr.setNodeLabel(recon.getNode());
+            asr.setTree(recon.getTree());
+            asr.setReconstructedTree(recon.getReconTree());
+            asr.setMSA(recon.getMsa());
+            asr.setAncestor(recon.getAncestor());
+            asr.loadSequences(recon.getSequences());
+            asr.setJointInferences(recon.getJointInferences());
+            asr.loadParameters();
+            for (int i = 0; i < 50; i ++) {
+                TreeNodeObject n = orderedNodes.poll();
+                seqController.insertJointToDb(reconUnknownAncsId, n.getOriginalLabel(), asr.getASRPOG(Defines.JOINT));
+                System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
+            }
+
+        }
+
+        ArrayList<String> retNodes = new ArrayList<>();
+
+        for (int i = 0; i < 50; i ++) {
+            TreeNodeObject n = orderedNodes.poll();
+            retNodes.add(n.getOriginalLabel() + "@" + n.getScore() + "_" + n.getDistanceToRoot());
+            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
+        }
+        return retNodes;
     }
 
     /**
@@ -107,18 +148,8 @@ public class TreeController {
         } else {
             sharedLeaves = getIntersection(leaves, intersection);
         }
-        System.out.println(node.getDistanceToRoot());
         scoreNodes(sharedLeaves, treeUnknownAncs.getRoot(), node.getDistanceToRoot());
 
-        for (TreeNodeObject l: sharedLeaves) {
-            System.out.println("LEAF: " + l.getLabel());
-        }
-        ArrayList<String> topNodes = new ArrayList<>();
-        for (int i = 0; i < orderedNodes.size(); i ++) {
-            TreeNodeObject n = orderedNodes.poll();
-            topNodes.add(n.getLabel());
-            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot() + " orig-dist: " + node.getDistanceToRoot());
-        }
         return null;
     }
 
@@ -219,19 +250,22 @@ public class TreeController {
         if (node.isExtent()) {
             if (!extentList.contains(node)) {
                 // Add a negative score for a mismatch
-                node.addToScore(10);
-                return 10;// + Math.abs(distance - node.getDistanceToRoot());
+                node.addToScore(10 + ((extentList.size() - 1) * 10));
+                return 10;
             } else {
                 // Add a positive score for a match
-                node.addToScore(-10);// + Math.abs(distance - node.getDistanceToRoot()));
-                return -10;// + Math.abs(distance - node.getDistanceToRoot());
+                node.addToScore(-30 + ((extentList.size() - 1) * 10));
+                return -10;
             }
         }
         for (TreeNodeObject child: node.getChildren()) {
             node.addToScore(scoreNodes(extentList, child, distance));
         }
+        double score = node.getScore();
+        int sizeDiff = Math.abs(extentList.size() - node.getLeafCount());
+        node.addToScore(Math.abs(extentList.size() - node.getLeafCount()) * 10);
         orderedNodes.add(node);
-        return node.getScore();
+        return score;
     }
 
 
@@ -273,5 +307,13 @@ public class TreeController {
 
     public void setReconModel(ReconstructionsModel reconModel) {
         this.reconModel = reconModel;
+    }
+
+    public void setSeqController(SeqController seqController) {
+        this.seqController = seqController;
+    }
+
+    public void setReconController(ReconstructionController reconController) {
+        this.reconController = reconController;
     }
 }

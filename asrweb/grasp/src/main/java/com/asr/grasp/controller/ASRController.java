@@ -108,12 +108,12 @@ public class ASRController {
     /**
      * Run reconstruction using saved data and specified options
      */
-    public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs) throws InterruptedException {
+    public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs, String logFileName) throws InterruptedException {
         NUM_THREADS = numThreads;
         if (type.equalsIgnoreCase("marginal"))
             performedMarginal = runReconstructionMarginal(tree, seqs, model, node);
         else if (asrJoint == null || asrJoint.getAncestralInferences().isEmpty())
-            performedJoint = runReconstructionJoint(tree, seqs, model);
+            performedJoint = runReconstructionJoint(tree, seqs, model, logFileName);
         if (rootLabel == null || rootLabel.equalsIgnoreCase("root"))
             if (asrJoint != null)
                 rootLabel = asrJoint.getRootLabel();
@@ -126,11 +126,11 @@ public class ASRController {
     /**
      * Run joint reconstruction using saved data and specified options
      */
-    private boolean runReconstructionJoint(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model) throws InterruptedException {
+    private boolean runReconstructionJoint(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String logFileName) throws InterruptedException {
         if (asrJoint == null)
             asrJoint = new ASRPOG(model, NUM_THREADS);
         if (asrJoint.getAncestralInferences() == null || asrJoint.getAncestralInferences().isEmpty())
-            asrJoint.runReconstruction(treeNwk, seqs, true, msa == null ? null : msa.getMSAGraph());
+            asrJoint.runReconstruction(treeNwk, seqs, true, (msa == null ? null : msa.getMSAGraph()), logFileName);
         return true;
     }
 

@@ -192,7 +192,7 @@ public class ASRObject {
             loadTree();
         if (performAlignment && extants == null)
             asrController.performAlignment(alnFilepath);
-        asrController.runReconstruction(inferenceType, NUM_THREADS, model, nodeLabel, tree, extants);
+        asrController.runReconstruction(inferenceType, NUM_THREADS, model, nodeLabel, tree, extants, label);
         if (reconstructedTree == null)
             reconstructedTree = asrController.getReconstructedNewick();
     }

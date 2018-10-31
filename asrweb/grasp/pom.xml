@@ -26,9 +26,9 @@
 
 	<profiles>
 		<profile>
-			<id>dev</id>
+			<id>release</id>
 			<properties>
-				<activatedProperties>dev-override</activatedProperties>
+				<activatedProperties>release-override</activatedProperties>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>

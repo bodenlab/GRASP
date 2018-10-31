@@ -6,6 +6,8 @@ import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.utils.Defines;
 import dat.POGraph;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +44,35 @@ public class SeqController {
     @Autowired
     private InferenceModel infModel;
 
+    private String logFileName;
+
+    /**
+     * Helper function that prints the memory usage to a file
+     */
+    private long[] printStats(FileWriter fr, String label, double time, long prevTotal, long prevFree) {
+        Runtime rt = Runtime.getRuntime();
+        long total = rt.totalMemory();
+        long free = rt.freeMemory();
+        long used = total - free;
+        if (prevTotal != 0) {
+            try {
+                fr.write(label + ",consensus," + time +
+                        "," + total +
+                        "," + used +
+                        "," + free + "\n");
+                System.out.println(label + " saved");
+            } catch (Exception e) {
+                System.out.println(label + "," + time +
+                        "," + total +
+                        "," + used +
+                        "," + free + "\n");
+            }
+        }
+        long[] vals = {total, free};
+        return vals;
+    }
+
+
     /**
      * Inserts all the joint reconstructions into the database.
      * Returns the list of insterted node labels.
@@ -54,14 +85,27 @@ public class SeqController {
     public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy) {
         List<String> labels = asrInstance.getAncestralSeqLabels();
         List<String> insertedLabels = new ArrayList<>();
+        FileWriter fr = null;
+        long[] vals = {0, 0};
+        long startTime = System.nanoTime();
+        if (logFileName != null) {
+            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
+            try {
+                fr = new FileWriter(file);
+                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
+            } catch (Exception e) {
+                System.out.println("Couldn't open file...");
+            }
+        }
         for (String label: labels) {
+
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
             // Insert it into the database
             // What we want to do here is perform two inserts -> one for the sequence so we can do
             // motif searching
             POAGJson ancsJson = new POAGJson(ancestor, gappy);
             String ancsStr = ancsJson.toJSON().toString();
-            System.out.println(ancsStr);
+
             boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
             if (! inserted) {
                 return null;
@@ -70,10 +114,21 @@ public class SeqController {
             if (inserted) {
                 insertedLabels.add(label);
             }
+            System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime) / 1000000000.0));
+
+            System.out.print(label + ", ");
+            if (this.logFileName != null) {
+                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0, vals[0],
+                        vals[1]);
+            }
         }
+        System.out.println("\n Finished Inserting Joint recons.");
         return insertedLabels;
     }
 
+    public void setFileName(String filename) {
+        logFileName = filename;
+    }
     /**
      * Insert a single joint instance into the database.
      *

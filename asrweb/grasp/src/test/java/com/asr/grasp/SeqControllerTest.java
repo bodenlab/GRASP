@@ -181,9 +181,9 @@ public class SeqControllerTest extends BaseTest {
         // Check these were saved in the DB
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
 
-        String motif1 = "YPPD";
+        String motif1 = "%YPPD%";
 
-        String motif2 = "GFLR";
+        String motif2 = "%GFLR%";
 
         ArrayList<String> motif1Match = seqController.findAllWithMotif(recon.getId(), motif1);
 

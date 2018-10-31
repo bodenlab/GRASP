@@ -98,6 +98,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     private boolean saveGappySeq = true;
 
+    /**
+     * ToDo: delete
+    */
+    private String logFileName = null;
+
     @RequestMapping(value = "/register", method = RequestMethod.GET)
     public ModelAndView showRegistrationForm(WebRequest request, Model model) {
         model.addAttribute("user", loggedInUser);
@@ -342,20 +347,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         if (errSave == null && saved == true) {
             mav.addObject("type", "saved");
-        }
-
-        if (user.getUsername().equals("arianemora")) {
-//            for (int j=500; j < 1300; j += 500) {
-//                String baseDir = "/Users/ariane/Documents/boden/data/dhad/generated_random_sampling/";
-//                String filenameAln = baseDir + j + "_" + (j + 1258) + "_dhad_25102018.aln";
-//                String filenameNwk = baseDir + "r_" + j + "_" + (j + 1258) + "_dhad_25102018.nwk";
-//                asr.setInferenceType("Joint");
-//                asr.setAlnFilepath(filenameAln);
-//                asr.setTreeFilepath(filenameNwk);
-//                asr.setLabel(j + '_' + (j + 1258) + "_dhad_auto");
-//                recon = new ASRThread(asr, asr.getInferenceType(), asr.getNodeLabel(), false, logger, user, reconController);
-//
-//            }
         }
         return mav;
     }
@@ -609,7 +600,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             // This means we weren't able to dine it in the DB so we need to run the recon as usual
             return "Need to do this...";
         }
-        System.out.println(reconstructedAnsc);
         return reconstructedAnsc;
     }
 
@@ -747,7 +737,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
 
         this.asr = asrForm;
-
         // ToDo: Also check here that they have a unique label
         String err = null;
         if (asr.getLabel().equals("")) {
@@ -756,6 +745,12 @@ public class GraspApplication extends SpringBootServletInitializer {
             err = reconController.isLabelUnique(asr
                     .getLabel());
         }
+
+        /**
+         * ToDo: delete
+         */
+        logFileName = asr.getLabel();
+
         if (err != null) {
             ModelAndView mav = new ModelAndView("index");
             mav.addObject("error", true);

@@ -51,17 +51,6 @@ public class ASRThread implements Runnable {
                 asr.setNodeLabel(node);
             status = "done";
 
-//            /**
-//             * Temporarily save the reconstructions
-//             */
-//            ReconstructionObject currRecon =  reconController.createFromASR(asr);
-//
-//            // Set the anscestor and the msa
-//            currRecon.setAncestor(asr.getAncestor());
-//            currRecon.setMsa(asr.getMSA());
-//            currRecon.setOwnerId(owner.getId());
-//            reconController.save(owner, currRecon);
-
             // Set the owner ID to be the logged in user
         } catch (InterruptedException e) {
             asr.setNodeLabel(node);

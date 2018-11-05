@@ -113,4 +113,11 @@ public class ReconstructionObject {
         return this.inferenceType;
     }
 
+    public void clearLargeStrings() {
+        this.msa = null;
+        this.reconTree = null;
+        this.sequences = null;
+        this.ancestor = null;
+        this.tree = null;
+    }
 }

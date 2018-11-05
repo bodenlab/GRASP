@@ -11,6 +11,8 @@ import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import json.JSONArray;
+import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +55,6 @@ public class TreeController {
         return null;
     }
 
-
     /**
      * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
      *
@@ -63,7 +64,8 @@ public class TreeController {
      * @param ancsestorLabel
      * @return
      */
-    public ArrayList<String> getSimilarNodes(UserObject user, String reconKnownAncsLabel, String reconUnknownAncsLabel, String ancsestorLabel, Boolean save) {
+    public ArrayList<String> getSimilarNodesTmp(UserObject user, String reconKnownAncsLabel,
+            String reconUnknownAncsLabel, String ancsestorLabel, int numSimilarNodes) {
         int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
         int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
 
@@ -72,7 +74,6 @@ public class TreeController {
         if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
             return null;
         }
-
 
         // Otherwise get the trees
         TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
@@ -88,35 +89,68 @@ public class TreeController {
 
         getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
 
-        if (save) {
-            ReconstructionObject recon = reconController.getById(reconUnknownAncsId, user);
-            ASRObject asr = new ASRObject();
-            asr.setLabel(recon.getLabel());
-            asr.setInferenceType(recon.getInferenceType());
-            asr.setModel(recon.getModel());
-            asr.setNodeLabel(recon.getNode());
-            asr.setTree(recon.getTree());
-            asr.setReconstructedTree(recon.getReconTree());
-            asr.setMSA(recon.getMsa());
-            asr.setAncestor(recon.getAncestor());
-            asr.loadSequences(recon.getSequences());
-            asr.setJointInferences(recon.getJointInferences());
-            asr.loadParameters();
-            for (int i = 0; i < 50; i ++) {
-                TreeNodeObject n = orderedNodes.poll();
-                seqController.insertJointToDb(reconUnknownAncsId, n.getOriginalLabel(), asr.getASRPOG(Defines.JOINT), false);
-                System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
-            }
-
-        }
-
         ArrayList<String> retNodes = new ArrayList<>();
 
-        for (int i = 0; i < 50; i ++) {
+        /**
+         * Convert the nodes to a JSON representation so we can view these on the front end.
+         */
+        for (int i = 0; i < numSimilarNodes; i ++) {
             TreeNodeObject n = orderedNodes.poll();
-            retNodes.add(n.getOriginalLabel() + "@" + n.getScore() + "_" + n.getDistanceToRoot());
+            retNodes.add(n.getOriginalLabel());
             System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
         }
+
+        return retNodes;
+    }
+
+
+    /**
+     * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
+     *
+     * @param user
+     * @param reconKnownAncsLabel
+     * @param reconUnknownAncsLabel
+     * @param ancsestorLabel
+     * @return
+     */
+    public JSONArray getSimilarNodes(UserObject user, String reconKnownAncsLabel, String reconUnknownAncsLabel, String ancsestorLabel, int numSimilarNodes) {
+        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+
+
+        // If either of the labels are incorrect then return
+        if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+            return null;
+        }
+
+        // Otherwise get the trees
+        TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
+        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
+
+        // If either of the trees weren't able to be parsed return
+        if (treeKnownAncs == null || treeUnknownAncs == null) {
+            return null;
+        }
+
+        // Setup the ordered nodes
+        orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
+
+        getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
+
+        JSONArray retNodes = new JSONArray();
+
+        /**
+         * Convert the nodes to a JSON representation so we can view these on the front end.
+         */
+        for (int i = 0; i < numSimilarNodes; i ++) {
+            TreeNodeObject n = orderedNodes.poll();
+            JSONArray node = new JSONArray();
+            node.put(Defines.S_NAME, n.getOriginalLabel());
+            node.put(Defines.S_SCORE, n.getScore());
+            retNodes.put(node);
+            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
+        }
+
         return retNodes;
     }
 
@@ -133,22 +167,31 @@ public class TreeController {
          * both trees in terms of ancestor labels.
          */
         ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs, treeUnknownAncs);
-        // Prune each tree to only contain the intersection
-        updateNode(intersection, treeKnownAncs.getRoot());
-        updateNode(intersection, treeUnknownAncs.getRoot());
 
         // Now that we have the intersection we want to get the leaf nodes in the known ancestor
         // that lie under the node of interest - these must also be in the intersection obj
         TreeNodeObject node = treeKnownAncs.getNodeByLabel(ancsestorLabel);
-        ArrayList<TreeNodeObject> leaves = node.getLeaves();
-        ArrayList<TreeNodeObject> sharedLeaves;
-        // Get the intersection of the leaves and the intersection
-        if (leaves.size() > intersection.size()) {
-            sharedLeaves = getIntersection(intersection, leaves);
-        } else {
-            sharedLeaves = getIntersection(leaves, intersection);
+        ArrayList<String> leaves = node.getLeafLabels();
+        ArrayList<String> sharedLeaves;
+
+        // Get the intersection of the leaves and the intersection - first convert the intersection
+        // to Strings
+        ArrayList<String> intersectionLabels = new ArrayList<>();
+
+        for (TreeNodeObject tn: intersection) {
+            intersectionLabels.add(tn.getLabel());
         }
-        scoreNodes(sharedLeaves, treeUnknownAncs.getRoot(), node.getDistanceToRoot());
+
+        // This just is a slight optimisation to allow us to only look through the smaller set
+        if (leaves.size() > intersection.size()) {
+            sharedLeaves = getIntersectionOfStrings(intersectionLabels, leaves);
+        } else {
+            sharedLeaves = getIntersectionOfStrings(leaves, intersectionLabels);
+        }
+
+        // Also want to pass the leaves that aren't in the tree
+        intersectionLabels.removeAll(sharedLeaves);
+        scoreNodes(sharedLeaves, intersectionLabels, treeUnknownAncs.getRoot(), node.getDistanceToRoot());
 
         return null;
     }
@@ -175,6 +218,23 @@ public class TreeController {
      * Helper to iterate through the smaller list.
      * @param smallList
      * @param largeList
+     * @return
+     */
+    public ArrayList<String> getIntersectionOfStrings(ArrayList<String> smallList, ArrayList<String> largeList) {
+        ArrayList<String> extentIntersection = new ArrayList<>();
+
+        for (String extent: smallList) {
+            if (largeList.contains(extent)) {
+                extentIntersection.add(extent);
+            }
+        }
+        return extentIntersection;
+    }
+
+    /**
+     * Helper to iterate through the smaller list.
+     * @param smallList
+     * @param largeList
      * @param tree
      * @return
      */
@@ -190,23 +250,81 @@ public class TreeController {
     }
 
     /**
-     * Helper to iterate through the smaller list.
-     * @param smallList
-     * @param largeList
-     * @return
+     * Computes scores for node based on how many of the extents were included
+     * in the children for a particular node.
+     * @param extentList
+     * @param node
      */
-    public ArrayList<TreeNodeObject> getIntersection(ArrayList<TreeNodeObject> smallList, ArrayList<TreeNodeObject> largeList) {
-        ArrayList<TreeNodeObject> extentIntersection = new ArrayList<>();
-
-        for (TreeNodeObject extent: smallList) {
-            if (largeList.contains(extent)) {
-                extentIntersection.add(extent);
+    public double scoreNodes(ArrayList<String> extentList, ArrayList<String> extentNotIncludedList, TreeNodeObject node, Double distance) {
+        int value = 1;
+        if (node.isExtent()) {
+            if (!extentList.contains(node.getLabel())) {
+                // Add a negative score for a mismatch
+                node.addToScore(value + ((extentList.size() - 1) * value));
+                return value;
+            } else if (extentNotIncludedList.contains(node.getLabel())) {
+                // Add a positive score for a match
+                node.addToScore(-value + ((extentList.size() - 1) * value));
+                return -value;
+            } else {
+                // Add nothing to the score
+                return 0;
             }
         }
-        return extentIntersection;
+        for (TreeNodeObject child: node.getChildren()) {
+            // Get the leaf nodes under each of the nodes and add these
+            scoreNodes(extentList, extentNotIncludedList, child, distance);
+        }
+
+        ArrayList<TreeNodeObject> leaves = node.getLeaves();
+        int score = 0;
+        for (TreeNodeObject tno: leaves) {
+            if (extentList.contains(tno.getLabel())) {
+                score -= value;
+            } else if (extentNotIncludedList.contains(tno.getLabel())) {
+                score += value;
+            }
+        }
+        node.addToScore(score);
+        orderedNodes.add(node);
+
+        return score;
     }
 
+
+    public class TreeNodeComparator implements Comparator<TreeNodeObject>
+    {
+        @Override
+        public int compare(TreeNodeObject x, TreeNodeObject y)
+        {
+            if (x.getScore() < y.getScore())
+            {
+                return -1;
+            }
+            if (x.getScore() > y.getScore())
+            {
+                return 1;
+            }
+            // If both have the same score we want to return the distance difference
+            // ToDo: check if this is correct
+            if (x.getDistanceToRoot() < y.getDistanceToRoot())
+            {
+                return -1;
+            }
+            if (x.getDistanceToRoot() > y.getDistanceToRoot())
+            {
+                return 1;
+            }
+            return 0;
+        }
+    }
+
+
+
     /**
+     * ---------------------------------------------------------------------------------------------
+     *              Unused function. Was initially used to remove the redundant paths.
+     * ---------------------------------------------------------------------------------------------
      * The aim of this function is to update the tree to only contain the nodes that
      * were included in the original tree.
      * @param extentList
@@ -240,66 +358,11 @@ public class TreeController {
         return node;
     }
 
-    /**
-     * Computes scores for node based on how many of the extents were included
-     * in the children for a particular node.
-     * @param extentList
-     * @param node
-     */
-    public double scoreNodes(ArrayList<TreeNodeObject> extentList, TreeNodeObject node, Double distance) {
-        if (node.isExtent()) {
-            if (!extentList.contains(node)) {
-                // Add a negative score for a mismatch
-                node.addToScore(10 + ((extentList.size() - 1) * 10));
-                return 10;
-            } else {
-                // Add a positive score for a match
-                node.addToScore(-30 + ((extentList.size() - 1) * 10));
-                return -10;
-            }
-        }
-        for (TreeNodeObject child: node.getChildren()) {
-            node.addToScore(scoreNodes(extentList, child, distance));
-        }
-        double score = node.getScore();
-        int sizeDiff = Math.abs(extentList.size() - node.getLeafCount());
-        node.addToScore(Math.abs(extentList.size() - node.getLeafCount()) * 10);
-        orderedNodes.add(node);
-        return score;
-    }
-
-
-    public class TreeNodeComparator implements Comparator<TreeNodeObject>
-    {
-        @Override
-        public int compare(TreeNodeObject x, TreeNodeObject y)
-        {
-            if (x.getScore() < y.getScore())
-            {
-                return -1;
-            }
-            if (x.getScore() > y.getScore())
-            {
-                return 1;
-            }
-            // If both have the same score we want to return the distance difference
-            // ToDo: check if this is correct
-            if (x.getDistanceToRoot() < y.getDistanceToRoot())
-            {
-                return -1;
-            }
-            if (x.getDistanceToRoot() > y.getDistanceToRoot())
-            {
-                return 1;
-            }
-            return 0;
-        }
-    }
 
     /**
-     * ------------------------------------------------------------------------
+     * ---------------------------------------------------------------------------------------------
      *          The following are to set the test env.
-     * ------------------------------------------------------------------------
+     * ---------------------------------------------------------------------------------------------
      */
     public void setTreeModel(TreeModel treeModel) {
         this.treeModel = treeModel;

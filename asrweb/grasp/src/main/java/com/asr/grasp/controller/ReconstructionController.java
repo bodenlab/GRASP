@@ -125,8 +125,9 @@ public class ReconstructionController {
             if (err == null) {
                 user.addToOwnerdReconIds(recon.getId(), recon.getLabel(),
                         "Not Available", "today");
-                reconModel.saveInferences(recon);
-
+                // We want to reduce the memory overhead, so we can remove the ancestor graph amd
+                // the MSA of the reconstrcuction
+                recon.clearLargeStrings();
                 return null;
             }
             return err;
@@ -283,6 +284,7 @@ public class ReconstructionController {
             return null;
         }
     }
+
 
     /**
      * ------------------------------------------------------------------------

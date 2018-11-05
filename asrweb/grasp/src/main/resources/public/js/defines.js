@@ -151,3 +151,10 @@ const TRUE = 1;
 const FALSE = 0;
 const INITIAL = 'o';
 const FINAL = 'f';
+
+
+/**
+ * This is for the similar nodes.
+ **/
+const S_NAME = 0;
+const S_SCORE = 1;

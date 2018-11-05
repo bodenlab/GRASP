@@ -200,15 +200,55 @@
                                     $(document).ready(function () {
                                         $('#results-nav-link').addClass("disable-link");
                                         $('#results-nav-link').css("color", "#b3b3b3");
-				                    });
+                                    });
                                     /*]]>*/
                     </script>
                 </div>
+                <div class="form-group row col-sm-offset-1 col-sm-6">
+                    <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="If you select to save your reconstruction you will recieve an email about it once it
+                        has complete. Otherwise you'll need to keep your connection open to get the reconstruction back. It is recomended that you choose save for reconstructions > 500 sequences. Saving will also
+                        allow cool things like motif searching :) " >
+                        <input id="save-run" type="checkbox" data-size="small" data-label-text="Save or Run" data-label-width="300" data-handle-width="200" data-off-text="Save with email" data-on-color="default" data-on-text="Run without saving" />
+                    </div>
+                    <input type="hidden" th:value="save" th:field="*{save}" class="inferenceType" />
+                    <script type="text/javascript">
+                      /*<![CDATA[*/
+                      $("[id='save-run']").bootstrapSwitch();
+                      $('input[id="save-run"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                        if (state == true) {
+                          $('#save').val("true");
+                          document.getElementById("email").required = false;
+                        } else {
+                          $('#save').val("false");
+                          document.getElementById("email").required = true;
+
+                        }
+                      });
+                      /*]]>*/
+                    </script>
+                </div>
+                <div class="form-group row col-sm-offset-2 col-sm-12 pad-top-bottom">
+                    <input type="text" class="form-input col-xs-6"
+                           placeholder="Email for saving your reonstruction..."
+                           id="email" name="email" th:field="*{email}" required="false"/>
+                </div>
+
                 <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn" onclick="javascript:displayLoad();">Perform reconstruction</button>
                     <a class="btn col-xs-12  pad-top-bottom" href="/guide"> Read the GRASP guide</a>
 
-                </div>            </form>
+                </div>
+            </form>
         </div>
+        <script>
+          /*<![CDATA[*/
+          // $(document).ready(function () {
+          //   var email = /*[[${email}]]*/ ;
+          //   if (email != null) {
+          //     $('#email').text(email)
+          //   }
+          /*]]>*/
+        </script>
+
         </div>
     </div>
 </body>

@@ -4,6 +4,7 @@ import api.PartialOrderGraph;
 import com.asr.grasp.model.InferenceModel;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.utils.Defines;
+import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,12 +19,7 @@ import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
 import vis.POAGJson;
 
-//import org.biojava.nbio.alignment.Alignments.PairwiseSequenceAlignerType;
-//import org.biojava.nbio.alignment.template.SequencePair;
-//import org.biojava.nbio.alignment.template.SubstitutionMatrix;
-//import org.biojava.nbio.core.sequence.ProteinSequence;
-//import org.biojava.nbio.core.sequence.compound.AminoAcidCompound;
-//import org.biojava.nbio.core.sequence.io.FastaReaderHelper;
+
 /**
  * Class that keeps track of the consensus sequences stored in the database.
  * Currently all joint reconstructions are saved.
@@ -38,13 +34,16 @@ import vis.POAGJson;
 @Service
 public class SeqController {
 
-    @Autowired
-    private SeqModel seqModel;
 
     @Autowired
     private InferenceModel infModel;
 
+    @Autowired
+    private SeqModel seqModel;
+
+
     private String logFileName;
+
 
     /**
      * Helper function that prints the memory usage to a file
@@ -72,7 +71,6 @@ public class SeqController {
         return vals;
     }
 
-
     /**
      * Inserts all the joint reconstructions into the database.
      * Returns the list of insterted node labels.
@@ -82,12 +80,11 @@ public class SeqController {
      * @param asrInstance
      * @return
      */
-    public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy) {
-        List<String> labels = asrInstance.getAncestralSeqLabels();
+    public List<String> insertSpecificJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> nodeLabels) {
         List<String> insertedLabels = new ArrayList<>();
+        long startTime = System.nanoTime();
         FileWriter fr = null;
         long[] vals = {0, 0};
-        long startTime = System.nanoTime();
         if (logFileName != null) {
             File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
             try {
@@ -97,8 +94,8 @@ public class SeqController {
                 System.out.println("Couldn't open file...");
             }
         }
-        for (String label: labels) {
-
+        for (String label: nodeLabels) {
+            System.out.println("Running " +  label );
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
             // Insert it into the database
             // What we want to do here is perform two inserts -> one for the sequence so we can do
@@ -111,14 +108,177 @@ public class SeqController {
                 return null;
             }
             inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
-            if (inserted) {
-                insertedLabels.add(label);
-            }
+
             System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime) / 1000000000.0));
 
             System.out.print(label + ", ");
             if (this.logFileName != null) {
-                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0, vals[0],
+                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
+                        vals[0],
+                        vals[1]);
+            }
+        }
+        System.out.println("\n Finished Inserting Joint recons.");
+        return insertedLabels;
+    }
+
+    /**
+     * Inserts all the joint reconstructions into the database.
+     * Returns the list of insterted node labels.
+     * ToDo: Do we want to auto delete any they don't want? Currently keeping all.
+     *
+     * @param reconId
+     * @param asrInstance
+     * @return
+     */
+    public List<String> insertAllJointsToDbTmp (int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> alreadySaved) {
+        List<String> insertedLabels = new ArrayList<>();
+        long startTime = System.nanoTime();
+        FileWriter fr = null;
+        long[] vals = {0, 0};
+        if (logFileName != null) {
+            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
+            try {
+                fr = new FileWriter(file);
+                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
+            } catch (Exception e) {
+                System.out.println("Couldn't open file...");
+            }
+        }
+        List<String> labels = asrInstance.getAncestralSeqLabels();
+        for (String label: labels) {
+            if (!alreadySaved.contains(label)) {
+                System.out.println("Running " + label);
+                PartialOrderGraph ancestor = asrInstance.getGraph(label);
+                // Insert it into the database
+                // What we want to do here is perform two inserts -> one for the sequence so we can do
+                // motif searching
+                POAGJson ancsJson = new POAGJson(ancestor, gappy);
+                String ancsStr = ancsJson.toJSON().toString();
+
+                boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+                if (!inserted) {
+                    return null;
+                }
+                inserted = seqModel
+                        .insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT,
+                                gappy);
+
+                System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime)
+                        / 1000000000.0));
+
+                System.out.print(label + ", ");
+                if (this.logFileName != null) {
+                    vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
+                            vals[0],
+                            vals[1]);
+                }
+            }
+        }
+        System.out.println("\n Finished Inserting Joint recons.");
+        return insertedLabels;
+    }
+
+
+    /**
+     * Inserts all the joint reconstructions into the database.
+     * Returns the list of insterted node labels.
+     * ToDo: Do we want to auto delete any they don't want? Currently keeping all.
+     *
+     * @param reconId
+     * @param asrInstance
+     * @return
+     */
+    public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave) {
+        List<String> insertedLabels = new ArrayList<>();
+        long startTime = System.nanoTime();
+        FileWriter fr = null;
+        long[] vals = {0, 0};
+        if (logFileName != null) {
+            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
+            try {
+                fr = new FileWriter(file);
+                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
+            } catch (Exception e) {
+                System.out.println("Couldn't open file...");
+            }
+        }
+        for (String label: toSave) {
+            System.out.println("Running " + label);
+            PartialOrderGraph ancestor = asrInstance.getGraph(label);
+            // Insert it into the database
+            // What we want to do here is perform two inserts -> one for the sequence so we can do
+            // motif searching
+            POAGJson ancsJson = new POAGJson(ancestor, gappy);
+            String ancsStr = ancsJson.toJSON().toString();
+
+            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+            if (!inserted) {
+                return null;
+            }
+            inserted = seqModel
+                    .insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT,
+                            gappy);
+
+            System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime)
+                    / 1000000000.0));
+
+            System.out.print(label + ", ");
+            if (this.logFileName != null) {
+                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
+                        vals[0],
+                        vals[1]);
+            }
+        }
+        System.out.println("\n Finished Inserting Joint recons.");
+        return insertedLabels;
+    }
+
+    /**
+     * Inserts all the joint reconstructions into the database.
+     * Returns the list of insterted node labels.
+     * ToDo: Do we want to auto delete any they don't want? Currently keeping all.
+     *
+     * @param reconId
+     * @param asrInstance
+     * @return
+     */
+    public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy) {
+        List<String> insertedLabels = new ArrayList<>();
+        long startTime = System.nanoTime();
+        FileWriter fr = null;
+        long[] vals = {0, 0};
+        if (logFileName != null) {
+            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
+            try {
+                fr = new FileWriter(file);
+                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
+            } catch (Exception e) {
+                System.out.println("Couldn't open file...");
+            }
+        }
+        List<String> labels = asrInstance.getAncestralSeqLabels();
+        for (String label: labels) {
+            System.out.println("Running " +  label );
+            PartialOrderGraph ancestor = asrInstance.getGraph(label);
+            // Insert it into the database
+            // What we want to do here is perform two inserts -> one for the sequence so we can do
+            // motif searching
+            POAGJson ancsJson = new POAGJson(ancestor, gappy);
+            String ancsStr = ancsJson.toJSON().toString();
+
+            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+            if (! inserted) {
+                return null;
+            }
+            inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
+
+            System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime) / 1000000000.0));
+
+            System.out.print(label + ", ");
+            if (this.logFileName != null) {
+                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
+                        vals[0],
                         vals[1]);
             }
         }
@@ -236,6 +396,34 @@ public class SeqController {
     }
 
     /**
+     *
+     * @return
+     */
+    public HashMap<String, ArrayList<String>> getSeqLabelAsNamedMap(int reconId) {
+        ArrayList<String> seqLabels = getAllSeqLabels(reconId, Defines.EXTANT);
+        HashMap<String, ArrayList<String>> extentNames = new HashMap<>();
+        ArrayList<String> extentNamesUniprot = new ArrayList<>();
+        ArrayList<String> extentNamesNcbi = new ArrayList<>();
+        for (String name : seqLabels) {
+            // Uniprot names can be identified by the | character in position 2. https://www.uniprot.org/help/fasta-headers
+            if (name.substring(2, 3).equals("|")) {
+                String[] id = name.split("\\|");
+                String idN = id[1];
+                extentNamesUniprot.add(idN);
+            } else {
+                // Otherwise assume it is a NCBI id TODO: Have a check that it is NCBI format
+                String[] id = name.split("\\.");
+                String idN = id[0];
+                // Add it to both uniprot and ncbi
+                // extentNamesUniprot.add(idN);
+                extentNamesNcbi.add(idN);
+            }
+        }
+        extentNames.put(Defines.UNIPROT, extentNamesUniprot);
+        extentNames.put(Defines.NCBI, extentNamesNcbi);
+        return extentNames;
+    }
+    /**
      * Saves an ancestor node to a file.
      * @param fileWriter
      * @param label
@@ -293,16 +481,6 @@ public class SeqController {
         }
         return null;
     }
-
-
-//    private void alignPairGlobal(String seq1, String seq2) throws Exception {
-//        ProteinSequence s1 = new ProteinSequence(seq1);
-//        ProteinSequence s2 = new ProteinSequence(seq2);
-//        SubstitutionMatrix<AminoAcidCompound> matrix = new SimpleSubstitutionMatrix<AminoAcidCompound>();
-//        SequencePair<ProteinSequence, AminoAcidCompound> pair = Alignments.getPairwiseAlignment(s1, s2,
-//                PairwiseSequenceAlignerType.GLOBAL, new SimpleGapPenalty(), matrix);
-//        System.out.printf("%n%s vs %s%n%s", pair.getQuery().getAccession(), pair.getTarget().getAccession(), pair);
-//    }
 
     private int getHammingDistance(String seq1, String seq2) {
         if (seq1.length() != seq2.length())

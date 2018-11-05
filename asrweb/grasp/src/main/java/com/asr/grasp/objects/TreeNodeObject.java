@@ -12,7 +12,9 @@ import java.util.ArrayList;
 public class TreeNodeObject {
 
     private ArrayList<TreeNodeObject> children;
-    private ArrayList<TreeNodeObject> leaves;
+    private ArrayList<TreeNodeObject> leaves; // ToDo: review do we need this?
+    private ArrayList<String> leafLabels;
+
     private String label;
     private double score;
     private Double distance;
@@ -20,10 +22,14 @@ public class TreeNodeObject {
     private TreeNodeObject parent;
     private String originalLabel;
 
+
     public TreeNodeObject(String label, TreeNodeObject parent, Double distance) {
         this.children = new ArrayList<>();
         this.leaves = new ArrayList<>();
+        this.leafLabels = new ArrayList<>();
         this.originalLabel = label;
+        // Here we need to format the label as depending on the tool even similar trees could
+        // have extra information tagged on.
         formatLabel(label);
         this.score = 0;
         this.distance = distance;
@@ -128,6 +134,20 @@ public class TreeNodeObject {
         return leaves;
     }
 
+
+    /**
+     * Returns the leafs under a particular node. This allows us to
+     * determine similarity between nodes.
+     * @return
+     */
+    public ArrayList<String> getLeafLabels() {
+        if (leafLabels.size() > 0) {
+            return leafLabels;
+        }
+        getLeafLabels(this);
+        return leafLabels;
+    }
+
     /**
      * Returns the leafs under a particular node. This allows us to
      * determine similarity between nodes.
@@ -152,6 +172,21 @@ public class TreeNodeObject {
                 leaves.add(child);
             } else {
                 getLeaves(child);
+            }
+        }
+    }
+
+
+    /**
+     * Recursively adds the leaves - only saves the labels.
+     * @param node
+     */
+    public void getLeafLabels(TreeNodeObject node) {
+        for (TreeNodeObject child: node.getChildren()) {
+            if (child.isExtent()) {
+                leafLabels.add(child.getLabel());
+            } else {
+                getLeafLabels(child);
             }
         }
     }

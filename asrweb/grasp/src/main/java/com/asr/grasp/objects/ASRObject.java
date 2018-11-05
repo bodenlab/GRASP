@@ -34,6 +34,9 @@ public class ASRObject {
 
     private ASRController asrController;
 
+    private String email = "";
+    private boolean save = true;
+
     private String dataPath = "data/app/";
 
     private String label = "";
@@ -94,6 +97,16 @@ public class ASRObject {
         }
         return null;
     }
+
+    /**
+     * Setters and getters to enable getting the email from the front end.
+     * @return
+     */
+    public String getEmail() { return this.email; }
+    public void setEmail(String email) { this.email = email; }
+    public boolean getSave() { return this.save; }
+    public void setSave(boolean save) { this.save = save;}
+
 
     public String getLabel() {
         return this.label;

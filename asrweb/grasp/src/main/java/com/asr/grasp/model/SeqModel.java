@@ -314,6 +314,9 @@ public class SeqModel extends BaseModel {
 
     /**
      * Finds the node labels from a reconstruction that have a particular motif.
+     *
+     * The similar to postgres flag allows you do add in regex's, for example:
+     * '%M-*TP%' will look for all sequences that have a M, any number of gaps followed by TP.
      */
     public ArrayList<String> findNodesWithMotif(int reconId, String motif) {
         String query = "SELECT node_label FROM web.sequences WHERE r_id=? AND seq SIMILAR TO ?;";

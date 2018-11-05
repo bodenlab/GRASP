@@ -31,6 +31,138 @@ let getNodesWithMotif = function () {
   })
 }
 
+
+/**
+ * Get a list of node labels that contain a motif.
+ */
+let getSimilarNodes = function () {
+  let unknownRecon = document.getElementById("unknown-recon").value;
+  let nodeLabel = document.getElementById("node-label").value;
+  let numNodes = document.getElementById("node-num").value;
+  $.ajax({
+    url: "/getsimilarnode",
+    type: "POST",
+    dataType: 'json',
+    contentType: "application/json",
+    data: JSON.stringify({"unknown": unknownRecon, "node": nodeLabel, "num": numNodes}),
+    success: function (data) {
+      // CHeck if we have an error message
+      if (data.error !== undefined) {
+        document.getElementById("motif-warning-text").innerHTML = data.error;
+        $('#motif-warning-alert').removeClass("hidden");
+      } else {
+        resetNodesWithScores();
+        // Now we have an array of the nodeIDs with motifs
+        updateSimilarNodes(data);
+      }
+    }, error: function (err) {
+      console.log(err);
+      $('#motif-warning-alert').removeClass("hidden");
+    }
+  })
+}
+
+
+
+/**
+ * Get a list of node labels that contain a motif.
+ */
+let saveSimilarNodes = function () {
+  let unknownRecon = document.getElementById("unknown-recon").value;
+  let nodeLabel = document.getElementById("node-label").value;
+  let numNodes = document.getElementById("node-num").value;
+  $.ajax({
+    url: "/savesimilarnode",
+    type: "POST",
+    dataType: 'json',
+    contentType: "application/json",
+    data: JSON.stringify({"unknown": unknownRecon, "node": nodeLabel, "num": numNodes}),
+    success: function (data) {
+      // CHeck if we have an error message
+      if (data.error !== undefined) {
+        document.getElementById("motif-warning-text").innerHTML = data.error;
+        $('#motif-warning-alert').removeClass("hidden");
+      } else {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        data.forEach(function(rowArray){
+          let row = rowArray.join(",");
+          csvContent += row + "\r\n";
+        });
+        var encodedUri = encodeURI(csvContent);
+        window.open(encodedUri);
+        resetNodesWithScores();
+        // Now we have an array of the nodeIDs with motifs
+        updateSimilarNodes(data);
+      }
+    }, error: function (err) {
+      console.log(err);
+      $('#motif-warning-alert').removeClass("hidden");
+    }
+  })
+}
+
+
+
+
+
+/**
+ * Updates the nodes to display visually that they are the most similar.
+ *
+ * @param nodeLabelList
+ */
+let updateSimilarNodes = function (scoredNodes) {
+  // Get the color scale - first need to find the min and max
+  let min = 10000000;
+  let max = 0;
+  _.forEach(scoredNodes, d => {
+    if (d[S_SCORE] < min) {
+      min = d[S_SCORE];
+    }
+    if (d[S_SCORE] > max) {
+      max = d[S_SCORE];
+    }
+  });
+  let colour = makeColorScale(min, max);
+  let scoredIds = [];
+  _.forEach(scoredNodes, d => {
+    let id = formatTreeNodeId(d[S_NAME]);
+    let node =  phylo_options.tree.node_dict[id];
+    if (node !== undefined) {
+      if (node[T_EXTANT]) {
+        updateTextDisplay(id, colour(d[S_SCORE]));
+      } else {
+        updateNodesDisplay(id, colour(d[S_SCORE]));
+      }
+      scoredIds.push(d[S_NAME]);
+    }
+  });
+
+  // Also set this to be the current found motif
+  phylo_options["nodes_w_scores"] = scoredIds;
+}
+
+
+/**
+ * Resets the nodes with the scores
+ */
+let resetNodesWithScores = function () {
+  _.forEach(phylo_options["nodes_w_scores"], d => {
+    let id = formatTreeNodeId(d);
+    let node =  phylo_options.tree.node_dict[id];
+    if (node !== undefined) {
+      if (node[T_EXTANT]) {
+        resetTextDisplay(id);
+      } else {
+        resetNodesDisplay(id)
+      }
+    }
+  });
+  // Also set this to be the current found motif
+  phylo_options["nodes_w_scores"] = [];
+}
+
+
+
 /**
  * Updates the nodes to display visually that they contain the motif.
  *
@@ -40,10 +172,13 @@ let updateNodesWithMotif = function (nodeLabelList) {
   _.forEach(nodeLabelList, d => {
     let id = formatTreeNodeId(d);
     let node =  phylo_options.tree.node_dict[id];
-    if (node[T_EXTANT]) {
-      updateTextDisplay(id);
-    } else {
-      updateNodesDisplay(id);
+    // Need to check if it exists first as it may be hidden
+    if (node !== undefined) {
+      if (node[T_EXTANT]) {
+        updateTextDisplay(id, "#39CDA0");
+      } else {
+        updateNodesDisplay(id, "#39CDA0");
+      }
     }
   });
   // Also set this to be the current found motif
@@ -57,10 +192,13 @@ let resetNodesWithMotif = function () {
   _.forEach(phylo_options["nodes_w_motif"], d => {
     let id = formatTreeNodeId(d);
     let node =  phylo_options.tree.node_dict[id];
-    if (node[T_EXTANT]) {
-      resetTextDisplay(id);
-    } else {
-      resetNodesDisplay(id)    }
+    if (node !== undefined) {
+      if (node[T_EXTANT]) {
+        resetTextDisplay(id);
+      } else {
+        resetNodesDisplay(id)
+      }
+    }
   });
   // Also set this to be the current found motif
   phylo_options["nodes_w_motif"] = [];
@@ -71,9 +209,9 @@ let resetNodesWithMotif = function () {
  *
  * @param nodeId
  */
-let updateNodesDisplay = function (nodeId) {
+let updateNodesDisplay = function (nodeId, colour) {
   d3.select( "#fill-" + nodeId).attr("r", phylo_options.style.node_radius * 2);
-  d3.select( "#fill-" + nodeId).attr("fill", "#59B595");
+  d3.select( "#fill-" + nodeId).attr("fill", colour);
 }
 
 /**
@@ -81,8 +219,8 @@ let updateNodesDisplay = function (nodeId) {
  *
  * @param nodeId
  */
-let updateTextDisplay = function (nodeId) {
-  d3.select( "#text-" + nodeId).attr("fill", "#59B595");
+let updateTextDisplay = function (nodeId, colour) {
+  d3.select( "#text-" + nodeId).attr("fill", colour);
 }
 
 /**
@@ -125,4 +263,17 @@ let getOriginalColour = function (node) {
 
 let onMsgClose = function (idToHide) {
   $(idToHide).addClass("hidden");
+}
+
+/**
+ * Make a color scale for the similarity of nodes.
+ *
+ * @param min
+ * @param max
+ */
+let makeColorScale = function (min, max) {
+  let color = d3.scale.linear().domain([min, max])
+  .interpolate(d3.interpolateHcl)
+  .range([d3.rgb("#ff4d66"), d3.rgb('#FFF500')]);
+  return color;
 }

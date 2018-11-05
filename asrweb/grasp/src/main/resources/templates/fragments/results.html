@@ -117,6 +117,18 @@
 
           </div>
         </div>
+        <div>
+          <button type="button" id="find-similar-nodes" class="btn btn-default col-xs-2"
+                  onclick="getSimilarNodes()">Find similar nodes in another reconstructed tree
+          </button>
+          <input type="text" class="form-input col-xs-4 no-padding" style="height: 2.1em;"
+                 placeholder="Input a reconstruction label..." id="unknown-recon" name="unknown-recon-value"/>
+          <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
+                 placeholder="Choose a node label..." id="node-label" name="node-label-value"/>
+          <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
+                 placeholder="Choose how many (number)" id="node-num" name="node-num-value"/>
+          <!-- ToDo: probably want to have an auto search -->
+        </div>
       </div>
 
       <div id="phylo-tree" class="col-sm-12" data-toggle="popover" data-placement="top"

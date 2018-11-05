@@ -1,0 +1,122 @@
+package com.asr.grasp.controller;
+
+import com.asr.grasp.objects.EmailObject;
+import java.util.Properties;
+import javax.mail.Message;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.stereotype.Service;
+
+/**
+ * Sends emails for registration and also for when a reconstruction is complete.
+ *
+ * Created by ariane @ 01/11/2018
+ */
+@Service
+public class EmailController {
+
+    @Value("${spring.mail.host}")
+    private String host;
+
+    @Value("${spring.mail.username}")
+    private String username;
+
+    @Value("${spring.mail.password}")
+    private String password;
+
+    @Value("${spring.mail.port}")
+    private int port;
+
+    @Value("${spring.mail.properties.mail.smtp.auth}")
+    private String auth;
+
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
+    private String enable;
+
+    @Value("${spring.mail.properties.mail.debug}")
+    private String debug;
+
+    @Value("${spring.mail.properties.mail.protocol}")
+    private String protocol;
+
+    @Value("${project.emailname}")
+    private String emailname;
+
+    @Autowired
+    JavaMailSender mailSender;
+
+    /**
+     * The sender mail class allows us to inject the passwords and configurations of the
+     * web app to create the sending object.
+     *
+     * Currently this could just be done once - however as we have the saving running on a separate
+     * thread it is created each time (adding overhead). ToDo: review this.
+     * @return
+     */
+    @Bean
+    public JavaMailSender getMailSender(){
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+
+        mailSender.setHost(host);
+        mailSender.setPort(port);
+        mailSender.setUsername(username);
+        mailSender.setPassword(password);
+
+        Properties javaMailProperties = new Properties();
+        javaMailProperties.put("mail.smtp.starttls.enable", enable);
+        javaMailProperties.put("mail.smtp.auth", auth);
+        javaMailProperties.put("mail.transport.protocol", protocol);
+        javaMailProperties.put("mail.debug", debug);
+
+        mailSender.setJavaMailProperties(javaMailProperties);
+        return mailSender;
+    }
+
+    /**
+     * Sends the email.
+     *
+     * @param email
+     */
+    public void sendEmail(EmailObject email) {
+
+        MimeMessagePreparator preparator = getMessagePreparator(email);
+        mailSender = getMailSender();
+        try {
+            mailSender.send(preparator);
+            System.out.println("Message Sent");
+        } catch (MailException ex) {
+            System.err.println(ex.getMessage());
+        }
+    }
+
+    /**
+     * Prepares the email, we add in the email content and what not here.
+     *
+     * This takes the email object, if we want to add anything else to the email, this is where
+     * it would be done (that isn't simple text). E.g. files.
+     * @param email
+     * @return
+     */
+    private MimeMessagePreparator getMessagePreparator(EmailObject email) {
+
+        MimeMessagePreparator preparator = new MimeMessagePreparator() {
+
+            public void prepare(MimeMessage mimeMessage) throws Exception {
+                mimeMessage.setFrom(emailname);
+                mimeMessage.setRecipient(Message.RecipientType.TO,
+                        new InternetAddress(email.getEmail()));
+                mimeMessage.setText(email.getContent());
+                mimeMessage.setSubject(email.getSubject());
+            }
+        };
+        return preparator;
+    }
+}
+

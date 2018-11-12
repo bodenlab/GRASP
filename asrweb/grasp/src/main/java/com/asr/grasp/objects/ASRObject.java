@@ -282,6 +282,7 @@ public class ASRObject {
         return numAlnCols;
     }
 
+
     public int getNumberSequences() throws IOException {
         if (numExtantSequences == 0)
             getNumberAlnCols();
@@ -623,6 +624,11 @@ public class ASRObject {
             System.err.println(e);
             return e;
         }
+    }
+
+
+    public List<EnumSeq.Gappy<Enumerable>> getSeqsAsEnum() {
+        return this.extants;
     }
 
     /**

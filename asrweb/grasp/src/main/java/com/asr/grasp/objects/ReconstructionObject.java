@@ -57,7 +57,8 @@ public class ReconstructionObject {
 
     public void setTree(String tree) { this.tree = tree; }
 
-    public String getSequences() { return this.sequences; }
+    public String getSequences() {
+        return this.sequences; }
 
     public void setSequences(String sequences) { this.sequences = sequences; }
 

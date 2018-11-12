@@ -54,6 +54,16 @@ let getSimilarNodes = function () {
         resetNodesWithScores();
         // Now we have an array of the nodeIDs with motifs
         updateSimilarNodes(data);
+        if (data[0][2] == "saveCSV") {
+          let strD = "name,score,method,leaf_count,dist_to_root,orig_dist_to_root,exts_inc_from_orig,exts_no_inc_from_orig,exts_inc,exts_no_inc,count_other_exts\n";
+          for (d in data) {
+            for (x in data[d]) {
+              strD += data[d][x] + ",";
+            }
+            strD += "\n";
+          }
+          download(strD, "test.csv", "text/csv")
+        }
       }
     }, error: function (err) {
       console.log(err);
@@ -62,8 +72,30 @@ let getSimilarNodes = function () {
   })
 }
 
+function download (content, fileName, mimeType) {
+  var a = document.createElement('a');
+  mimeType = mimeType || 'application/octet-stream';
+  if (navigator.msSaveBlob) { // IE10
+    return navigator.msSaveBlob(new Blob([content], {type: mimeType}),
+        fileName);
+  } else if ('download' in a) { //html5 A[download]
+    a.href = 'data:' + mimeType + ',' + encodeURIComponent(content);
+    a.setAttribute('download', fileName);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return true;
+  } else { //do iframe dataURL download (old ch+FF):
+    var f = document.createElement('iframe');
+    document.body.appendChild(f);
+    f.src = 'data:' + mimeType + ',' + encodeURIComponent(content);
 
-
+    setTimeout(function () {
+      document.body.removeChild(f);
+    }, 300);
+    return true;
+  }
+}
 /**
  * Get a list of node labels that contain a motif.
  */

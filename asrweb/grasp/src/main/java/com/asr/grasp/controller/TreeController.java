@@ -39,6 +39,8 @@ public class TreeController {
 
     private PriorityQueue<TreeNodeObject> orderedNodes;
 
+    private double origDistToRoot = 0;
+
     /**
      * Gets a Tree via it's reconstruction and userId.
      *
@@ -147,7 +149,19 @@ public class TreeController {
             JSONArray node = new JSONArray();
             node.put(Defines.S_NAME, n.getOriginalLabel());
             node.put(Defines.S_SCORE, n.getScore());
+            if (user.getUsername().equals("ariane8")) {
+                node.put(2, "saveCSV");
+                node.put(3, n.getLeafCount());
+                node.put(4, n.getDistanceToRoot());
+                node.put(5, treeKnownAncs.getNodeByLabel(ancsestorLabel).getDistanceToRoot());
+                node.put(6, n.getIncCnt());
+                node.put(7, n.getNoIncCnt());
+                node.put(8, n.getInc());
+                node.put(9, n.getNoInc());
+                node.put(10, n.getExtC());
+            }
             retNodes.put(node);
+
             System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
         }
 
@@ -166,6 +180,10 @@ public class TreeController {
          * First we want to upadate each node of the tree to only include the intersection of
          * both trees in terms of ancestor labels.
          */
+
+        // Set up the original root node distance
+        origDistToRoot = treeKnownAncs.getNodeByLabel(ancsestorLabel).getDistanceToRoot();
+
         ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs, treeUnknownAncs);
 
         // Now that we have the intersection we want to get the leaf nodes in the known ancestor
@@ -281,8 +299,13 @@ public class TreeController {
         for (TreeNodeObject tno: leaves) {
             if (extentList.contains(tno.getLabel())) {
                 score -= value;
+                node.addToInc(tno.getLabel());
             } else if (extentNotIncludedList.contains(tno.getLabel())) {
                 score += value;
+                node.addToNoInc(tno.getLabel());
+                System.out.println("NOT INC:" + tno.getLabel());
+            } else {
+                node.addExt();
             }
         }
         node.addToScore(score);
@@ -307,11 +330,11 @@ public class TreeController {
             }
             // If both have the same score we want to return the distance difference
             // ToDo: check if this is correct
-            if (x.getDistanceToRoot() < y.getDistanceToRoot())
+            if (Math.abs(origDistToRoot - x.getDistanceToRoot()) < (Math.abs(origDistToRoot - y.getDistanceToRoot())))
             {
                 return -1;
             }
-            if (x.getDistanceToRoot() > y.getDistanceToRoot())
+            if (Math.abs(origDistToRoot - x.getDistanceToRoot()) > (Math.abs(origDistToRoot - y.getDistanceToRoot())))
             {
                 return 1;
             }

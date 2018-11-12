@@ -3,8 +3,12 @@ package com.asr.grasp.controller;
 import api.PartialOrderGraph;
 import com.asr.grasp.model.InferenceModel;
 import com.asr.grasp.model.SeqModel;
+import com.asr.grasp.objects.ASRObject;
+import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
 import com.sun.java.swing.plaf.motif.resources.motif;
+import dat.EnumSeq;
+import dat.Enumerable;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import json.JSONArray;
+import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
@@ -454,6 +459,25 @@ public class SeqController {
         return infModel.getInferenceForLabel(reconId, label);
     }
 
+    /**
+     * Here we also want to use the inference to determine which is the number of sequences that
+     * flow through that particular position.
+     */
+    public void updateConsusensForNodes(ReconstructionObject recon, ArrayList<String> labels, ASRObject asrInstance) {
+        JSONObject inferences = new JSONObject();
+        inferences.put("meta", new JSONObject().put("type", true));
+        JSONArray nodes = new JSONArray();
+        nodes.put(0, "meta");
+        for (String label: labels) {
+            String jsonArr = infModel.getInferenceForLabel(recon.getId(), label);
+            nodes.put(new JSONObject(jsonArr));
+        }
+        asrInstance.loadSequences(recon.getSequences());
+        inferences.put("inferences", nodes);
+       	ASRPOG asr = new ASRPOG(asrInstance.getModel(), asrInstance.getNumberThreads(), inferences, asrInstance.getSeqsAsEnum(), asrInstance.getTree());
+        insertSpecificJointsToDB(recon.getId(), asr, true, labels);
+
+    }
 
     /**
      * Gets a sequence and returns a JSON formatted version. This enables us to use it on

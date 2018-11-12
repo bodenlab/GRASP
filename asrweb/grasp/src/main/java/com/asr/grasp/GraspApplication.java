@@ -638,6 +638,26 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Check for the motif
         String motif = dataJson.getString("motif");
+        if (loggedInUser.getUsername().equals("ariane8")) {
+            currRecon = reconController.getByIdForMarginal(currRecon.getId(),
+                    loggedInUser);
+
+            asr = new ASRObject();
+            asr.setLabel(currRecon.getLabel());
+            asr.setInferenceType(currRecon.getInferenceType());
+            asr.setModel(currRecon.getModel());
+            asr.setNodeLabel(currRecon.getNode());
+            asr.setTree(currRecon.getTree());
+            asr.setReconstructedTree(currRecon.getReconTree());
+            asr.setMSA(currRecon.getMsa());
+            asr.setAncestor(currRecon.getAncestor());
+            asr.loadSequences(currRecon.getSequences());
+            asr.setJointInferences(currRecon.getJointInferences());
+            asr.loadParameters();
+            ArrayList<String> labels = new ArrayList<>();
+            labels.add("N0");
+            seqController.updateConsusensForNodes(currRecon, labels, asr);
+        }
 
         //Return the list of matching node ids as a json array
         return seqController

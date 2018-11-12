@@ -99,7 +99,7 @@
                             // $('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name)
                             var update_info = function(el, file) {
                                 el.html(file.name);
-                                if (file.size > 20000000) {
+                                if (file.size > 200000000) {
                                     $("#warning").css({'display':'block'});
                                     $("#warning-text").text("File size cannot exceed 20MB.");
                                     $("#submit-btn").prop('disabled', true);

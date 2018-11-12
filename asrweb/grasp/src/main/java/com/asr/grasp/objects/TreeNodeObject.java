@@ -22,6 +22,12 @@ public class TreeNodeObject {
     private TreeNodeObject parent;
     private String originalLabel;
 
+    // Temporary helpers to get stats for the results
+    private String includedLeavesFromOrig = "";
+    private String unincludedLeavesFromOrig = "";
+    private int otherExtentCount = 0;
+    private int noIncCnt = 0;
+    private int incCnt = 0;
 
     public TreeNodeObject(String label, TreeNodeObject parent, Double distance) {
         this.children = new ArrayList<>();
@@ -38,6 +44,42 @@ public class TreeNodeObject {
         }
         this.parent = parent;
     }
+
+
+    public void addExt() {
+        otherExtentCount += 1;
+    }
+
+    public int getIncCnt() {
+        return  incCnt;
+    }
+    public int getNoIncCnt() {
+        return  noIncCnt;
+    }
+    public int getExtC() {
+        return  otherExtentCount;
+    }
+
+    public void addToNoInc(String label) {
+        noIncCnt ++;
+        this.unincludedLeavesFromOrig += "|" + label;
+    }
+
+    public String getNoInc() {
+        return unincludedLeavesFromOrig;
+    }
+
+
+    public void addToInc(String label) {
+        incCnt ++;
+        this.includedLeavesFromOrig += "|" + label;
+    }
+
+    public String getInc() {
+        return includedLeavesFromOrig;
+    }
+
+
 
     /**
      * Get the unformatted label.

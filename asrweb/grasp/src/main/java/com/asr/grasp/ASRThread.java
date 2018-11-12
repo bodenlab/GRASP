@@ -1,7 +1,9 @@
 package com.asr.grasp;
 
+import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.objects.ASRObject;
 
+import com.asr.grasp.objects.UserObject;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,9 +16,11 @@ public class ASRThread implements Runnable {
     private String inference;
     private String node;
     private Boolean addNode;
+    private UserObject owner;
     private final Thread thread;
+    private ReconstructionController reconController;
 
-    public ASRThread(ASRObject asr, String inference, String node, Boolean addNode, Logger logger) {
+    public ASRThread(ASRObject asr, String inference, String node, Boolean addNode, Logger logger, UserObject owner, ReconstructionController reconController) {
         this.asr = asr;
         this.logger = logger;
         this.inference = asr.getInferenceType();
@@ -25,6 +29,8 @@ public class ASRThread implements Runnable {
         this.asr.setInferenceType(inference);
         this.asr.setWorkingNodeLabel(node);
         this.asr.setNodeLabel(node);
+        this.owner = owner;
+        this.reconController = reconController;
         this.thread = new Thread(this, "ASR-" + System.nanoTime());
         thread.start();
     }
@@ -43,6 +49,8 @@ public class ASRThread implements Runnable {
             if (addNode)
                 asr.setNodeLabel(node);
             status = "done";
+
+            // Set the owner ID to be the logged in user
         } catch (InterruptedException e) {
             asr.setNodeLabel(node);
             asr.setInferenceType(inference);

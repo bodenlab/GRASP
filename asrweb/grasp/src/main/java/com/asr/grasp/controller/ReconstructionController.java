@@ -47,6 +47,7 @@ public class ReconstructionController {
         return reconModel.doesExist(label);
     }
 
+
     /**
      * Get the ID. If the ID hasn't been set yet we need to set it based on
      * the username.
@@ -66,18 +67,36 @@ public class ReconstructionController {
     }
 
     /**
-     * Gets a reconstruction by its ID.
+     * Gets a reconstruction by its ID. Loads a cut down version of a reconstruction.
      * This is used to load a saved reconstruction.
+     *
      * @param reconId
      * @param user
      * @return
      */
     public ReconstructionObject getById(int reconId, UserObject user) {
         // Check we can get the reconsrtcution
+        ReconstructionObject reconstruction = reconModel.getMiniById(reconId, user
+                .getId());
+        return reconstruction;
+    }
+
+    /**
+     * Gets a reconstruction by its ID.
+     *
+     * This is used to load a saved reconstruction. We need all the parameters in this case
+     * as we want to be able to fully reconstruct the ASR.
+     * @param reconId
+     * @param user
+     * @return
+     */
+    public ReconstructionObject getByIdForMarginal(int reconId, UserObject user) {
+        // Check we can get the reconsrtcution
         ReconstructionObject reconstruction = reconModel.getById(reconId, user
                 .getId());
         return reconstruction;
     }
+
 
     /**
      * Save a users reconstruction to the model.
@@ -106,6 +125,9 @@ public class ReconstructionController {
             if (err == null) {
                 user.addToOwnerdReconIds(recon.getId(), recon.getLabel(),
                         "Not Available", "today");
+                // We want to reduce the memory overhead, so we can remove the ancestor graph amd
+                // the MSA of the reconstrcuction
+                recon.clearLargeStrings();
                 return null;
             }
             return err;
@@ -262,6 +284,7 @@ public class ReconstructionController {
             return null;
         }
     }
+
 
     /**
      * ------------------------------------------------------------------------

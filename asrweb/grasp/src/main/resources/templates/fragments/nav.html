@@ -29,32 +29,30 @@
             </div>
             <script type="text/javascript" th:inline="javascript">
 
-                                /*<![CDATA[*/
+                /*<![CDATA[*/
+                    $(document).ready(function () {
+                        var results = $('#results-nav-flag').text();
+                        if (results == 'true') {
+                            $('#results-nav-link').removeClass("disable-link");
+                            $('#results-nav-link').css("color", "#777");
+                            $('#save-link').removeClass("hidden");
+                        } else {
+                            $('#results-nav-link').addClass("disable-link");
+                            $('#results-nav-link').css("color", "#b3b3b3");
+                            $('#save-link').addClass("hidden");
+                        }
 
-                                    $(document).ready(function () {
-                                        var results = $('#results-nav-flag').text();
-                                        if (results == 'true') {
-				                            $('#results-nav-link').removeClass("disable-link");
-				                            $('#results-nav-link').css("color", "#777");
-				                            $('#save-link').removeClass("hidden");
-                                        } else {
-                                            $('#results-nav-link').addClass("disable-link");
-                                            $('#results-nav-link').css("color", "#b3b3b3");
-				                            $('#save-link').addClass("hidden");
-                                        }
-
-                                        var username = /*[[${username}]]*/ ;
-                                        if (username != null) {
-                                            $('#account-link').text(username
-                                                + "'s Saved Reconstructions");
-                                            $('#account-link').css("color", "#333");
-                                            $('#account-link').css("font-weight", "bold");
-                                            $('#login-link').text("Logout");
-                                            $('#account-link').removeClass("hidden");
-                                        }
-				                    });
-
-                                    /*]]>*/
+                        var username = /*[[${username}]]*/ ;
+                        if (username != null) {
+                            $('#account-link').text(username
+                                + "'s Saved Reconstructions");
+                            $('#account-link').css("color", "#333");
+                            $('#account-link').css("font-weight", "bold");
+                            $('#login-link').text("Logout");
+                            $('#account-link').removeClass("hidden");
+                        }
+                     });
+                /*]]>*/
             </script>
         </div>
     </nav>

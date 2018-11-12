@@ -49,6 +49,7 @@ public class Defines {
     public static final int JOINT = 1;
     public static final int ALL = 2;
     public static final int EXTANT = 3;
+    public static final int ANCESTOR = 4;
 
     /**
      * ---------------------------------------------------------------------------------------------
@@ -88,4 +89,15 @@ public class Defines {
     public static final int E_WEIGHT = 4;
     public static final int E_SINGLE = 5;
 
+    /**
+     * Email type
+     */
+    public static final int REGISTRATION = 0;
+    public static final int RECONSTRUCTION = 1;
+
+    /**
+     * For the visualisation of the similar nodes.
+     */
+    public static final int S_NAME = 0;
+    public static final int S_SCORE = 1;
 }

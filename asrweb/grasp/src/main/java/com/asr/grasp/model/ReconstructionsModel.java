@@ -8,10 +8,14 @@ import java.util.HashSet;
 import com.asr.grasp.objects.GeneralObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
+import java.util.List;
 
+import java.util.Map;
 import json.JSONArray;
 import json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import reconstruction.Inference;
 
 /**
  * Interface with the Postgres Database table Reconstructions.
@@ -21,6 +25,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ReconstructionsModel extends BaseModel {
 
+    @Autowired InferenceModel infModel;
+
     /**
      * These control the mappings of the arrays to values for the reconstruction object.
      * LABELS are ALWAYS stored in position 0 (of first order or second order arrays.
@@ -29,7 +35,7 @@ public class ReconstructionsModel extends BaseModel {
      */
     final int LABEL = 0;
     /* VALUE holds an array that contains a label in the 0tth element and then has
-     * 2 values following: 1: value, 2: seq_num*/
+     * 2 values following: 1: value, 2: seq_num */
     final int VALUE = 1;
     final int SEQ_NUM = 2;
 
@@ -77,8 +83,18 @@ public class ReconstructionsModel extends BaseModel {
         reconstruction.setId(rawRecons.getInt(id.getLabel()));
         reconstruction.setOwnerId(rawRecons.getInt(ownerId
                 .getLabel()));
-        reconstruction.setJointInferences(rawRecons.getString(jointInferences
-                .getLabel()));
+
+        String inferences = rawRecons.getString(jointInferences
+                .getLabel());
+        /**
+         * The method of storing inferences has been updated and they are no longer stored
+         * in the inference column. As such, we need to have backwards compatability.
+         * At the moment we're storing an empty string, hence we know if it is less than 30
+         * we need to check the inferences table.
+         */
+        if (inferences.length() < 30) {
+            reconstruction.setJointInferences(new HashMap<>()); //infModel.getInferences(reconstruction.getId()));
+        }
         reconstruction.setAncestor(rawRecons.getString
                 (anscestor.getLabel()));
         reconstruction.setInferenceType(rawRecons.getString
@@ -101,6 +117,35 @@ public class ReconstructionsModel extends BaseModel {
         return reconstruction;
     }
 
+
+    /**
+     * Creates a reconstruction object given a pointer to a results set that
+     * contains a reference to the current row.
+     *
+     * @param rawRecons
+     * @return
+     * @throws SQLException
+     */
+    private ReconstructionObject createMiniFromDB(ResultSet rawRecons)
+            throws SQLException{
+        ReconstructionObject reconstruction = new ReconstructionObject();
+        reconstruction.setId(rawRecons.getInt(id.getLabel()));
+        reconstruction.setOwnerId(rawRecons.getInt(ownerId.getLabel()));
+
+        reconstruction.setAncestor(rawRecons.getString(anscestor.getLabel()));
+        reconstruction.setInferenceType(rawRecons.getString
+                (inferenceType.getLabel()));
+        reconstruction.setLabel(rawRecons.getString(label
+                .getLabel()));
+        reconstruction.setModel(rawRecons.getString(model.getLabel()));
+        reconstruction.setMsa(rawRecons.getString(msa.getLabel
+                ()));
+        reconstruction.setNode(rawRecons.getString(node.getLabel()));
+
+        reconstruction.setReconTree(rawRecons.getString(reconstructedTree.getLabel()));
+
+        return reconstruction;
+    }
 
     /**
      * Helper function for removing much of the space overhead.
@@ -164,7 +209,7 @@ public class ReconstructionsModel extends BaseModel {
             statement.setInt(1, recon.getOwnerId());
             statement.setString(2, recon.getAncestor());
             statement.setString(3, recon.getInferenceType());
-            statement.setString(4, recon.getJointInferences());
+            statement.setString(4, "");
             statement.setString(5, recon.getLabel());
             statement.setString(6, recon.getModel());
             statement.setString(7, recon.getMsa());
@@ -174,6 +219,7 @@ public class ReconstructionsModel extends BaseModel {
             statement.setString(11, recon.getSequences());
             statement.setString(12, recon.getTree());
 
+
             // Deletes the record from the model
             statement.executeUpdate();
             con.close();
@@ -181,6 +227,16 @@ public class ReconstructionsModel extends BaseModel {
         } catch (Exception e) {
             return "recon.insert.fail";
         }
+    }
+
+
+    /**
+     * Save the inferences to the database.
+     * @param recon
+     */
+    public void saveInferences(ReconstructionObject recon) {
+        Map<String, List<Inference>> inferences = recon.getJointInferences();
+        // infModel.insertListIntoDb(recon.getId(), inferences);
     }
 
     /**
@@ -239,8 +295,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return Set<Reconstruction>
      */
-    public HashMap<Integer, ArrayList<GeneralObject>> getReconsForUser(int
-                                                                            userId) {
+    public HashMap<Integer, ArrayList<GeneralObject>> getReconsForUser(int  userId) {
         ResultSet rawRecons = queryOnId(
                 "SELECT r.label as label, " +
                 " r.owner_id as owner_id, " +
@@ -305,8 +360,43 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return null if no reconstruction matches those configs
      */
-    public ReconstructionObject getById(int reconId, int
-            userId) {
+    public ReconstructionObject getMiniById(int reconId, int userId) {
+        String query = "SELECT r.id, r.owner_id, " +
+                "r.ancestor, r" +
+                ".inference_type, r.label, " +
+                "r.model, r.msa, r.node, r.reconstructed_tree" +
+                " FROM " +
+                "web.reconstructions AS r LEFT JOIN web.share_users AS su ON " +
+                "su.r_id=r.id WHERE " +
+                "r.id=? AND su.u_id=?;";
+        try {
+            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setInt(1, reconId);
+            statement.setInt(2, userId);
+
+            ResultSet rawRecons = statement.executeQuery();
+            con.close();
+            // If we have an entry convert it to the correct format.
+            if (rawRecons.next()) {
+                return createMiniFromDB(rawRecons);
+            }
+            return null;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+
+    /**
+     * Gets a reconstruction by ID. A user ID is also passed so we need to
+     * confirm that the user has access to this reconstruction.
+     *
+     * @return null if no reconstruction matches those configs
+     */
+    public ReconstructionObject getById(int reconId, int userId) {
         String query = "SELECT r.id, r.owner_id, " +
                 "r.ancestor, r" +
                 ".inference_type, r.joint_inferences, r.label, " +
@@ -363,7 +453,7 @@ public class ReconstructionsModel extends BaseModel {
         } catch (Exception e) {
             System.out.println(e);
         }
-        return Defines.ERROR;
+        return Defines.FALSE;
     }
 
     /**
@@ -374,8 +464,7 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return null if no reconstruction matches those configs
      */
-    public int getUsersAccess(int reconId, int
-            userId) {
+    public int getUsersAccess(int reconId, int userId) {
         String query = "SELECT r.owner_id as owner_id, " +
                 "su.u_id as user_id " +
                 "FROM web.reconstructions AS r " +
@@ -478,6 +567,12 @@ public class ReconstructionsModel extends BaseModel {
         // Delete the reconstruction from the share_users table
         String query = "DELETE FROM web.share_users WHERE r_id=?;";
         deleteOnId(query, reconId);
+        // Delete the sequences
+        String querySequences = "DELETE FROM web.sequences WHERE r_id=?;";
+        deleteOnId(querySequences, reconId);
+        // Delete the inferences
+        String queryInf = "DELETE FROM web.inferences WHERE r_id=?;";
+        deleteOnId(queryInf, reconId);
         // Delete from the group users table
         query = "DELETE FROM web.share_groups WHERE r_id=?;";
         deleteOnId(query, reconId);
@@ -558,4 +653,14 @@ public class ReconstructionsModel extends BaseModel {
         return null;
     }
 
+    /**
+     * --------------------------------------------------------------------------------------------
+     *
+     *                  Used to set the inference model
+     *
+     * --------------------------------------------------------------------------------------------
+     */
+    public void setInfModel(InferenceModel infModel) {
+        this.infModel = infModel;
+    }
 }

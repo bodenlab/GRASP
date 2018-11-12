@@ -5,6 +5,7 @@ import com.asr.grasp.utils.Defines;
 import dat.EnumSeq;
 import dat.Enumerable;
 import java.util.HashMap;
+import java.util.Map;
 import json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -19,6 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import reconstruction.ASRPOG;
+import reconstruction.Inference;
 
 /**
  * ASR API for integration in the Swing web form
@@ -31,6 +33,9 @@ public class ASRObject {
     private int NUM_THREADS = 5;
 
     private ASRController asrController;
+
+    private String email = "";
+    private boolean save = true;
 
     private String dataPath = "data/app/";
 
@@ -57,7 +62,7 @@ public class ASRObject {
     private List<EnumSeq.Gappy<Enumerable>> extants = null;
     private String msa = null;
     private String ancestor = null;
-    private String jointInferences = null;
+    private Map<String, List<Inference>> jointInferences = null;
 
     // for logging
     private int numAlnCols = 0;
@@ -92,6 +97,16 @@ public class ASRObject {
         }
         return null;
     }
+
+    /**
+     * Setters and getters to enable getting the email from the front end.
+     * @return
+     */
+    public String getEmail() { return this.email; }
+    public void setEmail(String email) { this.email = email; }
+    public boolean getSave() { return this.save; }
+    public void setSave(boolean save) { this.save = save;}
+
 
     public String getLabel() {
         return this.label;
@@ -190,7 +205,7 @@ public class ASRObject {
             loadTree();
         if (performAlignment && extants == null)
             asrController.performAlignment(alnFilepath);
-        asrController.runReconstruction(inferenceType, NUM_THREADS, model, nodeLabel, tree, extants);
+        asrController.runReconstruction(inferenceType, NUM_THREADS, model, nodeLabel, tree, extants, label);
         if (reconstructedTree == null)
             reconstructedTree = asrController.getReconstructedNewick();
     }
@@ -267,6 +282,7 @@ public class ASRObject {
         return numAlnCols;
     }
 
+
     public int getNumberSequences() throws IOException {
         if (numExtantSequences == 0)
             getNumberAlnCols();
@@ -329,13 +345,13 @@ public class ASRObject {
         return reconstructedTree;
     }
 
-    public String getJointInferences() {
+    public Map<String, List<Inference>> getJointInferences() {
         if (jointInferences == null)
             jointInferences = asrController.getJointInferences();
         return jointInferences;
     }
 
-    public void setJointInferences(String inference) {
+    public void setJointInferences(Map<String, List<Inference>>  inference) {
         jointInferences = inference;
         if (inference != null)
             asrController.setJointInferences(inference);
@@ -608,6 +624,11 @@ public class ASRObject {
             System.err.println(e);
             return e;
         }
+    }
+
+
+    public List<EnumSeq.Gappy<Enumerable>> getSeqsAsEnum() {
+        return this.extants;
     }
 
     /**

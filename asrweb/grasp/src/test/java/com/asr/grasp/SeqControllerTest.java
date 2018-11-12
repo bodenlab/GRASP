@@ -61,7 +61,7 @@ public class SeqControllerTest extends BaseTest {
 
         // Test saving these into the database
         // Check saving it to the DB
-        System.out.println(seqController.insertAllExtantsToDb(recon.getId(), seqs));
+        System.out.println(seqController.insertAllExtantsToDb(recon.getId(), seqs, true));
 
         // Now test getting the sequences from the database
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.EXTANT);
@@ -99,15 +99,15 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint));
+        System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint, true));
 
         // Check these were saved in the DB
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
 
         assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
-
+        System.out.println(seqMap.get("N22_68"));
         assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
-
+        System.out.println(seqMap.get("N4_98"));
         // Delete the user to clean up the database will automatically delete
         // any reconstructions associated with the user and any consensus sequences.
         userModel.deleteUser(userController.getId(user));
@@ -135,7 +135,7 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        seqController.insertAllJointsToDb(recon.getId(), joint);
+        seqController.insertAllJointsToDb(recon.getId(), joint, false);
         HashMap<String, String> seqs = seqController.getAllSeqs(recon.getId(), Defines.ALL);
 
         // Confirm we have matches
@@ -176,14 +176,14 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        seqController.insertAllJointsToDb(recon.getId(), joint);
+        seqController.insertAllJointsToDb(recon.getId(), joint, true);
 
         // Check these were saved in the DB
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
 
-        String motif1 = "YPPD";
+        String motif1 = "%YPPD%";
 
-        String motif2 = "GFLR";
+        String motif2 = "%GFLR%";
 
         ArrayList<String> motif1Match = seqController.findAllWithMotif(recon.getId(), motif1);
 

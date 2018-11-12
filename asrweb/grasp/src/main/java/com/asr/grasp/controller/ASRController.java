@@ -5,8 +5,10 @@ import api.PartialOrderGraph;
 import dat.EnumSeq;
 import dat.Enumerable;
 import dat.POGraph;
+import java.util.Map;
 import json.JSONObject;
 import reconstruction.ASRPOG;
+import reconstruction.Inference;
 import vis.POAGJson;
 
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class ASRController {
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
     private ASRPOG asrJoint = null;
-    private JSONObject jointInferences = null;
+    private Map<String, List<Inference>>  jointInferences = null;
 
     // ASR object to store marginal reconstruction of current node (if given)
     private ASRPOG asrMarginal = null;
@@ -78,9 +80,13 @@ public class ASRController {
     }
 
 
-    public String getJointInferences() {
+    /**
+     * Return the list of joint inferences these can then be iterated through
+     * @return
+     */
+    public Map<String, List<Inference>> getJointInferences() {
         if (asrJoint != null)
-            return asrJoint.exportInferencesToJSON().toString();
+            return asrJoint.getAncestralInferences();
         return null;
     }
 
@@ -95,19 +101,19 @@ public class ASRController {
         msaGraph = new POGraph(extants);
     }
 
-    public void setJointInferences(String inferences) {
-        jointInferences = new JSONObject(inferences);
+    public void setJointInferences(Map<String, List<Inference>>  inferences) {
+        jointInferences = inferences;
     }
 
     /**
      * Run reconstruction using saved data and specified options
      */
-    public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs) throws InterruptedException {
+    public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs, String logFileName) throws InterruptedException {
         NUM_THREADS = numThreads;
         if (type.equalsIgnoreCase("marginal"))
             performedMarginal = runReconstructionMarginal(tree, seqs, model, node);
         else if (asrJoint == null || asrJoint.getAncestralInferences().isEmpty())
-            performedJoint = runReconstructionJoint(tree, seqs, model);
+            performedJoint = runReconstructionJoint(tree, seqs, model, logFileName);
         if (rootLabel == null || rootLabel.equalsIgnoreCase("root"))
             if (asrJoint != null)
                 rootLabel = asrJoint.getRootLabel();
@@ -120,11 +126,11 @@ public class ASRController {
     /**
      * Run joint reconstruction using saved data and specified options
      */
-    private boolean runReconstructionJoint(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model) throws InterruptedException {
+    private boolean runReconstructionJoint(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String logFileName) throws InterruptedException {
         if (asrJoint == null)
             asrJoint = new ASRPOG(model, NUM_THREADS);
         if (asrJoint.getAncestralInferences() == null || asrJoint.getAncestralInferences().isEmpty())
-            asrJoint.runReconstruction(treeNwk, seqs, true, msa == null ? null : msa.getMSAGraph());
+            asrJoint.runReconstruction(treeNwk, seqs, true, (msa == null ? null : msa.getMSAGraph()), logFileName);
         return true;
     }
 

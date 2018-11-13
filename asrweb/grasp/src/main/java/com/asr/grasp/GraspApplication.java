@@ -594,9 +594,10 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), dataJson.getString("nodeLabel"));
-        if (reconstructedAnsc.equals(null)) {
-            // This means we weren't able to dine it in the DB so we need to run the recon as usual
-            return "Need to do this...";
+
+        if (reconstructedAnsc == null) {
+            // This means we weren't able to find it in the DB so we need to run the recon as usual
+            return asr.getAncestralGraphJSON(dataJson.getString("nodeLabel")).toString();
         }
         return reconstructedAnsc;
     }

@@ -12,7 +12,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand topnav" href="#">GRASP<span id="recon-label"></span> <span class="node-label"></span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></a>
-                <button class="navbar-brand hidden margin5" id="save-link"  data-toggle="modal" data-target="#save-modal">
+                <button class="navbar-brand hidden save-modal-btn" id="save-link"  data-toggle="modal" data-target="#save-modal">
                     <span class="glyphicon glyphicon-floppy-disk text-primary glyph-lg"></span>
                 </button>
             </div>
@@ -20,7 +20,6 @@
                 <p hidden="hidden" id="results-nav-flag" th:text="${results}"></p>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="nav-item"><a class="nav-link" href="/">New reconstruction</a></li>
-                    <!--<li class="nav-item"><a id="results-nav-link" class="nav-link" href="/GRASP/results">Results</a></li>-->
                     <li class="nav-item-highlight"><a class="nav-item-highlight" href="/guide">Guide</a></li>
                     <li class="nav-item-highlight"><a class="nav-item-highlight" href="/tutorial">Tutorial</a></li>
                     <li class="nav-item"><a class="nav-link" id="about-link" href="#about-nav">About</a></li>

@@ -22,10 +22,10 @@
                         <div class="col-md-4">
                             <fieldset>
                                 <legend>
-                                    Ancestral Graphs
+                                    Ancestral Graphs - <strong>Temporarily Disabled</strong>
                                 </legend>
-                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
-                                    <input id="check-pog-msa" name="check-pog-msa" class="dlopt" type="checkbox"></input>
+                                <div class="checkbox disabled" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
+                                    <input id="check-pog-msa" name="disabled check-pog-msa" class="dlopt" disabled="true" type="checkbox"></input>
                                     <label for="check-pog-msa">
                                         Sequence alignment POAG (*.dot)
                                     </label>
@@ -36,14 +36,14 @@
                                         Marginal reconstruction POG of <span class="node-label">Root</span> (*.dot)
                                     </label>
                                 </div>
-                                <div class="checkbox dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
-                                    <input id="check-pog-joint" class="styled dlopt" name="check-pog-joint" type="checkbox"></input>
+                                <div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
+                                    <input id="check-pog-joint" class="disabled styled dlopt disabled" disabled="true" name="check-pog-joint" type="checkbox"></input>
                                     <label for="check-pog-joint">
                                         Joint reconstruction POG of added ancestors (*.dot)
                                     </label>
                                 </div>
-                                <div class="checkbox dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
-                                    <input id="check-pog-joint-single" class="styled dlopt" name="check-pog-joint-single" type="checkbox"></input>
+                                <div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
+                                    <input id="check-pog-joint-single" class=" disabled styled dlopt" disabled="true" name="check-pog-joint-single" type="checkbox"></input>
                                     <label for="check-pog-joint-single">
                                         Joint reconstruction POG of <span class="node-label">Root</span> (*.dot)
                                     </label>
@@ -74,6 +74,7 @@
                                     <label>
                                         Consensus sequences of Joint Reconstructions (.fasta)
                                     </label>
+                                    <input id="graphs-input" name="graphs-input" hidden="hidden"></input>
                                 </div>
                                 <div class="col-sm-10" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
                                     <select id="multiselect-download" class="selectpicker" multiple="true" data-live-search="true">
@@ -94,8 +95,7 @@
                 <script type="text/javascript" th:inline="javascript">
                 /*<![CDATA[*/
 
-                let graphs = [];
-                $("#graphs-input").val(graphs);
+
                 $("#check-pog-joint").change(function(){
                     check_disabled_state_dlbtn();
                     if ($("#check-pog-joint").prop("checked")) {
@@ -127,6 +127,7 @@
                 $("#check-seq-joint").change(function(){
                     check_disabled_state_dlbtn();
                     graphs = getSelectedValuesForDownload("multiselect-download");
+                    console.log(graphs)
                     $("#graphs-input").val(graphs);
                     if ($("#check-seq-joint").prop("checked")) {
                         if (graphs.length > 5) {
@@ -153,8 +154,9 @@
                     $(".dlopt").each(function () {
                       if ($(this).prop("checked")) {
                         $("#download-btn").removeClass("disabled");
-                        $("#graphs-input").val("");
-                        let graphs = getSelectedValuesForDownload("multiselect-download");
+                        graphs = getSelectedValuesForDownload("multiselect-download");
+                        console.log(graphs)
+
                         $("#graphs-input").val(graphs);
                       }
                     });

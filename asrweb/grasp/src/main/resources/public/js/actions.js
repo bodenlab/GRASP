@@ -25,6 +25,9 @@
  */
 let getSelectedValuesForDownload = function (elemId) {
     let vals = $('select#' + elemId).val();
+    if (vals === null) {
+        vals = [];
+    }
     for (let v in vals) {
         if (vals[v] === "All") {
             return "all";

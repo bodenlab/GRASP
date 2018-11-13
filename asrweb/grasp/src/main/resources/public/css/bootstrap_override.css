@@ -194,8 +194,9 @@ fieldset {
     min-width: 200px;
 }
 
-.margin5 {
-    margin-left: 5px;
+.save-modal-btn {
+    border: none;
+    background-color: transparent;
 }
 
 .email-modal {

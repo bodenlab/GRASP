@@ -114,7 +114,15 @@ public class GraspApplication extends SpringBootServletInitializer {
     private boolean isSaving = false;
 
     // Inputted email of the user - might be before they login
-    String email;
+    private String email;
+
+    // Keep track of the currently selected reconstructed nodes so that we can easily let the user
+    // save them.
+    private ArrayList<JSONObject> reconstructedNodes;
+
+    // Again for downloading
+    private JSONObject ancestor;
+    private JSONObject msa;
 
     /**
      * ToDo: delete
@@ -277,6 +285,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         mav.addObject("ids", ids.toString());
         mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+        // Add the ancestor to the list we don't need to check here for duplicates as this will be
+        // the initial iteration.
+        reconstructedNodes = new ArrayList<>();
+        msa = new JSONObject(currRecon.getMsa());
+        ancestor = new JSONObject(recon.getAncestor());
 
         return mav;
     }
@@ -622,8 +635,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
-            return asr.getAncestralGraphJSON(dataJson.getString("nodeLabel")).toString();
+            JSONObject ancestor = asr.getAncestralGraphJSON(dataJson.getString("nodeLabel"));
+            reconstructedNodes.add(ancestor);
+            return ancestor.toString();
         }
+
+        // Add to the reconstructed ancestors for saving
+        reconstructedNodes.add(new JSONObject(reconstructedAnsc));
+
         return reconstructedAnsc;
     }
 
@@ -685,13 +704,15 @@ public class GraspApplication extends SpringBootServletInitializer {
         isSaving = true;
         return null;
     }
-        /**
-         * Gets the node ids that contain a certain motif. This updates the tree.
-         *
-         * Returns
-         * @param jsonString
-         * @return
-         */
+
+
+    /**
+     * Gets the node ids that contain a certain motif. This updates the tree.
+     *
+     * Returns
+     * @param jsonString
+     * @return
+     */
     @RequestMapping(value = "/motif" , method = RequestMethod.POST)
     public @ResponseBody String getAncestorsMatchingMotif(@RequestBody String jsonString) {
 
@@ -704,26 +725,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Check for the motif
         String motif = dataJson.getString("motif");
-        if (loggedInUser.getUsername().equals("ariane8")) {
-            currRecon = reconController.getByIdForMarginal(currRecon.getId(),
-                    loggedInUser);
-
-            asr = new ASRObject();
-            asr.setLabel(currRecon.getLabel());
-            asr.setInferenceType(currRecon.getInferenceType());
-            asr.setModel(currRecon.getModel());
-            asr.setNodeLabel(currRecon.getNode());
-            asr.setTree(currRecon.getTree());
-            asr.setReconstructedTree(currRecon.getReconTree());
-            asr.setMSA(currRecon.getMsa());
-            asr.setAncestor(currRecon.getAncestor());
-            asr.loadSequences(currRecon.getSequences());
-            asr.setJointInferences(currRecon.getJointInferences());
-            asr.loadParameters();
-            ArrayList<String> labels = new ArrayList<>();
-            labels.add("N0");
-            seqController.updateConsusensForNodes(currRecon, labels, asr);
-        }
 
         //Return the list of matching node ids as a json array
         return seqController
@@ -763,6 +764,11 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Set the anscestor and the msa
         currRecon.setAncestor(ancestor.toString());
         currRecon.setMsa(msa.toString());
+
+
+        reconstructedNodes = new ArrayList<>();
+        this.ancestor = ancestor;
+        this.msa = msa;
 
         // Set the owner ID to be the logged in user
         currRecon.setOwnerId(loggedInUser.getId());
@@ -831,6 +837,12 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("results", true);
         model.addAttribute("node", asr.getNodeLabel());
         model.addAttribute("username", loggedInUser.getUsername());
+
+        // Also set the ancestor and MSA for saving
+        reconstructedNodes = new ArrayList<>();
+        ancestor = new JSONObject(asr.getMSAGraphJSON());
+        msa = new JSONObject(asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
+
 
         return graphs;
     }
@@ -931,6 +943,31 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
+     * Used to load the save attributes of a reconstruction.
+     */
+    public void loadReconToASR() {
+        currRecon = reconController.getByIdForMarginal(currRecon.getId(),
+                loggedInUser);
+
+        asr = new ASRObject();
+        asr.setLabel(currRecon.getLabel());
+        asr.setInferenceType(currRecon.getInferenceType());
+        asr.setModel(currRecon.getModel());
+        asr.setNodeLabel(currRecon.getNode());
+        asr.setTree(currRecon.getTree());
+        asr.setReconstructedTree(currRecon.getReconTree());
+        asr.setMSA(currRecon.getMsa());
+        asr.setAncestor(currRecon.getAncestor());
+        asr.loadSequences(currRecon.getSequences());
+        asr.setJointInferences(currRecon.getJointInferences());
+        asr.loadParameters();
+
+        // Also set the ancestor and MSA
+        ancestor = new JSONObject(currRecon.getAncestor());
+        msa = new JSONObject(currRecon.getMsa());
+    }
+
+    /**
      * Perform marginal reconstruction of specified tree node.
      *
      * @param infer inference type (Expects marginal)
@@ -953,21 +990,7 @@ public class GraspApplication extends SpringBootServletInitializer {
              * Here is where we need to load the whole reconstruction i.e. all the seqs etc
              *
              */
-            currRecon = reconController.getByIdForMarginal(currRecon.getId(),
-                    loggedInUser);
-
-            asr = new ASRObject();
-            asr.setLabel(currRecon.getLabel());
-            asr.setInferenceType(currRecon.getInferenceType());
-            asr.setModel(currRecon.getModel());
-            asr.setNodeLabel(currRecon.getNode());
-            asr.setTree(currRecon.getTree());
-            asr.setReconstructedTree(currRecon.getReconTree());
-            asr.setMSA(currRecon.getMsa());
-            asr.setAncestor(currRecon.getAncestor());
-            asr.loadSequences(currRecon.getSequences());
-            asr.setJointInferences(currRecon.getJointInferences());
-            asr.loadParameters();
+            loadReconToASR();
 
             recon = new ASRThread(asr, infer, node, addGraph, logger, loggedInUser,
                     reconController);

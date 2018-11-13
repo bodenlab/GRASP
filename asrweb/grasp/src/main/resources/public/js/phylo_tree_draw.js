@@ -200,7 +200,8 @@ var setup_phylo_svg = function (phylo_options) {
 
   var svg = d3.select(options.div_id).append("svg")
   .attr("width", "100%")//width + options.margin.left + options.margin.right)
-  .attr("height", options.height + options.margin.top + options.margin.bottom);
+  .attr("height", options.height + options.margin.top + options.margin.bottom)
+  .attr("id", "phylo-tree-svg");
   phylo_options.svg_info.width = width + options.margin.left
       + options.margin.right;
   phylo_options.svg_info.height = options.height + options.margin.top

@@ -149,12 +149,16 @@
           <button type="button" id="find-similar-nodes" class="btn btn-default col-xs-4"
                   onclick="getSimilarNodes()">Find similar nodes in another reconstructed tree
           </button>
-          <input type="text" class="form-input col-xs-4 no-padding" style="height: 2.1em;"
+          <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
                  placeholder="Input a reconstruction label..." id="unknown-recon" name="unknown-recon-value"/>
           <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
                  placeholder="Choose a node label..." id="node-label" name="node-label-value"/>
           <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
                  placeholder="Choose how many (num)" id="node-num" name="node-num-value"/>
+          <button type="button" id="phylo-tree-rotate" class="btn btn-default col-xs-2"
+                  onclick="rotatePhyloTree()">Rotate Tree
+          </button>
+
           <!-- ToDo: probably want to have an auto search -->
         </div>
       </div>

@@ -1,3 +1,24 @@
+/**
+ * Rotate the phylo tree by 180 degrees
+ */
+currentRotation = 0;
+let rotatePhyloTree = function() {
+  let rotations = ['rotate(90deg)', 'rotate(180deg)', 'rotate(270deg)', 'rotate(0deg)'];
+  $('#phylo-tree-svg').css('transform', rotations[currentRotation]);
+  if (currentRotation % 2 === 0) {
+    $('#phylo-tree-svg').css('height', '1000px');
+    $('#phylo-tree-svg').css('margin-top', '120px');
+  } else {
+    $('#phylo-tree-svg').css('height', '100%');
+    $('#phylo-tree-svg').css('margin-top', '0px');
+  }
+  currentRotation ++;
+  if (currentRotation > 3) {
+    currentRotation = 0;
+  }
+}
+
+
 
 var expand_all_nodes = function () {
   phylo_options.tree.collapse_under = [];

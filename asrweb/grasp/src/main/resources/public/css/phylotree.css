@@ -102,3 +102,21 @@ stroke: #CCC;
 
 .tree-widget {
 }
+
+
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(180deg);
+  }
+}
+
+svg.rotate
+{
+  -webkit-animation-name:             rotate;
+  -webkit-animation-duration:         0.5s;
+  -webkit-animation-iteration-count:  1;
+  -webkit-animation-timing-function: linear;
+}

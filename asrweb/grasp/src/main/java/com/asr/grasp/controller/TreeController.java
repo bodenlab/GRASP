@@ -8,6 +8,9 @@ import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -40,6 +43,17 @@ public class TreeController {
     private PriorityQueue<TreeNodeObject> orderedNodes;
 
     private double origDistToRoot = 0;
+
+    /**
+     * Gets a reconstructed tree string via it's reconstruction and userId.
+     *
+     * @param reconId
+     * @param userId
+     * @return
+     */
+    public String getReconTreeById(int reconId, int userId) {
+        return treeModel.getById(reconId, userId);
+    }
 
     /**
      * Gets a Tree via it's reconstruction and userId.
@@ -342,6 +356,19 @@ public class TreeController {
         }
     }
 
+
+    /**
+     * Save a tree to a file. Used for the downloads.
+     *
+     * @param filepath
+     * @throws IOException
+     */
+    public void saveTree(String filepath, String tree) throws IOException {
+        Writer writer = new PrintWriter(filepath, "UTF-8");
+        writer.write(tree);
+        writer.write(";\n");
+        writer.close();
+    }
 
 
     /**

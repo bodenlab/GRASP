@@ -27,6 +27,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -111,6 +112,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     // A flag that keeps track of whether a reconstruction is currently being saved.
     private boolean isSaving = false;
+
+    // Inputted email of the user - might be before they login
+    String email;
 
     /**
      * ToDo: delete
@@ -277,6 +281,20 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
+
+    /**
+     * Save the current reconstruction if there is a current reconstruction.
+     *
+     * This is called when a user registers (i.e. they may have just made a reconstruction) or logs
+     * in.
+     */
+    public void saveCurrReconStartThread() {
+        saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
+        saveController.initialiseForReconstruction(asr);
+        saveController.start();
+    }
+
+
     /**
      * Save the current reconstruction if there is a current reconstruction.
      *
@@ -328,6 +346,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         Boolean saved = false;
         // If there is a current reconstruction save it.
         if (currRecon.getLabel() != null) {
+            // Assume they input their email when they selected to save it.
+            if (email != null) {
+                loggedInUser.setEmail(email);
+            } else {
+                // ToDo: Fix this to ask for an email again.
+                loggedInUser.setEmail("noemail");
+            }
             errSave = saveCurrRecon();
             saved = true;
         }
@@ -646,18 +671,16 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (isSaving) {
             return "isSaving";
         }
+        email = dataJson.getString("email");
 
 
         // if a user is not logged in, prompt to Login
         if (loggedInUser.getUsername() == null || loggedInUser.getUsername().equals("")) {
             return "login";
         }
-        String email = dataJson.getString("email");
 
         loggedInUser.setEmail(email);
-        saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
-        saveController.initialiseForReconstruction(asr);
-        saveController.start();
+        saveCurrReconStartThread();
 
         isSaving = true;
         return null;
@@ -892,9 +915,7 @@ public class GraspApplication extends SpringBootServletInitializer {
             }
             // Set the loggedin users email temp
             loggedInUser.setEmail(asr.getEmail());
-            saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
-            saveController.initialiseForReconstruction(asr);
-            saveController.start();
+            saveCurrReconStartThread();
             ModelAndView mav = accountView.get(loggedInUser, userController);
             mav.addObject("type", "saving");
             return mav;
@@ -1067,32 +1088,17 @@ public class GraspApplication extends SpringBootServletInitializer {
             throws IOException {
         // Check if we are getting all the joint reconstructions
         ArrayList<String> ancs = new ArrayList<>();
-        if (request.getParameter("graphs-input").equals("all")) {
-            ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
-        } else {
-            String tmp = request.getParameter("graphs-input");
-            JSONArray graphs = new JSONArray(tmp);
-            for (int i = 0; i < graphs.length(); i++) {
-                ancs.add(graphs.getString(i));
+        if (request.getParameter("graphs-input") != null) {
+            if (request.getParameter("graphs-input").equals("all")) {
+                ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
+            } else {
+                String tmp = request.getParameter("graphs-input");
+                JSONArray graphs = new JSONArray(tmp);
+                for (int i = 0; i < graphs.length(); i++) {
+                    ancs.add(graphs.getString(i));
+                }
             }
         }
-
-        /**
-//         * Check if we have any similar nodes to download & anu
-//         */
-//        ArrayList<String> similarNodes = new ArrayList<>();
-//        int otherReconId = Defines.FALSE;
-//        String originalNodeLabel = "";
-//        if (!request.getParameter("similar-nodes").equals("none")) {
-//            String tmp = request.getParameter("similar-nodes");
-//            JSONArray graphs = new JSONArray(tmp);
-//            for (int i = 0; i < graphs.length(); i++) {
-//                ancs.add(graphs.getString(i));
-//            }
-//            // Get the reconId
-//            otherReconId = Integer.parseInt(request.getParameter("unknown-recon"));
-//            originalNodeLabel = request.getParameter("original-label");
-//        }
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("Content-Disposition",
@@ -1121,8 +1127,9 @@ public class GraspApplication extends SpringBootServletInitializer {
                         (new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
             } else {
-                asr.saveTree((new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath()
-                        .toString());
+                // This means we have a saved reconstruction so we want to write it to a file.
+                String reconTree = treeController.getReconTreeById(currRecon.getId(), loggedInUser.getId());
+                treeController.saveTree(tempDir + "/reconstructed_tree.nwk", reconTree);
             }
         }
         if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa")
@@ -1137,10 +1144,6 @@ public class GraspApplication extends SpringBootServletInitializer {
                 .getParameter("check-marg-dist").equalsIgnoreCase("on")) {
             asr.saveMarginalDistribution(tempDir, request.getParameter("joint-node"));
         }
-//        if (request.getParameter("check-pog-joint") != null && request
-//                .getParameter("check-pog-joint").equalsIgnoreCase("on")) {
-//            asr.saveAncestors(tempDir + "/", ancs);
-//        }
         if (request.getParameter("check-pog-joint-single") != null && request
                 .getParameter("check-pog-joint-single").equalsIgnoreCase("on")) {
             asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
@@ -1157,20 +1160,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             }
             bw.close();
         }
-//        if (request.getParameter("check-seq-joint-single") != null && request
-//                .getParameter("check-seq-joint-single").equalsIgnoreCase("on")) {
-//            asr.saveConsensusJoint(
-//                    tempDir + "/" + request.getParameter("joint-node") + "_consensus",
-//                    request.getParameter("joint-node"));
-//        }
-////		if (request.getParameter("check-msa-marg-dist") != null && request.getParameter("check-msa-marg-dist").equalsIgnoreCase("on"))
-////			asr.saveMarginalDistribution(tempDir + "/", "msa");
-//        if (request.getParameter("check-seq-joint") != null && request
-//                .getParameter("check-seq-joint").equalsIgnoreCase("on")) {
-//            asr.saveConsensusJoint(tempDir + "/ancestors_consensus", ancs);
-//        }
-//		if (request.getParameter("check-msa-aln") != null && request.getParameter("check-msa-aln").equalsIgnoreCase("on"))
-//			asr.saveMSAAln(tempDir + "/" + asr.getLabel());
 
         // send output folder to client
         ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());

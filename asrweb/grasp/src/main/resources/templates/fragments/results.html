@@ -344,8 +344,39 @@
         var inf = /*[[${inferenceType}]]*/;
         var recon = /*[[${tree}]]*/;
         var node = /*[[${node}]]*/;
+        saved = /*[[${saved}]]*/
         run_asr_app(json_str, recon, label, inf, node, protIds);
       });
+
+      /**
+       * have a popup to stop users from exiting the reconstruction page when they
+       * haven't saved their recons.
+       * @param e
+       */
+      window.onbeforeunload = function(){
+        if (!saved) {
+          alert("Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ");
+        }
+        if (!saved) {
+          return "Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ";
+        }
+      };
+
+      window.onunload = function() {
+        if (!saved) {
+          alert("Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ");
+        }
+      }
+
+      $(window).bind("beforeunload", function(event) {
+        if (!saved) {
+          alert("Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ");
+        }
+        if (!saved) {
+          return "Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ";
+        }
+      });
+
       /*]]>*/
 
     </script>

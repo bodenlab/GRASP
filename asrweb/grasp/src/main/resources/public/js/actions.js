@@ -47,8 +47,7 @@ let getSelectedValuesForDownload = function (elemId) {
  * notified once it is complete.
  */
 let saveRecon = function() {
-    let email = document.getElementById("email").innerText;
-    let motif = document.getElementById("find-motif-value").value;
+    let email = document.getElementById("email").value;
     $.ajax({
       url: "/saveRecon",
       type: "POST",
@@ -56,6 +55,7 @@ let saveRecon = function() {
       contentType: "application/json",
       data: JSON.stringify({"email": email}),
       success: function (data) {
+          saved = true;
         // CHeck if we have an error message
         if (data === "login") {
           window.alert("You need to login to perform this action.");
@@ -70,6 +70,7 @@ let saveRecon = function() {
       }
     })
 }
+
 
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
 
@@ -566,4 +567,6 @@ function svgString2Image(svgString, width, height, format, callback) {
     };
     image.src = imgsrc;
 }
+
+
 

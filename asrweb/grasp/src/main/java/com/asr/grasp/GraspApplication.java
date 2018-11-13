@@ -18,6 +18,7 @@ import com.asr.grasp.view.AccountView;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import javax.print.DocFlavor.STRING;
 import json.JSONArray;
 import json.JSONObject;
@@ -284,6 +285,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         JSONObject ids = taxaController.getNonExistIdsFromProtId(seqController.getSeqLabelAsNamedMap(currRecon.getId()));
 
         mav.addObject("ids", ids.toString());
+        mav.addObject("saved", true);
+
         mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
         // Add the ancestor to the list we don't need to check here for duplicates as this will be
         // the initial iteration.
@@ -813,6 +816,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         JSONObject ids = taxaController.getNonExistIdsFromProtId(seqController.getSeqLabelAsNamedMap(currRecon.getId()));
         mav.addObject("ids", ids.toString());
         mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+        mav.addObject("saved", false);
 
         return mav;
     }
@@ -837,12 +841,12 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("results", true);
         model.addAttribute("node", asr.getNodeLabel());
         model.addAttribute("username", loggedInUser.getUsername());
+        model.addAttribute("saved", false);
 
         // Also set the ancestor and MSA for saving
         reconstructedNodes = new ArrayList<>();
         ancestor = new JSONObject(asr.getMSAGraphJSON());
         msa = new JSONObject(asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
-
 
         return graphs;
     }
@@ -994,9 +998,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
             recon = new ASRThread(asr, infer, node, addGraph, logger, loggedInUser,
                     reconController);
-        } else {
-            System.out.println(seqController.getSeqAsJson(currRecon.getId(), node, Defines.JOINT));
-            // ToDo: we want to change this to an AJAX call and return the string here
         }
         mav.addObject("username", loggedInUser.getUsername());
         return mav;
@@ -1121,6 +1122,8 @@ public class GraspApplication extends SpringBootServletInitializer {
                     ancs.add(graphs.getString(i));
                 }
             }
+            // Sort the array
+            Collections.sort(ancs, Collections.reverseOrder());
         }
 
         response.setStatus(HttpServletResponse.SC_OK);

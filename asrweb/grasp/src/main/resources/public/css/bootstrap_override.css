@@ -193,3 +193,11 @@ fieldset {
 .multiselect dropdown-toggle btn btn-default {
     min-width: 200px;
 }
+
+.margin5 {
+    margin-left: 5px;
+}
+
+.email-modal {
+    min-height: 160px;
+}

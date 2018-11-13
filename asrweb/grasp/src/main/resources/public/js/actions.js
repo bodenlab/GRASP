@@ -5,15 +5,15 @@
  *   Runs the JS commands for the phylo tree and the POAG.
  *  ------------------------------------------------------------------
  */
-
-$(function() {
-  $('#multiselect-download').multiselect({
-    includeSelectAllOption: true,
-    selectAllJustVisible: false,
-    enableFiltering: true,
-    selectAllValue: 'select-all-value'
-  })
-});
+//
+// $(function() {
+//   $('#multiselect-download').multiselect({
+//     includeSelectAllOption: true,
+//     selectAllJustVisible: false,
+//     enableFiltering: true,
+//     selectAllValue: 'select-all-value'
+//   })
+// });
 
 /**
  * Gets the items that a user has selected for download.
@@ -37,6 +37,35 @@ let getSelectedValuesForDownload = function (elemId) {
     }
     return JSON.stringify(vals);
 
+}
+
+/**
+ * Saves the current reconstruction, the user inputs an email and they get
+ * notified once it is complete.
+ */
+let saveRecon = function() {
+    let email = document.getElementById("email").innerText;
+    let motif = document.getElementById("find-motif-value").value;
+    $.ajax({
+      url: "/saveRecon",
+      type: "POST",
+      dataType: 'json',
+      contentType: "application/json",
+      data: JSON.stringify({"email": email}),
+      success: function (data) {
+        // CHeck if we have an error message
+        if (data === "login") {
+          window.alert("You need to login to perform this action.");
+        } else if (data === "isSaving") {
+          window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
+        } else {
+          window.alert("Saving reoncstruction, check your emails :) ");
+        }
+      }, error: function (err) {
+        console.log(err);
+        $('#motif-warning-alert').removeClass("hidden");
+      }
+    })
 }
 
 var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {

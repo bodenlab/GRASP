@@ -72,6 +72,8 @@ let getSimilarNodes = function () {
   })
 }
 
+
+
 function download (content, fileName, mimeType) {
   var a = document.createElement('a');
   mimeType = mimeType || 'application/octet-stream';
@@ -96,6 +98,8 @@ function download (content, fileName, mimeType) {
     return true;
   }
 }
+
+
 /**
  * Get a list of node labels that contain a motif.
  */

@@ -86,7 +86,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     @Autowired
     private EmailController emailController;
 
-    private SaveController saveController;
+    private SaveController saveController = new SaveController();
 
     @Autowired
     private TreeController treeController;
@@ -108,6 +108,9 @@ public class GraspApplication extends SpringBootServletInitializer {
     private ASRObject asr;
 
     private boolean saveGappySeq = true;
+
+    // A flag that keeps track of whether a reconstruction is currently being saved.
+    private boolean isSaving = false;
 
     /**
      * ToDo: delete
@@ -470,6 +473,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
+
     /**
      * Save reconstruction
      *
@@ -620,12 +624,50 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
-     * Gets the node ids that contain a certain motif. This updates the tree.
+     * Checks if the reconstruction can be saved. Also checks if the user is currently saving a
+     * recon, if they are then return that they have to wait until the other reconstruction
+     * has been saved.
      *
      * Returns
      * @param jsonString
      * @return
      */
+    @RequestMapping(value = "/saveRecon" , method = RequestMethod.POST)
+    public @ResponseBody String saveCurrentRecon(@RequestBody String jsonString) {
+        JSONObject dataJson = new JSONObject(jsonString);
+
+        /**
+         * Only allow one reconstruction to be saved at a time.
+         * ToDo: Batch these
+         */
+        isSaving = saveController.getIsSaving();
+
+        if (isSaving) {
+            return "isSaving";
+        }
+
+
+        // if a user is not logged in, prompt to Login
+        if (loggedInUser.getUsername() == null || loggedInUser.getUsername().equals("")) {
+            return "login";
+        }
+        String email = dataJson.getString("email");
+
+        loggedInUser.setEmail(email);
+        saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
+        saveController.initialiseForReconstruction(asr);
+        saveController.start();
+
+        isSaving = true;
+        return null;
+    }
+        /**
+         * Gets the node ids that contain a certain motif. This updates the tree.
+         *
+         * Returns
+         * @param jsonString
+         * @return
+         */
     @RequestMapping(value = "/motif" , method = RequestMethod.POST)
     public @ResponseBody String getAncestorsMatchingMotif(@RequestBody String jsonString) {
 
@@ -839,9 +881,17 @@ public class GraspApplication extends SpringBootServletInitializer {
                 mav.addObject("error", true);
                 return mav;
             }
+            isSaving = saveController.getIsSaving();
+            if (isSaving) {
+                ModelAndView mav = new ModelAndView("index");
+                mav.addObject("errorMessage", "You can only save one reconstruction at a time, sorry! We're working on batching this :) ");
+                mav.addObject("user", loggedInUser);
+                mav.addObject("error", true);
+                return mav;
+            }
             // Set the loggedin users email temp
             loggedInUser.setEmail(asr.getEmail());
-            saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq);
+            saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
             saveController.initialiseForReconstruction(asr);
             saveController.start();
             ModelAndView mav = accountView.get(loggedInUser, userController);

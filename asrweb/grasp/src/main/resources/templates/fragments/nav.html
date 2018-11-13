@@ -12,7 +12,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand topnav" href="#">GRASP<span id="recon-label"></span> <span class="node-label"></span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></a>
-                <a class="navbar-brand hidden" id="save-link" title="Save reconstruction" href="/save"><span class="glyphicon glyphicon-floppy-disk text-primary glyph-lg"></span></a>
+                <button class="navbar-brand hidden margin5" id="save-link"  data-toggle="modal" data-target="#save-modal">
+                    <span class="glyphicon glyphicon-floppy-disk text-primary glyph-lg"></span>
+                </button>
             </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <p hidden="hidden" id="results-nav-flag" th:text="${results}"></p>

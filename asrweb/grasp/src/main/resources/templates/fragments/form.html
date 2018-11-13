@@ -216,10 +216,10 @@
                       $("[id='save-run']").bootstrapSwitch();
                       $('input[id="save-run"]').on('switchChange.bootstrapSwitch', function(event, state) {
                         if (state == true) {
-                          $('#save').val("true");
+                          $('#save').val(false);
                           document.getElementById("email").required = false;
                         } else {
-                          $('#save').val("false");
+                          $('#save').val(true);
                           document.getElementById("email").required = true;
 
                         }

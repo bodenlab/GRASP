@@ -34,6 +34,15 @@ public class SaveController implements Runnable {
     private Thread thread;
     private boolean runRecon; // Lets us know whether we need to run the reconstruction
     private boolean saveGappySeq;
+    private boolean isSaving;
+
+    /**
+     * To allow us to have a saveController object in the main App.
+     */
+    public SaveController() {
+        isSaving = false;
+    }
+
 
     /**
      * Here we have to pass all the instanciated classes from the main GraspApplication class.
@@ -52,7 +61,7 @@ public class SaveController implements Runnable {
      */
     public SaveController(ReconstructionController reconController, ReconstructionObject currRecon,
             UserController userController, UserObject user, EmailController emailController,
-            SeqController seqController, TreeController treeController, boolean saveGappySeq) {
+            SeqController seqController, TreeController treeController, boolean saveGappySeq, boolean isSaving) {
         /* Set the following for the emailing and saving */
         this.reconController = reconController;
         this.seqController = seqController;
@@ -62,6 +71,7 @@ public class SaveController implements Runnable {
         this.user = user;
         this.saveGappySeq = saveGappySeq;
         this.treeController = treeController;
+        this.isSaving = isSaving;
     }
 
     /**
@@ -158,11 +168,20 @@ public class SaveController implements Runnable {
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
             email.setContent(currRecon.getLabel());
             emailController.sendEmail(email);
-
+            isSaving = false;
         } catch (Exception e) {
             System.out.println("Couldn't run.");
         }
     }
+
+    /**
+     * Gets whether we are currently saving a reconstruction or not.
+     * @return
+     */
+    public boolean getIsSaving() {
+        return isSaving;
+    }
+
 
     /**
      * Start the thread.

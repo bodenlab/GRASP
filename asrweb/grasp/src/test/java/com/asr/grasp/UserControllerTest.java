@@ -37,6 +37,21 @@ public class UserControllerTest extends BaseTest {
         return user;
     }
 
+
+    /**
+     * Create a user and don't check to remove based on username first.
+     * @param username
+     * @param password
+     * @return
+     */
+    private UserObject createUserNoDel(String username, String password) {
+        UserObject user = new UserObject();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setPasswordMatch(password);
+        return user;
+    }
+
     @Test
     public void testRegister() {
         /**
@@ -67,13 +82,13 @@ public class UserControllerTest extends BaseTest {
          */
         setUpEnv();
 
-        UserObject user = createUser("testuser", "testpassword");
+        UserObject user = createUserNoDel("testuser", "testpassword");
         user = registerUser(user); // success method tested above
 
         int userId = user.getId();
 
         // Re-add that user and check we get the correct error
-        user = createUser("testuser", "testpassword");
+        user = createUserNoDel("testuser", "testpassword");
 
         // Register User 1
         String err = userController.register(user);

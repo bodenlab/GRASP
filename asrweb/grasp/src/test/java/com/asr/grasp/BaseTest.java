@@ -15,6 +15,8 @@ import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.model.TreeModel;
+import com.asr.grasp.utils.Defines;
+
 public class BaseTest {
     /**
      * ------------------------------------------------------------------------
@@ -47,10 +49,20 @@ public class BaseTest {
     InferenceModel infModel;
 
     public UserObject createUser(String username, String password) {
+        /**
+         * Check if the user exists, if they do, delete them
+         */
+
         UserObject user = new UserObject();
         user.setUsername(username);
         user.setPassword(password);
         user.setPasswordMatch(password);
+        int id = userController.getId(user);
+        // if they have remove them and re-add them
+        if (id > 0) {
+            userModel.deleteUser(userController.getId(user));
+            user.setId(Defines.UNINIT);
+        }
         return user;
     }
 
@@ -60,6 +72,13 @@ public class BaseTest {
         user.setUsername(username);
         user.setPassword(password);
         user.setPasswordMatch(password);
+        // Check if the user has already been registered
+        int id = userController.getId(user);
+        // if they have remove them and re-add them
+        if (id > 0) {
+            userModel.deleteUser(userController.getId(user));
+            user.setId(Defines.UNINIT);
+        }
         userController.register(user);
         return user;
     }

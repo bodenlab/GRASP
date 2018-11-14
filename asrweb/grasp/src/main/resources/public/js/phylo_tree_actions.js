@@ -6,8 +6,8 @@ let rotatePhyloTree = function() {
   let rotations = ['rotate(90deg)', 'rotate(180deg)', 'rotate(270deg)', 'rotate(0deg)'];
   $('#phylo-tree-svg').css('transform', rotations[currentRotation]);
   if (currentRotation % 2 === 0) {
-    $('#phylo-tree-svg').css('height', '1000px');
-    $('#phylo-tree-svg').css('margin-top', '120px');
+    $('#phylo-tree-svg').css('height', '1600px');
+    $('#phylo-tree-svg').css('margin-top', '20px');
   } else {
     $('#phylo-tree-svg').css('height', '100%');
     $('#phylo-tree-svg').css('margin-top', '0px');

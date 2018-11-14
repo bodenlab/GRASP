@@ -104,54 +104,54 @@ stroke: #CCC;
 }
 
 
-.svg {
-  position: fixed;
-  cursor: move;
-}
+/*.svg {*/
+  /*position: fixed;*/
+  /*cursor: move;*/
+/*}*/
 
-.svg-scrim {
-  pointer-events: none;
-  z-index: 5;
-}
+/*.svg-scrim {*/
+  /*pointer-events: none;*/
+  /*z-index: 5;*/
+/*}*/
 
-.proxy {
-  fill: none;
-  stroke: none;
-}
+/*.proxy {*/
+  /*fill: none;*/
+  /*stroke: none;*/
+/*}*/
 
-.controls {
-  position: fixed;
-  top: 0;
-  left: 0;
-  padding: 12px;
-  z-index: 10;
+/*.controls {*/
+  /*position: fixed;*/
+  /*top: 0;*/
+  /*left: 0;*/
+  /*padding: 12px;*/
+  /*z-index: 10;*/
 
-  .controls-button {
-    font-weight: 700;
-  }
-}
+  /*.controls-button {*/
+    /*font-weight: 700;*/
+  /*}*/
+/*}*/
 
-.info {
-  user-select: none;
-  pointer-events: none;
+/*.info {*/
+  /*user-select: none;*/
+  /*pointer-events: none;*/
 
-  ul {
-    font-size: 13px;
-    list-style-type: none;
-    padding: 0;
-    line-height: 20px;
-    margin-top: 0;
-  }
-}
+  /*ul {*/
+    /*font-size: 13px;*/
+    /*list-style-type: none;*/
+    /*padding: 0;*/
+    /*line-height: 20px;*/
+    /*margin-top: 0;*/
+  /*}*/
+/*}*/
 
-.svg-background {
-  fill: none;
-  stroke: none;
-}
+/*.svg-background {*/
+  /*fill: none;*/
+  /*stroke: none;*/
+/*}*/
 
-.pivot {
-  fill: #ffc107;
-  stroke: rgba(0,0,0,0.5);
-  stroke-width: 2;
-  opacity: 0;
-}
+/*.pivot {*/
+  /*fill: #ffc107;*/
+  /*stroke: rgba(0,0,0,0.5);*/
+  /*stroke-width: 2;*/
+  /*opacity: 0;*/
+/*}*/

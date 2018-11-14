@@ -1045,9 +1045,9 @@ public class GraspApplication extends SpringBootServletInitializer {
         // copy output files to temporary folder, or generate output where needed and save in temporary folder
         File tutorialFile = new File(
                 Thread.currentThread().getContextClassLoader().getResource(
-                        "data/app/test/GRASPTutorial.fasta")
+                        "data/app/tutorial/GRASPTutorial.fasta")
                         .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/test/GRASPTutorial.fasta")).toPath(),
+        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/tutorial/GRASPTutorial.fasta")).toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
         // send output folder to client
@@ -1086,13 +1086,13 @@ public class GraspApplication extends SpringBootServletInitializer {
                 Thread.currentThread().getContextClassLoader().getResource(
                         "data/app/test/GRASPTutorial.aln")
                         .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/test/GRASPTutorial.aln")).toPath(),
+        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/tutorial/GRASPTutorial.aln")).toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
         tutorialFile = new File(
                 Thread.currentThread().getContextClassLoader().getResource(
                         "data/app/test/GRASPTutorial.nwk")
                         .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/test/GRASPTutorial.nwk")).toPath(),
+        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/data/app/tutorial/GRASPTutorial.nwk")).toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
         // send output folder to client

@@ -85,7 +85,7 @@
                         </div>
                     </div>
                     <div class="row col-xs-12">
-                        <div class="col-xs-12 pad-top-bottom"><button type="submit" name="download" class="btn btn-default col-xs-12 disabled" id="download-btn">Download</button></div>
+                        <div class="col-xs-12 pad-top-bottom"><button type="submit" name="download" class="btn btn-default col-xs-12 disabled" id="download-btn" disabled="true">Download</button></div>
                     </div>
                     <div class="row col-xs-12">
                         <div class="col-xs-12 alert alert-warning collapse" role="alert" id="download-warning"><label>These results may take some time to download...</label><br></br><br></br><label>Downloading all ancestral joint graphs can result in a large download and may take time.</label></div>
@@ -94,7 +94,6 @@
 
                 <script type="text/javascript" th:inline="javascript">
                 /*<![CDATA[*/
-
 
                 $("#check-pog-joint").change(function(){
                     check_disabled_state_dlbtn();
@@ -150,10 +149,13 @@
                   // Check if we have already performed this function
                     if (!$("#download-btn").hasClass("disabled")) {
                       $("#download-btn").addClass("disabled");
+                      $("#download-btn").prop('disabled', true);
+
                     }
                     $(".dlopt").each(function () {
                       if ($(this).prop("checked")) {
                         $("#download-btn").removeClass("disabled");
+                        $("#download-btn").prop('disabled', false);
                         graphs = getSelectedValuesForDownload("multiselect-download");
                         console.log(graphs)
 

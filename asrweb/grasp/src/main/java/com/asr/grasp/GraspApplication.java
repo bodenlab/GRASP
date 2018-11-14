@@ -1112,7 +1112,11 @@ public class GraspApplication extends SpringBootServletInitializer {
             throws IOException {
         // Check if we are getting all the joint reconstructions
         ArrayList<String> ancs = new ArrayList<>();
-        if (request.getParameter("graphs-input") != null) {
+        // If we have nothing just return
+        if (request.getParameter("graphs-input").length() < 1) {
+            return;
+        }
+        if (request.getParameter("graphs-input") != null && request.getParameter("graphs-input").length() > 2) {
             if (request.getParameter("graphs-input").equals("all")) {
                 ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
             } else {

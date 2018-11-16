@@ -63,6 +63,18 @@ let getSimilarNodes = function () {
             strD += "\n";
           }
           download(strD, "test.csv", "text/csv")
+        } else if (data[0][0] == "save-all") {
+          strD = "";
+          for (d in data) {
+              for (x in data[d]) {
+                if (data[d][x] !== "save-all") {
+                  strD += data[d][x] + ",";
+                }
+              }
+              strD += "\n";
+          }
+          download(strD, data[0][1] + "_" + data[0][2] + ".csv", "text/csv")
+
         }
       }
     }, error: function (err) {

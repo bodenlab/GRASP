@@ -57,9 +57,9 @@ let saveRecon = function() {
       success: function (data) {
           saved = true;
         // CHeck if we have an error message
-        if (data === "login") {
-          window.alert("You need to login to perform this action.");
-        } else if (data === "isSaving") {
+        if (data.value === "login") {
+          window.alert("You need to login to perform this action. When you login the saving will automatically start :) ");
+        } else if (data.value  === "isSaving") {
           window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
         } else {
           window.alert("Saving reoncstruction, check your emails :) ");

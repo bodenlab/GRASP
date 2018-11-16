@@ -46,6 +46,13 @@ public class TreeNodeObject {
     }
 
 
+    public void resetScore() {
+        this.score = 0.0;
+        this.otherExtentCount = 0;
+        this.incCnt = 0;
+        this.noIncCnt = 0;
+    }
+
     public void addExt() {
         otherExtentCount += 1;
     }
@@ -110,18 +117,23 @@ public class TreeNodeObject {
         }
     }
 
+    public double setDistanceFromRoot() {
+        if (distanceFromRoot != 0) {
+            return distanceFromRoot;
+        }
+        if (parent != null) {
+            distanceFromRoot = this.distance + parent.getDistanceToRoot();
+            return distanceFromRoot;
+        } else {
+            return this.distance;
+        }
+    }
     /**
      * Gets the distance to the root from a node - includes own distance.
      * @return
      */
     public double getDistanceToRoot() {
-        if (distanceFromRoot != 0) {
-            return distanceFromRoot + distance;
-        }
-        if (parent != null) {
-            distanceFromRoot += parent.getDistanceToRoot();
-        }
-        return distanceFromRoot + distance;
+        return distanceFromRoot;
     }
 
     /**

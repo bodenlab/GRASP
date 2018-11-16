@@ -200,7 +200,7 @@ public class SeqController {
         FileWriter fr = null;
         long[] vals = {0, 0};
         if (logFileName != null) {
-            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
+            File file = new File("/var/www/GRASP/data/stats_insert_" + logFileName + ".csv");
             try {
                 fr = new FileWriter(file);
                 fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
@@ -409,6 +409,7 @@ public class SeqController {
         HashMap<String, ArrayList<String>> extentNames = new HashMap<>();
         ArrayList<String> extentNamesUniprot = new ArrayList<>();
         ArrayList<String> extentNamesNcbi = new ArrayList<>();
+
         for (String name : seqLabels) {
             // Uniprot names can be identified by the | character in position 2. https://www.uniprot.org/help/fasta-headers
             if (name.substring(2, 3).equals("|")) {

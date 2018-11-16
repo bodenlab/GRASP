@@ -15,14 +15,25 @@ public class TreeObject {
 
     /* We keep track of the extents so that we can find the intersection between two trees easily */
     private ArrayList<String> extantLabelList;
+    private ArrayList<String> ancestorLabelList;
 
     public TreeObject(String treeAsNewick) {
         this.nodeList = new ArrayList<>();
         this.leafNodeList = new ArrayList<>();
         this.extantLabelList = new ArrayList<>();
+        this.ancestorLabelList = new ArrayList<>();
         parseNewick(treeAsNewick, root);
+        // Setup all the distances for each of the nodes
+        for (TreeNodeObject tno: nodeList) {
+            tno.setDistanceFromRoot();
+        }
     }
 
+    public void clearScores() {
+        for (TreeNodeObject tno: nodeList) {
+            tno.resetScore();
+        }
+    }
     /**
      * Corrects for if we have labels which do or don't have the pipe from uniprot
      * @param rawLabel
@@ -37,6 +48,14 @@ public class TreeObject {
                 return rawLabel;
             }
         }
+    }
+
+    /**
+     * Gets the list of anc
+     * @return
+     */
+    public ArrayList<String> getAncestorLabelList() {
+        return this.ancestorLabelList;
     }
 
     /**
@@ -214,6 +233,9 @@ public class TreeObject {
             embed = embed.substring(comma + 1);
             comma = getComma(embed);
         }
+        // So we can iterate through all the ancestors
+        ancestorLabelList.add(node.getLabel());
+
         return node;
     }
 

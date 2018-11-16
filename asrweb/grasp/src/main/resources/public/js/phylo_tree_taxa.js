@@ -58,8 +58,13 @@ function chunkArray(array, chunkSize) {
 function queryTaxonIds(ncbiList, uniprotList, ncbiMapping, uniprotMapping) {
   let requests = [];
   idMapping = uniprotMapping;
-  for (const key in ncbiMapping) {
-    uniprotMapping[key] = ncbiMapping[key];
+  if (idMapping === undefined) {
+    idMapping = {};
+  }
+  if (ncbiMapping !== undefined) {
+    for (const key in ncbiMapping) {
+      idMapping[key] = ncbiMapping[key];
+    }
   }
   if (ncbiList.length > 1) {
     try {
@@ -130,7 +135,7 @@ function runTaxaAjax() {
  */
 function getId(extentId, type) {
   if (type == NCBI_VALUE) {
-    return phylo_options.tree.extants[extentId][T_NAME].split("|")[0].split(".")[0]
+    return phylo_options.tree.extants[extentId][T_NAME].split(".")[0]
   } else if (type == UNIPROT_VALUE) {
     return phylo_options.tree.extants[extentId][T_NAME].split("|")[1]
   }
@@ -138,7 +143,7 @@ function getId(extentId, type) {
   if (phylo_options.tree.extants[extentId][T_NAME].substr(2, 1) == "|") {
     return phylo_options.tree.extants[extentId][T_NAME].split("|")[1];
   }
-  return phylo_options.tree.extants[extentId][T_NAME].split("|")[0].split(".")[0];
+  return phylo_options.tree.extants[extentId][T_NAME].split(".")[0];
 }
 
 /**

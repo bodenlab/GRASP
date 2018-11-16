@@ -38,6 +38,7 @@ public class Defines {
      */
     public static final String UNIPROT = "uniprot";
     public static final String NCBI = "ncbi";
+    public static final String ID_MAPPING = "id_mapping";
     public static final String PDB = "pdb";
     public static final String[] SUPPORTED_PROT = {UNIPROT, NCBI};
 

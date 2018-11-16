@@ -7,6 +7,7 @@ import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 import json.JSONObject;
+import org.springframework.stereotype.Controller;
 
 /**
  * A class that is out of the @session and @beans to allow saving when the connection
@@ -16,6 +17,7 @@ import json.JSONObject;
  * complete.
  *
  */
+@Controller
 public class SaveController implements Runnable {
 
     ReconstructionController reconController;
@@ -170,7 +172,8 @@ public class SaveController implements Runnable {
             emailController.sendEmail(email);
             isSaving = false;
         } catch (Exception e) {
-            System.out.println("Couldn't run.");
+            System.out.println("Couldn't run the saving thread: " + e);
+            isSaving = false;
         }
     }
 

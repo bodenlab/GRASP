@@ -14,9 +14,11 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import javax.swing.tree.TreeNode;
 import json.JSONArray;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 /**
@@ -163,7 +165,7 @@ public class TreeController {
             JSONArray node = new JSONArray();
             node.put(Defines.S_NAME, n.getOriginalLabel());
             node.put(Defines.S_SCORE, n.getScore());
-            if (user.getUsername().equals("ariane8")) {
+            if (user.getUsername().equals("ariane2")) {
                 node.put(2, "saveCSV");
                 node.put(3, n.getLeafCount());
                 node.put(4, n.getDistanceToRoot());
@@ -177,6 +179,109 @@ public class TreeController {
             retNodes.put(node);
 
             System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
+        }
+
+        return retNodes;
+    }
+
+    /**
+     * Gets all the matching nodes (1:1) for two given trees.
+     *
+     * @param user
+     * @param reconKnownAncsLabel
+     * @param reconUnknownAncsLabel
+     * @return
+     */
+    public JSONArray getAllSimilarNodes(UserObject user, String reconKnownAncsLabel, String reconUnknownAncsLabel) {
+        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+
+
+        // If either of the labels are incorrect then return
+        if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+            return null;
+        }
+
+        // Otherwise get the trees
+        TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
+        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
+
+        // If either of the trees weren't able to be parsed return
+        if (treeKnownAncs == null || treeUnknownAncs == null) {
+            return null;
+        }
+
+        // Get the node list which we will iterate through
+        ArrayList<String> ancestors = new ArrayList<>();
+//        ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs,
+//                treeUnknownAncs);
+
+        JSONArray retNodes = new JSONArray();
+        JSONArray jsonN = new JSONArray();
+        jsonN.put("save-all");
+
+        ancestors = treeKnownAncs.getAncestorLabelList();
+        jsonN.put(reconKnownAncsLabel);
+        jsonN.put(reconUnknownAncsLabel);
+
+        jsonN.put("score");
+        jsonN.put("extent-count");
+        jsonN.put("original-dist-to-root");
+        jsonN.put("corrosponding-dist-to-root");
+        retNodes.put(jsonN);
+
+        for (String ancsestorLabel: ancestors) {
+            // Setup the ordered nodes
+
+            orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
+            ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs,
+                    treeUnknownAncs);
+
+            treeKnownAncs.clearScores();
+            treeUnknownAncs.clearScores();
+            // Now that we have the intersection we want to get the leaf nodes in the known ancestor
+            // that lie under the node of interest - these must also be in the intersection obj
+            TreeNodeObject node = treeKnownAncs.getNodeByLabel(ancsestorLabel);
+            origDistToRoot = node.getDistanceToRoot();
+
+            ArrayList<String> leaves = node.getLeafLabels();
+            ArrayList<String> sharedLeaves;
+
+            // Get the intersection of the leaves and the intersection - first convert the intersection
+            // to Strings
+            ArrayList<String> intersectionLabels = new ArrayList<>();
+
+            for (TreeNodeObject tn : intersection) {
+                intersectionLabels.add(tn.getLabel());
+            }
+
+            // This just is a slight optimisation to allow us to only look through the smaller set
+            if (leaves.size() > intersection.size()) {
+                sharedLeaves = getIntersectionOfStrings(intersectionLabels, leaves);
+            } else {
+                sharedLeaves = getIntersectionOfStrings(leaves, intersectionLabels);
+            }
+
+            // Also want to pass the leaves that aren't in the tree
+            intersectionLabels.removeAll(sharedLeaves);
+
+            scoreNodes(sharedLeaves, intersectionLabels, treeUnknownAncs.getRoot(), node.getDistanceToRoot());
+
+            /**
+             * If you want to save all of them uncomment the while loop
+             */
+//            while (orderedNodes.size() > 1) {
+                TreeNodeObject n = orderedNodes.poll();
+                JSONArray jsonNode = new JSONArray();
+                jsonNode.put(node.getOriginalLabel());
+                jsonNode.put(n.getOriginalLabel());
+                jsonNode.put(n.getScore());
+                jsonNode.put(n.getExtC());
+                jsonNode.put(origDistToRoot);
+                jsonNode.put(n.getDistanceToRoot());
+                retNodes.put(jsonNode);
+//                System.out.println(node.getOriginalLabel() + " : " + n.getOriginalLabel() + ", " + n.getScore() + ", "  + n.getExtC() + ", " + n.getDistanceToRoot() + " vs " + origDistToRoot );
+//            }
         }
 
         return retNodes;
@@ -317,14 +422,13 @@ public class TreeController {
             } else if (extentNotIncludedList.contains(tno.getLabel())) {
                 score += value;
                 node.addToNoInc(tno.getLabel());
-                System.out.println("NOT INC:" + tno.getLabel());
             } else {
                 node.addExt();
             }
         }
+
         node.addToScore(score);
         orderedNodes.add(node);
-
         return score;
     }
 
@@ -342,6 +446,18 @@ public class TreeController {
             {
                 return 1;
             }
+            // ToDo: confirm we want the node with the least number of external extents
+            if (x.getExtC() < y.getExtC())
+            {
+                return -1;
+            }
+            if (x.getExtC() > y.getExtC())
+            {
+                return 1;
+            }
+
+            // The following is surpassed by the function above.
+
             // If both have the same score we want to return the distance difference
             // ToDo: check if this is correct
             if (Math.abs(origDistToRoot - x.getDistanceToRoot()) < (Math.abs(origDistToRoot - y.getDistanceToRoot())))

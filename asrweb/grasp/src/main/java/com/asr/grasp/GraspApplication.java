@@ -88,7 +88,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     @Autowired
     private EmailController emailController;
 
-    private SaveController saveController = new SaveController();
+    private SaveController saveController = null;
 
     @Autowired
     private TreeController treeController;
@@ -125,6 +125,8 @@ public class GraspApplication extends SpringBootServletInitializer {
     private JSONObject ancestor;
     private JSONObject msa;
 
+    private boolean needToSave = false;
+
     /**
      * ToDo: delete
     */
@@ -144,11 +146,17 @@ public class GraspApplication extends SpringBootServletInitializer {
     public ModelAndView showLoginForm(WebRequest request, Model model) {
         // Reset our variables.
         loggedInUser = new UserObject();
-        currRecon = new ReconstructionObject();
-        asr = new ASRObject();
+
+        if (!needToSave) {
+            currRecon = new ReconstructionObject();
+            asr = new ASRObject();
+        } else {
+            needToSave = false;
+        }
 
         model.addAttribute("user", loggedInUser);
         model.addAttribute("username", null);
+        needToSave = false;
         return new ModelAndView("login");
     }
 
@@ -322,15 +330,22 @@ public class GraspApplication extends SpringBootServletInitializer {
         // owner id
         currRecon.setOwnerId(loggedInUser.getId());
 
-        // Save the reconstruction
-        String err = reconController.save(loggedInUser, currRecon);
+        String err = null;
+        if (email != null) {
+            saveCurrReconStartThread();
+        } else {
+            // Save the reconstruction
+            err = reconController.save(loggedInUser, currRecon);
 
-        // We also want to save all joint recons
-        seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT), saveGappySeq);
+            // We also want to save all joint recons
+            seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
+                    saveGappySeq);
 
-        // Also want to save all the extents into the db
-        seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap(), saveGappySeq);
+            // Also want to save all the extents into the db
+            seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap(),
+                    saveGappySeq);
 
+        }
         return err;
     }
 
@@ -370,6 +385,7 @@ public class GraspApplication extends SpringBootServletInitializer {
                 loggedInUser.setEmail("noemail");
             }
             errSave = saveCurrRecon();
+            email = null;
             saved = true;
         }
 
@@ -386,6 +402,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (errSave == null && saved == true) {
             mav.addObject("type", "saved");
         }
+        saveController = new SaveController();
         return mav;
     }
 
@@ -684,28 +701,33 @@ public class GraspApplication extends SpringBootServletInitializer {
     public @ResponseBody String saveCurrentRecon(@RequestBody String jsonString) {
         JSONObject dataJson = new JSONObject(jsonString);
 
+        JSONObject returnVal = new JSONObject();
         /**
          * Only allow one reconstruction to be saved at a time.
          * ToDo: Batch these
          */
-        isSaving = saveController.getIsSaving();
-
+        if (saveController != null) {
+            isSaving = saveController.getIsSaving();
+        } else {
+            isSaving = false;
+        }
         if (isSaving) {
-            return "isSaving";
+            return returnVal.put("value", "isSaving").toString();
         }
         email = dataJson.getString("email");
 
 
         // if a user is not logged in, prompt to Login
         if (loggedInUser.getUsername() == null || loggedInUser.getUsername().equals("")) {
-            return "login";
+            needToSave = true;
+            return returnVal.put("value", "login").toString();
         }
 
         loggedInUser.setEmail(email);
         saveCurrReconStartThread();
 
         isSaving = true;
-        return null;
+        return returnVal.toString();
     }
 
 
@@ -753,6 +775,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         JSONArray similarNodes = treeController.getSimilarNodes(loggedInUser, data.getString("unknown"),  currRecon.getLabel(), data.getString("node"), data.getInt("num"));
 
+        if (loggedInUser.getUsername().equals("ariane2") || loggedInUser.getUsername().equals("gabe")) {
+            similarNodes = treeController.getAllSimilarNodes(loggedInUser, data.getString("unknown"),  currRecon.getLabel());
+        }
         //Return the list of matching node ids as a json array
         return similarNodes.toString();
     }
@@ -912,11 +937,14 @@ public class GraspApplication extends SpringBootServletInitializer {
         /**
          * Here if they are aiming to save it we just save and send an email
          */
-        if (asr.getSave()) {
+
+        // ToDo: I have been horrible and just inverted this, if you are reading this I am sorry
+        // I will fix this up when i get back from the US - for now accept by deepest appologies :'(
+        if (!asr.getSave()) {
             // check if a user is logged in
             if (loggedInUser.getId() == Defines.FALSE) {
                 ModelAndView mav = new ModelAndView("index");
-                mav.addObject("errorMessage", "You need to be logged in to be able to run a reconstruction, sorry!");
+                mav.addObject("errorMessage", "You need to be logged in to be able to save a reconstruction, sorry!");
                 mav.addObject("user", loggedInUser);
                 mav.addObject("error", true);
                 return mav;

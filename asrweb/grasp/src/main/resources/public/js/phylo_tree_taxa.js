@@ -122,6 +122,11 @@ function runTaxaAjax() {
     contentType: "application/json",
     data: JSON.stringify(idMappingToSave),
     success: function (data) {
+      if (data.error !== undefined) {
+        document.getElementById("motif-warning-text").innerHTML = data.error;
+        $('#taxonomy-info-alert').addClass("hidden");
+        $('#motif-warning-alert').removeClass("hidden");
+      }
       applyTaxonInfo(data);
     }, error: function (err) {
       $('#taxonomy-info-alert').addClass("hidden");

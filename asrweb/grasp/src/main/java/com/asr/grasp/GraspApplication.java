@@ -620,10 +620,16 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/taxa" , method = RequestMethod.POST)
     public @ResponseBody String getTaxaInfo(@RequestBody String jsonString) {
+        String err = verify();
+
+        if (err != null) {
+            return err;
+        }
+
         JSONObject dataJson = new JSONObject(jsonString);
         // Check if we have anything to save
         if ((Boolean)dataJson.get("toSave") == true) {
-            String err = taxaController.insertTaxaIds(dataJson);
+            err = taxaController.insertTaxaIds(dataJson);
         }
 
         // Now we want to get the taxonomic information for all the IDs in this dataset.

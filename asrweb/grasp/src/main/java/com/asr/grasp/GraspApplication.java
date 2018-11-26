@@ -843,10 +843,19 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("username", loggedInUser.getUsername());
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
-
-        JSONObject ids = taxaController.getNonExistIdsFromProtId(seqController.getSeqLabelAsNamedMap(currRecon.getId()));
+        JSONObject ids = new JSONObject();
+        ArrayList<String> jointLabels = new ArrayList<>();
+        try {
+            ids = taxaController.getNonExistIdsFromProtId(seqController.getSeqLabelAsNamedMap(currRecon.getId()));
+            jointLabels = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
+            if (jointLabels == null) {
+                jointLabels = new ArrayList<>();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
         mav.addObject("ids", ids.toString());
-        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+        mav.addObject("jointLabels", jointLabels);
         mav.addObject("saved", false);
 
         return mav;
@@ -984,25 +993,25 @@ public class GraspApplication extends SpringBootServletInitializer {
      * Used to load the save attributes of a reconstruction.
      */
     public void loadReconToASR() {
-        currRecon = reconController.getByIdForMarginal(currRecon.getId(),
-                loggedInUser);
-
-        asr = new ASRObject();
-        asr.setLabel(currRecon.getLabel());
-        asr.setInferenceType(currRecon.getInferenceType());
-        asr.setModel(currRecon.getModel());
-        asr.setNodeLabel(currRecon.getNode());
-        asr.setTree(currRecon.getTree());
-        asr.setReconstructedTree(currRecon.getReconTree());
-        asr.setMSA(currRecon.getMsa());
-        asr.setAncestor(currRecon.getAncestor());
-        asr.loadSequences(currRecon.getSequences());
-        asr.setJointInferences(currRecon.getJointInferences());
-        asr.loadParameters();
-
-        // Also set the ancestor and MSA
-        ancestor = new JSONObject(currRecon.getAncestor());
-        msa = new JSONObject(currRecon.getMsa());
+        if (currRecon == null) {
+            currRecon = reconController.getByIdForMarginal(currRecon.getId(),
+                    loggedInUser);
+            asr = new ASRObject();
+            asr.setLabel(currRecon.getLabel());
+            asr.setInferenceType(currRecon.getInferenceType());
+            asr.setModel(currRecon.getModel());
+            asr.setNodeLabel(currRecon.getNode());
+            asr.setTree(currRecon.getTree());
+            asr.setReconstructedTree(currRecon.getReconTree());
+            asr.setMSA(currRecon.getMsa());
+            asr.setAncestor(currRecon.getAncestor());
+            asr.loadSequences(currRecon.getSequences());
+            asr.setJointInferences(currRecon.getJointInferences());
+            asr.loadParameters();
+            // Also set the ancestor and MSA
+            ancestor = new JSONObject(currRecon.getAncestor());
+            msa = new JSONObject(currRecon.getMsa());
+        }
     }
 
     /**

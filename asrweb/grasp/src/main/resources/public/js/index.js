@@ -950,7 +950,7 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge[E_FROM] = poags.node_dict[name + '-' + edge[E_FROM]];
         // To node
         reduced_edge[E_TO] = poags.node_dict[name + '-' + edge[E_TO]]
-
+        console.log(edge[E_CONSENSUS])
         reduced_edge[E_CONSENSUS] = edge[E_CONSENSUS] === 1;
         reduced_edge[E_RECIPROCATED] = edge[E_RECIPROCATED] === 1;
         reduced_edge[E_WEIGHT] = edge[E_WEIGHT];
@@ -1418,6 +1418,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
     }
     if (edge[E_CONSENSUS] && poags.options.display.draw_consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
+        stroke = "#0008F8";
     }
     group.append("path")
             .attr("d", line_function(line_points))

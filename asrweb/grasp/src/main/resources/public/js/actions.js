@@ -414,8 +414,8 @@ var reset_poag_stack = function () {
     poags.single.nodes = {};
     poags = process_msa_data(poags);
     poags = process_edges(poags, poags.single.raw.msa, poags.root_poag_name, true);
-    poags = process_poag_data(poags, poags.single.raw.inferred, cur_node[N_NAME], true, false);
-    poags = process_edges(poags, poags.single.raw.inferred, cur_node[N_NAME], true, false);
+    poags = process_poag_data(poags, poags.single.raw.inferred, poags.inferred_poag_name, true, false);
+    poags = process_edges(poags, poags.single.raw.inferred, poags.inferred_poag_name, true, false);
     redraw_poags();
 }
 

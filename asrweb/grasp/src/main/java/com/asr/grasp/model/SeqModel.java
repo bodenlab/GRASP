@@ -2,7 +2,6 @@ package com.asr.grasp.model;
 
 import api.PartialOrderGraph;
 import com.asr.grasp.utils.Defines;
-import com.sun.java.swing.plaf.motif.resources.motif;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;

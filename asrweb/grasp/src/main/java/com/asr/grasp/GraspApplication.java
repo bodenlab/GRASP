@@ -1066,8 +1066,8 @@ public class GraspApplication extends SpringBootServletInitializer {
              * Here is where we need to load the whole reconstruction i.e. all the seqs etc
              *
              */
-            loadReconToASR();
             runningMarginal = true;
+            loadReconToASR();
             // Set the node label we want to infer.
             marginalAsr.setNodeLabel(node);
             // Run the thread

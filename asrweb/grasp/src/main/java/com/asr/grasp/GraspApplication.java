@@ -194,6 +194,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (recon != null) {
             recon.interrupt();
         }
+        // Ensure we don't think any jobs are still running.
+        runningMarginal = false;
 
         if (asr.performedRecon()) {
             return returnASR(model);

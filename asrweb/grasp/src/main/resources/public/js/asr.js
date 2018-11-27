@@ -228,12 +228,12 @@ var generate_mutants = function() {
             var myMutantValue = 1.0 / Ns[i];
             var myMutant = []; //{value:myMutantValue,label:myMutantLabel};
             myMutant[G_VALUE_MUTANT] = myMutantValue;
-            myMutantLabel[G_LABEL_MUTANT] = myMutantLabel;
+            myMutant[G_LABEL_MUTANT] = myMutantLabel;
             node[G_MUTANTS].push(myMutant);
         }
-        node.mutant = false;
+        node[N_MUTANT] = false;
         if (idx.length > 1) {
-            node.mutant = true;
+            node[N_MUTANT] = true;
         }
         // add node to node list
         poags.single.nodes[poags.inferred_poag_name].push(node);

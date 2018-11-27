@@ -1647,7 +1647,14 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     radius -= 10;
 
     if (node[N_GROUP] !== "MSA" && node[N_GROUP] !== "Merged" && options.mutants.count > 0 && options.mutants.draw === true) {
+        // ToDo: Confirm that we don't actually want to change anything on the pie graph
         pie_data = node[G_MUTANTS];
+        if (pie_data.length > 1) {
+            console.log(node[G_MUTANTS]);
+        } else {
+            // We don't want to draw a pie graph if there is only one character.
+            return;
+        }
     } else if (node[N_MERGED_SEQ] !== undefined) {
         var pie_data = node[N_MERGED_SEQ];
         radius += 10;
@@ -2244,13 +2251,10 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
  *
  * From http://www.bioinformatics.nl/~berndb/aacolour.html
  */
-
-
-
 function formatMutants(node, poag) {
 
     if (node[N_TYPE] != "fused") {
-        node.graph = {};
+        node[G_GRAPH] = {};
         if (graph.options.mutants.count > 0) {
             node[G_GRAPH] = node[G_MUTANTS];
         } else {

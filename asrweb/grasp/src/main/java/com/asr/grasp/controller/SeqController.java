@@ -6,7 +6,6 @@ import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
-import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.EnumSeq;
 import dat.Enumerable;
 import dat.POGraph;

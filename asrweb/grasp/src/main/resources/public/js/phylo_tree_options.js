@@ -74,15 +74,9 @@ var perform_marginal = function (node_name, node_fill) {
 /*
 ** Refresh the results view to show joint reconstruction results of the selected tree node
 */
-var displayJointGraph = function (node_name, node_fill, reset_graphs = false) {
-  if (reset_graphs == false && inferType == "marginal") {
-    reset_graphs = true;
-    selectedNode = node_name;
-    select_node(selectedNode);
-    refresh_tree();
-  }
+var displayJointGraph = function (node_name, node_fill, reset_graph_call = false) {
   // check if we are adding a joint reconstruction, and if so, only add if it hasn't already been added
-  if (!reset_graphs) {
+  if (!reset_graph_call) {
     for (var n in poags.multi.names) {
       if (poags.multi.names[n] === node_name) {
         return;
@@ -94,10 +88,10 @@ var displayJointGraph = function (node_name, node_fill, reset_graphs = false) {
     type: 'POST',
     dataType: 'json',
     contentType: "application/json",
-    data: JSON.stringify({joint: true, nodeLabel: node_name, addgraph: reset_graphs == false}),
+    data: JSON.stringify({joint: true, nodeLabel: node_name, addgraph: reset_graph_call}),
     success: function (data) {
       drawMutants = false;
-      if (reset_graphs) {
+      if (reset_graph_call) {
         graph_array = [];
         merged_graphs = [];
       }
@@ -109,12 +103,17 @@ var displayJointGraph = function (node_name, node_fill, reset_graphs = false) {
           poags.options.poagColours).length + 1)];
       poags.options.names_to_colour[node_name.split(
           "_")[0]] = node_fill;
-      if (reset_graphs) {
+      if (reset_graph_call) {
         selectedNode = node_name;
         /**
          * ToDo: May need to look into this!
          */
-        poags = process_poags_joint(data, poags, false, false, false, node_name);
+
+        let dataToProcess = {};
+        dataToProcess.top = poags.single.raw.msa;
+        dataToProcess.bottom = data;
+        setup_poags(dataToProcess, true, false, false, node_name);
+        redraw_poags();
       } else {
         poags = process_poags_joint(data, poags, false, false, false, node_name);
         //var new_graph = fuse_multipleGraphs(graph_array);

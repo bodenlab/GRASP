@@ -865,6 +865,12 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         poags.multi.names.push(name);
     }
 
+    // Set all the nodes to be deleted during inference if they haven't been
+    let allNodes = poags.node_dict;
+    for (var an in allNodes) {
+        allNodes[an][N_DEL_DUR_INF] = true;
+    }
+
     for (var n in raw_poag.nodes) {
         var node = raw_poag.nodes[n];
 
@@ -884,7 +890,7 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         node[G_MUTANTS] = convertCharValToStr(node[G_GRAPH]);
         if (node[N_X] !== msa_node[N_X]) {
             for (var on in raw_poag.nodes) {
-                if (raw_poag.nodes[on][N_X] == msa_node[N_X]) {
+                if (raw_poag.nodes[on][N_X] === msa_node[N_X]) {
                     raw_poag.nodes[on][N_X] = node[N_X];
                     break;
                 }
@@ -901,6 +907,7 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
 
         // Set that this msa node wasn't deleted during inference
         // Only set if the poag name is 'inferred'
+        msa_node[N_DEL_DUR_INF] = false;
         if (inferred) {
             msa_node[N_DEL_DUR_INF] = false;
             poags.single.nodes[name].push(node);
@@ -950,7 +957,6 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge[E_FROM] = poags.node_dict[name + '-' + edge[E_FROM]];
         // To node
         reduced_edge[E_TO] = poags.node_dict[name + '-' + edge[E_TO]]
-        console.log(edge[E_CONSENSUS])
         reduced_edge[E_CONSENSUS] = edge[E_CONSENSUS] === 1;
         reduced_edge[E_RECIPROCATED] = edge[E_RECIPROCATED] === 1;
         reduced_edge[E_WEIGHT] = edge[E_WEIGHT];
@@ -1640,7 +1646,12 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     radius -= 10;
 
     if (node[N_GROUP] !== "MSA" && node[N_GROUP] !== "Merged" && options.mutants.count > 0 && options.mutants.draw === true) {
+        // ToDo: Confirm that we don't actually want to change anything on the pie graph
         pie_data = node[G_MUTANTS];
+        if (pie_data.length < 2) {
+            // We don't want to draw a pie graph if there is only one character.
+            return;
+        }
     } else if (node[N_MERGED_SEQ] !== undefined) {
         var pie_data = node[N_MERGED_SEQ];
         radius += 10;
@@ -2237,13 +2248,10 @@ create_new_graph = function (node, options, group, node_cx, node_cy) {
  *
  * From http://www.bioinformatics.nl/~berndb/aacolour.html
  */
-
-
-
 function formatMutants(node, poag) {
 
     if (node[N_TYPE] != "fused") {
-        node.graph = {};
+        node[G_GRAPH] = {};
         if (graph.options.mutants.count > 0) {
             node[G_GRAPH] = node[G_MUTANTS];
         } else {

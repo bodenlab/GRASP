@@ -32,7 +32,7 @@ public class BaseTest {
     // -------------------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER -------
     String sessionPath = TestPropertiesOverride.sessionPath;
     // ------------------------------------------------------------------------
-    String dbPassword = "none";
+    String dbPassword = "cakes";
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp";
     String dbUser = "web";
     UserController userController;

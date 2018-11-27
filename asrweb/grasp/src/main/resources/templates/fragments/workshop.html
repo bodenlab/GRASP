@@ -10,7 +10,7 @@
                     <h3>Data Downloads</h3>
                     <p>
                     <ul>
-                        <li><strong> <a href="/download-tutorial-files">Tutorial Fasta File</a></strong>, the data for the tutorial.</li>
+                        <li><strong> <a href="/download-tutorial-files">Tutorial FASTA File</a></strong>, the data for the tutorial.</li>
                         <li><strong> <a href="/download-tutorial-files-aln">Curated Alignment and Newick Files</a></strong>, a curated tree and alignment ready to upload to GRASP. </li>
                     </ul>
                     </p>
@@ -65,7 +65,7 @@
                     <div class="step">
                         <h4>2. Infer a tree using RAxML</h4>
                         <p>We will be using RAxML to infer by maximum likelihood a phylogenetic tree.</p>
-                        <p>If you are using the user interface, use 'GRASPTutor./ial.aln' as the input alignment and follow the prompts in the interface. Save the resulting tree, and move to Step 3.</p>
+                        <p>If you are using the user interface, use 'GRASPTutorial.aln' as the input alignment and follow the prompts in the interface. Save the resulting tree, and move to Step 3.</p>
                         <p>If you are using the command line version (recommended), type the following command in terminal from within the directory where you installed RAxML.
                         <br></br><em>Note: you will need to copy the input file (GRASPTutorial.aln) into the RAxML directory.</em></p>
                         <p>./raxmlHPC-PTHREADS -m PROTGAMMAJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</p>
@@ -170,7 +170,7 @@
                         <div class="step">
                             <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
                             <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish.</p>
-                            <p><em>Note: the taxonomic name for the ray-finned fish is <a href="https://en.wikipedia.org/wiki/Actinopterygii">Actinopterygii</a> and because GRASP mapped the taxonomy successfully we should be able to search on the term "Actinopteri" which is the major class of ray-finned fish. </em></p>
+                            <!--<p><em>Note: the taxonomic name for the ray-finned fish is <a href="https://en.wikipedia.org/wiki/Actinopterygii">Actinopterygii</a> and because GRASP mapped the taxonomy successfully we should be able to search on the term "Actinopteri" which is the major class of ray-finned fish. </em></p>-->
                             <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
                             <p>Set up your data so you are displaying the (MSA) POAG, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously.</p>
                             <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>

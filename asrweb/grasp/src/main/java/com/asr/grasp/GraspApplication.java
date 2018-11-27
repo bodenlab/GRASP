@@ -1009,7 +1009,7 @@ public class GraspApplication extends SpringBootServletInitializer {
      * Used to load the save attributes of a reconstruction.
      */
     public void loadReconToASR() {
-        if (currRecon == null) {
+        if (currRecon == null || currRecon.getId() != Defines.UNINIT) {
             currRecon = reconController.getByIdForMarginal(currRecon.getId(),
                     loggedInUser);
             asr = new ASRObject();

@@ -64,6 +64,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     private ASRThread recon = null;
 
+    private boolean runningMarginal = false;
+
     @Autowired
     private UserValidator userValidator;
 
@@ -106,8 +108,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     private ReconstructionObject currRecon = new ReconstructionObject();
 
-    @Autowired
-    private ASRObject asr;
+    /**
+     * ToDo: Will need to look into this as holding two instances for large recons won't work. HOWEVER, we shouldn't
+     * be looking to do this for large reoconstructions anyway- the user should be saving them first which would
+     * mitigate these issues.
+     */
+    private ASRObject asr = new ASRObject();
+    private ASRObject marginalAsr = new ASRObject();
+
 
     private boolean saveGappySeq = true;
 
@@ -578,6 +586,42 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
+
+    /**
+     * Allows us to keep the marginal and the joint reconstruction separate.
+     * @param status
+     * @param asr
+     * @return
+     */
+    public String getStatusFromAsr(String status, ASRObject asr) {
+        try {
+            if (status != null && (status.equalsIgnoreCase("done") || status.contains("error"))) {
+                String stat = status;
+                asr.setFirstPass(true); // reset flag
+                asr.setPrevProgress(0);
+                return stat;
+            }
+
+            // try to get current node ID
+            int progress = asr.getNumberAlnCols() == 0 ? 0
+                    : (100 * asr.getReconCurrentNodeId()) / asr.getNumberAlnCols();
+            if (asr.getFirstPass() && progress < asr.getPrevProgress()) {
+                asr.setFirstPass(false);
+            }
+
+            progress = asr.getFirstPass() ? progress / 2 : 50 + progress / 2;
+            if (progress > asr.getPrevProgress()) {
+                asr.setPrevProgress(progress);
+            }
+
+            return asr.getPrevProgress() + "%";
+        } catch (Exception e) {
+            System.out.println(e);
+            return "";
+        }
+    }
+
+
     /**
      * Show status of reconstruction while asynchronously performing analysis
      *
@@ -588,27 +632,11 @@ public class GraspApplication extends SpringBootServletInitializer {
     String showStatus(@RequestParam("request") String request, Model model) throws Exception {
 
         String status = recon.getStatus();
-
-        if (status != null && (status.equalsIgnoreCase("done") || status.contains("error"))) {
-            String stat = status;
-            asr.setFirstPass(true); // reset flag
-            asr.setPrevProgress(0);
-            return stat;
+        if (runningMarginal) {
+            return getStatusFromAsr(status, marginalAsr);
         }
+        return getStatusFromAsr(status, asr);
 
-        // try to get current node ID
-        int progress = asr.getNumberAlnCols() == 0 ? 0
-                : (100 * asr.getReconCurrentNodeId()) / asr.getNumberAlnCols();
-        if (asr.getFirstPass() && progress < asr.getPrevProgress()) {
-            asr.setFirstPass(false);
-        }
-
-        progress = asr.getFirstPass() ? progress / 2 : 50 + progress / 2;
-        if (progress > asr.getPrevProgress()) {
-            asr.setPrevProgress(progress);
-        }
-
-        return asr.getPrevProgress() + "%";
     }
 
 
@@ -867,27 +895,15 @@ public class GraspApplication extends SpringBootServletInitializer {
     String returnASRGraph(@RequestParam("getrecongraph") String getrecongraph, Model model,
             HttpServletRequest request) {
 
-        model.addAttribute("label", asr.getLabel());
+        String graphs = "";
 
-        // add reconstructed newick string to send to javascript
-        model.addAttribute("tree", asr.getReconstructedNewickString());
-
-        // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
-        model.addAttribute("graph", graphs);
-
-        // add attribute to specify to view results (i.e. to show the graph, tree, etc)
-        model.addAttribute("inferenceType", asr.getInferenceType());
-        model.addAttribute("results", true);
-        model.addAttribute("node", asr.getNodeLabel());
-        model.addAttribute("username", loggedInUser.getUsername());
-        model.addAttribute("saved", false);
-
-        // Also set the ancestor and MSA for saving
-        reconstructedNodes = new ArrayList<>();
-        ancestor = new JSONObject(asr.getMSAGraphJSON());
-        msa = new JSONObject(asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
-
+        if (runningMarginal) {
+            graphs = marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
+            runningMarginal = false;
+        } else {
+            // add msa and inferred ancestral graph
+            graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
+        }
         return graphs;
     }
 
@@ -1012,6 +1028,19 @@ public class GraspApplication extends SpringBootServletInitializer {
             ancestor = new JSONObject(currRecon.getAncestor());
             msa = new JSONObject(currRecon.getMsa());
         }
+        if (runningMarginal) {
+            marginalAsr = new ASRObject();
+            marginalAsr.setLabel(asr.getLabel());
+            marginalAsr.setInferenceType(asr.getInferenceType());
+            marginalAsr.setModel(asr.getModel());
+            marginalAsr.setTree(asr.getTree());
+            marginalAsr.setReconstructedTree(asr.getReconstructedNewickString());
+            marginalAsr.setMSA(asr.getMSA());
+            marginalAsr.setAncestor(asr.getAncestor());
+            marginalAsr.loadSequences(asr.getSequences());
+            marginalAsr.setJointInferences(asr.getJointInferences());
+            marginalAsr.loadParameters();
+        }
     }
 
     /**
@@ -1038,8 +1067,11 @@ public class GraspApplication extends SpringBootServletInitializer {
              *
              */
             loadReconToASR();
-
-            recon = new ASRThread(asr, infer, node, addGraph, logger, loggedInUser,
+            runningMarginal = true;
+            // Set the node label we want to infer.
+            marginalAsr.setNodeLabel(node);
+            // Run the thread
+            recon = new ASRThread(marginalAsr, infer, node, addGraph, logger, loggedInUser,
                     reconController);
         }
         mav.addObject("username", loggedInUser.getUsername());

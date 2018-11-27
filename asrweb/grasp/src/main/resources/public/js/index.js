@@ -865,6 +865,12 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         poags.multi.names.push(name);
     }
 
+    // Set all the nodes to be deleted during inference if they haven't been
+    let allNodes = poags.node_dict;
+    for (var an in allNodes) {
+        allNodes[an][N_DEL_DUR_INF] = true;
+    }
+
     for (var n in raw_poag.nodes) {
         var node = raw_poag.nodes[n];
 
@@ -884,7 +890,7 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
         node[G_MUTANTS] = convertCharValToStr(node[G_GRAPH]);
         if (node[N_X] !== msa_node[N_X]) {
             for (var on in raw_poag.nodes) {
-                if (raw_poag.nodes[on][N_X] == msa_node[N_X]) {
+                if (raw_poag.nodes[on][N_X] === msa_node[N_X]) {
                     raw_poag.nodes[on][N_X] = node[N_X];
                     break;
                 }
@@ -901,6 +907,7 @@ var process_poag_data = function (poags, raw_poag, name, inferred, merged) {
 
         // Set that this msa node wasn't deleted during inference
         // Only set if the poag name is 'inferred'
+        msa_node[N_DEL_DUR_INF] = false;
         if (inferred) {
             msa_node[N_DEL_DUR_INF] = false;
             poags.single.nodes[name].push(node);

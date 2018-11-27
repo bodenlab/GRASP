@@ -27,8 +27,6 @@ import reconstruction.Inference;
  *
  * Created by marnie on 11/4/17.
  */
-@Component
-@SessionScope
 public class ASRObject {
     private int NUM_THREADS = 5;
 

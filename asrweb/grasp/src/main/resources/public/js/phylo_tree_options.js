@@ -114,7 +114,12 @@ var displayJointGraph = function (node_name, node_fill, reset_graphs = false) {
         /**
          * ToDo: May need to look into this!
          */
-        poags = process_poags_joint(data, poags, false, false, false, node_name);
+
+        let dataToProcess = {};
+        dataToProcess.top = poags.single.raw.msa;
+        dataToProcess.bottom = data;
+        setup_poags(dataToProcess, true, false, false, node_name);
+        redraw_poags();
       } else {
         poags = process_poags_joint(data, poags, false, false, false, node_name);
         //var new_graph = fuse_multipleGraphs(graph_array);

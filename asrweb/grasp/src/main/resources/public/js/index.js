@@ -957,7 +957,6 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge[E_FROM] = poags.node_dict[name + '-' + edge[E_FROM]];
         // To node
         reduced_edge[E_TO] = poags.node_dict[name + '-' + edge[E_TO]]
-        console.log(edge[E_CONSENSUS])
         reduced_edge[E_CONSENSUS] = edge[E_CONSENSUS] === 1;
         reduced_edge[E_RECIPROCATED] = edge[E_RECIPROCATED] === 1;
         reduced_edge[E_WEIGHT] = edge[E_WEIGHT];
@@ -1649,9 +1648,7 @@ var draw_pie = function (poags, node, group, radius, poagPi, node_cx, node_cy) {
     if (node[N_GROUP] !== "MSA" && node[N_GROUP] !== "Merged" && options.mutants.count > 0 && options.mutants.draw === true) {
         // ToDo: Confirm that we don't actually want to change anything on the pie graph
         pie_data = node[G_MUTANTS];
-        if (pie_data.length > 1) {
-            console.log(node[G_MUTANTS]);
-        } else {
+        if (pie_data.length < 2) {
             // We don't want to draw a pie graph if there is only one character.
             return;
         }

@@ -62,7 +62,7 @@ let saveRecon = function() {
         } else if (data.value  === "isSaving") {
           window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
         } else {
-          window.alert("Saving reoncstruction, check your emails :) ");
+          window.alert("Saving reconstruction, check your emails :) ");
         }
       }, error: function (err) {
         console.log(err);

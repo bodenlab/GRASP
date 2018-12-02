@@ -28,10 +28,6 @@ nbdist/
 *-override.properties
 *TestPropertiesOverride.java
 
-### Tests that won't work on every local installation ###
-*TaxaControllerTest.java
-*TreeControllerTest.java
-
 *maven-metadata.xml*
 
 *.DS_Store

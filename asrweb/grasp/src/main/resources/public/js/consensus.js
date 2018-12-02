@@ -14,7 +14,7 @@ let getNodesWithMotif = function () {
     contentType: "application/json",
     data: JSON.stringify({"motif": motif}),
     success: function (data) {
-      // CHeck if we have an error message
+      // Check if we have an error message
       if (data.error !== undefined) {
         document.getElementById("motif-warning-text").innerHTML = data.error;
         $('#motif-warning-alert').removeClass("hidden");
@@ -46,12 +46,13 @@ let getSimilarNodes = function () {
     contentType: "application/json",
     data: JSON.stringify({"unknown": unknownRecon, "node": nodeLabel, "num": numNodes}),
     success: function (data) {
-      // CHeck if we have an error message
+      // Check if we have an error message
       if (data.error !== undefined) {
         document.getElementById("motif-warning-text").innerHTML = data.error;
         $('#motif-warning-alert').removeClass("hidden");
       } else {
-        resetNodesWithScores();
+          $('#motif-warning-alert').addClass("hidden");
+          resetNodesWithScores();
         // Now we have an array of the nodeIDs with motifs
         updateSimilarNodes(data);
         if (data[0][2] == "saveCSV") {

@@ -812,6 +812,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (data.getString("unknown").length() > 0 & data.getString("node").length() > 0 & data.getString("num").length() > 0 ) {
 
+
             JSONArray similarNodes = treeController.getSimilarNodes(loggedInUser, data.getString("unknown"), currRecon.getLabel(), data.getString("node"), data.getInt("num"));
 
             if (loggedInUser.getUsername().equals("ariane2") || loggedInUser.getUsername().equals("gabe")) {
@@ -821,7 +822,7 @@ public class GraspApplication extends SpringBootServletInitializer {
             return similarNodes.toString();
         }
 
-        return new JSONObject().put("error", "Make sure you have filled out the reconstruction label, node label, and number of similar nodes fields").toString();
+        return new JSONObject().put("error", "Make sure you have filled out the reconstruction label, node label, and number of similar nodes fields correctly").toString();
 
     }
 

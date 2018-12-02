@@ -809,15 +809,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Otherwise we're able to run it
         JSONObject data = new JSONObject(jsonString);
 
-        System.out.println("Here is data call" + data);
-        System.out.println(data.getString("unknown").length() > 0);
-        System.out.println(data.getString("node").length() > 0);
-        System.out.println(data.getString("unknown").length() > 0);
-        System.out.println(data.getString("num").length() > 0);
 
         if (data.getString("unknown").length() > 0 & data.getString("node").length() > 0 & data.getString("num").length() > 0 ) {
-
-            System.out.println("Got in here");
 
             JSONArray similarNodes = treeController.getSimilarNodes(loggedInUser, data.getString("unknown"), currRecon.getLabel(), data.getString("node"), data.getInt("num"));
 

@@ -110,7 +110,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     /**
      * ToDo: Will need to look into this as holding two instances for large recons won't work. HOWEVER, we shouldn't
-     * be looking to do this for large reoconstructions anyway- the user should be saving them first which would
+     * be looking to do this for large reconstructions anyway- the user should be saving them first which would
      * mitigate these issues.
      */
     private ASRObject asr = new ASRObject();
@@ -719,7 +719,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
         if (!seqController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
-            return new JSONObject().put("error", "Apologies but you need to re-run your reconstruction as we've made alot of changes to make this feature possible! Please re-run it (and save your reconstruction) and then this will be possible. Also please delete your old reconstruction so we have more space in our database, thank you :) ").toString();
+            return new JSONObject().put("error", "Apologies but you need to re-run your reconstruction as we've made a lot of changes to make this feature possible! Please re-run it (and save your reconstruction) and then this will be possible. Also please delete your old reconstruction so we have more space in our database, thank you :) ").toString();
         }
         return null;
     }
@@ -809,13 +809,27 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Otherwise we're able to run it
         JSONObject data = new JSONObject(jsonString);
 
-        JSONArray similarNodes = treeController.getSimilarNodes(loggedInUser, data.getString("unknown"),  currRecon.getLabel(), data.getString("node"), data.getInt("num"));
+        System.out.println("Here is data call" + data);
+        System.out.println(data.getString("unknown").length() > 0);
+        System.out.println(data.getString("node").length() > 0);
+        System.out.println(data.getString("unknown").length() > 0);
+        System.out.println(data.getString("num").length() > 0);
 
-        if (loggedInUser.getUsername().equals("ariane2") || loggedInUser.getUsername().equals("gabe")) {
-            similarNodes = treeController.getAllSimilarNodes(loggedInUser, data.getString("unknown"),  currRecon.getLabel());
+        if (data.getString("unknown").length() > 0 & data.getString("node").length() > 0 & data.getString("num").length() > 0 ) {
+
+            System.out.println("Got in here");
+
+            JSONArray similarNodes = treeController.getSimilarNodes(loggedInUser, data.getString("unknown"), currRecon.getLabel(), data.getString("node"), data.getInt("num"));
+
+            if (loggedInUser.getUsername().equals("ariane2") || loggedInUser.getUsername().equals("gabe")) {
+                similarNodes = treeController.getAllSimilarNodes(loggedInUser, data.getString("unknown"), currRecon.getLabel());
+            }
+            //Return the list of matching node ids as a json array
+            return similarNodes.toString();
         }
-        //Return the list of matching node ids as a json array
-        return similarNodes.toString();
+
+        return new JSONObject().put("error", "Make sure you have filled out the reconstruction label, node label, and number of similar nodes fields").toString();
+
     }
 
     /**

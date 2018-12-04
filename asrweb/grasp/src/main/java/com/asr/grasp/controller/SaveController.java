@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 public class SaveController implements Runnable {
 
     String error = null;
+    String currReconLabel;
 
     ReconstructionController reconController;
     SeqController seqController;
@@ -88,6 +89,7 @@ public class SaveController implements Runnable {
      */
     public void initialiseForReconstruction(ASRObject asr) {
         this.asr = asr;
+        this.currReconLabel = asr.getLabel();
         this.inference = asr.getInferenceType();
         this.node = asr.getNodeLabel();
         this.asr.setInferenceType(inference);
@@ -112,6 +114,8 @@ public class SaveController implements Runnable {
 
         // Set the owner ID to be the logged in user
         currRecon.setOwnerId(user.getId());
+        currRecon.setLabel(asr.getLabel());
+        currReconLabel = asr.getLabel();
 
         // Set the current reconstruction of the owner to be this reconstruction
         userController.setCurrRecon(currRecon, user);
@@ -176,7 +180,10 @@ public class SaveController implements Runnable {
 
             // This time we want to send an email with the specific error
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
-            email.setContent(currRecon.getLabel(), e.getMessage());
+            email.setContent(currReconLabel, e.getMessage());
+
+            // Temporailiy set the reconstruction label so we can return this to the user
+            currRecon.setLabel(currReconLabel);
 
             // Set the error in the reconstruction
             currRecon.setError(e.getMessage());

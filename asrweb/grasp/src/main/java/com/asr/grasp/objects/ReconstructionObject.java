@@ -117,7 +117,7 @@ public class ReconstructionObject {
     }
 
     public String getError() {
-        if (error.length() > 1) {
+        if (error != null && error.length() > 1) {
             return this.error;
         }
         return null;

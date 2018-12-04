@@ -12,6 +12,7 @@ import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
 import com.asr.grasp.utils.Defines;
+import com.asr.grasp.utils.NaturalOrderComparator;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
@@ -19,7 +20,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.print.DocFlavor.STRING;
+
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -28,7 +29,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -1212,8 +1212,13 @@ public class GraspApplication extends SpringBootServletInitializer {
                 }
             }
             // Sort the array
-            Collections.sort(ancs, Collections.reverseOrder());
+
+            Collections.sort(ancs, new NaturalOrderComparator());
+
         }
+
+
+
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("Content-Disposition",

@@ -69,17 +69,19 @@
                                     <input type="hidden" name="node-label" class="full-node-label disabled margopt" value="root" />
                                 </div>
 
-                                <div class="checkbox disabled margopt" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                    <input id="check-seq-joint" name="check-seq-joint" class="dlopt" type="checkbox"></input>
-                                    <label>
-                                        Consensus sequences of Joint Reconstructions (.fasta)
-                                    </label>
-                                    <input id="graphs-input" name="graphs-input" hidden="hidden"></input>
-                                </div>
-                                <div class="col-sm-10" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                    <select id="multiselect-download" class="selectpicker" multiple="true" data-live-search="true">
-                                        <option>All</option>
-                                    </select>
+                                <div id="check-joint">
+                                    <div class="checkbox disabled margopt" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                        <input id="check-seq-joint" name="check-seq-joint" class="dlopt" type="checkbox"></input>
+                                        <label>
+                                            Consensus sequences of Joint Reconstructions (.fasta)
+                                        </label>
+                                        <input id="graphs-input" name="graphs-input" hidden="hidden"></input>
+                                    </div>
+                                    <div class="col-sm-10" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                        <select id="multiselect-download" class="selectpicker" multiple="true" data-live-search="true">
+                                            <option>All</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </fieldset>
                         </div>
@@ -123,7 +125,7 @@
                 $("#check-seq-marg").change(function(){
                     check_disabled_state_dlbtn();
                 });
-                $("#check-seq-joint").change(function(){
+                $("#check-joint").change(function(){
                     check_disabled_state_dlbtn();
                     graphs = getSelectedValuesForDownload("multiselect-download");
                     console.log(graphs)
@@ -136,6 +138,7 @@
                         $("#download-warning").addClass('collapse');
                     }
                 });
+
                 $("#check-seq-joint-single").change(function(){
                     check_disabled_state_dlbtn();
                 });

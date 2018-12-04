@@ -31,12 +31,21 @@ public class EmailObject {
         return this.type;
     }
 
-    public void setContent(String appUrl, String confirmationToken) {
+    public void setContent(String name, String appUrl, String confirmationToken) {
         this.content = "Dear " + username + ", \n "
                 + " Please confirm your email by clicking the following link: \n"
                 + appUrl + "confirm?token=" + confirmationToken + " \n"
                 + " Cheers, \n The grasp team :) ";
         this.subject = "Email registration at GRASP";
+    }
+
+    public void setContent(String reconName, String error) {
+        this.content = "Dear " + username + ", \n "
+                + " Unfortunately your reconstruction " + reconName + " had the following error: \n"
+                + error + " \n"
+                + " Have a look at the guide page for common errors or email us if you're having issues.\n"
+                + " Cheers, \n The grasp team :) ";
+        this.subject = "Reconstruction complete at GRASP";
     }
 
 

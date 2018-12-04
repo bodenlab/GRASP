@@ -89,6 +89,15 @@ public class UserController {
         return null;
     }
 
+    /**
+     * Returns the currently runnning reconstructions and their error state.
+     * @param user
+     * @return
+     */
+    public ArrayList<GeneralObject> getRunningRecons(UserObject user) {
+        return user.getRunningRecons();
+    }
+
 
     /**
      * If we don't already have the reconstructions in memory, we need to get

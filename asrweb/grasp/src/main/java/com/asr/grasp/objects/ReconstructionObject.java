@@ -19,6 +19,8 @@ public class ReconstructionObject {
 
     private int ownerId = Defines.UNINIT;
 
+    private String error = "";
+
     private String label = null;
 
     private String tree;
@@ -113,6 +115,15 @@ public class ReconstructionObject {
     public String getInferenceType() {
         return this.inferenceType;
     }
+
+    public String getError() {
+        if (error.length() > 1) {
+            return this.error;
+        }
+        return null;
+    }
+
+    public void setError(String error) { this.error = error; }
 
     public void clearLargeStrings() {
         this.msa = null;

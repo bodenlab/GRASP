@@ -16,6 +16,7 @@ public class GeneralObject {
     public String label;
     public String size;
     public String updatedAt;
+    public String error = "";
 
     public GeneralObject(int id, String label, String size, String updatedAt) {
         this.label = label;
@@ -23,6 +24,10 @@ public class GeneralObject {
         this.size = size;
         this.updatedAt = updatedAt;
     }
+
+    public void setError(String error) { this.error = error; }
+
+    public String getError() { return this.error; }
 
     public String getUpdatedAt() {
         return this.updatedAt;

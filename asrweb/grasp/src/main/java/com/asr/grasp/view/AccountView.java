@@ -20,6 +20,8 @@ public class AccountView {
                 .getOwnerAccessReconIds(loggedInUser));
         mav.addObject("memberAccessRecons", userController
                 .getMemberAccessReconIds(loggedInUser));
+        mav.addObject("runningRecons", userController
+                .getRunningRecons(loggedInUser));
         mav.addObject("username", loggedInUser.getUsername());
         return mav;
     }

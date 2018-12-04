@@ -20,6 +20,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SaveController implements Runnable {
 
+    String error = null;
+
     ReconstructionController reconController;
     SeqController seqController;
     EmailController emailController;
@@ -170,11 +172,25 @@ public class SaveController implements Runnable {
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
             email.setContent(currRecon.getLabel());
             emailController.sendEmail(email);
-            isSaving = false;
         } catch (Exception e) {
+
+            // This time we want to send an email with the specific error
+            EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
+            email.setContent(currRecon.getLabel(), e.getMessage());
+
+            // Set the error in the reconstruction
+            currRecon.setError(e.getMessage());
+
+            // Set the current error so we can refer back to it later
+            currRecon.setError(e.getMessage());
+            user.addToRunningRecons(currRecon);
+
+            // Send the user the email
+            emailController.sendEmail(email);
+            // Print out the error for debugging purposes
             System.out.println("Couldn't run the saving thread: " + e);
-            isSaving = false;
         }
+        isSaving = false;
     }
 
     /**

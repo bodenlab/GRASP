@@ -206,12 +206,43 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
-     * ToDo need to change to int reconId from long id. Deletes a reconstruction
+     * Delete's the currently running reconstruction when the user has set it to be saved.
      *
      * @return the view for the account page.
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET, params =
-            {"delete", "id"})
+    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"delete", "label"})
+    public ModelAndView deleteRecon(@RequestParam("delete") String delete,
+                                    @RequestParam("label") String reconLabel, WebRequest
+                                            webrequest, Model model) {
+
+        ModelAndView mav = accountView.get(loggedInUser, userController);
+        // Here we want to stop the current reconstruction that is running on the marginalRecon thread
+        if (recon != null) {
+            recon.interrupt();
+        }
+        // Ensure we don't think any jobs are still running.
+        runningMarginal = false;
+
+        if (marginalAsr.performedRecon()) {
+            return returnASR(model);
+        }
+
+        if (marginalAsr.getError() != null) {
+            mav.addObject("warning", marginalAsr.getError());
+        } else {
+            mav.addObject("type", "deleted");
+            mav.addObject("warning", null);
+        }
+
+        return mav;
+    }
+
+
+    /**
+     *
+     * @return the view for the account page.
+     */
+    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"delete", "id"})
     public ModelAndView deleteRecon(@RequestParam("delete") String delete,
             @RequestParam("id") int reconId, WebRequest
             webrequest, Model model) {
@@ -323,6 +354,12 @@ public class GraspApplication extends SpringBootServletInitializer {
      * in.
      */
     public void saveCurrReconStartThread() {
+        /**
+         * Need a check here to confirm that the reconstruction has an error in it.
+         * If the reconstruction has an error, we instead want to email the user that their reconstruction had an error
+         * and also send this to the page?
+         * ToDo: See above.
+         */
         saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
         saveController.initialiseForReconstruction(asr);
         saveController.start();

@@ -28,6 +28,9 @@ import reconstruction.Inference;
  * Created by marnie on 11/4/17.
  */
 public class ASRObject {
+
+    private String error = ""; // Keep track of any error's that are occuring.
+
     private int NUM_THREADS = 5;
 
     private ASRController asrController;
@@ -164,6 +167,19 @@ public class ASRObject {
     public String getTree() { return this.tree; }
     public boolean getLoaded() { return this.loaded; }
 
+    /**
+     * Used to allow the error to be passed to the user when an error is encountered during
+     * the user's reconstruction running and saving it.
+     * @return
+     */
+    public String getError() {
+        if (error.length() > 1) {
+            return this.error;
+        }
+        return null;
+    }
+
+    public void setError(String error) { this.error = error; }
 
     // Logging functions
     public int getNumberBases(){

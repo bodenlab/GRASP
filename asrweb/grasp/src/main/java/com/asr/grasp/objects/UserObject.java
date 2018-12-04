@@ -25,16 +25,13 @@ public class UserObject {
 
     private String passwordMatch;
 
-    private ArrayList<GeneralObject> ownerAccessReconIds = new ArrayList<>(); // was created
-    // by this
-    // user.
+    private ArrayList<GeneralObject> ownerAccessReconIds = new ArrayList<>(); // was created by this user.
 
-    private ArrayList<GeneralObject> memberAccessReconIds = new ArrayList<>(); // Didn't
-    // create the
-    // reconstruction
+    private ArrayList<GeneralObject> memberAccessReconIds = new ArrayList<>(); // Didn't create the reconstruction
 
-    private ReconstructionObject currRecon; // Store only the users current
-    // reconstruction.
+    private ArrayList<GeneralObject> runningRecons = new ArrayList<>(); // Currently running reconstructions
+
+    private ReconstructionObject currRecon; // Store only the users current reconstruction.
 
     public int getId() {
         return this.id;
@@ -126,6 +123,36 @@ public class UserObject {
     public String getPasswordMatch() {
         return this.passwordMatch;
     }
+
+    /**
+     * Gets a list of the users currently running reconstructions.
+     *
+     * ToDo: Update the above to have a progress of each reconstruction.
+     * @return
+     */
+    public ArrayList<GeneralObject> getRunningRecons() {
+        if (runningRecons != null) {
+            return runningRecons;
+        }
+        // Otherwise return an empty list
+        return new ArrayList<>();
+    }
+
+    public void addToRunningRecons(ReconstructionObject recon) {
+        // Check if the currently running reonstructions has been initialised yet
+        if (runningRecons == null) {
+            runningRecons = new ArrayList<>();
+        }
+        GeneralObject reconForUser = new GeneralObject(Defines.UNINIT, recon.getLabel(), "", "");
+        // Check if this reconstruction has an error
+        if (recon.getError() != null) {
+            reconForUser.setError(recon.getError());
+        }
+
+        runningRecons.add(reconForUser);
+    }
+
+
 
     /**
      * If we don't already have the reconstructions in memory, we need to get

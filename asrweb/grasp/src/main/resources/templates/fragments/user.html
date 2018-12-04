@@ -28,14 +28,35 @@
             <div id="recon-error" class="alert alert-danger hidden" role="alert">
                 User <span id="share-user"></span> does not exist. Share unsuccessful.
             </div>
+            <h3 class="pad-top-bottom">Currently Running Reconstructions</h3>
+
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Label</th>
+                    <th scope="col">Error Message</th>
+                    <th scope="col">Cancel</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="recon : *{runningRecons}">
+                    <td th:text="${recon.label}"></td>
+                    <td th:text="${recon.error}"></td>
+                    <td><a th:href="@{/(delete='t',label=${recon.label})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h3 class="pad-top-bottom">Your Reconstructions</h3>
+
             <table class="table table-hover">
                 <thead>
                 <tr>
                     <th scope="col">Label</th>
                     <th scope="col">Size</th>
                     <th scope="col">Last Updated</th>
-                    <!--<th scope="col">Inference Type</th>-->
-                    <!--<th scope="col">Ancestral Node</th>-->
+                    <th scope="col"></th>
                     <th scope="col"></th>
                     <th scope="col"></th>
                 </tr>
@@ -45,23 +66,19 @@
                         <td th:text="${recon.label}"></td>
                         <td th:text="${recon.size}"></td>
                         <td th:text="${{recon.updatedAt}}"></td>
-                        <!--<td th:text="${recon.inferenceType}"></td>-->
-                        <!--<td th:text="${recon.node}"></td>-->
                         <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
                         <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
                         <td><a th:onclick="${'updateReconId(' + recon.id + ');'}" href="" data-toggle="modal" data-target="#share-user-modal" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
                     </tr>
                 </tbody>
             </table>
-            <h3 class="pad-top-bottom">Shared Reconstructions</h3>
+            <h3 class="pad-top-bottom">Reconstructions Shared With You</h3>
             <table class="table table-hover">
                 <thead>
                 <tr>
                     <th scope="col">Label</th>
                     <th scope="col">Size</th>
                     <th scope="col">Last Updated</th>
-                    <!--<th scope="col">Inference Type</th>-->
-                    <!--<th scope="col">Ancestral Node</th>-->
                     <th scope="col"></th>
                     <th scope="col"></th>
                 </tr>
@@ -71,8 +88,7 @@
                     <td th:text="${recon.label}"></td>
                     <td th:text="${recon.size}"></td>
                     <td th:text="${{recon.updatedAt}}"></td>
-                    <!--<td th:text="${recon.inferenceType}"></td>-->
-                    <!--<td th:text="${recon.node}"></td>-->
+                    <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
                     <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
                 </tr>
                 </tbody>

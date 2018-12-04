@@ -195,6 +195,9 @@ public class GraspApplication extends SpringBootServletInitializer {
             recon.interrupt();
         }
         // Ensure we don't think any jobs are still running.
+        if (runningMarginal) {
+            saveController.interrupt();
+        }
         runningMarginal = false;
 
         if (asr.performedRecon()) {
@@ -206,20 +209,20 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
-     * Delete's the currently running reconstruction when the user has set it to be saved.
-     *
-     * @return the view for the account page.
+     * Re-used the delete method for cancelling a running reconstruction.
      */
     @RequestMapping(value = "/", method = RequestMethod.GET, params = {"delete", "label"})
-    public ModelAndView deleteRecon(@RequestParam("delete") String delete,
+    public ModelAndView cancelSavingRecon(@RequestParam("delete") String delete,
                                     @RequestParam("label") String reconLabel, WebRequest
                                             webrequest, Model model) {
 
         ModelAndView mav = accountView.get(loggedInUser, userController);
+
         // Here we want to stop the current reconstruction that is running on the marginalRecon thread
         if (recon != null) {
             recon.interrupt();
         }
+        loggedInUser.removeFromRunningRecons(reconLabel);
         // Ensure we don't think any jobs are still running.
         runningMarginal = false;
 
@@ -230,7 +233,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (marginalAsr.getError() != null) {
             mav.addObject("warning", marginalAsr.getError());
         } else {
-            mav.addObject("type", "deleted");
+            mav.addObject("type", "cancelled");
             mav.addObject("warning", null);
         }
 

@@ -97,6 +97,20 @@ public class SaveController implements Runnable {
         this.asr.setNodeLabel(node);
         this.owner = user;
         this.runRecon = true;
+        // Finally add a reconstruction to the user so they can see that there are reconstructions pending
+        currRecon = new ReconstructionObject();
+        currRecon.setLabel(currReconLabel);
+        currRecon.setError("Running");
+        user.addToRunningRecons(currRecon);
+    }
+
+
+    /**
+     * Interupt the thread. Also remove the reconstruction from the user's currently running reconstructions.
+     */
+    public void interrupt(){
+        user.removeFromRunningRecons(currReconLabel);
+        thread.interrupt();
     }
 
     /**
@@ -176,6 +190,9 @@ public class SaveController implements Runnable {
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
             email.setContent(currRecon.getLabel());
             emailController.sendEmail(email);
+
+            // Remove from the running reconstructions if it was successful
+            user.removeFromRunningRecons(currReconLabel);
         } catch (Exception e) {
 
             // This time we want to send an email with the specific error
@@ -190,7 +207,7 @@ public class SaveController implements Runnable {
 
             // Set the current error so we can refer back to it later
             currRecon.setError(e.getMessage());
-            user.addToRunningRecons(currRecon);
+            user.updateStatus(currRecon, e.getMessage());
 
             // Send the user the email
             emailController.sendEmail(email);

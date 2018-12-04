@@ -4,6 +4,7 @@ import com.asr.grasp.utils.Defines;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * The user object is used to pass information between the front end interface and
@@ -138,6 +139,12 @@ public class UserObject {
         return new ArrayList<>();
     }
 
+    /**
+     * Adds a reconstruction to a user's list of currently running reconstructions.
+     *
+     * They are then able to view these on their page.
+     * @param recon
+     */
     public void addToRunningRecons(ReconstructionObject recon) {
         // Check if the currently running reonstructions has been initialised yet
         if (runningRecons == null) {
@@ -152,6 +159,41 @@ public class UserObject {
         runningRecons.add(reconForUser);
     }
 
+    /**
+     * Adds a reconstruction to a user's list of currently running reconstructions.
+     *
+     * They are then able to view these on their page.
+     * @param reconLabel
+     */
+    public void removeFromRunningRecons(String reconLabel) {
+        // Check if the currently running reonstructions has been initialised yet
+        if (runningRecons == null) {
+            return;
+        }
+        // Here we need an iterator so we can access this in multiple threads without a concurrent access exception.
+        for(Iterator<GeneralObject> iter = runningRecons.iterator(); iter.hasNext();) {
+            GeneralObject reconGeneral = iter.next();
+            if (reconLabel.equals(reconGeneral.getLabel())) {
+                iter.remove();
+            }
+        }
+    }
+
+    /**
+     * Changes the status of a reconstruction (i.e. the error message)
+     * @param recon
+     */
+    public void updateStatus(ReconstructionObject recon, String status) {
+        // Check if the currently running reonstructions has been initialised yet
+        if (runningRecons == null) {
+            return;
+        }
+        for (GeneralObject reconGeneral: runningRecons) {
+            if (recon.getLabel().equals(reconGeneral.getLabel())) {
+                reconGeneral.setError(status);
+            }
+        }
+    }
 
 
     /**

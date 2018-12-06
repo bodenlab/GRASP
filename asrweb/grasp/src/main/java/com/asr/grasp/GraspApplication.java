@@ -1,5 +1,6 @@
 package com.asr.grasp;
 
+import com.asr.grasp.controller.ConsensusController;
 import com.asr.grasp.controller.EmailController;
 import com.asr.grasp.controller.SaveController;
 import com.asr.grasp.controller.SeqController;
@@ -95,6 +96,9 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     @Autowired
     private TreeController treeController;
+
+    @Autowired
+    private ConsensusController consensusController;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -691,7 +695,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), dataJson.getString("nodeLabel"));
 
         //ToDo: Here is where we can alter the consensus sequence.
-        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc), consensusController.getEdgeCountDict(currRecon.getId(), loggedInUser.getId(), dataJson.getString("nodeLabel")));
 
         System.out.println(c.getSupportedSequence(true));
 
@@ -702,10 +706,12 @@ public class GraspApplication extends SpringBootServletInitializer {
             return ancestor.toString();
         }
 
-        // Add to the reconstructed ancestors for saving
-        reconstructedNodes.add(new JSONObject(reconstructedAnsc));
-
-        return reconstructedAnsc;
+        return c.getAsJson().toString();
+//
+//        // Add to the reconstructed ancestors for saving
+//        reconstructedNodes.add(new JSONObject(reconstructedAnsc));
+//
+//        return reconstructedAnsc;
     }
 
     /**

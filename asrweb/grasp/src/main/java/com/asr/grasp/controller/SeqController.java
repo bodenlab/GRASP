@@ -428,6 +428,19 @@ public class SeqController {
         extentNames.put(Defines.NCBI, extentNamesNcbi);
         return extentNames;
     }
+
+    /**
+     * Gets a sequence by it's label.
+     *
+     * @param label
+     * @param reconId
+     * @param reconMethod
+     * @return
+     */
+    public String getSeqByLabel(String label, int reconId, int reconMethod) {
+        return seqModel.getSeqByLabel(label, reconId, reconMethod);
+    }
+
     /**
      * Saves an ancestor node to a file.
      * @param fileWriter

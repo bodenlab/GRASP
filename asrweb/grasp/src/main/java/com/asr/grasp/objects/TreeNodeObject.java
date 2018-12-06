@@ -14,6 +14,7 @@ public class TreeNodeObject {
     private ArrayList<TreeNodeObject> children;
     private ArrayList<TreeNodeObject> leaves; // ToDo: review do we need this?
     private ArrayList<String> leafLabels;
+    private ArrayList<String> rawLeafLabels;
 
     private String label;
     private double score;
@@ -33,6 +34,8 @@ public class TreeNodeObject {
         this.children = new ArrayList<>();
         this.leaves = new ArrayList<>();
         this.leafLabels = new ArrayList<>();
+        this.rawLeafLabels = new ArrayList<>();
+
         this.originalLabel = label;
         // Here we need to format the label as depending on the tool even similar trees could
         // have extra information tagged on.
@@ -202,6 +205,21 @@ public class TreeNodeObject {
         return leafLabels;
     }
 
+
+    /**
+     * Returns the leafs under a particular node. This allows us to
+     * determine similarity between nodes.
+     * @return
+     */
+    public ArrayList<String> getRawLeafLabels() {
+        if (rawLeafLabels.size() > 0) {
+            return rawLeafLabels;
+        }
+        getLeafLabels(this);
+        return rawLeafLabels;
+    }
+
+
     /**
      * Returns the leafs under a particular node. This allows us to
      * determine similarity between nodes.
@@ -239,10 +257,19 @@ public class TreeNodeObject {
         for (TreeNodeObject child: node.getChildren()) {
             if (child.isExtent()) {
                 leafLabels.add(child.getLabel());
+                rawLeafLabels.add(child.getOriginalLabel());
             } else {
                 getLeafLabels(child);
             }
         }
+    }
+
+    /**
+     * Gets the parent of a particular node.
+     * @return
+     */
+    public TreeNodeObject getParent() {
+        return parent;
     }
 
     /**

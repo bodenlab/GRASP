@@ -22,6 +22,10 @@ public class ConsensusObject {
     ArrayList< Edge> edges;
      Node initialNode;
      Node finalNode;
+    // Map with heuristics
+    HashMap<Integer, Double> cost = new HashMap<>();
+    HashMap<String, Double> weightMap;
+
 
     public ConsensusObject(POAGJson poagJson) {
 
@@ -33,7 +37,8 @@ public class ConsensusObject {
      * Need to match up the nodes and the edges. We do
      * @param unformattedJson
      */
-    public ConsensusObject(JSONObject unformattedJson) {
+    public ConsensusObject(JSONObject unformattedJson, HashMap<String, Double> weightMap) {
+        this.weightMap = weightMap;
         JSONArray jsonNodes = unformattedJson.getJSONArray("nodes");
         JSONArray jsonEdges = unformattedJson.getJSONArray("edges");
 
@@ -48,7 +53,7 @@ public class ConsensusObject {
             JSONArray node = (JSONArray) jsonNodes.get(n);
             int nodeId = node.getInt(Defines.G_ID);
             Character base = (char) (int) node.get(Defines.G_CHAR);
-            nodeMap.put(nodeId, new Node(base, nodeId));
+            nodeMap.put(nodeId, new Node(base, nodeId, node, n));
             if (nodeId < initialId) {
                 initialId = nodeId;
             }
@@ -62,9 +67,15 @@ public class ConsensusObject {
             JSONArray edgeJson = (JSONArray) jsonEdges.get(e);
             int fromId = edgeJson.getInt(Defines.E_FROM);
             int toId = edgeJson.getInt(Defines.E_TO);
-            boolean reciprocated = edgeJson.getInt(Defines.E_RECIPROCATED) == Defines.TRUE ? true : false;
-            double weight = edgeJson.getDouble(Defines.E_WEIGHT);
-            Edge edge = new Edge(fromId, toId, weight, reciprocated);
+            boolean reciprocated = edgeJson.getInt(Defines.E_RECIPROCATED) == Defines.TRUE;
+            double weight = 0.0;
+            try {
+                weight = weightMap.get(fromId + "-" + toId);
+            } catch (Exception eE) {
+                System.out.println("UNABLE to get mapping:" + fromId + '-' + toId);
+            }
+            edgeJson.put(Defines.E_WEIGHT, weight * 100);
+            Edge edge = new Edge(fromId, toId, weight, reciprocated, edgeJson, e);
             edges.add(edge);
             // Add the edge to the node map
             nodeMap.get(fromId).addOutEdge(edge);
@@ -73,6 +84,25 @@ public class ConsensusObject {
         // Run consensus gen
         initialNode = nodeMap.get(initialId);
         finalNode = nodeMap.get(endId);
+    }
+
+    /**
+     * Converts the consensus object into the JSON representation required by the grasp app.
+     * @return
+     */
+    public JSONObject getAsJson() {
+        JSONArray nodesJSON = new JSONArray();
+        JSONArray edgesJSON = new JSONArray();
+        JSONObject jsonMap = new JSONObject();
+        for (Edge e: edges) {
+            edgesJSON.put(e.arrayPos, e.edgeAsJson);
+        }
+        for (Integer n: nodeMap.keySet()) {
+            nodesJSON.put( nodeMap.get(n).arrayPos, nodeMap.get(n).nodeAsJson);
+        }
+        jsonMap.put("nodes", nodesJSON);
+        jsonMap.put("edges", edgesJSON);
+        return jsonMap;
     }
 
 
@@ -89,8 +119,7 @@ public class ConsensusObject {
      *
      * @return
      */
-    private double heuristicCostEstimate(
-             Edge edge, Node from, Node to, boolean isBidirectional) {
+    private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
         int multiplier = 1;
         if (!isBidirectional) {
             multiplier = 1000;
@@ -99,9 +128,12 @@ public class ConsensusObject {
         positionDiff = (positionDiff > 0) ? positionDiff : 1;
 
         // Edge weight is out of 100
-        double val =  multiplier * ((100 - edge.getWeight() + 1) * positionDiff);
-        //System.out.println("W:" + edge.getWeight() + ", F: " + from.getId() + ", T: " + to.getId() + ", V: " + val);
-        if (val < 0) {
+        double val = (1 - edge.getWeight());
+        if (val <= 0) {
+            val = Double.MIN_VALUE;
+        }
+        val =  multiplier * val * positionDiff;
+        if (val <= 0) {
             val = Double.MAX_VALUE;
         }
         return Math.abs(val);
@@ -123,6 +155,7 @@ public class ConsensusObject {
         String sequenceString = "";
         while (cameFrom.keySet().contains(current)) {
              Path prevPath = cameFrom.get(current);
+             prevPath.getEdge().setConsensus(true);
              Node prevNode = prevPath.getNode();
             // Set the edge to have a true consensus flag
             prevPath.getEdge().setConsensus(true);
@@ -171,26 +204,25 @@ public class ConsensusObject {
         openSet.add(initialNode);
         // Storing the previous node
         HashMap< Node,  Path> cameFrom = new HashMap<>();
-        // Map with heuristics
-        HashMap< Node, Double> cost = new HashMap<>();
+
         // Add the initial node cost
-        cost.put(initialNode, new Double(0));
-        boolean printout = false;
+        cost.put(initialNode.getId(), new Double(0));
+        boolean printout = true;
         while (!openSet.isEmpty()) {
-             Node current = openSet.poll();
+            Node current = openSet.poll();
             if (current.equals(finalNode)) {
                 // Reconstruct the path
                 return reconstructPath(cameFrom, current, gappy);
             }
             // Otherwise add this to the closedSet
             closedSet.add(current);
-            if (current.getId() == 64) {
-                printout = true;
-            }
-
-            if (current.getId() == 72) {
-                printout = false;
-            }
+//            if (current.getId() == 64) {
+//                printout = true;
+//            }
+//
+//            if (current.getId() == 72) {
+//                printout = false;
+//            }
             if (printout) {
                 System.out.println("Looking at edges from: " + current.getId());
             }
@@ -202,29 +234,32 @@ public class ConsensusObject {
                     continue; // ignore as it has already been visited
                 }
                 // Otherwise we set the cost to this node
-                double tentativeCost = cost.get(current) + thisCost;
+                double tentativeCost = cost.get(current.getId()) + thisCost;
 
                 // Check if we have discovered a new node
                 if (!openSet.contains(neighbor)) {
                     // Assign the cost to the node
                     neighbor.setCost(tentativeCost);
+                    cost.put(neighbor.getId(), tentativeCost);
                     openSet.add(neighbor);
-                } else if (tentativeCost > cost.get(neighbor)) {
+                } else if (tentativeCost > cost.get(neighbor.getId())) {
                     if (printout) {
-                        System.out.println("WORSE : " + neighbor.getId() + " , H: " + thisCost + " C: " + tentativeCost);
+                        System.out.println("WORSE : " + current.getBase() + "-" + neighbor.getBase() + ": " + neighbor.getId() + " , " + neighbor.getBase() + ":" + thisCost + ", " + tentativeCost + " vs." + neighbor.getCost());
                     }
                     continue; // This isn't a better path
                 }
+                cost.put(neighbor.getId(), tentativeCost);
+                neighbor.setCost(tentativeCost);
+
                 if (printout) {
-                    System.out.println("BETTER: " + neighbor.getId() + " , H: " + thisCost + " C: " + tentativeCost);
+                    System.out.println("BETTER : " + current.getBase() + "-" + neighbor.getBase() + ": " + neighbor.getId() + " , " + neighbor.getBase() + ":" + thisCost + ", " + tentativeCost + " vs." + cost.get(neighbor.getId()));
                 }
                 // Check if we already have this in the camefrom path, if so remove
                 if (cameFrom.get(neighbor) != null) {
-                    System.out.println("ALREADY HAD PATH, BEING OVERRIDDEN, F: " + cameFrom.get(neighbor).edge.fromId + ", T: " + cameFrom.get(neighbor).edge.fromId);
+                    System.out.println("ALREADY HAD PATH, BEING OVERRIDDEN, " + cameFrom.get(neighbor).edge.fromId + ", " + cameFrom.get(neighbor).edge.toId);
                 }
                 // If we have made it here this is the best path so let's
                 cameFrom.put(neighbor, new Path(current, next));
-                cost.put(neighbor, tentativeCost);
             }
         }
         return null;
@@ -244,11 +279,11 @@ public class ConsensusObject {
         @Override
         public int compare( Node x,  Node y)
         {
-            if (x.getCost() < y.getCost())
+            if (cost.get(x.getId()) < cost.get(y.getId()))
             {
                 return -1;
             }
-            if (x.getCost() > y.getCost())
+            if (cost.get(x.getId()) > cost.get(y.getId()))
             {
                 return 1;
             }
@@ -282,15 +317,25 @@ public class ConsensusObject {
         private double weight;
         private boolean reciprocated;
         private boolean consensus;
+        private JSONArray edgeAsJson;
+        private String id;
+        private int arrayPos;
 
-        public Edge(int fromId, int toId, double weight, boolean reciprocated) {
+        public Edge(int fromId, int toId, double weight, boolean reciprocated, JSONArray edgeAsJson, int arrayPos) {
+            this.arrayPos = arrayPos;
             this.fromId = fromId;
             this.toId = toId;
             this.weight = weight;
             this.reciprocated = reciprocated;
+            this.edgeAsJson = edgeAsJson;
+            this.edgeAsJson.put(Defines.E_CONSENSUS, Defines.FALSE);
+            this.id = fromId + "-" + toId;
         }
 
-        public void setConsensus(boolean consensus) { this.consensus = consensus; }
+        public void setConsensus(boolean consensus) {
+            this.consensus = consensus;
+            edgeAsJson.put(Defines.E_CONSENSUS, Defines.TRUE);
+        }
 
         public boolean getReciprocated () { return this.reciprocated; }
 
@@ -298,7 +343,9 @@ public class ConsensusObject {
 
         public int getToId() { return this.toId; }
 
-        public double getWeight() {return this.weight; }
+        public double getWeight() { return this.weight; }
+
+        public void setWeight(double weight) { this.weight = weight; }
 
     }
 
@@ -308,11 +355,16 @@ public class ConsensusObject {
         private ArrayList< Edge> outEdges;
         private double cost = Double.MAX_VALUE;
         private boolean consensus = false;
+        private JSONArray nodeAsJson;
+        int arrayPos = 0;
 
-        public Node(char base, int id) {
+        public Node(char base, int id, JSONArray nodeAsJson, int arrayPos) {
             this.base = base;
+            this.arrayPos = arrayPos;
             this.id = id;
             this.outEdges = new ArrayList<>();
+            this.nodeAsJson = nodeAsJson;
+            this.nodeAsJson.put(Defines.G_CONSENSUS, Defines.FALSE);
         }
 
         public ArrayList< Edge> getOutEdges() {
@@ -329,7 +381,10 @@ public class ConsensusObject {
             this.outEdges.add(edge);
         }
 
-        public void setConsensus(boolean consensus) { this.consensus = consensus;}
+        public void setConsensus(boolean consensus) {
+            this.nodeAsJson.put(Defines.G_CONSENSUS, Defines.TRUE);
+            this.consensus = consensus;
+        }
 
         public boolean getConsensus() {
             return consensus;

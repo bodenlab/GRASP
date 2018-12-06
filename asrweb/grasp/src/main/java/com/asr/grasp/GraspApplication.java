@@ -8,6 +8,7 @@ import com.asr.grasp.controller.TreeController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
@@ -688,6 +689,11 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), dataJson.getString("nodeLabel"));
+
+        //ToDo: Here is where we can alter the consensus sequence.
+        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+
+        System.out.println(c.getSupportedSequence(true));
 
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual

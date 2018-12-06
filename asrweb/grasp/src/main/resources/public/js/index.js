@@ -533,6 +533,35 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
     var draw_legend = true;
     var colour = poags.options.names_to_colour[poag_name];
 
+  for (var n in nodes) {
+    var node = nodes[n];
+    var node_x = node[N_X] + 1;
+    if (node_x >= poags.cur_x_min - 2 && node_x <= poags.cur_x_max + 2) {
+      var node_cx = poags.scale.x(node_x);
+      var node_cy = scale_y(node[N_Y]) + poags.y_offset;
+      if (node_x >= poags.cur_x_min && node[N_X] <= poags.cur_x_max) {
+        if (draw_legend) {
+          draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height,
+              scale_y, colour);
+          draw_legend = false;
+        }
+      }
+    }
+  }
+  draw_legend = false;
+  // draw all reciprocated edges so that they are drawn on top of uni-directional ones
+  for (var e in edges) {
+    var edge = edges[e];
+    //if we have an out going edge
+    if (edge[E_TO] !== undefined) {
+      if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
+              && edge[E_TO][N_X] < poags.cur_x_max + 1)
+              || (edge[E_FROM][N_X] < poags.cur_x_max + 1
+                  && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
+        draw_edges(poags, edge, group, scale_y);
+      }
+    }
+  }
     // draw all not reciprocated edges first
     for (var e in edges) {
         var edge = edges[e];
@@ -545,60 +574,47 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
         }
       }
     }
-    // draw all reciprocated edges so that they are drawn on top of uni-directional ones
-    for (var e in edges) {
-        var edge = edges[e];
-        //if we have an out going edge
-        if (edge[E_TO] !== undefined) {
-          if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
-                  && edge[E_TO][N_X] < poags.cur_x_max + 1)
-                  || (edge[E_FROM][N_X] < poags.cur_x_max + 1
-                      && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
-            draw_edges(poags, edge, group, scale_y);
+
+  for (var n in nodes) {
+    var node = nodes[n];
+    var node_x = node[N_X] + 1;
+    if (node_x >= poags.cur_x_min - 2 && node_x <= poags.cur_x_max + 2) {
+      var node_cx = poags.scale.x(node_x);
+      var node_cy = scale_y(node[N_Y]) + poags.y_offset;
+      if (node_x >= poags.cur_x_min && node[N_X] <= poags.cur_x_max) {
+        if (draw_legend) {
+          draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
+          draw_legend = false;
+        }
+        if (node[G_X] === poags.min_x || node[G_X] === poags.max_x) {
+          draw_terminus(poags, group, node_cx, node_cy);
+        } else {
+          var radius = draw_nodes(poags, node, group, node_cx, node_cy);
+
+          if (poag_name === poags.root_poag_name || node[N_TYPE] === 'marginal' || poagPi) {
+            draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
+            // if it is a merged node, we want to draw a layered Pie chart
+            // so we set poagPi to false and re draw a smaller pie chart with
+            // the proper colours.
+            if (poagPi) {
+              draw_pie(poags, node, group, radius, false, node_cx, node_cy);
+            }
+            // check whether to display a graph
+            var count = 0;
+            for (var b in node[G_GRAPH]) {
+              if (node[G_GRAPH][b][G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
+                count++;
+              }
+            }
+            if (count > 1) {
+              var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
+              poag_options.graph.graphs.push(graph_node);
+            }
           }
         }
+      }
     }
-
-    for (var n in nodes) {
-        var node = nodes[n];
-        var node_x = node[N_X] + 1;
-        if (node_x >= poags.cur_x_min - 2 && node_x <= poags.cur_x_max + 2) {
-            var node_cx = poags.scale.x(node_x);
-            var node_cy = scale_y(node[N_Y]) + poags.y_offset;
-            if (node_x >= poags.cur_x_min && node[N_X] <= poags.cur_x_max) {
-                if (draw_legend) {
-                    draw_legend_rect(poags, node, nodes[poags.cur_x_max], group, height, scale_y, colour);
-                    draw_legend = false;
-                }
-                if (node[G_X] === poags.min_x || node[G_X] === poags.max_x) {
-                    draw_terminus(poags, group, node_cx, node_cy);
-                } else {
-                    var radius = draw_nodes(poags, node, group, node_cx, node_cy);
-
-                    if (poag_name === poags.root_poag_name || node[N_TYPE] === 'marginal' || poagPi) {
-                        draw_pie(poags, node, group, radius, poagPi, node_cx, node_cy);
-                        // if it is a merged node, we want to draw a layered Pie chart
-                        // so we set poagPi to false and re draw a smaller pie chart with
-                        // the proper colours.
-                        if (poagPi) {
-                            draw_pie(poags, node, group, radius, false, node_cx, node_cy);
-                        }
-                        // check whether to display a graph
-                        var count = 0;
-                        for (var b in node[G_GRAPH]) {
-                            if (node[G_GRAPH][b][G_VALUE_BAR] > poag_options.graph.hist_bar_thresh) {
-                                count++;
-                            }
-                        }
-                        if (count > 1) {
-                            var graph_node = create_new_graph(node, poag_options.graph, group, node_cx, node_cy);
-                            poag_options.graph.graphs.push(graph_node);
-                        }
-                    }
-                }
-            }
-        }
-    }
+  }
 
 }
 
@@ -1359,6 +1375,24 @@ var draw_mini_msa = function (poags) {
 
 }
 
+/**
+ * Make a color scale for the similarity of nodes.
+ *
+ * @param min
+ * @param max
+ */
+let makeColorScaleEdge = function (min, max) {
+  let color = d3.scale.linear().domain([min, max])
+  .interpolate(d3.interpolateHcl)
+  .range([d3.rgb("#ff00c3"), d3.rgb('#0aff21')]);
+  return color;
+}
+let colorScale = makeColorScaleEdge(0, 100);
+
+// Define the div for the tooltip
+var tooltipdiv = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("opacity", 0);
 
 /**
  * Draws the edges.
@@ -1422,24 +1456,34 @@ var draw_edges = function (poags, edge, group, scale_y) {
     if (edge[E_RECIPROCATED]) {
         stroke = edge_opt.reciprocated_stroke;
     }
+    let drawCon = false;
     if (edge[E_CONSENSUS] && poags.options.display.draw_consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
         stroke = "#0008F8";
+      drawCon = true;
+
     }
+    console.log(edge[E_CONSENSUS])
     group.append("path")
             .attr("d", line_function(line_points))
             .attr("class", 'poag')
             .attr("id", 'edge-' + edge[E_FROM][UNIQUE_ID] + '-' + edge[E_TO][UNIQUE_ID])
             .attr("stroke-width", stroke_width)
-            .attr("stroke", stroke)
+            .attr("stroke", function() {
+              if (drawCon) {
+                return "#0008F8";
+              } else {
+                return colorScale(edge[E_WEIGHT])
+              }
+            })
             .attr("stroke-dasharray", function() {
-                if (edge[E_SINGLE]) {
+                if (!edge[E_RECIPROCATED]) {
                     return "3,3";
                 } else {
                     return "0,0";
                 }
             })
-            .attr("opacity", edge_opt.opacity)
+            .attr("opacity", 1) //edge_opt.opacity)
             .attr("fill", "none")
             .attr("marker-mid", "url(#triangle-end)")
 
@@ -1458,9 +1502,21 @@ var draw_edges = function (poags, edge, group, scale_y) {
                         search_tree(edge[E_SEQS][s], false, true);
                     }
 
-    }
+                }
 
-            })
+            }).on("mouseover", function() {
+                  tooltipdiv.transition()
+                  .duration(200)
+                  .style("opacity", .9);
+                  tooltipdiv.html("Seqs: " + edge[E_WEIGHT] + "%")
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                  tooltipdiv.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+                });
 
             // .on("mouseover", function() {
             //     $(this).attr("stroke-width", stroke_width*2)

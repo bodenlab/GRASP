@@ -1,6 +1,7 @@
 package com.asr.grasp.objects;
 
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -187,6 +188,35 @@ public class ConsensusObject {
     }
 
 
+    public Node getLowestCostNode(ArrayList<Node> openSet) {
+        double minCost = 10000000.0;
+        ArrayList<Node> bests = new ArrayList<>();
+        for (Node n: openSet) {
+            if (cost.get(n.getId()) < minCost) {
+                minCost = cost.get(n.getId());
+            }
+        }
+        // If there are multiple bests we want to tie break on the one with the smaller nodeId
+        for (Node n: openSet) {
+            if (cost.get(n.getId()) == minCost) {
+                bests.add(n);
+            }
+        }
+        // If the length of the array is > 1 we want to return the node with the  lowest ID
+        Node best = null;
+        int lowestId = 1000000000;
+        for (Node n: bests) {
+            if (n.getId() < lowestId) {
+                lowestId = n.getId();
+                best = n;
+            }
+        }
+        // Remove the best node from the openset
+        openSet.remove(best);
+        return best;
+    }
+
+
     /**
      * Gets the consensus sequences using an A star search algorithm.
      *
@@ -199,7 +229,8 @@ public class ConsensusObject {
         // Already visited nodes
         ArrayList< Node> closedSet = new ArrayList<>();
         // Unvisted nodes keep track of the best options
-        PriorityQueue< Node> openSet = new PriorityQueue<>(1000, comparator);
+        //PriorityQueue< Node> openSet = new PriorityQueue<>(1000, comparator);
+        ArrayList<Node> openSet = new ArrayList<>();
         // Add the initial node to the open set
         openSet.add(initialNode);
         // Storing the previous node
@@ -209,7 +240,7 @@ public class ConsensusObject {
         cost.put(initialNode.getId(), new Double(0));
         boolean printout = false;
         while (!openSet.isEmpty()) {
-            Node current = openSet.poll();
+            Node current = getLowestCostNode(openSet); //openSet.poll();
             if (current.equals(finalNode)) {
                 // Reconstruct the path
                 return reconstructPath(cameFrom, current, gappy);
@@ -235,7 +266,7 @@ public class ConsensusObject {
                     //System.out.println("___________ CLOSED SET CONTAINED: " + neighbor.getBase() + ": " + neighbor.getId());
                     // Check if this path is better and update the path to get to the neighbour
                     if (cost.get(neighbor.getId()) > thisCost) {
-                        cameFrom.put(neighbor, new Path(current, next));
+                        //cameFrom.put(neighbor, new Path(current, next));
                         cost.put(neighbor.getId(), thisCost);
                     }
                     continue; // ignore as it has already been visited
@@ -292,6 +323,12 @@ public class ConsensusObject {
             }
             if (cost.get(x.getId()) > cost.get(y.getId()))
             {
+                return 1;
+            }
+            if (x.getId() < y.getId()) {
+                return -1;
+            }
+            if (x.getId() > y.getId()) {
                 return 1;
             }
             return 0;

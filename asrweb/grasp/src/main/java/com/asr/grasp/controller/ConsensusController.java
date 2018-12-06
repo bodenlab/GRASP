@@ -50,6 +50,7 @@ public class ConsensusController {
         if (nodeParent == null) {
             nodeParent = node;
         }
+
         // Get all the extent ids
         ArrayList<String> extentLabels = nodeParent.getRawLeafLabels();
 

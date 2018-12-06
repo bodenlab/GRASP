@@ -199,7 +199,7 @@ public class ConsensusObject {
         // Already visited nodes
         ArrayList< Node> closedSet = new ArrayList<>();
         // Unvisted nodes keep track of the best options
-        PriorityQueue< Node> openSet = new PriorityQueue<>(10, comparator);
+        PriorityQueue< Node> openSet = new PriorityQueue<>(1000, comparator);
         // Add the initial node to the open set
         openSet.add(initialNode);
         // Storing the previous node
@@ -207,7 +207,7 @@ public class ConsensusObject {
 
         // Add the initial node cost
         cost.put(initialNode.getId(), new Double(0));
-        boolean printout = true;
+        boolean printout = false;
         while (!openSet.isEmpty()) {
             Node current = openSet.poll();
             if (current.equals(finalNode)) {
@@ -216,13 +216,14 @@ public class ConsensusObject {
             }
             // Otherwise add this to the closedSet
             closedSet.add(current);
-//            if (current.getId() == 64) {
-//                printout = true;
-//            }
-//
-//            if (current.getId() == 72) {
-//                printout = false;
-//            }
+            try {
+                System.out.println(
+                        cameFrom.get(current).node.getId() + "->" + current.getId() + " " + cameFrom
+                                .get(current).node.base + "->" + current.base);
+            } catch (Exception e) {
+
+            }
+
             if (printout) {
                 System.out.println("Looking at edges from: " + current.getId());
             }
@@ -231,6 +232,12 @@ public class ConsensusObject {
                  Node neighbor = nodeMap.get(next.getToId());
                 double thisCost = heuristicCostEstimate(next, current, neighbor, current.getOutEdges().get(n).reciprocated);
                 if (closedSet.contains(neighbor)) {
+                    //System.out.println("___________ CLOSED SET CONTAINED: " + neighbor.getBase() + ": " + neighbor.getId());
+                    // Check if this path is better and update the path to get to the neighbour
+                    if (cost.get(neighbor.getId()) > thisCost) {
+                        cameFrom.put(neighbor, new Path(current, next));
+                        cost.put(neighbor.getId(), thisCost);
+                    }
                     continue; // ignore as it has already been visited
                 }
                 // Otherwise we set the cost to this node
@@ -256,7 +263,7 @@ public class ConsensusObject {
                 }
                 // Check if we already have this in the camefrom path, if so remove
                 if (cameFrom.get(neighbor) != null) {
-                    System.out.println("ALREADY HAD PATH, BEING OVERRIDDEN, " + cameFrom.get(neighbor).edge.fromId + ", " + cameFrom.get(neighbor).edge.toId);
+                    //System.out.println("ALREADY HAD PATH, BEING OVERRIDDEN, " + cameFrom.get(neighbor).edge.fromId + "->" + cameFrom.get(neighbor).edge.toId + ", " + cameFrom.get(neighbor).node.base + " to " + current.base + " path:" + next.fromId + " ->" + next.toId);
                 }
                 // If we have made it here this is the best path so let's
                 cameFrom.put(neighbor, new Path(current, next));

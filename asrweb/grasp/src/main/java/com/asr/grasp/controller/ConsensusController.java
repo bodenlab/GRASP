@@ -62,6 +62,8 @@ public class ConsensusController {
         double maxVal = 0;
         for (String label: extentLabels) {
             String sequence = seqController.getSeqByLabel(label, reconId, Defines.EXTANT);
+            // Add a terminating character.
+            sequence += "x";
             seqLen = sequence.length();
             int from = -1;
             int to = 0;
@@ -72,6 +74,7 @@ public class ConsensusController {
                         break;
                     }
                 }
+
                 // Here we have an edge
                 double value = 0.0;
                 if (weightMap.get(from + "-" + to) != null) {
@@ -92,6 +95,7 @@ public class ConsensusController {
         for (String label: weightMap.keySet()) {
             weightMap.put(label, weightMap.get(label)/maxVal);
         }
+
         return weightMap;
     }
 }

@@ -143,11 +143,13 @@ public class SaveController implements Runnable {
                  * it each time.
                  */
 
-                String[] ancsOfInterest = {"N1", "N423", "N560", "N0", "N576", "N3"};
+                String[] ancsOfInterest = {"N1", "N423", "N560"};
                 System.out.println("Saving the nodes that are similar: ");
                 ArrayList<String> nodeLabels = new ArrayList<>();
                 for (String nl: ancsOfInterest) {
-                    ArrayList<String> similarLabels = treeController.getSimilarNodesTmp(user, "sp_cured_3_01112018", currRecon.getLabel(), nl, 50);
+                    //ArrayList<String> similarLabels = treeController.getSimilarNodesTmp(user, "base_dataset_mini", currRecon.getLabel(), nl, 3);
+
+                    ArrayList<String> similarLabels = treeController.getSimilarNodesTmp(user, "sp_cured_3_01112018", currRecon.getLabel(), nl, 5);
                     /**
                      * Don't want to add dups.
                      */

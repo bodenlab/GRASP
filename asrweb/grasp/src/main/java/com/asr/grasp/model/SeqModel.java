@@ -9,11 +9,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import reconstruction.ASRPOG;
-import reconstruction.Inference;
 import vis.POAGJson;
 
 @Repository
@@ -39,8 +37,9 @@ public class SeqModel extends BaseModel {
         String queryInf = "INSERT INTO web.inferences(r_id, node_label, inference) VALUES(?,?,?);";
         String querySeq = "INSERT INTO web.sequences(r_id, node_label, " +
                 "seq, s_type) VALUES(?,?,?,?);";
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statementInf = con.prepareStatement(queryInf);
             PreparedStatement statementSeq = con.prepareStatement(querySeq);
@@ -85,12 +84,13 @@ public class SeqModel extends BaseModel {
             statementInf.execute();
             statementSeq.execute();
             con.commit();
-            con.close();
             System.out.println("\n Finished Inserting Joint recons.");
-            return insertedLabels;
         } catch (Exception e) {
-            return null;
+            System.out.println(e.getMessage());
+            insertedLabels = null;
         }
+        closeCon(con);
+        return insertedLabels;
     }
 
     /**
@@ -100,8 +100,10 @@ public class SeqModel extends BaseModel {
             boolean gappy) {
         String query = "INSERT INTO web.sequences(r_id, node_label, " +
                 "seq, s_type) VALUES(?,?,?,?);";
+        Connection con = null;
+        boolean result = false;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
@@ -113,12 +115,12 @@ public class SeqModel extends BaseModel {
             }
             statement.setInt(4, method);
             statement.executeUpdate();
-            con.close();
-            return true;
+            result = true;
         } catch (Exception e) {
             System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
-            return false;
         }
+        closeCon(con);
+        return result;
     }
 
     /**
@@ -126,8 +128,9 @@ public class SeqModel extends BaseModel {
      */
     public HashMap<String, String> getAllExtents(int reconId) {
         String query = "SELECT node_label, seq FROM web.sequences WHERE r_id=? AND s_type=?;";
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement;
             statement = con.prepareStatement(query);
@@ -135,7 +138,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(2, Defines.EXTANT);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
-            con.close();
+            closeCon(con);
             if (results != null) {
                 while (results.next()) {
                     /* The node label is in position 1 which we want to be the key and the
@@ -146,6 +149,7 @@ public class SeqModel extends BaseModel {
         } catch (Exception e) {
             System.out.println("Unable to get String Map, issue with Statment in getAllExtents");
         }
+        closeCon(con);
         return null;
     }
 
@@ -155,8 +159,9 @@ public class SeqModel extends BaseModel {
      */
     public ArrayList<String> getAllSeqLabels(int reconId, int method) {
         String query;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement;
             // If they haven't defined a method then we want to return both joint and marginal
@@ -174,7 +179,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(2, method);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
-            con.close();
+            closeCon(con);
             if (results != null) {
                 /* The node label is in position 1 which we want to be the key and the
                  * sequence is in position 2 of the query above which we want to be the value */
@@ -183,6 +188,7 @@ public class SeqModel extends BaseModel {
         } catch (Exception e) {
             System.out.println("Unable to get String Map, issue with Statment in getAllConsensus");
         }
+        closeCon(con);
         return null;
     }
 
@@ -192,8 +198,9 @@ public class SeqModel extends BaseModel {
      */
     public HashMap<String, String> getAllSeqs(int reconId, int method) {
         String query;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement;
             // If they haven't defined a method then we want to return both joint and marginal
@@ -211,7 +218,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(2, method);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
-            con.close();
+            closeCon(con);
             if (results != null) {
                 /* The node label is in position 1 which we want to be the key and the
                  * sequence is in position 2 of the query above which we want to be the value */
@@ -220,6 +227,7 @@ public class SeqModel extends BaseModel {
         } catch (Exception e) {
             System.out.println("Unable to get String Map, issue with Statment in getAllConsensus");
         }
+        closeCon(con);
         return null;
     }
 
@@ -229,8 +237,9 @@ public class SeqModel extends BaseModel {
      */
     public String getSeqByLabel(String label, int reconId, int method) {
         String query;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement;
             // If they haven't defined a method then we want to return both joint and marginal
@@ -249,7 +258,7 @@ public class SeqModel extends BaseModel {
             statement.setInt(3, method);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
-            con.close();
+            closeCon(con);
             if (results != null) {
                 /* The node label is in position 1 which we want to be the key and the
                  * sequence is in position 2 of the query above which we want to be the value */
@@ -258,7 +267,44 @@ public class SeqModel extends BaseModel {
         } catch (Exception e) {
             System.out.println("Unable to get String Map, issue with Statment in getAllConsensus");
         }
+        closeCon(con);
         return null;
+    }
+
+
+    /**
+     * Update a sequence in the Database. This is used if our method of finding the consensus
+     * has been updated.
+     *
+     * @param reconId
+     * @param seq
+     * @param gappy
+     * @param method
+     * @return
+     */
+    public boolean updateConsensusSeq(int reconId, String seq, String nodeLabel, boolean gappy, int method) {
+        String query = "UPDATE web.sequences SET seq=? WHERE r_id=? AND node_label=? AND s_type=?;";
+        boolean result = false;
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setInt(2, reconId);
+            statement.setString(1, nodeLabel);
+            if (!gappy) {
+                statement.setString(3, seq.replaceAll("-", ""));
+            } else {
+                statement.setString(3, seq);
+            }
+            statement.setInt(4, method);
+            statement.executeUpdate();
+            result = true;
+        } catch (Exception e) {
+            System.out.println("UNABLE TO UPDATE THE CONSENSUS SEQ: " + nodeLabel + e.getMessage());
+        }
+        closeCon(con);
+        return result;
     }
 
     /**
@@ -267,18 +313,21 @@ public class SeqModel extends BaseModel {
      */
     public boolean deleteFromDb(int reconId, String nodeLabel) {
         String query = "DELETE FROM web.sequences WHERE r_id=? AND nodeLabel=?;";
+        boolean result = false;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, nodeLabel);
             statement.executeUpdate();
-            con.close();
-            return true;
+            result = true;
         } catch (Exception e) {
-            return false;
+            System.out.println(e.getMessage());
         }
+        closeCon(con);
+        return result;
     }
 
 
@@ -319,19 +368,21 @@ public class SeqModel extends BaseModel {
      */
     public ArrayList<String> findNodesWithMotif(int reconId, String motif) {
         String query = "SELECT node_label FROM web.sequences WHERE r_id=? AND seq SIMILAR TO ?;";
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, motif);
             ResultSet results = statement.executeQuery();
+            closeCon(con);
             if (results == null) {
                 return null;
             }
-            con.close();
             return getStrList(results);
         } catch (Exception e) {
+            closeCon(con);
             System.out.println("Unable to get matches for motifs: " + motif);
             return null;
         }
@@ -343,9 +394,10 @@ public class SeqModel extends BaseModel {
      */
     public boolean insertListIntoDb(int reconId, HashMap<String, String> sequences, boolean gappy) {
         String query = "INSERT INTO web.sequences(r_id, node_label, seq, s_type) VALUES(?,?,?,?);";
-
+        boolean result = false;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             con.setAutoCommit(false);
             PreparedStatement statement = con.prepareStatement(query);
@@ -362,12 +414,12 @@ public class SeqModel extends BaseModel {
             }
             int[] count = statement.executeBatch();
             con.commit();
-            con.close();
-            return true;
+            result = true;
         } catch (Exception e) {
             System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
-            return false;
         }
+        closeCon(con);
+        return result;
     }
 
     /**

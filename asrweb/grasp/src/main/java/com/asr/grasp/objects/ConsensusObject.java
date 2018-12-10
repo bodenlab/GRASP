@@ -1,11 +1,9 @@
 package com.asr.grasp.objects;
 
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.PriorityQueue;
 import java.util.Stack;
 import json.JSONArray;
 import json.JSONObject;
@@ -23,6 +21,7 @@ public class ConsensusObject {
     ArrayList< Edge> edges;
      Node initialNode;
      Node finalNode;
+     int numberNodes;
     // Map with heuristics
     HashMap<Integer, Double> cost = new HashMap<>();
     HashMap<String, Double> weightMap;
@@ -82,9 +81,12 @@ public class ConsensusObject {
             nodeMap.get(fromId).addOutEdge(edge);
         }
 
+
         // Run consensus gen
         initialNode = nodeMap.get(initialId);
         finalNode = nodeMap.get(endId);
+        // Set the numberof nodes to be the end ID
+        numberNodes = nodeMap.size();
     }
 
     /**
@@ -123,7 +125,7 @@ public class ConsensusObject {
     private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
         int multiplier = 1;
         if (!isBidirectional) {
-            multiplier = 1000;
+            multiplier = numberNodes;
         }
         int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
         positionDiff = (positionDiff > 0) ? positionDiff : 1;
@@ -247,13 +249,13 @@ public class ConsensusObject {
             }
             // Otherwise add this to the closedSet
             closedSet.add(current);
-            try {
-                System.out.println(
-                        cameFrom.get(current).node.getId() + "->" + current.getId() + " " + cameFrom
-                                .get(current).node.base + "->" + current.base);
-            } catch (Exception e) {
-
-            }
+//            try {
+//                System.out.println(
+//                        cameFrom.get(current).node.getId() + "->" + current.getId() + " " + cameFrom
+//                                .get(current).node.base + "->" + current.base);
+//            } catch (Exception e) {
+//
+//            }
 
             if (printout) {
                 System.out.println("Looking at edges from: " + current.getId());

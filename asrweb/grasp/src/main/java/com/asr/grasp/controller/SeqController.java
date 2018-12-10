@@ -4,10 +4,9 @@ import api.PartialOrderGraph;
 import com.asr.grasp.model.InferenceModel;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.objects.ASRObject;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
-import dat.EnumSeq;
-import dat.Enumerable;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,6 +48,9 @@ public class SeqController {
     private String logFileName;
 
 
+    @Autowired
+    private  ConsensusController consensusController;
+
     /**
      * Helper function that prints the memory usage to a file
      */
@@ -73,6 +75,31 @@ public class SeqController {
         }
         long[] vals = {total, free};
         return vals;
+    }
+
+    /**
+     * Helper function to allow us to insert an updated inference into the database.
+     * @param reconId
+     * @param label
+     * @param ancsStr
+     */
+    public void updateDBInference(int reconId, String label, String ancsStr) {
+        boolean updated = infModel.updateInference(reconId, label, ancsStr);
+        // Check whether this was updated sucessfully.
+    }
+
+
+    /**
+     * Update the sequence in the database.
+     *
+     * @param reconId
+     * @param label
+     * @param seq
+     * @param gappy
+     */
+    public void updateDBSequence(int reconId, String label, String seq, boolean gappy) {
+        boolean updated = seqModel.updateConsensusSeq(reconId, label, seq, gappy, Defines.JOINT);
+        // Do something here and choose whether this has been updated correctly.
     }
 
     /**
@@ -220,8 +247,20 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
-            inserted = seqModel
-                    .insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT,
+            int uid = 89;
+            //ToDo: Here is where we can alter the consensus sequence.
+            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr),
+                    consensusController
+                            .getEdgeCountDict(reconId, uid,
+                                    label));
+
+            String supportedSeq = c.getSupportedSequence(true);
+            System.out.println(supportedSeq);
+
+            String infUpdated = c.getAsJson().toString();
+            updateDBInference(reconId, label, infUpdated);
+            // Also want to update the Joint sequence
+            inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
                             gappy);
 
             System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime)

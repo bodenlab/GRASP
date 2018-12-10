@@ -48,6 +48,17 @@ public class ReconstructionController {
     }
 
 
+
+    /**
+     * ToDo: REMOVE TEMPORARY FUNCTION!
+     *
+     * @return
+     */
+    public int getId(String label, int userId) {
+        return reconModel.getIdByLabel(label, userId);
+    }
+
+
     /**
      * Get the ID. If the ID hasn't been set yet we need to set it based on
      * the username.

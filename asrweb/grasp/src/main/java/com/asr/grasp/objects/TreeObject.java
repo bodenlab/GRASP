@@ -12,16 +12,19 @@ public class TreeObject {
     private TreeNodeObject root;
     private ArrayList<TreeNodeObject> nodeList;
     private ArrayList<TreeNodeObject> leafNodeList;
+    private ArrayList<TreeNodeObject> ancestorList;
 
     /* We keep track of the extents so that we can find the intersection between two trees easily */
     private ArrayList<String> extantLabelList;
     private ArrayList<String> ancestorLabelList;
+
 
     public TreeObject(String treeAsNewick) {
         this.nodeList = new ArrayList<>();
         this.leafNodeList = new ArrayList<>();
         this.extantLabelList = new ArrayList<>();
         this.ancestorLabelList = new ArrayList<>();
+        this.ancestorList = new ArrayList<>();
         parseNewick(treeAsNewick, root);
         // Setup all the distances for each of the nodes
         for (TreeNodeObject tno: nodeList) {
@@ -29,11 +32,20 @@ public class TreeObject {
         }
     }
 
+    /**
+     * Gets the list of ancestors
+     * @return
+     */
+    public ArrayList<TreeNodeObject> getAncestorList() {
+        return ancestorList;
+    }
+
     public void clearScores() {
         for (TreeNodeObject tno: nodeList) {
             tno.resetScore();
         }
     }
+
     /**
      * Corrects for if we have labels which do or don't have the pipe from uniprot
      * @param rawLabel
@@ -131,7 +143,7 @@ public class TreeObject {
      * @return the root node of tree
      */
     private TreeNodeObject parseNewick(String newickStr, TreeNodeObject parent) {
-        root = parseNewick(newickStr, parent, new ArrayList<>(), 0);
+        root = parseNewick(newickStr, parent, new ArrayList<>(), 0, 0);
         return root;
     }
 
@@ -142,12 +154,13 @@ public class TreeObject {
      * @param parent        Parent Node
      * @return
      */
-    private TreeNodeObject parseLeafNewick(String str, TreeNodeObject parent) {
+    private TreeNodeObject parseLeafNewick(String str, TreeNodeObject parent, int nextId) {
         TreeNodeObject node;
         String label;
         int splitIdx = str.indexOf(':'); // check if a distance is specified
         if (splitIdx == -1) {// no distance
-            node = new TreeNodeObject(str, parent, null);
+            node = new TreeNodeObject(str, parent, null, nextId);
+            nextId ++;
         } else { // there's a distance
             label = str.substring(0, splitIdx).trim();
             try {
@@ -156,7 +169,8 @@ public class TreeObject {
                     dist = 0.00001;
                     System.err.println("Distance value: 0.0 parsed in tree file. Representing distance as " + Double.toString(dist));
                 }
-                node = new TreeNodeObject(label, parent, dist);
+                node = new TreeNodeObject(label, parent, dist, nextId);
+                nextId ++;
                 if (root == null) {
                     root = node;
                 }
@@ -183,16 +197,18 @@ public class TreeObject {
      * @param count         Number of nodeIds visited
      * @return
      */
-    private TreeNodeObject parseInternalNewick(String embed, String tail, TreeNodeObject parent, ArrayList<Integer> nodeIds, int count) {
+    private TreeNodeObject parseInternalNewick(String embed, String tail, TreeNodeObject parent, ArrayList<Integer> nodeIds, int count, int nextId) {
         String label;
         TreeNodeObject node;
         int splitIdx = tail.indexOf(':'); // check if a distance is specified
         if (splitIdx == -1) { // no distance
             if(!tail.isEmpty() && tail.substring(0, tail.length() - 1) != null && !tail.substring(0, tail.length() - 1).isEmpty()) {
                 label = tail.substring(splitIdx + 1, tail.length()).replace(";", "");
-                node = new TreeNodeObject(label, parent, null);
+                node = new TreeNodeObject(label, parent, null, nextId);
+                nextId ++;
             } else {
-                node = new TreeNodeObject("N" + count, parent, null);
+                node = new TreeNodeObject("N" + count, parent, null, nextId);
+                nextId ++;
             }
         } else { // there's a distance
             if(tail.substring(0, splitIdx) != null && !tail.substring(0, splitIdx).isEmpty()) {
@@ -206,7 +222,7 @@ public class TreeObject {
                     dist = 0.00001;
                     System.err.println("Distance value: 0.0 parsed in tree file. Representing distance as " + Double.toString(dist));
                 }
-                node = new TreeNodeObject(label, parent, dist);
+                node = new TreeNodeObject(label, parent, dist, count);
                 if (root == null) {
                     root = node;
                 }
@@ -226,7 +242,8 @@ public class TreeObject {
             while (nodeIds.contains(count)) {
                 count++;
             }
-            node.addChild(parseNewick(toProcess, node, nodeIds, count));
+            node.addChild(parseNewick(toProcess, node, nodeIds, count, nextId));
+            nextId ++;
             if (comma + 1 > embed.length()) {
                 break;
             }
@@ -235,7 +252,7 @@ public class TreeObject {
         }
         // So we can iterate through all the ancestors
         ancestorLabelList.add(node.getLabel());
-
+        ancestorList.add(node);
         return node;
     }
 
@@ -246,17 +263,19 @@ public class TreeObject {
      * @param parent the parent of the current node
      * @return the root node of tree
      */
-    private TreeNodeObject parseNewick(String str, TreeNodeObject parent, ArrayList<Integer> nodeIds, int count) {
+    private TreeNodeObject parseNewick(String str, TreeNodeObject parent, ArrayList<Integer> nodeIds, int count, int nextId) {
         TreeNodeObject node = null;
         str = str.replace("\t","");
         int startIdx = str.indexOf('('); // start parenthesis
         int endIdx = str.lastIndexOf(')'); // end parenthesis
         if (startIdx == -1 && endIdx == -1) { // we are at leaf (no parentheses)
-            node = parseLeafNewick(str, parent);
+            node = parseLeafNewick(str, parent, nextId);
+            nextId ++;
         } else if (startIdx >= 0 && endIdx >= 0) { // balanced parentheses
             String embed = str.substring(startIdx + 1, endIdx);
             String tail = str.substring(endIdx + 1, str.length());
-            node = parseInternalNewick(embed, tail, parent, nodeIds, count);
+            node = parseInternalNewick(embed, tail, parent, nodeIds, count, nextId);
+            nextId ++;
         }
         if (!nodeList.contains(node)) {
             nodeList.add(node);

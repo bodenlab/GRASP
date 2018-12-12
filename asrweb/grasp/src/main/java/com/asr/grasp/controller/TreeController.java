@@ -13,11 +13,13 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import javax.swing.tree.TreeNode;
 import json.JSONArray;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 /**
@@ -44,6 +46,12 @@ public class TreeController {
     private PriorityQueue<TreeNodeObject> orderedNodes;
 
     private double origDistToRoot = 0;
+
+    private boolean breakout = false;
+
+    private boolean forceUnknown = false;
+
+    private TreeNodeObject bestNode = null;
 
     /**
      * Gets a reconstructed tree string via it's reconstruction and userId.
@@ -122,6 +130,88 @@ public class TreeController {
 
 
     /**
+     *
+     * @param treeKnownStr
+     * @param treeUnknownStr
+     */
+    public void getSimilarNodes(String treeKnownStr, String treeUnknownStr) {
+        TreeObject treeKnown = new TreeObject(treeKnownStr);
+        TreeObject treeUnknown = new TreeObject(treeUnknownStr);
+
+        // Setup the ordered nodes
+        runSimilarNodesEfficient(treeKnown, treeUnknown);
+
+    }
+
+
+     public void getSimilarNodes(UserObject user, String reconKnownAncsLabel, String reconUnknownAncsLabel) {
+         int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+         int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+
+         // If either of the labels are incorrect then return
+         if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+             return;
+         }
+
+         // Otherwise get the trees
+         TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
+         TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
+
+         // Setup the ordered nodes
+         runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs);
+     }
+
+    /**
+     * The method is as follows:
+     *
+     *      1. Find the extent sequences that exist in both trees.
+     *      2. For each node in the UNKNOWN and KNOWN tree, we build a hashset of those extents
+     *      3. For each node in the KNOWN tree, we find the matching node in the UNKNOWN tree
+     *          Done with the following method
+     *          a. Start at a TreeNode that has at least one of the Intersections Extents
+     *          b. Determine the score for each parent going up the tree based on the intersetion
+     *              of each of the intersection HashSets
+     *          c. Break once all the extent's in the known node (that are included in the other)
+     *              are in the UNKNOWN node. The best node MUST exist under this one.
+     */
+
+
+    /**
+     * @param treeKnownAncs
+     * @param treeUnknownAncs
+     * @return
+     */
+    public ArrayList<String> runSimilarNodesEfficient(TreeObject treeKnownAncs, TreeObject treeUnknownAncs) {
+        // Get the intersection of leaves. This will be used to confirm that at each node we are
+        // correctly counting nodes that appear in both trees.
+        // Force it to use the Id's of the unknown tree
+        ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs, treeUnknownAncs, true);
+
+        int id = 0;
+        for (TreeNodeObject tno: intersection) {
+            tno.setId(id);
+            id ++;
+        }
+
+        // For the known tree we want to build up a hashset using the new Id notation
+        // This will also allow us to only get the nodes contained in the intersection
+        treeKnownAncs.getRoot().buildIntersectionLabelMapping(intersection);
+        treeUnknownAncs.getRoot().buildIntersectionLabelMapping(intersection);
+        // For each node in the known tree we now want to get the best node
+        ArrayList<TreeNodeObject> nodes = treeKnownAncs.getAncestorList();
+        for (TreeNodeObject tno: nodes) {
+            scoreNodesEfficient(tno.getIntersectIds(), treeUnknownAncs.getRoot());
+            System.out.println("NODE: " + tno.getLabel() + " MATCHED:" + bestNode.getLabel() + ", score: " + bestNode.getScore());// + " orig-dist: " + node.getDistanceToRoot());
+            treeUnknownAncs.clearScores();
+            treeKnownAncs.clearScores();
+        }
+
+        return null;
+    }
+
+
+
+    /**
      * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
      *
      * @param user
@@ -164,17 +254,17 @@ public class TreeController {
             JSONArray node = new JSONArray();
             node.put(Defines.S_NAME, n.getOriginalLabel());
             node.put(Defines.S_SCORE, n.getScore());
-            if (user.getUsername().equals("ariane2")) {
-                node.put(2, "saveCSV");
-                node.put(3, n.getLeafCount());
-                node.put(4, n.getDistanceToRoot());
-                node.put(5, treeKnownAncs.getNodeByLabel(ancsestorLabel).getDistanceToRoot());
-                node.put(6, n.getIncCnt());
-                node.put(7, n.getNoIncCnt());
-                node.put(8, n.getInc());
-                node.put(9, n.getNoInc());
-                node.put(10, n.getExtC());
-            }
+//            if (user.getUsername().equals("ariane2")) {
+//                node.put(2, "saveCSV");
+//                node.put(3, n.getLeafCount());
+//                node.put(4, n.getDistanceToRoot());
+//                node.put(5, treeKnownAncs.getNodeByLabel(ancsestorLabel).getDistanceToRoot());
+//                node.put(6, n.getIncCnt());
+//                node.put(7, n.getNoIncCnt());
+//                node.put(8, n.getInc());
+//                node.put(9, n.getNoInc());
+//                node.put(10, n.getExtC());
+//            }
             retNodes.put(node);
 
             System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
@@ -211,15 +301,11 @@ public class TreeController {
         }
 
         // Get the node list which we will iterate through
-        ArrayList<String> ancestors = new ArrayList<>();
-//        ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs,
-//                treeUnknownAncs);
-
         JSONArray retNodes = new JSONArray();
         JSONArray jsonN = new JSONArray();
         jsonN.put("save-all");
 
-        ancestors = treeKnownAncs.getAncestorLabelList();
+        ArrayList<String> ancestors = treeKnownAncs.getAncestorLabelList();
         jsonN.put(reconKnownAncsLabel);
         jsonN.put(reconUnknownAncsLabel);
 
@@ -234,7 +320,7 @@ public class TreeController {
 
             orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
             ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs,
-                    treeUnknownAncs);
+                    treeUnknownAncs, forceUnknown);
 
             treeKnownAncs.clearScores();
             treeUnknownAncs.clearScores();
@@ -302,7 +388,7 @@ public class TreeController {
         // Set up the original root node distance
         origDistToRoot = treeKnownAncs.getNodeByLabel(ancsestorLabel).getDistanceToRoot();
 
-        ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs, treeUnknownAncs);
+        ArrayList<TreeNodeObject> intersection = getIntersection(treeKnownAncs, treeUnknownAncs, forceUnknown);
 
         // Now that we have the intersection we want to get the leaf nodes in the known ancestor
         // that lie under the node of interest - these must also be in the intersection obj
@@ -339,11 +425,11 @@ public class TreeController {
      * @param treeUnknownAncs
      * @return
      */
-    public ArrayList<TreeNodeObject> getIntersection(TreeObject treeKnownAncs, TreeObject treeUnknownAncs) {
+    public ArrayList<TreeNodeObject> getIntersection(TreeObject treeKnownAncs, TreeObject treeUnknownAncs, boolean forceUnknown) {
         // iterate through the smaller one
         ArrayList<String> knownExtentLabelList = treeKnownAncs.getExtantLabelList();
         ArrayList<String> unknownExtentLabelList = treeUnknownAncs.getExtantLabelList();
-        if (knownExtentLabelList.size() > unknownExtentLabelList.size()) {
+        if (forceUnknown || knownExtentLabelList.size() > unknownExtentLabelList.size()) {
             return getIntersection(unknownExtentLabelList, knownExtentLabelList, treeUnknownAncs);
         } else {
             return getIntersection(knownExtentLabelList, unknownExtentLabelList, treeKnownAncs);
@@ -379,10 +465,61 @@ public class TreeController {
 
         for (String extent: smallList) {
             if (largeList.contains(extent)) {
-                extentIntersection.add(tree.getNodeByLabel(extent));
+                TreeNodeObject tno =  tree.getNodeByLabel(extent);
+                tno.setInIntersection();
+                extentIntersection.add(tno);
             }
         }
         return extentIntersection;
+    }
+
+
+    /**
+     * Computes scores for node based on how many of the extents were included
+     * in the children for a particular node.
+     *
+     * Includes a breakout
+     * @param node
+     */
+    public double scoreNodesEfficient(HashSet<String> extentIdMap, TreeNodeObject node) {
+        if (breakout) {
+            return 0.0;
+        }
+        double value = 1;
+
+        double score = 0.0;
+        if (node.isExtent()) {
+            if (!node.isInIntersection()) {
+                return 0.0;
+            }
+            if (extentIdMap.contains(node.getLabel())) {
+                return -value;
+            } else {
+                // Add a positive score for a match
+                return value;
+            }
+        }
+        for (TreeNodeObject child: node.getChildren()) {
+            // Get the leaf nodes under each of the nodes and add these
+            score += scoreNodesEfficient(extentIdMap, child);
+            if (breakout) {
+                return 0.0;
+            }
+        }
+
+        node.addToScore(score);
+        if (bestNode == null) {
+            bestNode = node;
+        } else if (node.getScore() < bestNode.getScore()) {
+            bestNode = node;
+        } else if (node.getScore() == bestNode.getScore()) {
+            if (node.getExtC() <= bestNode.getExtC()) {
+                System.out.println("UPDATED:" + node.getLabel() + " from " + bestNode.getLabel());
+                bestNode = node;
+            }
+        }
+        System.out.println(node.getLabel() + " " + score);
+        return node.getScore();
     }
 
     /**

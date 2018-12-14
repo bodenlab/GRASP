@@ -1,5 +1,9 @@
 package com.asr.grasp.objects;
 
+import dat.PhyloTree;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -18,6 +22,22 @@ public class TreeObject {
     private ArrayList<String> extantLabelList;
     private ArrayList<String> ancestorLabelList;
 
+    public TreeObject(String filname, boolean load) {
+        this.nodeList = new ArrayList<>();
+        this.leafNodeList = new ArrayList<>();
+        this.extantLabelList = new ArrayList<>();
+        this.ancestorLabelList = new ArrayList<>();
+        this.ancestorList = new ArrayList<>();
+        try {
+            loadNewick("/Users/ariane/Documents/boden/apps/ASR/asrweb/grasp/src/main/resources/data/test/" + filname);
+        } catch (Exception e) {
+            System.out.println("" + e.getMessage());
+        }
+        // Setup all the distances for each of the nodes
+        for (TreeNodeObject tno: nodeList) {
+            tno.setDistanceFromRoot();
+        }
+    }
 
     public TreeObject(String treeAsNewick) {
         this.nodeList = new ArrayList<>();
@@ -118,6 +138,24 @@ public class TreeObject {
      *
      * ---------------------------------------------------------------------------------------------
      */
+
+    /**
+     * Factory method to create a tree instance from a Newick formatted file.
+     * @param filename name of file
+     * @return instance of tree
+     */
+    public void loadNewick(String filename) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null)
+            sb.append(line.trim());
+
+        root = parseNewick(sb.toString(), root); //null parent for root
+        reader.close();
+    }
+
+
 
     /**
      * Find index of first comma at the current level (non-embedded commas are ignored) or end of string.

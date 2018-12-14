@@ -134,31 +134,32 @@ public class TreeController {
      * @param treeKnownStr
      * @param treeUnknownStr
      */
-    public void getSimilarNodes(String treeKnownStr, String treeUnknownStr) {
-        TreeObject treeKnown = new TreeObject(treeKnownStr);
-        TreeObject treeUnknown = new TreeObject(treeUnknownStr);
+//    public void getSimilarNodes(String treeKnownStr, String treeUnknownStr, boolean sameTree) {
+//        TreeObject treeKnown = new TreeObject(treeKnownStr);
+//        TreeObject treeUnknown = new TreeObject(treeUnknownStr);
+//
+//        // Setup the ordered nodes
+//        runSimilarNodesEfficient(treeKnown, treeUnknown, sameTree);
+//
+//    }
 
-        // Setup the ordered nodes
-        runSimilarNodesEfficient(treeKnown, treeUnknown);
 
-    }
-
-
-     public void getSimilarNodes(UserObject user, String reconKnownAncsLabel, String reconUnknownAncsLabel) {
-         int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
-         int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
-
-         // If either of the labels are incorrect then return
-         if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
-             return;
-         }
+     public void getSimilarNodes(String reconKnownAncsLabel, String reconUnknownAncsLabel, boolean sameTree) {
+//         int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+//         int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+//
+//         // If either of the labels are incorrect then return
+//         if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+//             return;
+//         }
 
          // Otherwise get the trees
-         TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
-         TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
+         TreeObject treeKnownAncs = new TreeObject(reconKnownAncsLabel, true);
+         TreeObject treeUnknownAncs = new TreeObject(reconUnknownAncsLabel, true);
+         System.out.println(reconKnownAncsLabel + "," + reconUnknownAncsLabel + ",Score");
 
          // Setup the ordered nodes
-         runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs);
+         runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs, sameTree);
      }
 
     /**
@@ -181,7 +182,7 @@ public class TreeController {
      * @param treeUnknownAncs
      * @return
      */
-    public ArrayList<String> runSimilarNodesEfficient(TreeObject treeKnownAncs, TreeObject treeUnknownAncs) {
+    public ArrayList<String> runSimilarNodesEfficient(TreeObject treeKnownAncs, TreeObject treeUnknownAncs, boolean sameTree) {
         // Get the intersection of leaves. This will be used to confirm that at each node we are
         // correctly counting nodes that appear in both trees.
         // Force it to use the Id's of the unknown tree
@@ -201,7 +202,21 @@ public class TreeController {
         ArrayList<TreeNodeObject> nodes = treeKnownAncs.getAncestorList();
         for (TreeNodeObject tno: nodes) {
             scoreNodesEfficient(tno.getIntersectIds(), treeUnknownAncs.getRoot());
-            System.out.println("NODE: " + tno.getLabel() + " MATCHED:" + bestNode.getLabel() + ", score: " + bestNode.getScore());// + " orig-dist: " + node.getDistanceToRoot());
+            if (sameTree) {
+                if (!tno.getLabel().equals(bestNode.getLabel())) {
+                    System.out.println(
+                            "NODE: " + tno.getLabel() + " UNMATCHED:" + bestNode.getLabel()
+                                    + ", score: "
+                                    + bestNode
+                                    .getScore());// + " orig-dist: " + node.getDistanceToRoot());
+                } else {
+                    System.out.println(
+                            tno.getLabel() + "," + bestNode.getLabel() + "," + bestNode.getScore());
+                }
+            } else {
+                System.out.println(
+                        tno.getLabel() + "," + bestNode.getLabel() + "," + bestNode.getScore());
+            }
             treeUnknownAncs.clearScores();
             treeKnownAncs.clearScores();
         }
@@ -365,6 +380,13 @@ public class TreeController {
                 jsonNode.put(origDistToRoot);
                 jsonNode.put(n.getDistanceToRoot());
                 retNodes.put(jsonNode);
+
+                if (!ancsestorLabel.equals(n.getLabel())) {
+                    System.out.println(
+                            "NODE: " + ancsestorLabel + " UNMATCHED:" + n.getLabel() + ", score: "
+                                    + bestNode
+                                    .getScore());
+                }
 //                System.out.println(node.getOriginalLabel() + " : " + n.getOriginalLabel() + ", " + n.getScore() + ", "  + n.getExtC() + ", " + n.getDistanceToRoot() + " vs " + origDistToRoot );
 //            }
         }
@@ -514,11 +536,11 @@ public class TreeController {
             bestNode = node;
         } else if (node.getScore() == bestNode.getScore()) {
             if (node.getExtC() <= bestNode.getExtC()) {
-                System.out.println("UPDATED:" + node.getLabel() + " from " + bestNode.getLabel());
+                //System.out.println("UPDATED:" + node.getLabel() + " from " + bestNode.getLabel());
                 bestNode = node;
             }
         }
-        System.out.println(node.getLabel() + " " + score);
+        //System.out.println(node.getLabel() + " " + score);
         return node.getScore();
     }
 

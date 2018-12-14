@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.sameInstance;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GraspConfig.class})
@@ -36,32 +37,41 @@ public class TreeControllerTest extends BaseTest {
     public void testNodeSimilarity() {
         setUpEnv();
 
-        String sml = "0_10_dhad_28102018";
-        String mid = "10_20_dhad_28102018";
-        String lrg = "20_40_dhad_28102018";
-        ASRObject asrSml = setAsr(sml);
-        ASRObject asrMid = setAsr(mid);
-        ASRObject asrLrg = setAsr(lrg);
-        UserObject user = createAndRegisterUser("testuser", "testpassword");
+        String base = "585_sp_cured_3";//"0_10_dhad_28102018";
+        String r1529 = "0_1529_reconstructed";
+        String r4029 = "2500_4029_reconstructed";
+        String r6529 = "5000_6529_reconstructed";
+        String r7500 = "7500_9029_reconstructed";
 
-        ReconstructionObject reconSml = saveRecons(asrSml, user);
-        ReconstructionObject reconMid = saveRecons(asrMid, user);
-        ReconstructionObject reconLrg = saveRecons(asrLrg, user);
-
-        String baseTestName = "test-test-test-";
-
-        int numNodes = 1;
-        String rootNodeLabel = "N6";
-        String anotherLabel = "N4";
-        //treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + mid);
+//        String mid = "10_20_dhad_28102018";
+//        String lrg = "20_40_dhad_28102018";
+//        ASRObject asrSml = setAsr(sml);
+//        ASRObject asrMid = setAsr(mid);
+//        ASRObject asrLrg = setAsr(lrg);
+//        UserObject user = createAndRegisterUser("testuser", "testpassword");
+//
+//        ReconstructionObject reconSml = saveRecons(asrSml, user);
+//        ReconstructionObject reconMid = saveRecons(asrMid, user);
+//        ReconstructionObject reconLrg = saveRecons(asrLrg, user);
+////
+//        String baseTestName = "test-test-test-";
+//
+//        int numNodes = 1;
+//        String rootNodeLabel = "N6";
+//        String anotherLabel = "N4";
+        // Sanity check to ensure that a same tree gets the same output
+        // Normaly this should be false.
+        boolean sameTree = false;
+        treeController.getSimilarNodes(base + ".nwk", r6529 + ".nwk", sameTree);
+        //treeController.getAllSimilarNodes(user, baseTestName + sml, baseTestName + sml);
         //treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + mid);
         //treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + lrg);
         //treeController.getSimilarNodes(user, baseTestName + sml,baseTestName + lrg);
-        JSONArray arr1 = treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + mid, rootNodeLabel, numNodes);
+        //JSONArray arr1 = treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + mid, rootNodeLabel, numNodes);
 
-//        JSONArray arr2 = treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + lrg, rootNodeLabel, numNodes);
-//        JSONArray arr3 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + mid, anotherLabel, numNodes);
-//        JSONArray arr4 = treeController.getSimilarNodes(user, baseTestName + sml,baseTestName + lrg, anotherLabel, numNodes);
+//        JSONArray arr2 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + sml, "N7", numNodes);
+//        JSONArray arr3 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + sml, "N6", numNodes);
+//        JSONArray arr4 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + sml, "N2", numNodes);
 //
 //        /**
 //         * Check that the first two give us node 0 (as this is the node it has to be)
@@ -75,7 +85,7 @@ public class TreeControllerTest extends BaseTest {
 //         */
 //        assertThat(arr3.toString(), equalTo("[[\"N4_0.990\",-4]]"));
 //        assertThat( arr4.toString(), equalTo("[[\"N16_1.000\",-2]]"));
-        userModel.deleteUser(userController.getId(user));
+        //userModel.deleteUser(userController.getId(user));
     }
 
     /**

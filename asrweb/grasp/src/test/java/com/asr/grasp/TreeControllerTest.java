@@ -62,7 +62,7 @@ public class TreeControllerTest extends BaseTest {
         // Sanity check to ensure that a same tree gets the same output
         // Normaly this should be false.
         boolean sameTree = false;
-        treeController.getSimilarNodes(base + ".nwk", r6529 + ".nwk", sameTree);
+        treeController.getSimilarNodes(r1529 + ".nwk", r7500 + ".nwk", sameTree);
         //treeController.getAllSimilarNodes(user, baseTestName + sml, baseTestName + sml);
         //treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + mid);
         //treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + lrg);

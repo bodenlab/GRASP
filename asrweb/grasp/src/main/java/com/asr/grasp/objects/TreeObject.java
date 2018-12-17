@@ -29,7 +29,7 @@ public class TreeObject {
         this.ancestorLabelList = new ArrayList<>();
         this.ancestorList = new ArrayList<>();
         try {
-            loadNewick("/Users/ariane/Documents/boden/apps/ASR/asrweb/grasp/src/main/resources/data/test/" + filname);
+            loadNewick(filname);
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
         }
@@ -197,7 +197,7 @@ public class TreeObject {
         String label;
         int splitIdx = str.indexOf(':'); // check if a distance is specified
         if (splitIdx == -1) {// no distance
-            node = new TreeNodeObject(str, parent, null, nextId);
+            node = new TreeNodeObject(str, parent, null, nextId, true);
             nextId ++;
         } else { // there's a distance
             label = str.substring(0, splitIdx).trim();
@@ -207,7 +207,7 @@ public class TreeObject {
                     dist = 0.00001;
                     System.err.println("Distance value: 0.0 parsed in tree file. Representing distance as " + Double.toString(dist));
                 }
-                node = new TreeNodeObject(label, parent, dist, nextId);
+                node = new TreeNodeObject(label, parent, dist, nextId,  true);
                 nextId ++;
                 if (root == null) {
                     root = node;
@@ -242,10 +242,10 @@ public class TreeObject {
         if (splitIdx == -1) { // no distance
             if(!tail.isEmpty() && tail.substring(0, tail.length() - 1) != null && !tail.substring(0, tail.length() - 1).isEmpty()) {
                 label = tail.substring(splitIdx + 1, tail.length()).replace(";", "");
-                node = new TreeNodeObject(label, parent, null, nextId);
+                node = new TreeNodeObject(label, parent, null, nextId, false);
                 nextId ++;
             } else {
-                node = new TreeNodeObject("N" + count, parent, null, nextId);
+                node = new TreeNodeObject("N" + count, parent, null, nextId, false);
                 nextId ++;
             }
         } else { // there's a distance
@@ -260,7 +260,7 @@ public class TreeObject {
                     dist = 0.00001;
                     System.err.println("Distance value: 0.0 parsed in tree file. Representing distance as " + Double.toString(dist));
                 }
-                node = new TreeNodeObject(label, parent, dist, count);
+                node = new TreeNodeObject(label, parent, dist, count, false);
                 if (root == null) {
                     root = node;
                 }

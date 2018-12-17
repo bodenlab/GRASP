@@ -135,39 +135,8 @@ public class SaveController implements Runnable {
             // Now we want to save the sequences
             seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap(), saveGappySeq);
             System.out.println("Saving the reconstruction complete, now creating all the joints");
-
-            // Start saving the joint reconstruction, this is the component that takes the longest
-            if (user.getUsername().equals("ariane2")) {
-                /**
-                 * Here we want to just save the top 20 for each --> otherwise we have to re-do
-                 * it each time.
-                 */
-
-                String[] ancsOfInterest = {"N1", "N423", "N560"};
-                System.out.println("Saving the nodes that are similar: ");
-                ArrayList<String> nodeLabels = new ArrayList<>();
-                for (String nl: ancsOfInterest) {
-                    //ArrayList<String> similarLabels = treeController.getSimilarNodesTmp(user, "base_dataset_mini", currRecon.getLabel(), nl, 3);
-
-                    ArrayList<String> similarLabels = treeController.getSimilarNodesTmp(user, "sp_cured_3_01112018", currRecon.getLabel(), nl, 5);
-                    /**
-                     * Don't want to add dups.
-                     */
-                    System.out.println("Running Node: " + nl);
-                    for (String i: similarLabels) {
-                        if (!nodeLabels.contains(i)) {
-                            nodeLabels.add(i);
-                            System.out.print(i + ",     ");
-                        }
-                    }
-                }
-
-                seqController.insertSpecificJointsToDB(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
-                        saveGappySeq, nodeLabels);
-            } else {
-                seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
-                        saveGappySeq);
-            }
+            seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
+                    saveGappySeq);
             // Now we want to send an email notifying the user that their reconstruction is complete
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
             email.setContent(currRecon.getLabel());

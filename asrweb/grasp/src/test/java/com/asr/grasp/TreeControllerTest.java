@@ -37,87 +37,92 @@ public class TreeControllerTest extends BaseTest {
     public void testNodeSimilarity() {
         setUpEnv();
 
-        String base = "585_sp_cured_3";//"0_10_dhad_28102018";
-        String r1529 = "0_1529_reconstructed";
-        String r4029 = "2500_4029_reconstructed";
-        String r6529 = "5000_6529_reconstructed";
-        String r7500 = "7500_9029_reconstructed";
+        String sml = "0_10_dhad_28102018";
+        String mid = "10_20_dhad_28102018";
+        String lrg = "20_40_dhad_28102018";
 
-//        String mid = "10_20_dhad_28102018";
-//        String lrg = "20_40_dhad_28102018";
-//        ASRObject asrSml = setAsr(sml);
-//        ASRObject asrMid = setAsr(mid);
-//        ASRObject asrLrg = setAsr(lrg);
-//        UserObject user = createAndRegisterUser("testuser", "testpassword");
-//
-//        ReconstructionObject reconSml = saveRecons(asrSml, user);
-//        ReconstructionObject reconMid = saveRecons(asrMid, user);
-//        ReconstructionObject reconLrg = saveRecons(asrLrg, user);
-////
-//        String baseTestName = "test-test-test-";
-//
-//        int numNodes = 1;
-//        String rootNodeLabel = "N6";
-//        String anotherLabel = "N4";
-        // Sanity check to ensure that a same tree gets the same output
-        // Normaly this should be false.
-        boolean sameTree = false;
-        treeController.getSimilarNodes(r1529 + ".nwk", r7500 + ".nwk", sameTree);
-        //treeController.getAllSimilarNodes(user, baseTestName + sml, baseTestName + sml);
-        //treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + mid);
-        //treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + lrg);
-        //treeController.getSimilarNodes(user, baseTestName + sml,baseTestName + lrg);
-        //JSONArray arr1 = treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + mid, rootNodeLabel, numNodes);
+        ASRObject asrSml = setAsr(sml);
+        ASRObject asrMid = setAsr(mid);
+        ASRObject asrLrg = setAsr(lrg);
+        UserObject user = createAndRegisterUser("testuser", "testpassword");
 
-//        JSONArray arr2 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + sml, "N7", numNodes);
-//        JSONArray arr3 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + sml, "N6", numNodes);
-//        JSONArray arr4 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + sml, "N2", numNodes);
-//
-//        /**
-//         * Check that the first two give us node 0 (as this is the node it has to be)
-//         */
-//        assertThat(arr1.toString(), equalTo("[[\"N0\",-10]]"));
-//        assertThat(arr2.toString(), equalTo("[[\"N0\",-20]]"));
-//
-//        /**
-//         * Check that we get the correct results for N4 - we expect N4 also in the second recon
-//         * but N13 in the third.
-//         */
-//        assertThat(arr3.toString(), equalTo("[[\"N4_0.990\",-4]]"));
-//        assertThat( arr4.toString(), equalTo("[[\"N16_1.000\",-2]]"));
-        //userModel.deleteUser(userController.getId(user));
+        ReconstructionObject reconSml = saveRecons(asrSml, user);
+        ReconstructionObject reconMid = saveRecons(asrMid, user);
+        ReconstructionObject reconLrg = saveRecons(asrLrg, user);
+
+        String baseTestName = "test-test-test-";
+
+        int numNodes = 1;
+        String rootNodeLabel = "N0";
+        String anotherLabel = "N4";
+
+        JSONArray arr1 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + mid, rootNodeLabel, numNodes);
+        JSONArray arr2 = treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + lrg, rootNodeLabel, numNodes);
+        JSONArray arr3 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + mid, anotherLabel, numNodes);
+        JSONArray arr4 = treeController.getSimilarNodes(user, baseTestName + sml,baseTestName + lrg, anotherLabel, numNodes);
+
+        /**
+         * Check that the first two give us node 0 (as this is the node it has to be)
+         */
+        assertThat(arr1.toString(), equalTo("[[\"N0\",-10]]"));
+        assertThat(arr2.toString(), equalTo("[[\"N0\",-20]]"));
+
+        /**
+         * Check that we get the correct results for N4 - we expect N4 also in the second recon
+         * but N13 in the third.
+         */
+        assertThat(arr3.toString(), equalTo("[[\"N13_0.976\",-6]]"));
+        assertThat( arr4.toString(), equalTo("[[\"N8_0.975\",-6]]"));
+        userModel.deleteUser(userController.getId(user));
     }
 
     /**
      * This is just used to run tests locally. To be removed.
      */
-//
-//    @Test
-//    public void testNodeSimilaritySearcher() {
-//        /**
-//         * Tests being able to get similar nodes.
-//         */
-//        // Load two recons that are subsets of each other
-//        int ownerId = 213;
-//
-//        String sml = "taketimeemailtest";
-//        String mid = "500_1758_dhad_01112018";
-//        String lrg = "40_samples_test";
-//        setUpEnv();
-//        UserObject user = new UserObject();
-//        user.setId(213);
-//
-//        String ancs1 = "N1";
-//        String ancs2 = "N423";
-//        String ancs3 = "N560";
-//
-//        treeController.getSimilarNodes(user, sml, mid, "N0", 2);
-//        treeController.getSimilarNodes(user, sml, mid, ancs1, 2);
-//        treeController.getSimilarNodes(user, sml, mid, ancs2, 2);
-//        treeController.getSimilarNodes(user, sml, mid, ancs3, 2);
-//    }
+
+    @Test
+    public void testGetAllMatching() {
+        /**
+         * Tests being able to get similar nodes.
+         */
+        setUpEnv();
+
+        String sml = "0_10_dhad_28102018.nwk";
+        String mid = "10_20_dhad_28102018.nwk";
+        String lrg = "20_40_dhad_28102018.nwk";
+
+        ArrayList<String> result;
+        // Should print out matching nodes
+        result = treeController.getSimilarNodes(TestPropertiesOverride.testFilePath + sml, TestPropertiesOverride.testFilePath + sml, true);
+
+        System.out.println("------------------------------------");
+        System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
+        System.out.println("------------------------------------");
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N2_1.000,-2.0, N0_N0,N0_N0,-10.0"));
 
 
+        // Should print out eq. nodes
+        result = treeController.getSimilarNodes(TestPropertiesOverride.testFilePath + sml, TestPropertiesOverride.testFilePath + mid, false);
+        System.out.println("------------------------------------");
+        System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
+        System.out.println("------------------------------------");
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N1_1.000,-2.0, N0_N0,N0_N0,-10.0"));
+
+
+        result = treeController.getSimilarNodes(TestPropertiesOverride.testFilePath + mid, TestPropertiesOverride.testFilePath + lrg, false);
+        System.out.println("------------------------------------");
+        System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
+        System.out.println("------------------------------------");
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N5_0.968,N20_0.959,-2.0, N0_N0,N0_N0,-20.0"));
+
+    }
+
+
+    /**
+     * Helper method for saving things (add in to save an alignment)
+     * @param ancs
+     * @param ancsLabel
+     */
     public void save(ArrayList<String> ancs, String ancsLabel) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(

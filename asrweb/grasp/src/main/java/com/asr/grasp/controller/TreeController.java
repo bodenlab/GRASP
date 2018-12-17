@@ -80,87 +80,28 @@ public class TreeController {
         return null;
     }
 
-    /**
-     * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
-     *
-     * @param user
-     * @param reconKnownAncsLabel
-     * @param reconUnknownAncsLabel
-     * @param ancsestorLabel
-     * @return
-     */
-    public ArrayList<String> getSimilarNodesTmp(UserObject user, String reconKnownAncsLabel,
-            String reconUnknownAncsLabel, String ancsestorLabel, int numSimilarNodes) {
-        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
-        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
-
-
-        // If either of the labels are incorrect then return
-        if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
-            return null;
-        }
-
-        // Otherwise get the trees
-        TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
-        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
-
-        // If either of the trees weren't able to be parsed return
-        if (treeKnownAncs == null || treeUnknownAncs == null) {
-            return null;
-        }
-
-        // Setup the ordered nodes
-        orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
-
-        getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
-
-        ArrayList<String> retNodes = new ArrayList<>();
-
-        /**
-         * Convert the nodes to a JSON representation so we can view these on the front end.
-         */
-        for (int i = 0; i < numSimilarNodes; i ++) {
-            TreeNodeObject n = orderedNodes.poll();
-            retNodes.add(n.getOriginalLabel());
-            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
-        }
-
-        return retNodes;
-    }
-
 
     /**
+     * This method takes two file paths and finds the similar nodes between the two.
      *
-     * @param treeKnownStr
-     * @param treeUnknownStr
+     * It prints it out to the console.
+     *
+     * ToDo: Allow users to download a CSV File.
+     *
+     * @param reconKnownAncsFilePath
+     * @param reconUnknownAncsFilePath
+     * @param sameTree
      */
-//    public void getSimilarNodes(String treeKnownStr, String treeUnknownStr, boolean sameTree) {
-//        TreeObject treeKnown = new TreeObject(treeKnownStr);
-//        TreeObject treeUnknown = new TreeObject(treeUnknownStr);
-//
-//        // Setup the ordered nodes
-//        runSimilarNodesEfficient(treeKnown, treeUnknown, sameTree);
-//
-//    }
-
-
-     public void getSimilarNodes(String reconKnownAncsLabel, String reconUnknownAncsLabel, boolean sameTree) {
-//         int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
-//         int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
-//
-//         // If either of the labels are incorrect then return
-//         if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
-//             return;
-//         }
-
+     public ArrayList<String> getSimilarNodes(String reconKnownAncsFilePath, String reconUnknownAncsFilePath, boolean sameTree) {
          // Otherwise get the trees
-         TreeObject treeKnownAncs = new TreeObject(reconKnownAncsLabel, true);
-         TreeObject treeUnknownAncs = new TreeObject(reconUnknownAncsLabel, true);
-         System.out.println(reconKnownAncsLabel + "," + reconUnknownAncsLabel + ",Score");
+         TreeObject treeKnownAncs = new TreeObject(reconKnownAncsFilePath, true);
+         TreeObject treeUnknownAncs = new TreeObject(reconUnknownAncsFilePath, true);
+         System.out.println(reconKnownAncsFilePath + "," + reconUnknownAncsFilePath + ",Score");
 
          // Setup the ordered nodes
-         runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs, sameTree);
+         return runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs, sameTree);
      }
+
 
     /**
      * The method is as follows:
@@ -174,10 +115,6 @@ public class TreeController {
      *              of each of the intersection HashSets
      *          c. Break once all the extent's in the known node (that are included in the other)
      *              are in the UNKNOWN node. The best node MUST exist under this one.
-     */
-
-
-    /**
      * @param treeKnownAncs
      * @param treeUnknownAncs
      * @return
@@ -200,28 +137,32 @@ public class TreeController {
         treeUnknownAncs.getRoot().buildIntersectionLabelMapping(intersection);
         // For each node in the known tree we now want to get the best node
         ArrayList<TreeNodeObject> nodes = treeKnownAncs.getAncestorList();
+
+        // Return a .ist of lines that can easily be printed to a file.
+        ArrayList<String> listOfLines = new ArrayList<>();
         for (TreeNodeObject tno: nodes) {
             scoreNodesEfficient(tno.getIntersectIds(), treeUnknownAncs.getRoot());
+            String result = "";
             if (sameTree) {
                 if (!tno.getLabel().equals(bestNode.getLabel())) {
-                    System.out.println(
-                            "NODE: " + tno.getLabel() + " UNMATCHED:" + bestNode.getLabel()
+                    result = "NODE: " + tno.getLabel() + " UNMATCHED:" + bestNode.getLabel()
                                     + ", score: "
                                     + bestNode
-                                    .getScore());// + " orig-dist: " + node.getDistanceToRoot());
+                                    .getScore();
                 } else {
-                    System.out.println(
-                            tno.getLabel() + "," + bestNode.getLabel() + "," + bestNode.getScore());
+                    result = tno.getLabel() + "," + bestNode.getLabel() + "," + bestNode.getScore();
                 }
             } else {
-                System.out.println(
-                        tno.getLabel() + "," + bestNode.getLabel() + "," + bestNode.getScore());
+                result =
+                        tno.getLabel() + "," + bestNode.getLabel() + "," + bestNode.getScore();
             }
+            listOfLines.add(result);
+            System.out.println(result);
             treeUnknownAncs.clearScores();
             treeKnownAncs.clearScores();
         }
 
-        return null;
+        return listOfLines;
     }
 
 
@@ -269,6 +210,8 @@ public class TreeController {
             JSONArray node = new JSONArray();
             node.put(Defines.S_NAME, n.getOriginalLabel());
             node.put(Defines.S_SCORE, n.getScore());
+            // ToDo: Remove and move to allow users to download in the download section
+            // ToDo: Only keeping in interim
 //            if (user.getUsername().equals("ariane2")) {
 //                node.put(2, "saveCSV");
 //                node.put(3, n.getLeafCount());
@@ -591,6 +534,9 @@ public class TreeController {
     }
 
 
+    /**
+     * ToDo: Check the priority Queue works as expected.
+     */
     public class TreeNodeComparator implements Comparator<TreeNodeObject>
     {
         @Override

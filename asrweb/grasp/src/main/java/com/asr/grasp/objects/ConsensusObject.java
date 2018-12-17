@@ -231,6 +231,7 @@ public class ConsensusObject {
         // Already visited nodes
         ArrayList< Node> closedSet = new ArrayList<>();
         // Unvisted nodes keep track of the best options
+        // ToDo Work out why priority queue isn't working
         //PriorityQueue< Node> openSet = new PriorityQueue<>(1000, comparator);
         ArrayList<Node> openSet = new ArrayList<>();
         // Add the initial node to the open set
@@ -265,7 +266,6 @@ public class ConsensusObject {
                  Node neighbor = nodeMap.get(next.getToId());
                 double thisCost = heuristicCostEstimate(next, current, neighbor, current.getOutEdges().get(n).reciprocated);
                 if (closedSet.contains(neighbor)) {
-                    //System.out.println("___________ CLOSED SET CONTAINED: " + neighbor.getBase() + ": " + neighbor.getId());
                     // Check if this path is better and update the path to get to the neighbour
                     if (cost.get(neighbor.getId()) > thisCost) {
                         //cameFrom.put(neighbor, new Path(current, next));
@@ -295,6 +295,7 @@ public class ConsensusObject {
                     System.out.println("BETTER : " + current.getBase() + "-" + neighbor.getBase() + ": " + neighbor.getId() + " , " + neighbor.getBase() + ":" + thisCost + ", " + tentativeCost + " vs." + cost.get(neighbor.getId()));
                 }
                 // Check if we already have this in the camefrom path, if so remove
+                // ToDo: Check if overriding is causing issues?
                 if (cameFrom.get(neighbor) != null) {
                     //System.out.println("ALREADY HAD PATH, BEING OVERRIDDEN, " + cameFrom.get(neighbor).edge.fromId + "->" + cameFrom.get(neighbor).edge.toId + ", " + cameFrom.get(neighbor).node.base + " to " + current.base + " path:" + next.fromId + " ->" + next.toId);
                 }

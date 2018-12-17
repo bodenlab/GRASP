@@ -40,7 +40,7 @@ public class TreeNodeObject {
     private int id;
     private boolean inIntersection = false;
 
-    public TreeNodeObject(String label, TreeNodeObject parent, Double distance, int id) {
+    public TreeNodeObject(String label, TreeNodeObject parent, Double distance, int id, boolean extent) {
         this.children = new ArrayList<>();
         this.leaves = new ArrayList<>();
         this.leafLabels = new ArrayList<>();
@@ -50,7 +50,7 @@ public class TreeNodeObject {
         this.id = id;
         // Here we need to format the label as depending on the tool even similar trees could
         // have extra information tagged on.
-        formatLabel(label);
+        formatLabel(label, extent);
         this.score = 0;
         this.distance = distance;
         if (distance == null) {
@@ -209,7 +209,7 @@ public class TreeNodeObject {
      * Corrects for if we have labels which do or don't have the pipe from uniprot
      * @param rawLabel
      */
-    private void formatLabel(String rawLabel) {
+    private void formatLabel(String rawLabel, boolean extent) {
         if (rawLabel.split("\\|").length > 1) {
             String[] splitOnPipe = rawLabel.split("\\|");
             if (splitOnPipe[0].length() == 2) {
@@ -217,12 +217,12 @@ public class TreeNodeObject {
             } else {
                 this.label = splitOnPipe[0];
             }
+        } else if (rawLabel.split("_").length > 1) {
+            this.label = rawLabel.split("_")[0];
+        } else if (extent || rawLabel == "N0") {
+            this.label = rawLabel;
         } else {
-            if (rawLabel.split("_").length > 1) {
-                this.label = rawLabel.split("_")[0];
-            } else {
-                this.label = rawLabel;
-            }
+            this.label = "N" + this.id + "_" + rawLabel;
         }
     }
 

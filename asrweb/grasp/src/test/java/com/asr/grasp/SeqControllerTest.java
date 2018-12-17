@@ -99,7 +99,7 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint, true));
+        System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId()));
 
         // Check these were saved in the DB
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
@@ -135,7 +135,7 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        seqController.insertAllJointsToDb(recon.getId(), joint, false);
+        seqController.insertAllJointsToDb(recon.getId(), joint, false, user.getId());
         HashMap<String, String> seqs = seqController.getAllSeqs(recon.getId(), Defines.ALL);
 
         // Confirm we have matches
@@ -176,7 +176,7 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
-        seqController.insertAllJointsToDb(recon.getId(), joint, true);
+        seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId());
 
         // Check these were saved in the DB
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);

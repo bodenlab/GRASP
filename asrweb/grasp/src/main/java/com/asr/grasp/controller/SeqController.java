@@ -7,6 +7,7 @@ import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
+import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -156,7 +157,7 @@ public class SeqController {
      * @param asrInstance
      * @return
      */
-    public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy) {
+    public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy, int userId) {
         List<String> insertedLabels = new ArrayList<>();
         List<String> labels = asrInstance.getAncestralSeqLabels();
         for (String label: labels) {
@@ -168,15 +169,54 @@ public class SeqController {
             POAGJson ancsJson = new POAGJson(ancestor, gappy);
             String ancsStr = ancsJson.toJSON().toString();
 
-            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
-            if (! inserted) {
+            // ToDo: remove once the speedy method has been implemented
+            boolean inserted = updateForNewConsensusTmp(ancsStr, reconId, userId, label, gappy);
+
+            if (!inserted) {
                 return null;
             }
-            inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
+             /*
+                 Old METHOD: UNCOMMENT ONCE UPDATED:
+
+                boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+                if (! inserted) {
+                    return null;
+                }
+                inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
+            */
         }
         System.out.println("\n Finished Inserting Joint recons.");
         return insertedLabels;
     }
+
+
+    /**
+     * A temporary method to allow us to use an alternate consensus method generation technique.
+     * @param reconstructedAnsc
+     * @param reconId
+     * @param uid
+     * @param nodeName
+     * @param gappy
+     */
+    public boolean updateForNewConsensusTmp(String reconstructedAnsc, int reconId, int uid, String nodeName, boolean gappy) {
+        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),
+                consensusController
+                        .getEdgeCountDict(reconId, uid,
+                                nodeName));
+
+        String supportedSeq = c.getSupportedSequence(true);
+        System.out.println(supportedSeq);
+
+        String infUpdated = c.getAsJson().toString();
+        boolean inserted = infModel.insertIntoDb(reconId, nodeName, infUpdated);
+        if (!inserted) {
+            return false;
+        }
+        // Also want to update the Joint sequence
+        inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, Defines.JOINT, gappy);
+        return inserted;
+    }
+
 
     /**
      * Insert a single joint instance into the database.

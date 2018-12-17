@@ -87,13 +87,13 @@ public class TreeControllerTest extends BaseTest {
          */
         setUpEnv();
 
-        String sml = "0_10_dhad_28102018.nwk";
-        String mid = "10_20_dhad_28102018.nwk";
-        String lrg = "20_40_dhad_28102018.nwk";
+        String sml = TestPropertiesOverride.testFilePath + "0_10_dhad_28102018.nwk";
+        String mid = TestPropertiesOverride.testFilePath + "10_20_dhad_28102018.nwk";
+        String lrg = TestPropertiesOverride.testFilePath + "20_40_dhad_28102018.nwk";
 
         ArrayList<String> result;
         // Should print out matching nodes
-        result = treeController.getSimilarNodes(TestPropertiesOverride.testFilePath + sml, TestPropertiesOverride.testFilePath + sml, true);
+        result = treeController.getSimilarNodes(sml, sml, true);
 
         System.out.println("------------------------------------");
         System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
@@ -102,14 +102,14 @@ public class TreeControllerTest extends BaseTest {
 
 
         // Should print out eq. nodes
-        result = treeController.getSimilarNodes(TestPropertiesOverride.testFilePath + sml, TestPropertiesOverride.testFilePath + mid, false);
+        result = treeController.getSimilarNodes(sml, mid, false);
         System.out.println("------------------------------------");
         System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
         System.out.println("------------------------------------");
         assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N1_1.000,-2.0, N0,N0,-10.0"));
 
 
-        result = treeController.getSimilarNodes(TestPropertiesOverride.testFilePath + mid, TestPropertiesOverride.testFilePath + lrg, false);
+        result = treeController.getSimilarNodes(mid, lrg, false);
         System.out.println("------------------------------------");
         System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
         System.out.println("------------------------------------");

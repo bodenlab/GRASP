@@ -219,7 +219,7 @@ public class TreeNodeObject {
             }
         } else if (rawLabel.split("_").length > 1) {
             this.label = rawLabel.split("_")[0];
-        } else if (extent || rawLabel == "N0") {
+        } else if (extent || rawLabel.equals("N0")) {
             this.label = rawLabel;
         } else {
             this.label = "N" + this.id + "_" + rawLabel;

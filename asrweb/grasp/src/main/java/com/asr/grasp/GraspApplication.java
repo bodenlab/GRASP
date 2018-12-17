@@ -1,5 +1,6 @@
 package com.asr.grasp;
 
+import com.asr.grasp.controller.ConsensusController;
 import com.asr.grasp.controller.EmailController;
 import com.asr.grasp.controller.SaveController;
 import com.asr.grasp.controller.SeqController;
@@ -8,6 +9,7 @@ import com.asr.grasp.controller.TreeController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
@@ -21,6 +23,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -95,6 +98,9 @@ public class GraspApplication extends SpringBootServletInitializer {
     @Autowired
     private TreeController treeController;
 
+    @Autowired
+    private ConsensusController consensusController;
+
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(GraspApplication.class);
@@ -134,11 +140,6 @@ public class GraspApplication extends SpringBootServletInitializer {
     private JSONObject msa;
 
     private boolean needToSave = false;
-
-    /**
-     * ToDo: delete
-    */
-    private String logFileName = null;
 
     @RequestMapping(value = "/register", method = RequestMethod.GET)
     public ModelAndView showRegistrationForm(WebRequest request, Model model) {
@@ -667,7 +668,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
-
     /**
      * Gets a joint reconstruction to add to the recon graph.
      *
@@ -677,6 +677,7 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/getrecon" , method = RequestMethod.POST)
     public @ResponseBody String getRecon(@RequestBody String jsonString) {
+
         JSONObject dataJson = new JSONObject(jsonString);
         // Check if we have anything to save
         int reconMethod = Defines.JOINT;
@@ -686,8 +687,10 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (dataJson.getString("nodeLabel").equals(null)) {
             return "You need to have a label.";
         }
+        String nodeLabel = dataJson.getString("nodeLabel");
+
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
-        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), dataJson.getString("nodeLabel"));
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
 
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
@@ -695,6 +698,9 @@ public class GraspApplication extends SpringBootServletInitializer {
             reconstructedNodes.add(ancestor);
             return ancestor.toString();
         }
+
+        // Here we want to update the one in the database so that we don't have to re-do this do for
+        //return c.getAsJson().toString();
 
         // Add to the reconstructed ancestors for saving
         reconstructedNodes.add(new JSONObject(reconstructedAnsc));
@@ -811,13 +817,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 
         if (data.getString("unknown").length() > 0 & data.getString("node").length() > 0 & data.getString("num").length() > 0 ) {
-
-
             JSONArray similarNodes = treeController.getSimilarNodes(loggedInUser, data.getString("unknown"), currRecon.getLabel(), data.getString("node"), data.getInt("num"));
 
-            if (loggedInUser.getUsername().equals("ariane2") || loggedInUser.getUsername().equals("gabe")) {
-                similarNodes = treeController.getAllSimilarNodes(loggedInUser, data.getString("unknown"), currRecon.getLabel());
-            }
             //Return the list of matching node ids as a json array
             return similarNodes.toString();
         }
@@ -938,11 +939,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         } else {
             err = reconController.isLabelUnique(asr.getLabel());
         }
-
-        /**
-         * ToDo: delete
-         */
-        logFileName = asr.getLabel();
 
         if (err != null) {
             ModelAndView mav = new ModelAndView("index");

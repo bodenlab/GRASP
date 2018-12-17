@@ -158,8 +158,10 @@ public class TaxaModel extends BaseModel {
      * Returns null if no error otherwise the error message.
      */
     public String insertTaxaIds(JSONObject ids, String query) {
+        String result = null;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
 
@@ -173,12 +175,12 @@ public class TaxaModel extends BaseModel {
                     System.out.println("Unable to execute update for: " + key );
                 }
             }
-            con.close();
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            return "Unable to process all inserts.";
+            result = "Unable to process all inserts.";
         }
-        return null;
+        closeCon(con);
+        return result;
     }
 
     /**

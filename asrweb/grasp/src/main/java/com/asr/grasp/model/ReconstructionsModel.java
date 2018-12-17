@@ -196,9 +196,10 @@ public class ReconstructionsModel extends BaseModel {
                 "inference_type, joint_inferences, label, model, msa, node, " +
                 "num_threads, reconstructed_tree, sequences, tree) VALUES(?," +
                 "?,?,?,?,?,?,?,?,?,?,?);";
-
+        Connection con = null;
+        String result = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             // Need to set all the parameters
@@ -219,14 +220,14 @@ public class ReconstructionsModel extends BaseModel {
             statement.setString(11, recon.getSequences());
             statement.setString(12, recon.getTree());
 
-
             // Deletes the record from the model
             statement.executeUpdate();
-            con.close();
-            return null;
+
         } catch (Exception e) {
-            return "recon.insert.fail";
+            result = "recon.insert.fail";
         }
+        closeCon(con);
+        return result;
     }
 
 
@@ -369,8 +370,9 @@ public class ReconstructionsModel extends BaseModel {
                 "web.reconstructions AS r LEFT JOIN web.share_users AS su ON " +
                 "su.r_id=r.id WHERE " +
                 "r.id=? AND su.u_id=?;";
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
@@ -379,11 +381,14 @@ public class ReconstructionsModel extends BaseModel {
             ResultSet rawRecons = statement.executeQuery();
             con.close();
             // If we have an entry convert it to the correct format.
+            closeCon(con);
+
             if (rawRecons.next()) {
                 return createMiniFromDB(rawRecons);
             }
             return null;
         } catch (Exception e) {
+            closeCon(con);
             System.out.println(e);
         }
         return null;
@@ -407,15 +412,16 @@ public class ReconstructionsModel extends BaseModel {
                 "web.reconstructions AS r LEFT JOIN web.share_users AS su ON " +
                 "su.r_id=r.id WHERE " +
                 "r.id=? AND su.u_id=?;";
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setInt(2, userId);
 
             ResultSet rawRecons = statement.executeQuery();
-            con.close();
+            closeCon(con);
             // If we have an entry convert it to the correct format.
             if (rawRecons.next()) {
                 return createFromDB(rawRecons);
@@ -423,6 +429,7 @@ public class ReconstructionsModel extends BaseModel {
             return null;
         } catch (Exception e) {
             System.out.println(e);
+            closeCon(con);
         }
         return null;
     }
@@ -441,19 +448,20 @@ public class ReconstructionsModel extends BaseModel {
                 " LEFT JOIN web.share_users AS su ON su.r_id = " +
                 "r.id WHERE " +
                 "r.label=? AND su.u_id=?;";
+        int result = Defines.FALSE;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setString(1, reconLabel);
             statement.setInt(2, userId);
-            int reconId = getId(statement.executeQuery());
-            con.close();
-            return reconId;
+            result = getId(statement.executeQuery());
         } catch (Exception e) {
             System.out.println(e);
         }
-        return Defines.FALSE;
+        closeCon(con);
+        return result;
     }
 
     /**

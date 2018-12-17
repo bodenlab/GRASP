@@ -1,6 +1,8 @@
 package com.asr.grasp.objects;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * This is a class that is aimed to be used internally. The TreeNodeObject class was created to
@@ -14,6 +16,11 @@ public class TreeNodeObject {
     private ArrayList<TreeNodeObject> children;
     private ArrayList<TreeNodeObject> leaves; // ToDo: review do we need this?
     private ArrayList<String> leafLabels;
+    private ArrayList<String> rawLeafLabels;
+
+    // Helper hashset to allow us to compare nodes, use an ID so that this makes it faster
+    private HashSet<String> intersectIds;
+
 
     private String label;
     private double score;
@@ -29,14 +36,21 @@ public class TreeNodeObject {
     private int noIncCnt = 0;
     private int incCnt = 0;
 
-    public TreeNodeObject(String label, TreeNodeObject parent, Double distance) {
+    // Used to uniquely identify a node, used during the mapping process.
+    private int id;
+    private boolean inIntersection = false;
+
+    public TreeNodeObject(String label, TreeNodeObject parent, Double distance, int id, boolean extent) {
         this.children = new ArrayList<>();
         this.leaves = new ArrayList<>();
         this.leafLabels = new ArrayList<>();
+        this.rawLeafLabels = new ArrayList<>();
+        this.intersectIds = new HashSet<>();
         this.originalLabel = label;
+        this.id = id;
         // Here we need to format the label as depending on the tool even similar trees could
         // have extra information tagged on.
-        formatLabel(label);
+        formatLabel(label, extent);
         this.score = 0;
         this.distance = distance;
         if (distance == null) {
@@ -46,11 +60,100 @@ public class TreeNodeObject {
     }
 
 
+    /**
+     * Quick method to set that this is a node we need to include in the counting.
+     */
+    public void setInIntersection() {
+        inIntersection = true;
+    }
+
+    /**
+     * Tells us whether we need to look at this node.
+     * @return
+     */
+    public boolean isInIntersection() {
+        return inIntersection;
+    }
+
+
+    /**
+     * Set the ID of the treeNodeObject.
+     *
+     * @param id
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the ID of the node.
+     * @return
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Gets the intersection ID's
+     * @return
+     */
+    public HashSet<String> getIntersectIds() {
+        return this.intersectIds;
+    }
+
+
+    /**
+     * Make a mapping of the intersection and the labels contained in this node.
+     *
+     * Here we want to use the placement as an ID. This will be consistent acrocss all mappings.
+     *
+     * Note: we do this with the extentIntersection containing the nodes from the UNKNOWN tree,
+     * this allows us to map the ID's back easily.
+     *
+     * @param extentIntersection
+     */
+    public boolean buildIntersectionLabelMapping(ArrayList<TreeNodeObject> extentIntersection) {
+        // Check if this is a leaf
+        if (isExtent()) {
+            for (TreeNodeObject tno: extentIntersection) {
+                if (tno.getLabel().equals(this.getLabel())) {
+                    inIntersection = true;
+                    intersectIds.add(tno.getLabel());
+                    return true;
+                }
+            }
+            addExt();
+            return false;
+        }
+
+        // Go through each of the children
+        for (TreeNodeObject tno: getChildren()) {
+            tno.buildIntersectionLabelMapping(extentIntersection);
+            intersectIds.addAll(tno.getIntersectIds());
+        }
+        otherExtentCount = leafLabels.size() - intersectIds.size();
+        return false;
+    }
+
+
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                                ToDo:  Delete the below
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
+
+
     public void resetScore() {
         this.score = 0.0;
         this.otherExtentCount = 0;
         this.incCnt = 0;
         this.noIncCnt = 0;
+    }
+
+    public void addChildsExt(TreeNodeObject child) {
+        otherExtentCount += child.getExtC();
     }
 
     public void addExt() {
@@ -86,7 +189,13 @@ public class TreeNodeObject {
         return includedLeavesFromOrig;
     }
 
-
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                                ToDo:  End Delete
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
 
     /**
      * Get the unformatted label.
@@ -100,7 +209,7 @@ public class TreeNodeObject {
      * Corrects for if we have labels which do or don't have the pipe from uniprot
      * @param rawLabel
      */
-    private void formatLabel(String rawLabel) {
+    private void formatLabel(String rawLabel, boolean extent) {
         if (rawLabel.split("\\|").length > 1) {
             String[] splitOnPipe = rawLabel.split("\\|");
             if (splitOnPipe[0].length() == 2) {
@@ -108,12 +217,12 @@ public class TreeNodeObject {
             } else {
                 this.label = splitOnPipe[0];
             }
+        } else if (rawLabel.split("_").length > 1) {
+            this.label = rawLabel.split("_")[0];
+        } else if (extent || rawLabel.equals("N0")) {
+            this.label = rawLabel;
         } else {
-            if (rawLabel.split("_").length > 1) {
-                this.label = rawLabel.split("_")[0];
-            } else {
-                this.label = rawLabel;
-            }
+            this.label = "N" + this.id + "_" + rawLabel;
         }
     }
 
@@ -202,6 +311,21 @@ public class TreeNodeObject {
         return leafLabels;
     }
 
+
+    /**
+     * Returns the leafs under a particular node. This allows us to
+     * determine similarity between nodes.
+     * @return
+     */
+    public ArrayList<String> getRawLeafLabels() {
+        if (rawLeafLabels.size() > 0) {
+            return rawLeafLabels;
+        }
+        getLeafLabels(this);
+        return rawLeafLabels;
+    }
+
+
     /**
      * Returns the leafs under a particular node. This allows us to
      * determine similarity between nodes.
@@ -239,10 +363,19 @@ public class TreeNodeObject {
         for (TreeNodeObject child: node.getChildren()) {
             if (child.isExtent()) {
                 leafLabels.add(child.getLabel());
+                rawLeafLabels.add(child.getOriginalLabel());
             } else {
                 getLeafLabels(child);
             }
         }
+    }
+
+    /**
+     * Gets the parent of a particular node.
+     * @return
+     */
+    public TreeNodeObject getParent() {
+        return parent;
     }
 
     /**

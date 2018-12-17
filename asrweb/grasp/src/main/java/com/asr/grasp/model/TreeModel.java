@@ -36,8 +36,10 @@ public class TreeModel extends BaseModel {
                 "web.reconstructions AS r LEFT JOIN web.share_users AS su ON " +
                 "su.r_id=r.id WHERE " +
                 "r.id=? AND su.u_id=?;";
+        String result = null;
+        Connection con = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
@@ -50,11 +52,11 @@ public class TreeModel extends BaseModel {
             if (rawRecons.next()) {
                 return rawRecons.getString(reconstructedTree.getLabel());
             }
-            return null;
         } catch (Exception e) {
             System.out.println("Error getting the reconstructed tree: " + e.getMessage());
         }
-        return null;
+        closeCon(con);
+        return result;
     }
 
 }

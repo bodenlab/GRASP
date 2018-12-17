@@ -73,6 +73,27 @@ public class InferenceModel extends BaseModel {
 //        }
 //    }
 
+
+    public boolean updateInference(int reconId, String nodeLabel, String inference) {
+        String query = "UPDATE web.inferences SET inference=? WHERE r_id=? AND node_label=?;";
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setInt(2, reconId);
+            statement.setString(3, nodeLabel);
+            statement.setString(1, inference);
+            statement.executeUpdate();
+            closeCon(con);
+            return true;
+        } catch (Exception e) {
+            closeCon(con);
+            System.out.println("UNABLE TO UPDATE: " + nodeLabel + e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * Saves a consensus sequence
      * @param reconId
@@ -82,20 +103,22 @@ public class InferenceModel extends BaseModel {
      */
     public boolean insertIntoDb (int reconId, String nodeLabel, String inference) {
         String query = "INSERT INTO web.inferences(r_id, node_label, inference) VALUES(?,?,?);";
+        Connection con = null;
+        boolean result = false;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, nodeLabel);
             statement.setString(3, inference);
             statement.executeUpdate();
-            con.close();
-            return true;
+            result = true;
         } catch (Exception e) {
             System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
-            return false;
         }
+        closeCon(con);
+        return result;
     }
 
     /**
@@ -122,8 +145,10 @@ public class InferenceModel extends BaseModel {
      */
     public String getInferenceForLabel(int reconId, String nodeLabel) {
         String query = "SELECT inference FROM web.inferences WHERE r_id=? AND node_label=?;";
+        Connection con = null;
+        String result = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement;
             statement = con.prepareStatement(query);
@@ -137,13 +162,15 @@ public class InferenceModel extends BaseModel {
                     /**
                      * We need to make an inference out of each of the Strings we got back
                      */
-                    return results.getString(1);
+
+                    result = results.getString(1);
                 }
             }
         } catch (Exception e) {
             System.out.println("Unable get inference mapping.");
         }
-        return null;
+        closeCon(con);
+        return result;
     }
 
     /**
@@ -154,8 +181,10 @@ public class InferenceModel extends BaseModel {
      */
     public Map<String, List<Inference>> getInferences(int reconId) {
         String query = "SELECT node_label, inference FROM web.inferences WHERE r_id=?;";
+        Connection con = null;
+        Map<String, List<Inference>> inferences = null;
         try {
-            Connection con = DriverManager.getConnection(dbUrl, dbUsername,
+            con = DriverManager.getConnection(dbUrl, dbUsername,
                     dbPassword);
             PreparedStatement statement;
             statement = con.prepareStatement(query);
@@ -167,7 +196,7 @@ public class InferenceModel extends BaseModel {
                 /**
                  * We need to make an inference out of each of the Strings we got back
                  */
-                Map<String, List<Inference>> inferences = new HashMap<>();
+                inferences = new HashMap<>();
 
                 while (results.next()) {
                     // Get the ID stored in the first column
@@ -181,12 +210,12 @@ public class InferenceModel extends BaseModel {
                     thisInf.add(convertJSONToInference((JSONArray)infJSON));
                     inferences.put(nodeLabel, thisInf);
                 }
-                return inferences;
             }
         } catch (Exception e) {
             System.out.println("Unable create inference mapping.");
         }
-        return null;
+        closeCon(con);
+        return inferences;
     }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.sameInstance;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GraspConfig.class})
@@ -39,6 +40,7 @@ public class TreeControllerTest extends BaseTest {
         String sml = "0_10_dhad_28102018";
         String mid = "10_20_dhad_28102018";
         String lrg = "20_40_dhad_28102018";
+
         ASRObject asrSml = setAsr(sml);
         ASRObject asrMid = setAsr(mid);
         ASRObject asrLrg = setAsr(lrg);
@@ -53,6 +55,7 @@ public class TreeControllerTest extends BaseTest {
         int numNodes = 1;
         String rootNodeLabel = "N0";
         String anotherLabel = "N4";
+
         JSONArray arr1 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + mid, rootNodeLabel, numNodes);
         JSONArray arr2 = treeController.getSimilarNodes(user, baseTestName + mid, baseTestName + lrg, rootNodeLabel, numNodes);
         JSONArray arr3 = treeController.getSimilarNodes(user, baseTestName + sml, baseTestName + mid, anotherLabel, numNodes);
@@ -68,41 +71,58 @@ public class TreeControllerTest extends BaseTest {
          * Check that we get the correct results for N4 - we expect N4 also in the second recon
          * but N13 in the third.
          */
-        assertThat(arr3.toString(), equalTo("[[\"N4_0.990\",-4]]"));
-        assertThat( arr4.toString(), equalTo("[[\"N16_1.000\",-2]]"));
+        assertThat(arr3.toString(), equalTo("[[\"N13_0.976\",-6]]"));
+        assertThat( arr4.toString(), equalTo("[[\"N8_0.975\",-6]]"));
         userModel.deleteUser(userController.getId(user));
     }
 
     /**
      * This is just used to run tests locally. To be removed.
      */
-//
-//    @Test
-//    public void testNodeSimilaritySearcher() {
-//        /**
-//         * Tests being able to get similar nodes.
-//         */
-//        // Load two recons that are subsets of each other
-//        int ownerId = 213;
-//
-//        String sml = "taketimeemailtest";
-//        String mid = "500_1758_dhad_01112018";
-//        String lrg = "40_samples_test";
-//        setUpEnv();
-//        UserObject user = new UserObject();
-//        user.setId(213);
-//
-//        String ancs1 = "N1";
-//        String ancs2 = "N423";
-//        String ancs3 = "N560";
-//
-//        treeController.getSimilarNodes(user, sml, mid, "N0", 2);
-//        treeController.getSimilarNodes(user, sml, mid, ancs1, 2);
-//        treeController.getSimilarNodes(user, sml, mid, ancs2, 2);
-//        treeController.getSimilarNodes(user, sml, mid, ancs3, 2);
-//    }
+
+    @Test
+    public void testGetAllMatching() {
+        /**
+         * Tests being able to get similar nodes.
+         */
+        setUpEnv();
+
+        String sml = TestPropertiesOverride.testFilePath + "0_10_dhad_28102018.nwk";
+        String mid = TestPropertiesOverride.testFilePath + "10_20_dhad_28102018.nwk";
+        String lrg = TestPropertiesOverride.testFilePath + "20_40_dhad_28102018.nwk";
+
+        ArrayList<String> result;
+        // Should print out matching nodes
+        result = treeController.getSimilarNodes(sml, sml, true);
+
+        System.out.println("------------------------------------");
+        System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
+        System.out.println("------------------------------------");
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N2_1.000,-2.0, N0,N0,-10.0"));
 
 
+        // Should print out eq. nodes
+        result = treeController.getSimilarNodes(sml, mid, false);
+        System.out.println("------------------------------------");
+        System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
+        System.out.println("------------------------------------");
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N1_1.000,-2.0, N0,N0,-10.0"));
+
+
+        result = treeController.getSimilarNodes(mid, lrg, false);
+        System.out.println("------------------------------------");
+        System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
+        System.out.println("------------------------------------");
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N5_0.968,N20_0.959,-2.0, N0,N0,-20.0"));
+
+    }
+
+
+    /**
+     * Helper method for saving things (add in to save an alignment)
+     * @param ancs
+     * @param ancsLabel
+     */
     public void save(ArrayList<String> ancs, String ancsLabel) {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(

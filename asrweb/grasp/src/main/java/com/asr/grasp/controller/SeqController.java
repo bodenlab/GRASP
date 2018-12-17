@@ -4,10 +4,9 @@ import api.PartialOrderGraph;
 import com.asr.grasp.model.InferenceModel;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.objects.ASRObject;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
-import dat.EnumSeq;
-import dat.Enumerable;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,6 +48,9 @@ public class SeqController {
     private String logFileName;
 
 
+    @Autowired
+    private  ConsensusController consensusController;
+
     /**
      * Helper function that prints the memory usage to a file
      */
@@ -76,113 +78,29 @@ public class SeqController {
     }
 
     /**
-     * Inserts all the joint reconstructions into the database.
-     * Returns the list of insterted node labels.
-     * ToDo: Do we want to auto delete any they don't want? Currently keeping all.
-     *
+     * Helper function to allow us to insert an updated inference into the database.
      * @param reconId
-     * @param asrInstance
-     * @return
+     * @param label
+     * @param ancsStr
      */
-    public List<String> insertSpecificJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> nodeLabels) {
-        List<String> insertedLabels = new ArrayList<>();
-        long startTime = System.nanoTime();
-        FileWriter fr = null;
-        long[] vals = {0, 0};
-        if (logFileName != null) {
-            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
-            try {
-                fr = new FileWriter(file);
-                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
-            } catch (Exception e) {
-                System.out.println("Couldn't open file...");
-            }
-        }
-        for (String label: nodeLabels) {
-            System.out.println("Running " +  label );
-            PartialOrderGraph ancestor = asrInstance.getGraph(label);
-            // Insert it into the database
-            // What we want to do here is perform two inserts -> one for the sequence so we can do
-            // motif searching
-            POAGJson ancsJson = new POAGJson(ancestor, gappy);
-            String ancsStr = ancsJson.toJSON().toString();
-
-            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
-            if (! inserted) {
-                return null;
-            }
-            inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
-
-            System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime) / 1000000000.0));
-
-            System.out.print(label + ", ");
-            if (this.logFileName != null) {
-                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
-                        vals[0],
-                        vals[1]);
-            }
-        }
-        System.out.println("\n Finished Inserting Joint recons.");
-        return insertedLabels;
+    public void updateDBInference(int reconId, String label, String ancsStr) {
+        boolean updated = infModel.updateInference(reconId, label, ancsStr);
+        // Check whether this was updated sucessfully.
     }
+
 
     /**
-     * Inserts all the joint reconstructions into the database.
-     * Returns the list of insterted node labels.
-     * ToDo: Do we want to auto delete any they don't want? Currently keeping all.
+     * Update the sequence in the database.
      *
      * @param reconId
-     * @param asrInstance
-     * @return
+     * @param label
+     * @param seq
+     * @param gappy
      */
-    public List<String> insertAllJointsToDbTmp (int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> alreadySaved) {
-        List<String> insertedLabels = new ArrayList<>();
-        long startTime = System.nanoTime();
-        FileWriter fr = null;
-        long[] vals = {0, 0};
-        if (logFileName != null) {
-            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
-            try {
-                fr = new FileWriter(file);
-                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
-            } catch (Exception e) {
-                System.out.println("Couldn't open file...");
-            }
-        }
-        List<String> labels = asrInstance.getAncestralSeqLabels();
-        for (String label: labels) {
-            if (!alreadySaved.contains(label)) {
-                System.out.println("Running " + label);
-                PartialOrderGraph ancestor = asrInstance.getGraph(label);
-                // Insert it into the database
-                // What we want to do here is perform two inserts -> one for the sequence so we can do
-                // motif searching
-                POAGJson ancsJson = new POAGJson(ancestor, gappy);
-                String ancsStr = ancsJson.toJSON().toString();
-
-                boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
-                if (!inserted) {
-                    return null;
-                }
-                inserted = seqModel
-                        .insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT,
-                                gappy);
-
-                System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime)
-                        / 1000000000.0));
-
-                System.out.print(label + ", ");
-                if (this.logFileName != null) {
-                    vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
-                            vals[0],
-                            vals[1]);
-                }
-            }
-        }
-        System.out.println("\n Finished Inserting Joint recons.");
-        return insertedLabels;
+    public void updateDBSequence(int reconId, String label, String seq, boolean gappy) {
+        boolean updated = seqModel.updateConsensusSeq(reconId, label, seq, gappy, Defines.JOINT);
+        // Do something here and choose whether this has been updated correctly.
     }
-
 
     /**
      * Inserts all the joint reconstructions into the database.
@@ -195,18 +113,7 @@ public class SeqController {
      */
     public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave) {
         List<String> insertedLabels = new ArrayList<>();
-        long startTime = System.nanoTime();
-        FileWriter fr = null;
-        long[] vals = {0, 0};
-        if (logFileName != null) {
-            File file = new File("/var/www/GRASP/data/stats_insert_" + logFileName + ".csv");
-            try {
-                fr = new FileWriter(file);
-                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
-            } catch (Exception e) {
-                System.out.println("Couldn't open file...");
-            }
-        }
+
         for (String label: toSave) {
             System.out.println("Running " + label);
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
@@ -220,19 +127,21 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
-            inserted = seqModel
-                    .insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT,
+            // HERE WE NEED TO UPDATE TH UID THIS SHOULDN"T BE USED ATM
+            //ToDo: Here is where we can alter the consensus sequence.
+            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr),
+                    consensusController
+                            .getEdgeCountDict(reconId, 00000000000,
+                                    label));
+
+            String supportedSeq = c.getSupportedSequence(true);
+            System.out.println(supportedSeq);
+
+            String infUpdated = c.getAsJson().toString();
+            updateDBInference(reconId, label, infUpdated);
+            // Also want to update the Joint sequence
+            inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
                             gappy);
-
-            System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime)
-                    / 1000000000.0));
-
-            System.out.print(label + ", ");
-            if (this.logFileName != null) {
-                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
-                        vals[0],
-                        vals[1]);
-            }
         }
         System.out.println("\n Finished Inserting Joint recons.");
         return insertedLabels;
@@ -249,18 +158,6 @@ public class SeqController {
      */
     public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy) {
         List<String> insertedLabels = new ArrayList<>();
-        long startTime = System.nanoTime();
-        FileWriter fr = null;
-        long[] vals = {0, 0};
-        if (logFileName != null) {
-            File file = new File("/var/www/GRASP/data/stats_" + logFileName + ".csv");
-            try {
-                fr = new FileWriter(file);
-                fr.write("nodeId,test,time,total_mem,used_mem,free_mem\n");
-            } catch (Exception e) {
-                System.out.println("Couldn't open file...");
-            }
-        }
         List<String> labels = asrInstance.getAncestralSeqLabels();
         for (String label: labels) {
             System.out.println("Running " +  label );
@@ -276,23 +173,11 @@ public class SeqController {
                 return null;
             }
             inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
-
-            System.out.println("Time to make insert twice:" + ((System.nanoTime() - startTime) / 1000000000.0));
-
-            System.out.print(label + ", ");
-            if (this.logFileName != null) {
-                vals = printStats(fr, label, (System.nanoTime() - startTime) / 1000000000.0,
-                        vals[0],
-                        vals[1]);
-            }
         }
         System.out.println("\n Finished Inserting Joint recons.");
         return insertedLabels;
     }
 
-    public void setFileName(String filename) {
-        logFileName = filename;
-    }
     /**
      * Insert a single joint instance into the database.
      *
@@ -428,6 +313,19 @@ public class SeqController {
         extentNames.put(Defines.NCBI, extentNamesNcbi);
         return extentNames;
     }
+
+    /**
+     * Gets a sequence by it's label.
+     *
+     * @param label
+     * @param reconId
+     * @param reconMethod
+     * @return
+     */
+    public String getSeqByLabel(String label, int reconId, int reconMethod) {
+        return seqModel.getSeqByLabel(label, reconId, reconMethod);
+    }
+
     /**
      * Saves an ancestor node to a file.
      * @param fileWriter

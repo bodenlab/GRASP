@@ -1,6 +1,7 @@
 package com.asr.grasp;
 
 import com.asr.grasp.controller.ASRController;
+import com.asr.grasp.controller.ConsensusController;
 import com.asr.grasp.controller.SeqController;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.TaxaController;
@@ -12,6 +13,7 @@ import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.TaxaModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.ASRObject;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.model.TreeModel;
@@ -47,6 +49,8 @@ public class BaseTest {
     TreeController treeController;
     TreeModel treeModel;
     InferenceModel infModel;
+    ConsensusController consensusController;
+    ConsensusObject consensusObject;
 
     public UserObject createUser(String username, String password) {
         /**
@@ -93,6 +97,7 @@ public class BaseTest {
         asrController = new ASRController();
         taxaController = new TaxaController();
         treeController = new TreeController();
+        consensusController = new ConsensusController();
 
         userModel = new UsersModel();
         userModel.setDBConfig(dbUrl, dbPassword, dbUser);
@@ -120,6 +125,7 @@ public class BaseTest {
         seqModel.setDBConfig(dbUrl, dbPassword, dbUser);
         seqController.setSeqModel(seqModel);
         seqController.setInfModel(infModel);
+        seqController.setConsensusController(consensusController);
 
         treeModel = new TreeModel();
         treeModel.setDBConfig(dbUrl, dbPassword, dbUser);
@@ -127,6 +133,10 @@ public class BaseTest {
         treeController.setReconModel(reconModel);
         treeController.setReconController(reconController);
         treeController.setSeqController(seqController);
+
+        consensusController.setSeqController(seqController);
+        consensusController.setTreeController(treeController);
+
     }
 
     /**

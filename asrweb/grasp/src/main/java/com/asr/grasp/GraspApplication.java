@@ -350,7 +350,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
             // We also want to save all joint recons
             seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
-                    saveGappySeq);
+                    saveGappySeq, loggedInUser.getId());
 
             // Also want to save all the extents into the db
             seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap(),

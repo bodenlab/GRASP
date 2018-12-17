@@ -31,19 +31,77 @@ public class UsersModel extends BaseModel {
      * @param
      * @return User
      */
-    public String registerUser(String username, String rawPassword) {
-        String[] values = {username, encryptPassword(rawPassword)};
+    public String registerUser(String email, String username) {
+        String temporaryPassword = generateId().toString();
+        String[] values = {username, encryptPassword(temporaryPassword), email};
+
         // Check a user doesn't exist with that username
         if (getUserId(username) > 0) {
             // Usernames are unique.
             return "user.username.duplicate";
-         }
-         if (!insertStrings("INSERT INTO web.users(username, password) " +
-                "VALUES(?, ?);", values)) {
-             return "user.username.error";
-         }
+        }
+
+        if (!insertStrings("INSERT INTO web.users(username, password, email) " +
+                "VALUES(?, ?, PGP_SYM_ENCRYPT(?,'AES_KEY'));", values)) {
+            return "user.username.error";
+        }
         return null;
     }
+
+    /**
+     * Returns a plain text version of a users password so that it can be used to send them
+     * the forgot password token.
+     *
+     * @param userId
+     * @return
+     */
+    public String getUsersEmail(int userId) {
+        String query = "SELECT PGP_SYM_DECRYPT(email::bytea, 'AES_KEY') as email FROM web.users where id=?;";
+        ResultSet result = queryOnId(query, userId);
+        try {
+            while (result.next()) {
+                // There should only be one email
+                return result.getString(1);
+            }
+        } catch (Exception e) {
+            System.out.println("ERROR GETTING EMAIL" + e);
+        }
+        return null;
+    }
+
+    /**
+     * Sets a users email. This is now done so that users can save their email to their account.
+     *
+     * @param userId
+     * @return
+     */
+    public boolean setUsersEmail(int userId, String email) {
+        String query = "UPDATE web.users SET email = PGP_SYM_ENCRYPT(?,'AES_KEY') WHERE id=?;";
+        return updateStringOnId(query, userId, email);
+    }
+
+    /**
+     * Creates a new user account. Encrypts password using bCrypt algorithm.
+     * Saves the user to the model.
+     *
+     * TODO: DELETE this is legacy.
+     *
+     * @param
+     * @return User
+     */
+//    public String registerUser(String username, String rawPassword) {
+//        String[] values = {username, encryptPassword(rawPassword)};
+//        // Check a user doesn't exist with that username
+//        if (getUserId(username) > 0) {
+//            // Usernames are unique.
+//            return "user.username.duplicate";
+//         }
+//         if (!insertStrings("INSERT INTO web.users(username, password) " +
+//                "VALUES(?, ?);", values)) {
+//             return "user.username.error";
+//         }
+//        return null;
+//    }
 
     /**
      * Generates a userId.
@@ -68,6 +126,7 @@ public class UsersModel extends BaseModel {
         String encryptedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         return encryptedPassword;
     }
+
 
     /**
      * Resets the users password.
@@ -148,7 +207,6 @@ public class UsersModel extends BaseModel {
         }
         return true;
     }
-
 
     /**
      * Checks the username and password are valid.

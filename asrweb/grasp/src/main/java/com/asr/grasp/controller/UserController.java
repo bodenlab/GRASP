@@ -6,6 +6,7 @@ import com.asr.grasp.objects.GeneralObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
+import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +53,18 @@ public class UserController {
     }
 
     /**
+     * Allow the user to reset their password.
+     * @param user
+     * @return
+     */
+    public String setPassword(UserObject user) {
+        if (!user.getPassword().equals(user.getPasswordMatch())) {
+            return "user.password.diff";
+        }
+        return usersModel.resetPassword(user.getId(), user.getPassword());
+    }
+
+    /**
      * Get the ID. If the ID hasn't been set yet we need to set it based on
      * the username.
      *
@@ -73,6 +86,43 @@ public class UserController {
      * Registers the user.
      */
     public String register(UserObject user) {
+        // Register the user
+        String err = usersModel.registerUser(user.getUsername(), user.getEmail());
+        // We remove the password
+        user.setEmail(null);
+
+        if (err != null) {
+            return err;
+        }
+
+        return null;
+    }
+
+    /**
+     * Registers the user.
+     */
+    public String confirmRegistration(UserObject user) {
+        // Register the user
+        String err = usersModel.loginUser(user.getUsername(), user.getConfirmationToken());
+        // We remove the password
+        user.setPassword(null);
+        user.setConfirmationToken(null);
+
+        if (err != null) {
+            return err;
+        }
+
+        // Set the user's ID
+        getId(user);
+
+        return null;
+    }
+
+
+    /**
+     * Registers the user.
+     */
+    public String registerOld(UserObject user) {
         // Register the user
         String err = usersModel.registerUser(user.getUsername(), user.getPassword());
         // We remove the password

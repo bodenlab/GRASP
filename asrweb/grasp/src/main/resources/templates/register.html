@@ -1,48 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8"></meta>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
-    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
-
-    <title>GRASP Ancestral Sequence Reconstruction</title>
-
-    <!-- Custom Fonts -->
-    <link rel="stylesheet" type="text/css" th:href="@{/css/lib/font-awesome.min.css}"></link>
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script type="text/javascript" th:src="@{/js/lib/html5shiv.js}"></script>
-    <script type="text/javascript" th:src="@{/js/lib/respond.min.js}"></script>
-    <![endif]-->
-
-    <link rel="stylesheet" th:href="@{/css/lib/bootstrap.min.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/lib/bootstrap-switch.min.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/bootstrap_override.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/asr.css}"></link>
-
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-116832942-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-116832942-1');
-    </script>
-
-    <script th:src="@{/js/lib/canvasToBlob.js}"></script>
-    <script th:src="@{/js/lib/FileSaver.min.js}"></script>
-    <script th:src="@{/js/lib/d3min.js}"></script>
-    <script th:src="@{/js/lib/lodash.min.js}"></script>
-    <script th:src="@{/js/lib/jquery.min.js}"></script>
-    <script th:src="@{/js/lib/jquery-2.2.4.min.js}"></script>
-    <script th:src="@{/js/lib/bootstrap.min.js}"></script>
-    <script th:src="@{/js/lib/moderniser.js}"></script>
-    <script type="text/javascript" th:src="@{/js/lib/bootstrap-switch.min.js}"></script>
-
+<head th:replace="fragments/head_include :: head_include">
+    <!-- metas, link and scripts -->
 </head>
-
 <body class="container-fluid">
 <div th:replace="fragments/nav :: nav"></div>
 
@@ -54,7 +14,26 @@
     <div class="container">
         <form class="col-xs-6 col-xs-offset-3" name="registerForm" th:action="@{/register}" th:object="${user}" method="POST" enctype="utf8">
             <div class="form-group row">
-                <h3>Please register an account</h3>
+                <h3>Please register for an account</h3>
+                <p>
+                    We'll send you a registration token, you can then follow the link in the email to finalise registration.
+                    We only use your email to send out notifications that your reconstruction is complete (if you
+                are saving it), or to let you know when we do maintenance on the server.
+                </p>
+                <p>
+                    Finally we encrypt your email and will never sell your stuff (it should be assumed but thought we'd be explicit).
+                    But always remember to use a secure and unique password - if you forget it you can always reset it!
+                </p>
+                <p>
+                    Note your username will be what you use to login so make it something easy to remember! If you have any
+                    questions feel free to get in contact with the crew at GRASP.
+                </p>
+            </div>
+            <div class="form-group row">
+                <label for="email">Username</label>
+                <input id="email" class="form-control" placeholder="Email" th:field="*{email}"/>
+                <small class="form-text text-danger" th:each="error: ${#fields.errors('email')}"
+                       th:text="${error}">Validation error</small>
             </div>
             <div class="form-group row">
                 <label for="username">Username</label>
@@ -62,29 +41,7 @@
                 <small class="form-text text-danger" th:each="error: ${#fields.errors('username')}"
                        th:text="${error}">Validation error</small>
             </div>
-            <div class="form-group row">
-                <label for="password">Password</label>
-                <input class="form-control" type="password" id="password" placeholder="Password" th:field="*{password}"/>
-                <small class="form-text text-danger" th:each="error : ${#fields.errors('password')}"
-                       th:text="${error}">Validation error</small>
-            </div>
-            <div class="form-group row">
-                <label for="retypepassword">Retype Password</label>
-                <input class="form-control" type="password" id="retypepassword" placeholder="Password" th:field="*{passwordMatch}"/>
-                <small class="form-text text-danger" th:each="error : ${#fields.errors('passwordMatch')}"
-                       th:text="${error}">Validation error</small>
-            </div>
-            <!--<div class="form-group row">-->
-                <!--<label for="email">Email</label>-->
-                <!--<input class="form-control" type="email" id="email"-->
-                       <!--placeholder="someone@somewhere.com"-->
-                       <!--th:field="*{email}"-->
-                       <!--data-error="This email address is invalid"-->
-                       <!--required="true"/>-->
-                <!--<small class="form-text text-danger"-->
-                       <!--th:each="error : ${#fields.errors('email')}"-->
-                       <!--th:text="${error}">Validation error</small>-->
-            <!--</div>-->
+
             <div class="form-group row">
                 <button type="submit" class="btn btn-primary col-sm-4">Register</button>
             </div>

@@ -9,7 +9,6 @@ import com.asr.grasp.controller.TreeController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
-import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
@@ -23,7 +22,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -148,11 +146,34 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
+     * Registers a new user account and sends the user to the accounts page.
+     */
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public ModelAndView registerUser(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+
+        userValidator.validate(user, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            return new ModelAndView("register");
+        }
+
+        String err = userController.register(user);
+
+        if (err != null) {
+            // Probably should add an error here
+            return new ModelAndView("register");
+        }
+
+        return return new ModelAndView("confirm-registration");
+    }
+
+    /**
      * This is actually to logout. Here we want to reset the loggedInUser and also the current
      * reconstruction and ASR.
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView showLoginForm(WebRequest request, Model model) {
+    public ModelAndView logoutUserAndGoToLoginPage(WebRequest request, Model model) {
         // Reset our variables.
         loggedInUser = new UserObject();
 
@@ -162,13 +183,184 @@ public class GraspApplication extends SpringBootServletInitializer {
         } else {
             needToSave = false;
         }
-
         model.addAttribute("user", loggedInUser);
-        model.addAttribute("username", null);
+        model.addAttribute("email", null);
         needToSave = false;
         return new ModelAndView("login");
     }
 
+
+    /**
+     * Logs in the user and takes them to their account page.
+     */
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ModelAndView loginUser(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+
+        loginValidator.validate(user, bindingResult);
+
+        // If we have passed the validation this means that the username and
+        // password are correct.
+        String err = userController.loginUser(user);
+        if (err != null) {
+            bindingResult.rejectValue("username", err);
+        }
+        if (bindingResult.hasErrors()) {
+            return new ModelAndView("login");
+        }
+
+        loggedInUser = user;
+
+        // ToDo: check the obsolete recons
+        //reconController.checkObsolete();
+
+        String errSave = null;
+        Boolean saved = false;
+        // If there is a current reconstruction save it.
+        if (currRecon.getLabel() != null) {
+            // Assume they input their email when they selected to save it.
+            if (email != null) {
+                loggedInUser.setEmail(email);
+            } else {
+                // ToDo: Fix this to ask for an email again.
+                loggedInUser.setEmail("noemail");
+            }
+            errSave = saveCurrRecon();
+            email = null;
+            saved = true;
+        }
+
+        // Get their accounts page after we have saved the reconstruction (if
+        // one existed).
+        ModelAndView mav = accountView.get(loggedInUser, userController);
+
+        // CHeck that err wasn't try
+        if (errSave != null) {
+            mav.addObject("warning", errSave);
+        } else {
+            mav.addObject("warning", null);
+        }
+        if (errSave == null && saved) {
+            mav.addObject("type", "saved");
+        }
+        saveController = new SaveController();
+        return mav;
+    }
+
+    /**
+     * Registers a new user account and sends the user to the accounts page.
+     *
+     * Checks the confirmation token is correct.
+     */
+    @RequestMapping(value = "/confirm-registration", method = RequestMethod.GET)
+    public ModelAndView confirmRegistration(Model model, HttpServletRequest request) {
+        model.addAttribute("user", loggedInUser);
+        return new ModelAndView("confirm_registration");
+    }
+
+    /**
+     * Registers a new user account and sends the user to the accounts page.
+     *
+     * Checks the confirmation token is correct.
+     */
+    @RequestMapping(value = "/confirm-registration", method = RequestMethod.POST)
+    public ModelAndView confirmRegistration(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        String confirmed = userController.confirmRegistration(user);
+        if (confirmed != null) {
+            // ToDo: Check this password is correct
+            model.addAttribute("error", confirmed);
+        }
+        loggedInUser = user;
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("email", null);
+
+        return new ModelAndView("set-password");
+    }
+
+
+
+    @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.GET)
+    public ModelAndView resetPasswordConfirmation(Model model, HttpServletRequest request) {
+        model.addAttribute("user", loggedInUser);
+        return new ModelAndView("reset_password_confirmation");
+    }
+
+
+    @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.POST)
+    public ModelAndView resetPasswordConfirmation(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        model.addAttribute("user", loggedInUser);
+        return new ModelAndView("reset_password_confirmation");
+    }
+
+
+
+    /**
+     * Allows the user to set their password if they are already logged in or have provided
+     * a correct login token.
+     *
+     * @param user
+     * @param bindingResult
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/set-password", method = RequestMethod.POST)
+    public ModelAndView setPassword(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        // ToDo: Check the obsolete recons
+        //reconController.checkObsolete();
+        loggedInUser = user;
+        userController.setPassword(user);
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("email", null);
+        // ToDo
+        return new ModelAndView("set_password");
+    }
+
+
+    /**
+     * @return
+     */
+    @RequestMapping(value = "/set-password", method = RequestMethod.GET)
+    public ModelAndView setPassword(Model model, HttpServletRequest request) {
+        // ToDo: Check the obsolete recons
+        //reconController.checkObsolete();
+        loggedInUser = new UserObject();
+        // ToDo
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("email", null);
+        return new ModelAndView("set_password");
+    }
+
+    /**
+     * Sends the user a token for their account based on their email address.
+     *
+     * @param user
+     * @param bindingResult
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/forgot-password", method = RequestMethod.GET)
+    public ModelAndView sendPasswordLink(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        // ToDo: Check the obsolete recons
+        //reconController.checkObsolete();
+        loggedInUser = user;
+        // ToDo
+        return new ModelAndView("forgot_password");
+    }
+
+
+    /**
+     * Returns the account page to the user.
+     *
+     * @param request
+     * @param model
+     * @return
+     */
     @RequestMapping(value = "/account", method = RequestMethod.GET)
     public ModelAndView showAccount(WebRequest request, Model model) {
         // ToDo: Check the obsolete recons
@@ -360,145 +552,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         return err;
     }
 
-    /**
-     * Logs in the user and takes them to their account page.
-     */
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ModelAndView loginUser(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
-
-        loginValidator.validate(user, bindingResult);
-
-        // If we have passed the validation this means that the username and
-        // password are correct.
-        String err = userController.loginUser(user);
-        if (err != null) {
-            bindingResult.rejectValue("username", err);
-        }
-        if (bindingResult.hasErrors()) {
-            return new ModelAndView("login");
-        }
-
-        loggedInUser = user;
-
-        // ToDo: check the obsolete recons
-        //reconController.checkObsolete();
-
-        String errSave = null;
-        Boolean saved = false;
-        // If there is a current reconstruction save it.
-        if (currRecon.getLabel() != null) {
-            // Assume they input their email when they selected to save it.
-            if (email != null) {
-                loggedInUser.setEmail(email);
-            } else {
-                // ToDo: Fix this to ask for an email again.
-                loggedInUser.setEmail("noemail");
-            }
-            errSave = saveCurrRecon();
-            email = null;
-            saved = true;
-        }
-
-        // Get their accounts page after we have saved the reconstruction (if
-        // one existed).
-        ModelAndView mav = accountView.get(loggedInUser, userController);
-
-        // CHeck that err wasn't try
-        if (errSave != null) {
-            mav.addObject("warning", errSave);
-        } else {
-            mav.addObject("warning", null);
-        }
-        if (errSave == null && saved == true) {
-            mav.addObject("type", "saved");
-        }
-        saveController = new SaveController();
-        return mav;
-    }
-
-    /**
-     * Registers a new user account and sends the user to the accounts page.
-     */
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ModelAndView registerUser(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
-
-        userValidator.validate(user, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            return new ModelAndView("register");
-        }
-
-        String err = userController.register(user);
-
-        if (err != null) {
-            // Probably should add an error here
-            return new ModelAndView("register");
-        }
-        // Otherwise we want to get the now logged in user by ID
-        userController.getId(user);
-
-        // Set the loggedInUser
-        loggedInUser = user;
-
-        Boolean saved = false;
-        String errSave = null;
-        // If there is a current reconstruction save it.
-        if (currRecon.getLabel() != null) {
-            errSave = saveCurrRecon();
-            saved = true;
-        }
-
-        // Get their accounts page after we have saved the reconstruction (if
-        // one existed).
-        ModelAndView mav = accountView.get(loggedInUser, userController);
-
-        // CHeck that err wasn't try
-        if (err != null || errSave != null) {
-            mav.addObject("warning", err.toString() + errSave.toString());
-        } else {
-            mav.addObject("warning", null);
-        }
-        if (errSave == null && saved == true) {
-            mav.addObject("type", "saved");
-        }
-        return mav;
-    }
-
-//	/**
-//	 * ToDo: Implememnt send registration email. This will enable users to
-//	 * reset passwords etc.
-//	 * @param registered
-//	 * @return
-//	 */
-//	private User sendRegistrationEmail(User registered, HttpServletRequest request) {
-//		// Disable user until they click on confirmation link in email
-//		// registered.setEnabled(false);
-//
-//		// Generate random 36-character string token for confirmation link
-//		registered.setConfirmationToken(UUID.randomUUID().toString());
-//
-//		String appUrl = request.getScheme() + "://" + request.getServerName();
-//
-//		SimpleMailMessage registrationEmail = new SimpleMailMessage();
-//		registrationEmail.setTo(registered.getEmail());
-//		registrationEmail.setSubject("Registration Confirmation");
-//		registrationEmail.setText("To confirm your e-mail address, please click the link below:\n"
-//				+ appUrl + "/confirm?token=" + registered.getConfirmationToken());
-//		registrationEmail.setFrom("noreply@domain.com");
-//
-//		emailService.sendEmail(registrationEmail);
-//		return registered;
-//	}
-//
-//	private com.asr.grasp.User createUserAccount(com.asr.grasp.User user){
-//		return controller.registerNewUserAccount(user);
-//	}
-//
-//	private com.asr.grasp.User getUserAccount(com.asr.grasp.User user){
-//		return controller.getUserAccount(user);
-//	}
 
     /**
      * Show guide
@@ -554,7 +607,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // if a user is not logged in, prompt to Login
         if (loggedInUser.getUsername() == null || loggedInUser.getUsername() == "") {
-            ModelAndView mav = new ModelAndView("login");
+            ModelAndView mav = new ModelAndView("old_login");
             mav.addObject("user", loggedInUser);
             return mav;
         }

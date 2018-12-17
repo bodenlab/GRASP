@@ -7,10 +7,8 @@ import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.utils.Defines;
-import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -465,7 +463,12 @@ public class SeqController {
     public void setSeqModel(SeqModel seqModel) {
         this.seqModel = seqModel;
     }
+
     public void setInfModel(InferenceModel infModel) {
         this.infModel = infModel;
+    }
+
+    public void setConsensusController(ConsensusController consensusController) {
+        this.consensusController = consensusController;
     }
 }

@@ -2,8 +2,6 @@ package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.TreeModel;
-import com.asr.grasp.objects.ASRObject;
-import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.objects.UserObject;
@@ -15,11 +13,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.PriorityQueue;
-import javax.swing.tree.TreeNode;
 import json.JSONArray;
-import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 
 /**

@@ -98,4 +98,17 @@ public class ConsensusController {
 
         return weightMap;
     }
+
+    /**
+     * ------------------------------------------------------------------------
+     *          The following are to set the test env.
+     * ------------------------------------------------------------------------
+     */
+    public void setSeqController(SeqController seqController) {
+        this.seqController = seqController;
+    }
+
+    public void setTreeController(TreeController treeController) {
+        this.treeController = treeController;
+    }
 }

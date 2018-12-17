@@ -98,6 +98,8 @@ public class SeqControllerTest extends BaseTest {
 
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
+        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
+
         // Check saving it to the DB
         System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId()));
 
@@ -135,6 +137,8 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
+        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
+
         seqController.insertAllJointsToDb(recon.getId(), joint, false, user.getId());
         HashMap<String, String> seqs = seqController.getAllSeqs(recon.getId(), Defines.ALL);
 
@@ -176,6 +180,8 @@ public class SeqControllerTest extends BaseTest {
         ASRPOG joint = asr.getASRPOG(Defines.JOINT);
 
         // Check saving it to the DB
+        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
+
         seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId());
 
         // Check these were saved in the DB
@@ -194,7 +200,7 @@ public class SeqControllerTest extends BaseTest {
 
         assertThat(motif1Match.size(), equalTo(2));
 
-        assertThat(motif2Match.size(), equalTo(3));
+        assertThat(motif2Match.size(), equalTo(7));
 
         assertThat(motif2Match.contains("N4_98"), equalTo(false));
         assertThat(motif2Match.contains("N13_97"), equalTo(true));

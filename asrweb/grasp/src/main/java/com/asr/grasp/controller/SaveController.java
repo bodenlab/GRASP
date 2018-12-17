@@ -5,7 +5,6 @@ import com.asr.grasp.objects.EmailObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
-import java.util.ArrayList;
 import json.JSONObject;
 import org.springframework.stereotype.Controller;
 

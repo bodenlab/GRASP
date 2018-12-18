@@ -1,5 +1,8 @@
 package com.asr.grasp.model;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
@@ -31,21 +34,32 @@ public class UsersModel extends BaseModel {
      * @param
      * @return User
      */
-    public String registerUser(String email, String username) {
-        String temporaryPassword = generateId().toString();
-        String[] values = {username, encryptPassword(temporaryPassword), email};
+    public String registerUser(String username, String email, String temporaryPassword) {
+        temporaryPassword = encryptPassword(temporaryPassword);
 
         // Check a user doesn't exist with that username
         if (getUserId(username) > 0) {
             // Usernames are unique.
             return "user.username.duplicate";
         }
-
-        if (!insertStrings("INSERT INTO web.users(username, password, email) " +
-                "VALUES(?, ?, PGP_SYM_ENCRYPT(?,'AES_KEY'));", values)) {
-            return "user.username.error";
+        String query = "INSERT INTO web.users(username, password, email) " +
+                "VALUES(?, ?, PGP_SYM_ENCRYPT(?,'AES_KEY'));";
+        Connection con = null;
+        String result = null;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setString(1, username);
+            statement.setString(2, temporaryPassword);
+            statement.setString(3, email);
+            statement.executeUpdate();
+        } catch (Exception e) {
+            System.out.println("UNABLE TO INSTERT USER: " + username + e.getMessage());
+            result = "user.username.error";
         }
-        return null;
+        closeCon(con);
+        return result;
     }
 
     /**
@@ -110,7 +124,7 @@ public class UsersModel extends BaseModel {
      * https://stackoverflow.com/questions/15184820/how-to-generate-unique-long-using-uuid
      * This will gaurentee uniqueness.
      */
-    private Long generateId() {
+    public Long generateId() {
         return (System.currentTimeMillis() << 20) |
                 (System.nanoTime() & ~9223372036854251520L);
     }

@@ -34,11 +34,18 @@ public class EmailObject {
     public void setContent(String appUrl, String confirmationToken) {
         this.content = "Dear " + username + ", \n "
                 + " Please confirm your email by clicking the following link: \n"
-                + appUrl + "confirm?token=" + confirmationToken + " \n"
+                + appUrl + " and adding in your confirmation token: " + confirmationToken + " \n"
                 + " Cheers, \n The grasp team :) ";
-        this.subject = "Email registration at GRASP";
+        this.subject = "Email confirmation at GRASP";
     }
 
+    public void setContentPasswordReset(String appUrl, String confirmationToken) {
+        this.content = "Dear " + username + ", \n "
+                + " Please reset your password clicking the following link: \n"
+                + appUrl + " and adding in your confirmation token: " + confirmationToken + " \n"
+                + " Cheers, \n The grasp team :) \n If this wasn't you, please get in contact with the people at GRASP.";
+        this.subject = "Reset password at GRASP";
+    }
 
     public void setContent(String reconName) {
         this.content = "Dear " + username + ", \n "

@@ -30,7 +30,7 @@
                 </p>
             </div>
             <div class="form-group row">
-                <label for="email">Username</label>
+                <label for="email">Email</label>
                 <input id="email" class="form-control" placeholder="Email" th:field="*{email}"/>
                 <small class="form-text text-danger" th:each="error: ${#fields.errors('email')}"
                        th:text="${error}">Validation error</small>

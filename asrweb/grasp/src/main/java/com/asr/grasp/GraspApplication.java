@@ -158,14 +158,21 @@ public class GraspApplication extends SpringBootServletInitializer {
             return new ModelAndView("register");
         }
 
-        String err = userController.register(user);
-
+        // Register the user
+        String err = userController.register(user, userController.getAConfirmationToken());
         if (err != null) {
-            // Probably should add an error here
-            return new ModelAndView("register");
+            model.addAttribute("warning", err);
+            return new ModelAndView("login");
         }
 
-        return return new ModelAndView("confirm-registration");
+        // Send the confirmation email
+        userController.sendRegistrationEmail(user);
+        if (err != null) {
+            // ToDo: Probably should add an error here
+            return new ModelAndView("register");
+        }
+        loggedInUser = user;
+        return new ModelAndView("confirm_registration");
     }
 
     /**
@@ -183,6 +190,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         } else {
             needToSave = false;
         }
+
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
         needToSave = false;
@@ -199,8 +207,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         loginValidator.validate(user, bindingResult);
 
-        // If we have passed the validation this means that the username and
-        // password are correct.
         String err = userController.loginUser(user);
         if (err != null) {
             bindingResult.rejectValue("username", err);
@@ -266,16 +272,19 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/confirm-registration", method = RequestMethod.POST)
     public ModelAndView confirmRegistration(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) {
+
         String confirmed = userController.confirmRegistration(user);
+        ModelAndView mav = new ModelAndView("confirm_registration");
+
         if (confirmed != null) {
-            // ToDo: Check this password is correct
-            model.addAttribute("error", confirmed);
+            mav.addObject("warning", confirmed);
+            return mav;
         }
         loggedInUser = user;
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
 
-        return new ModelAndView("set-password");
+        return new ModelAndView("set_password");
     }
 
 
@@ -312,11 +321,17 @@ public class GraspApplication extends SpringBootServletInitializer {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
         loggedInUser = user;
-        userController.setPassword(user);
+
+        String err = userController.setPassword(user);
+        ModelAndView mav = new ModelAndView("set_password");
+        if (err != null) {
+            mav.addObject("warning", err);
+            return mav;
+        }
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
         // ToDo
-        return new ModelAndView("set_password");
+        return accountView.get(loggedInUser, userController);
     }
 
 
@@ -343,13 +358,30 @@ public class GraspApplication extends SpringBootServletInitializer {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/forgot-password", method = RequestMethod.GET)
+    @RequestMapping(value = "/forgot-password", method = RequestMethod.POST)
     public ModelAndView sendPasswordLink(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
         loggedInUser = user;
         // ToDo
+        String err = userController.sendForgotPasswordEmail(user);
+        ModelAndView mav = new ModelAndView("forgot_password");
+        if (err != null) {
+            mav.addObject("warning", err);
+            return mav;
+        }
+        return new ModelAndView("set_password");
+    }
+
+    /**
+     * Sends the user a token for their account based on their email address.
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/forgot-password", method = RequestMethod.GET)
+    public ModelAndView sendPasswordLink(Model model, HttpServletRequest request) {
         return new ModelAndView("forgot_password");
     }
 

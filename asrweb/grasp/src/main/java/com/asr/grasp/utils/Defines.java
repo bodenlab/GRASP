@@ -95,6 +95,7 @@ public class Defines {
      */
     public static final int REGISTRATION = 0;
     public static final int RECONSTRUCTION = 1;
+    public static final int FORGOT_PASSWORD = 2;
 
     /**
      * For the visualisation of the similar nodes.

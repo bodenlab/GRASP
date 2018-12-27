@@ -210,6 +210,13 @@ public class TreeNodeObject {
      * @param rawLabel
      */
     private void formatLabel(String rawLabel, boolean extent) {
+        boolean isNumber = false;
+        try {
+            double num = Double.parseDouble(rawLabel);
+            isNumber = true;
+        } catch (Exception e) {
+            isNumber = false;
+        }
         if (rawLabel.split("\\|").length > 1) {
             String[] splitOnPipe = rawLabel.split("\\|");
             if (splitOnPipe[0].length() == 2) {
@@ -219,7 +226,7 @@ public class TreeNodeObject {
             }
         } else if (rawLabel.split("_").length > 1) {
             this.label = rawLabel.split("_")[0];
-        } else if (extent || rawLabel.equals("N0")) {
+        } else if (extent || rawLabel.equals("N0") || !isNumber) {
             this.label = rawLabel;
         } else {
             this.label = "N" + this.id + "_" + rawLabel;

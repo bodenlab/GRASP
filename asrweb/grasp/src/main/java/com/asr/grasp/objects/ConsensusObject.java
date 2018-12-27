@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Stack;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import json.JSONArray;
 import json.JSONObject;
 import vis.Defines;
@@ -25,7 +26,8 @@ public class ConsensusObject {
     // Map with heuristics
     HashMap<Integer, Double> cost = new HashMap<>();
     HashMap<String, Double> weightMap;
-
+    HashMap<Integer, Integer> seqStartMap;
+    HashMap<Integer, Double> cdfMap;
 
     public ConsensusObject(POAGJson poagJson) {
 
@@ -37,8 +39,10 @@ public class ConsensusObject {
      * Need to match up the nodes and the edges. We do
      * @param unformattedJson
      */
-    public ConsensusObject(JSONObject unformattedJson, HashMap<String, Double> weightMap) {
+    public ConsensusObject(JSONObject unformattedJson, HashMap<String, Double> weightMap, HashMap<Integer, Integer> seqStartMap, HashMap<Integer, Double> cdfMap) {
         this.weightMap = weightMap;
+        this.seqStartMap = seqStartMap;
+        this.cdfMap = cdfMap;
         JSONArray jsonNodes = unformattedJson.getJSONArray("nodes");
         JSONArray jsonEdges = unformattedJson.getJSONArray("edges");
 
@@ -123,9 +127,25 @@ public class ConsensusObject {
      * @return
      */
     private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
-        int multiplier = 1;
+        Integer multiplier = 1;
+        Double weightedMultiplier = 1.0;
         if (!isBidirectional) {
-            multiplier = numberNodes;
+            multiplier = seqStartMap.get(to.getId());
+
+            if (multiplier == null) {
+                multiplier = numberNodes;
+            } else {
+                System.out.println("USED MULTIPLIER: " + multiplier + " FROM " + from.getId() + "->" + to.getId());
+            }
+            // Max value in the cdf map is 1, min value is 0
+            // 0 indicates that all seqs pass through 1 means its very badly supported.
+            if (to.getId() == finalNode.getId()) {
+                System.out.println("DIDN'T CONTAIN FINAL NODE USED PRE:" + to.getId() + "->" + cdfMap.get(finalNode.getId() - 2));
+
+                weightedMultiplier = (multiplier * cdfMap.get(finalNode.getId() - 1)) + 1;
+            } else {
+                weightedMultiplier = (multiplier * cdfMap.get(to.getId())) + 1;
+            }
         }
         int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
         positionDiff = (positionDiff > 0) ? positionDiff : 1;
@@ -135,7 +155,7 @@ public class ConsensusObject {
         if (val <= 0) {
             val = Double.MIN_VALUE;
         }
-        val =  multiplier * val * positionDiff;
+        val =  weightedMultiplier * val * positionDiff;
         if (val <= 0) {
             val = Double.MAX_VALUE;
         }

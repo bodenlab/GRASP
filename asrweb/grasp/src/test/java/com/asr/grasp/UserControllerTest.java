@@ -25,13 +25,15 @@ public class UserControllerTest extends BaseTest {
      */
     private UserObject registerUser(UserObject user) {
         // Register User 1
+        user.setEmail(user.getUsername());
+        user.setConfirmationToken(user.getPassword());
         String err = userController.register(user, user.getPassword());
 
         // check we have no errors
         assertThat(err, is(equalTo(null)));
 
         // check the ID has been set
-        assertThat(user.getId(), not(equalTo(Defines.UNINIT)));
+        assertThat(userController.getId(user), not(equalTo(Defines.UNINIT)));
 
         // Keep track of the userId so we can delete it after
         return user;
@@ -47,8 +49,10 @@ public class UserControllerTest extends BaseTest {
     private UserObject createUserNoDel(String username, String password) {
         UserObject user = new UserObject();
         user.setUsername(username);
+        user.setEmail(username);
         user.setPassword(password);
         user.setPasswordMatch(password);
+        user.setConfirmationToken(password);
         return user;
     }
 

@@ -97,6 +97,53 @@ public class TreeController {
          return runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs, sameTree);
      }
 
+    /**
+     * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
+     *
+     * @param user
+     * @param reconKnownAncsLabel
+     * @param reconUnknownAncsLabel
+     * @param ancsestorLabel
+     * @return
+     */
+    public ArrayList<String> getSimilarNodesTmp(UserObject user, String reconKnownAncsLabel,
+            String reconUnknownAncsLabel, String ancsestorLabel, int numSimilarNodes) {
+        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+
+
+        // If either of the labels are incorrect then return
+        if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+            return null;
+        }
+
+        // Otherwise get the trees
+        TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
+        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
+
+        // If either of the trees weren't able to be parsed return
+        if (treeKnownAncs == null || treeUnknownAncs == null) {
+            return null;
+        }
+
+        // Setup the ordered nodes
+        orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
+
+        getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
+
+        ArrayList<String> retNodes = new ArrayList<>();
+
+        /**
+         * Convert the nodes to a JSON representation so we can view these on the front end.
+         */
+        for (int i = 0; i < numSimilarNodes; i ++) {
+            TreeNodeObject n = orderedNodes.poll();
+            retNodes.add(n.getOriginalLabel());
+            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
+        }
+
+        return retNodes;
+    }
 
     /**
      * The method is as follows:

@@ -126,12 +126,11 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
+            HashMap<String, Double> weightmap = consensusController.getEdgeCountDict(reconId, 00000000000, label);
+            HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
             // HERE WE NEED TO UPDATE TH UID THIS SHOULDN"T BE USED ATM
             //ToDo: Here is where we can alter the consensus sequence.
-            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr),
-                    consensusController
-                            .getEdgeCountDict(reconId, 00000000000,
-                                    label));
+            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr),weightmap,  seqStartMap, consensusController.getCdfMap());
 
             String supportedSeq = c.getSupportedSequence(true);
             System.out.println(supportedSeq);
@@ -197,10 +196,9 @@ public class SeqController {
      * @param gappy
      */
     public boolean updateForNewConsensusTmp(String reconstructedAnsc, int reconId, int uid, String nodeName, boolean gappy) {
-        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),
-                consensusController
-                        .getEdgeCountDict(reconId, uid,
-                                nodeName));
+        HashMap<String, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName);
+        HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
+        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),weightmap,  seqStartMap, consensusController.getCdfMap());
 
         String supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);

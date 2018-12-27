@@ -77,6 +77,9 @@ public class BaseTest {
         user.setUsername(username);
         user.setPassword(password);
         user.setPasswordMatch(password);
+        user.setConfirmationToken(password);
+        user.setEmail(username);
+
         // Check if the user has already been registered
         int id = userController.getId(user);
         // if they have remove them and re-add them
@@ -86,6 +89,7 @@ public class BaseTest {
         }
         // Method to make it easier to register for the test
         userController.register(user, password);
+        id = userController.getId(user);
         return user;
     }
 

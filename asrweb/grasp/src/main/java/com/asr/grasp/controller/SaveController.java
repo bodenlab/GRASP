@@ -134,7 +134,7 @@ public class SaveController implements Runnable {
             // Now we want to save the sequences
             seqController.insertAllExtantsToDb(currRecon.getId(), asr.getSequencesAsNamedMap(), saveGappySeq);
             System.out.println("Saving the reconstruction complete, now creating all the joints");
-            seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
+             seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
                     saveGappySeq, user.getId());
             // Now we want to send an email notifying the user that their reconstruction is complete
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);

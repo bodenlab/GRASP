@@ -9,6 +9,7 @@ import com.asr.grasp.controller.TreeController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
@@ -22,6 +23,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -753,6 +755,40 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
+    public HashMap<String, ArrayList<String>> getMapping() {
+        HashMap<String, ArrayList<String>> mapping = new HashMap<>();
+        // Get each recon label and set this as the key
+
+        ArrayList<String> r1258 = new ArrayList<>();
+        // N423
+        r1258.add("N1049_0.978");
+        mapping.put("1529", r1258);
+
+
+        ArrayList<String> r3758 = new ArrayList<>();
+        // N423
+        r3758.add("N2512_0.992");
+        mapping.put("2500_3758_dhad_07112018", r3758);
+
+        ArrayList<String> r6258 = new ArrayList<>();
+        // N423
+        r6258.add("N1091_0.994");
+        mapping.put("5000_6258_dhad_11112018", r6258);
+
+        ArrayList<String> r8758 = new ArrayList<>();
+        // N1
+        r8758.add("N117_0.937");
+        // N423
+        r8758.add("N5041_1.000");
+        // N560
+        r8758.add("N5816_1.000");
+
+        mapping.put("7500_8758_dhad_10112018", r8758);
+
+        return mapping;
+
+    }
+
     /**
      * Gets a joint reconstruction to add to the recon graph.
      *
@@ -776,7 +812,52 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
+        if (loggedInUser.getUsername().equals("dev")) {
+            HashMap<String, Double> weightmap = consensusController
+                    .getEdgeCountDict(currRecon.getId(), loggedInUser.getId(), nodeLabel);
+            HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
+            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc), weightmap,
+                    seqStartMap, consensusController.getCdfMap());
 
+            String supportedSeq = c.getSupportedSequence(true);
+            System.out.println(supportedSeq);
+
+            String infUpdated = c.getAsJson().toString();
+
+            return infUpdated;
+        }
+//        if (loggedInUser.getUsername().equals("ariane4")) {
+//            int uid = 97; // DHAD membership name
+//            // Get the mapping of reconstruction names
+//            HashMap<String, ArrayList<String>> mapping = getMapping();
+//
+//            for (String reconName: mapping.keySet()) {
+//                // Get the ID of the recon
+//                int reconId = reconController.getId(reconName, uid);
+//
+//                // For each node label of interest we want to get the mapping.
+//                ArrayList<String> labels = mapping.get(reconName);
+//
+//                for (String nodeName: labels) {
+//                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
+//                    reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
+//                    //ToDo: Here is where we can alter the consensus sequence.
+//                    HashMap<String, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName);
+//                    HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
+//                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),weightmap,  seqStartMap);
+//
+//
+//                    String supportedSeq = c.getSupportedSequence(true);
+//                    System.out.println(supportedSeq);
+//
+//                    String infUpdated = c.getAsJson().toString();
+//                    seqController.updateDBInference(reconId, nodeName, infUpdated);
+//                    // Also want to update the Joint sequence
+//                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+//                }
+//            }
+//            return reconstructedAnsc.toString();
+//        }
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
             JSONObject ancestor = asr.getAncestralGraphJSON(dataJson.getString("nodeLabel"));

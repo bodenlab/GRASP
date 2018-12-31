@@ -322,18 +322,20 @@ public class GraspApplication extends SpringBootServletInitializer {
             BindingResult bindingResult, Model model, HttpServletRequest request) {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
+        user.setId(loggedInUser.getId());
         loggedInUser = user;
-
         String err = userController.setPassword(user);
         ModelAndView mav = new ModelAndView("set_password");
         if (err != null) {
             mav.addObject("warning", err);
             return mav;
         }
+        loggedInUser = user;
+
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
         // ToDo
-        return accountView.get(loggedInUser, userController);
+        return new ModelAndView("login");
     }
 
 
@@ -755,39 +757,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
-    public HashMap<String, ArrayList<String>> getMapping() {
-        HashMap<String, ArrayList<String>> mapping = new HashMap<>();
-        // Get each recon label and set this as the key
-
-        ArrayList<String> r1258 = new ArrayList<>();
-        // N423
-        r1258.add("N1049_0.978");
-        mapping.put("1529", r1258);
-
-
-        ArrayList<String> r3758 = new ArrayList<>();
-        // N423
-        r3758.add("N2512_0.992");
-        mapping.put("2500_3758_dhad_07112018", r3758);
-
-        ArrayList<String> r6258 = new ArrayList<>();
-        // N423
-        r6258.add("N1091_0.994");
-        mapping.put("5000_6258_dhad_11112018", r6258);
-
-        ArrayList<String> r8758 = new ArrayList<>();
-        // N1
-        r8758.add("N117_0.937");
-        // N423
-        r8758.add("N5041_1.000");
-        // N560
-        r8758.add("N5816_1.000");
-
-        mapping.put("7500_8758_dhad_10112018", r8758);
-
-        return mapping;
-
-    }
 
     /**
      * Gets a joint reconstruction to add to the recon graph.
@@ -812,17 +781,20 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
-        if (loggedInUser.getUsername().equals("dev")) {
+        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
             HashMap<String, Double> weightmap = consensusController
                     .getEdgeCountDict(currRecon.getId(), loggedInUser.getId(), nodeLabel);
             HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
             ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc), weightmap,
-                    seqStartMap, consensusController.getCdfMap());
+                    seqStartMap, consensusController.getCdfMap(), consensusController.getNumSeqs());
 
             String supportedSeq = c.getSupportedSequence(true);
             System.out.println(supportedSeq);
 
             String infUpdated = c.getAsJson().toString();
+            seqController.updateDBInference(currRecon.getId(), nodeLabel, infUpdated);
+            // Also want to update the Joint sequence
+            seqController.updateDBSequence(currRecon.getId(), nodeLabel, supportedSeq, true);
 
             return infUpdated;
         }

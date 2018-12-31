@@ -66,7 +66,7 @@ public class UserController {
         if (user.getPassword().length() < 8 || user.getPassword().length() > 32) {
             return "user.password.size";
         }
-        String err =  usersModel.resetPassword(user.getId(), user.getPassword());
+        String err = usersModel.resetPassword(user.getId(), user.getPassword());
         user.setPasswordMatch(null);
         user.setPassword(null);
         return err;

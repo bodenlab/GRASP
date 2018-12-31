@@ -28,6 +28,7 @@ public class ConsensusObject {
     HashMap<String, Double> weightMap;
     HashMap<Integer, Integer> seqStartMap;
     HashMap<Integer, Double> cdfMap;
+    Double numSeqs = 1.0;
 
     public ConsensusObject(POAGJson poagJson) {
 
@@ -39,13 +40,22 @@ public class ConsensusObject {
      * Need to match up the nodes and the edges. We do
      * @param unformattedJson
      */
-    public ConsensusObject(JSONObject unformattedJson, HashMap<String, Double> weightMap, HashMap<Integer, Integer> seqStartMap, HashMap<Integer, Double> cdfMap) {
+    public ConsensusObject(JSONObject unformattedJson, HashMap<String, Double> weightMap, HashMap<Integer, Integer> seqStartMap, HashMap<Integer, Double> cdfMap, int numSeqs) {
         this.weightMap = weightMap;
         this.seqStartMap = seqStartMap;
         this.cdfMap = cdfMap;
-        JSONArray jsonNodes = unformattedJson.getJSONArray("nodes");
-        JSONArray jsonEdges = unformattedJson.getJSONArray("edges");
+        this.numSeqs = numSeqs + 0.0;
+        initNodeAndEdgeArrays(unformattedJson.getJSONArray("nodes"), unformattedJson.getJSONArray("edges"));
+    }
 
+
+    /**
+     * From the input data, create the correctly formatted data.
+     *
+     * @param jsonNodes
+     * @param jsonEdges
+     */
+    private void initNodeAndEdgeArrays(JSONArray jsonNodes, JSONArray jsonEdges) {
         edges = new ArrayList<>();
         nodeMap = new HashMap<>();
 
@@ -84,7 +94,6 @@ public class ConsensusObject {
             // Add the edge to the node map
             nodeMap.get(fromId).addOutEdge(edge);
         }
-
 
         // Run consensus gen
         initialNode = nodeMap.get(initialId);
@@ -129,29 +138,43 @@ public class ConsensusObject {
     private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
         Integer multiplier = 1;
         Double weightedMultiplier = 1.0;
-        if (!isBidirectional) {
-            multiplier = seqStartMap.get(to.getId());
+        weightedMultiplier = weightMap.get(from.getId() + "->" + to.getId());
 
-            if (multiplier == null) {
-                multiplier = numberNodes;
-            } else {
-                System.out.println("USED MULTIPLIER: " + multiplier + " FROM " + from.getId() + "->" + to.getId());
-            }
+        if (weightedMultiplier == null) {
+            weightedMultiplier = numberNodes + 1.0;
+        }
             // Max value in the cdf map is 1, min value is 0
             // 0 indicates that all seqs pass through 1 means its very badly supported.
-            if (to.getId() == finalNode.getId()) {
-                System.out.println("DIDN'T CONTAIN FINAL NODE USED PRE:" + to.getId() + "->" + cdfMap.get(finalNode.getId() - 2));
+            // ToDo: Maybe re-add this in
+//            if (to.getId() == finalNode.getId()) {
+//                System.out.println("DIDN'T CONTAIN FINAL NODE USED PRE:" + to.getId() + "->" + cdfMap.get(finalNode.getId() - 2));
+//
+//                weightedMultiplier = (multiplier * cdfMap.get(finalNode.getId() - 1)) + 1;
+//            } else {
+//                weightedMultiplier = (multiplier * cdfMap.get(to.getId())) + 1;
+//            }
 
-                weightedMultiplier = (multiplier * cdfMap.get(finalNode.getId() - 1)) + 1;
-            } else {
-                weightedMultiplier = (multiplier * cdfMap.get(to.getId())) + 1;
-            }
+        // If we have a weighted multiplier of 1, this means 100% of sequences contained this edge
+        double val = (1 - weightedMultiplier) + 1;
+        if (isBidirectional) {
+            weightedMultiplier = 1.0;
+        } else {
+            weightedMultiplier *= numberNodes;
         }
+
+        // Check if we have less than 1% support
+        if (edge.getWeight() < 1) {
+            weightedMultiplier = val - 1;
+            weightedMultiplier *= numberNodes;
+            System.out.println("LESS < 1% SUPPORT: " + from.getId() + "->" + to.getId() + " MULTIPLIER: " + weightedMultiplier);
+        }
+
         int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
         positionDiff = (positionDiff > 0) ? positionDiff : 1;
 
+        // Here we want to add an added weight (same as the bi-directional one)
+
         // Edge weight is out of 100
-        double val = (1 - edge.getWeight());
         if (val <= 0) {
             val = Double.MIN_VALUE;
         }

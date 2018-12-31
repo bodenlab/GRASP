@@ -7,7 +7,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +32,9 @@ public class ConsensusController {
 
     HashMap<Integer, Double> cdfMap;
 
+    // The number of sequences under the parent of this node (or the root).
+    private Integer numSeqs = 0;
+
     /**
      * Helper to access private var.
      * @return
@@ -55,7 +57,9 @@ public class ConsensusController {
      * @return
      */
     public HashMap<String, Double> getEdgeCountDict(int reconId, int userId, String nodeLabel) {
-        BufferedWriter bw = getBuff(reconId + "_" + nodeLabel);
+        // ToDo: Pass this - maybe remove - temp for the CDF MAP
+        boolean calcCDF = false;
+
         // Get the reconstructed tree from the database
         TreeObject tree = treeController.getById(reconId, userId);
 
@@ -82,6 +86,10 @@ public class ConsensusController {
         double maxVal = 0;
         int maxCount = 0;
         Integer count;
+
+        // Set the number of sequences.
+        numSeqs = extentLabels.size();
+
         for (String label: extentLabels) {
             boolean first = true;
             String sequence = seqController.getSeqByLabel(label, reconId, Defines.EXTANT);
@@ -122,7 +130,7 @@ public class ConsensusController {
                     start = to;
                     first = false;
                 }
-                value += 1.0/seqLen;
+                value += 1.0;
                 weightMap.put(from + "-" + to, value);
                 i = to;
                 from = to;
@@ -143,7 +151,6 @@ public class ConsensusController {
             }
             // Keep track of the last from
             // For each position in the seq map started dict add in 1 for each value from start - end
-            System.out.println("START: " + start + " END: " + end);
             for (int i = start; i < end; i ++) {
                 Integer numSeqs = numSeqsStarted.get(i);
                 if (numSeqs == null) {
@@ -157,25 +164,43 @@ public class ConsensusController {
 
         // Normalise it
         for (String label: weightMap.keySet()) {
-            weightMap.put(label, weightMap.get(label) / maxVal);
+            weightMap.put(label, weightMap.get(label) / numSeqs);
         }
 
-        try {
-            bw.write("");
-        } catch (Exception e) {
-
+        // If we aren't doing the CDF map we dont' want to waste time calculating it.
+        if (calcCDF) {
+            BufferedWriter bw = getBuff(reconId + "_" + nodeLabel);
+            buildCdfFromCountMap(maxCount, bw, seqLen);
         }
-
-        buildCdfFromCountMap(maxCount, bw, seqLen);
 
         return weightMap;
     }
 
 
+    /**
+     * Gets the number of sequences that were under the parent that was used to build the map.
+     * @return
+     */
+    public Integer getNumSeqs() {
+        return numSeqs;
+    }
+
+    /**
+     * Returns the private cdf map
+     * @return
+     */
     public HashMap<Integer, Double> getCdfMap() {
         return cdfMap;
     }
 
+
+    /**
+     * Builds the CDF map by adding the values.
+     * @param maxCount
+     * @param bw
+     * @param maxSeqLen
+     * @return
+     */
     public HashMap<Integer, Double> buildCdfFromCountMap(int maxCount, BufferedWriter bw, int maxSeqLen) {
         cdfMap = new HashMap<>();
         double maxCdfVal = 0.0;

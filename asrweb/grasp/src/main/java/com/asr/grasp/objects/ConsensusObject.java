@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Stack;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import json.JSONArray;
 import json.JSONObject;
 import vis.Defines;
@@ -136,13 +135,18 @@ public class ConsensusObject {
      * @return
      */
     private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
-        Integer multiplier = 1;
-        Double weightedMultiplier = 1.0;
-        weightedMultiplier = weightMap.get(from.getId() + "->" + to.getId());
+        try {
+            Integer multiplier = 1;
+            Double weightedMultiplier = 1.0;
+            weightedMultiplier = weightMap.get(from.getId() + "->" + to.getId());
 
-        if (weightedMultiplier == null) {
-            weightedMultiplier = numberNodes + 1.0;
-        }
+            System.out.println("EDGE: " + edge.getWeight() + from.getId() + "->" + to.getId() + " MULTIPLIER: "
+                    + weightedMultiplier);
+            if (weightedMultiplier == null) {
+                weightedMultiplier = numberNodes + 1.0;
+            } else {
+                weightedMultiplier = (1 - weightedMultiplier) + 1;
+            }
             // Max value in the cdf map is 1, min value is 0
             // 0 indicates that all seqs pass through 1 means its very badly supported.
             // ToDo: Maybe re-add this in
@@ -154,35 +158,41 @@ public class ConsensusObject {
 //                weightedMultiplier = (multiplier * cdfMap.get(to.getId())) + 1;
 //            }
 
-        // If we have a weighted multiplier of 1, this means 100% of sequences contained this edge
-        double val = (1 - weightedMultiplier) + 1;
-        if (isBidirectional) {
-            weightedMultiplier = 1.0;
-        } else {
-            weightedMultiplier *= numberNodes;
-        }
+            // If we have a weighted multiplier of 1, this means 100% of sequences contained this edge
+            double val = weightedMultiplier;
+            if (isBidirectional) {
+                weightedMultiplier = 1.0;
+            } else {
+                weightedMultiplier *= numberNodes;
+            }
 
-        // Check if we have less than 1% support
-        if (edge.getWeight() < 1) {
-            weightedMultiplier = val - 1;
-            weightedMultiplier *= numberNodes;
-            System.out.println("LESS < 1% SUPPORT: " + from.getId() + "->" + to.getId() + " MULTIPLIER: " + weightedMultiplier);
-        }
+            // Check if we have less than 1% support
+            if (edge.getWeight() < 1) {
+                weightedMultiplier = val;
+                weightedMultiplier *= numberNodes;
+                System.out.println(
+                        "LESS < 1% SUPPORT: " + from.getId() + "->" + to.getId() + " MULTIPLIER: "
+                                + weightedMultiplier);
+            }
 
-        int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
-        positionDiff = (positionDiff > 0) ? positionDiff : 1;
+            int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
+            positionDiff = (positionDiff > 0) ? positionDiff : 1;
 
-        // Here we want to add an added weight (same as the bi-directional one)
+            // Here we want to add an added weight (same as the bi-directional one)
 
-        // Edge weight is out of 100
-        if (val <= 0) {
-            val = Double.MIN_VALUE;
+            // Edge weight is out of 100
+            if (val <= 0) {
+                val = Double.MIN_VALUE;
+            }
+            val = weightedMultiplier * val * positionDiff;
+            if (val <= 0) {
+                val = Double.MAX_VALUE;
+            }
+            return Math.abs(val);
+        } catch (Exception e) {
+            System.out.println(e);
+            return Double.MAX_VALUE;
         }
-        val =  weightedMultiplier * val * positionDiff;
-        if (val <= 0) {
-            val = Double.MAX_VALUE;
-        }
-        return Math.abs(val);
 
     }
 

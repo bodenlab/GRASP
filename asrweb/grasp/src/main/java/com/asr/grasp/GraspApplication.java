@@ -529,6 +529,20 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
+     * Show feature log
+     *
+     * @return feature log html
+     */
+    @RequestMapping(value = "/feature_log", method = RequestMethod.GET)
+    public ModelAndView showFeatureLog(Model model) {
+        ModelAndView mav = new ModelAndView("feature_log");
+        mav.addObject("results", asr.getLabel() != "");
+        mav.addObject("user", loggedInUser);
+        mav.addObject("username", loggedInUser.getUsername());
+        return mav;
+    }
+
+    /**
      * Show max likelihood info
      *
      * @return guide html

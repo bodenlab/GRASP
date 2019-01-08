@@ -19,15 +19,14 @@ public class ConsensusObject {
 
     HashMap<Integer,  Node> nodeMap;
     ArrayList< Edge> edges;
-     Node initialNode;
-     Node finalNode;
-     int numberNodes;
+    Node initialNode;
+    Node finalNode;
+    int numberNodes;
     // Map with heuristics
     HashMap<Integer, Double> cost = new HashMap<>();
-    HashMap<String, Double> weightMap;
-    HashMap<Integer, Integer> seqStartMap;
-    HashMap<Integer, Double> cdfMap;
-    Double numSeqs = 1.0;
+    HashMap<Integer, Double> weightMap;
+    int numberSequencesUnderParent = -1;
+
 
     public ConsensusObject(POAGJson poagJson) {
 
@@ -39,22 +38,12 @@ public class ConsensusObject {
      * Need to match up the nodes and the edges. We do
      * @param unformattedJson
      */
-    public ConsensusObject(JSONObject unformattedJson, HashMap<String, Double> weightMap, HashMap<Integer, Integer> seqStartMap, HashMap<Integer, Double> cdfMap, int numSeqs) {
+    public ConsensusObject(JSONObject unformattedJson, HashMap<Integer, Double> weightMap, int numberSequencesUnderParent) {
         this.weightMap = weightMap;
-        this.seqStartMap = seqStartMap;
-        this.cdfMap = cdfMap;
-        this.numSeqs = numSeqs + 0.0;
-        initNodeAndEdgeArrays(unformattedJson.getJSONArray("nodes"), unformattedJson.getJSONArray("edges"));
-    }
+        this.numberSequencesUnderParent = numberSequencesUnderParent;
+        JSONArray jsonNodes = unformattedJson.getJSONArray("nodes");
+        JSONArray jsonEdges = unformattedJson.getJSONArray("edges");
 
-
-    /**
-     * From the input data, create the correctly formatted data.
-     *
-     * @param jsonNodes
-     * @param jsonEdges
-     */
-    private void initNodeAndEdgeArrays(JSONArray jsonNodes, JSONArray jsonEdges) {
         edges = new ArrayList<>();
         nodeMap = new HashMap<>();
 
@@ -81,18 +70,29 @@ public class ConsensusObject {
             int fromId = edgeJson.getInt(Defines.E_FROM);
             int toId = edgeJson.getInt(Defines.E_TO);
             boolean reciprocated = edgeJson.getInt(Defines.E_RECIPROCATED) == Defines.TRUE;
-            double weight = 0.0;
-            try {
-                weight = weightMap.get(fromId + "-" + toId);
-            } catch (Exception eE) {
-                System.out.println("UNABLE to get mapping:" + fromId + '-' + toId);
-            }
-            edgeJson.put(Defines.E_WEIGHT, weight * 100);
+            double weight = edgeJson.getDouble(Defines.E_WEIGHT);
+//            double weight = 0.0;
+//            try {
+//                weight = weightMap.get(toId) * ;
+//            } catch (Exception eE) {
+//                System.out.println("UNABLE to get mapping:" + fromId + '-' + toId);
+//            }
+//            edgeJson.put(Defines.E_WEIGHT, weight * 100);
             Edge edge = new Edge(fromId, toId, weight, reciprocated, edgeJson, e);
             edges.add(edge);
             // Add the edge to the node map
             nodeMap.get(fromId).addOutEdge(edge);
         }
+
+        // Add the initial and the final weights
+        if (weightMap.get(endId) != null) {
+            System.out.println("HAD END: " + weightMap.get(endId));
+        }
+        if (weightMap.get(initialId) != null) {
+            System.out.println("HAD START: " + weightMap.get(initialId));
+        }
+        weightMap.put(endId, 1.0);
+        weightMap.put(initialId, 1.0);
 
         // Run consensus gen
         initialNode = nodeMap.get(initialId);
@@ -135,64 +135,46 @@ public class ConsensusObject {
      * @return
      */
     private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
-        try {
-            Integer multiplier = 1;
-            Double weightedMultiplier = 1.0;
-            weightedMultiplier = weightMap.get(from.getId() + "->" + to.getId());
 
-            System.out.println("EDGE: " + edge.getWeight() + from.getId() + "->" + to.getId() + " MULTIPLIER: "
-                    + weightedMultiplier);
-            if (weightedMultiplier == null) {
-                weightedMultiplier = numberNodes + 1.0;
-            } else {
-                weightedMultiplier = (1 - weightedMultiplier) + 1;
-            }
-            // Max value in the cdf map is 1, min value is 0
-            // 0 indicates that all seqs pass through 1 means its very badly supported.
-            // ToDo: Maybe re-add this in
-//            if (to.getId() == finalNode.getId()) {
-//                System.out.println("DIDN'T CONTAIN FINAL NODE USED PRE:" + to.getId() + "->" + cdfMap.get(finalNode.getId() - 2));
-//
-//                weightedMultiplier = (multiplier * cdfMap.get(finalNode.getId() - 1)) + 1;
-//            } else {
-//                weightedMultiplier = (multiplier * cdfMap.get(to.getId())) + 1;
-//            }
+        int multiplier = 1;
+        double edgeWeight = 1 - (edge.getWeight()/100);
+        int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
+        positionDiff = (positionDiff > 0) ? positionDiff : 1;
 
-            // If we have a weighted multiplier of 1, this means 100% of sequences contained this edge
-            double val = weightedMultiplier;
-            if (isBidirectional) {
-                weightedMultiplier = 1.0;
-            } else {
-                weightedMultiplier *= numberNodes;
-            }
+        // Edge weight is out of 100
+        Double weight = weightMap.get(to.getId()) * weightMap.get(from.getId());
+        if (!isBidirectional) {
+            multiplier = numberSequencesUnderParent;
+        }
 
-            // Check if we have less than 1% support
-            if (edge.getWeight() < 1) {
-                weightedMultiplier = val;
-                weightedMultiplier *= numberNodes;
-                System.out.println(
-                        "LESS < 1% SUPPORT: " + from.getId() + "->" + to.getId() + " MULTIPLIER: "
-                                + weightedMultiplier);
-            }
+        if (edgeWeight > 0.99) {
+            multiplier = numberSequencesUnderParent;
+        }
 
-            int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
-            positionDiff = (positionDiff > 0) ? positionDiff : 1;
-
-            // Here we want to add an added weight (same as the bi-directional one)
-
-            // Edge weight is out of 100
-            if (val <= 0) {
-                val = Double.MIN_VALUE;
-            }
-            val = weightedMultiplier * val * positionDiff;
-            if (val <= 0) {
-                val = Double.MAX_VALUE;
-            }
-            return Math.abs(val);
-        } catch (Exception e) {
-            System.out.println(e);
+        if (weight == null) {
+            // If we don't even have a weight just return the largest possible value for this path.
+            System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "WEIGHT NULL: " + weight);
             return Double.MAX_VALUE;
         }
+
+        double val = ((1 - weight) + 1); // * (edgeWeight + 1);
+        if (val < 0) {
+            // That is very strange and we need to return an error
+            System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "VAL < 0: " + val);
+            val = Double.MAX_VALUE;
+        }
+        if (val == 0 && multiplier != 1) {
+            System.out.println("VAL == 0: " + val);
+            return Double.MIN_VALUE;
+        }
+
+        val =  multiplier * val * positionDiff;
+        if (val <= 0) {
+            System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "VAL <= 0 AFTER MULTIPLY: " + val);
+            val = Double.MAX_VALUE;
+        }
+        System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + ", FINAL VALUE: " + val + ", weight:" + weight + ", edgeWeight: " + (1 - edgeWeight) + " positiondiff: " + positionDiff + " mutiplier: " + multiplier + " bidir: " + isBidirectional);
+        return Math.abs(val);
 
     }
 
@@ -210,9 +192,9 @@ public class ConsensusObject {
         Stack<Character> sequence = new Stack<>();
         String sequenceString = "";
         while (cameFrom.keySet().contains(current)) {
-             Path prevPath = cameFrom.get(current);
-             prevPath.getEdge().setConsensus(true);
-             Node prevNode = prevPath.getNode();
+            Path prevPath = cameFrom.get(current);
+            prevPath.getEdge().setConsensus(true);
+            Node prevNode = prevPath.getNode();
             // Set the edge to have a true consensus flag
             prevPath.getEdge().setConsensus(true);
             // If we have a character we want to add it
@@ -244,12 +226,15 @@ public class ConsensusObject {
 
 
     public Node getLowestCostNode(ArrayList<Node> openSet) {
-        double minCost = 10000000.0;
+        double minCost = Double.MAX_VALUE;
         ArrayList<Node> bests = new ArrayList<>();
         for (Node n: openSet) {
             if (cost.get(n.getId()) < minCost) {
                 minCost = cost.get(n.getId());
             }
+        }
+        if (minCost == Double.MAX_VALUE) {
+            int i = 0;
         }
         // If there are multiple bests we want to tie break on the one with the smaller nodeId
         for (Node n: openSet) {
@@ -257,6 +242,7 @@ public class ConsensusObject {
                 bests.add(n);
             }
         }
+
         // If the length of the array is > 1 we want to return the node with the  lowest ID
         Node best = null;
         int lowestId = 1000000000;
@@ -268,6 +254,7 @@ public class ConsensusObject {
         }
         // Remove the best node from the openset
         openSet.remove(best);
+
         return best;
     }
 
@@ -297,6 +284,10 @@ public class ConsensusObject {
         boolean printout = false;
         while (!openSet.isEmpty()) {
             Node current = getLowestCostNode(openSet); //openSet.poll();
+            if (current == null) {
+                current = openSet.get(0);
+                openSet.remove(current);
+            }
             if (current.equals(finalNode)) {
                 // Reconstruct the path
                 return reconstructPath(cameFrom, current, gappy);
@@ -315,8 +306,8 @@ public class ConsensusObject {
                 System.out.println("Looking at edges from: " + current.getId());
             }
             for (int n = 0; n < current.getOutEdges().size(); n++) {
-                 Edge next = current.getOutEdges().get(n);
-                 Node neighbor = nodeMap.get(next.getToId());
+                Edge next = current.getOutEdges().get(n);
+                Node neighbor = nodeMap.get(next.getToId());
                 double thisCost = heuristicCostEstimate(next, current, neighbor, current.getOutEdges().get(n).reciprocated);
                 if (closedSet.contains(neighbor)) {
                     // Check if this path is better and update the path to get to the neighbour

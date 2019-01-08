@@ -782,11 +782,9 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
         if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
-            HashMap<String, Double> weightmap = consensusController
+            HashMap<Integer, Double> weightmap = consensusController
                     .getEdgeCountDict(currRecon.getId(), loggedInUser.getId(), nodeLabel);
-            HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
-            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc), weightmap,
-                    seqStartMap, consensusController.getCdfMap(), consensusController.getNumSeqs());
+            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc), weightmap, consensusController.getNumberSeqsUnderParent());
 
             String supportedSeq = c.getSupportedSequence(true);
             System.out.println(supportedSeq);

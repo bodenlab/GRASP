@@ -126,10 +126,11 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
-            HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, userId, label);
+            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr));
+            HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, userId, label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
             // HERE WE NEED TO UPDATE TH UID THIS SHOULDN"T BE USED ATM
             // ToDo: Here is where we can alter the consensus sequence.
-            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr), weightmap, consensusController.getNumberSeqsUnderParent());
 
             String supportedSeq = c.getSupportedSequence(true);
             System.out.println(supportedSeq);
@@ -195,8 +196,9 @@ public class SeqController {
      * @param gappy
      */
     public boolean updateForNewConsensusTmp(String reconstructedAnsc, int reconId, int uid, String nodeName, boolean gappy) {
-        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName);
-        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),weightmap, consensusController.getNumberSeqsUnderParent());
+        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
 
         System.out.println("LOOKING AT: " + nodeName);
         String supportedSeq = c.getSupportedSequence(true);

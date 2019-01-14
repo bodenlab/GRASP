@@ -149,45 +149,7 @@ public class ConsensusController {
         }
 
 
-
-        // To ensure that if we have a tie we actually choose the best one (lets for now say the
-        // best one is the one which has a higher sequence content in that column (very unlikely
-        // that this would be the same)
-//        double bestWeightVal = 0;
-//        for (Integer i: initialIds.keySet()) {
-//            if (initialIds.get(i) == bestInitialCount) {
-//                double weightVal = weightMap.get(i);
-//                if (bestWeightVal == weightVal && i != bestInitialId) {
-//                    System.out.println("WEIGHT VAL WAS EQUAL INITIAL!!!!!" + bestInitialId + ", " + i);
-//                }
-//                if (weightVal > bestWeightVal) {
-//                    bestWeightVal = weightVal;
-//                    bestInitialId = i;
-//                }
-//            }
-//        }
-//        bestWeightVal = 0;
-//        ArrayList<Integer> bestIds = new ArrayList<>();
-//        for (Integer i: finalIds.keySet()) {
-//            if (finalIds.get(i) == bestFinalCount) {
-//               bestIds.add(i);
-//            }
-//        }
-//
-//
-//        for (Integer i: finalIds.keySet()) {
-//            if (finalIds.get(i) == bestFinalCount) {
-//                double weightVal = weightMap.get(i);
-//                if (bestWeightVal == weightVal && i != bestFinalId) {
-//                    System.out.println("WEIGHT VAL WAS EQUAL FINAL!!!!!" + bestFinalId + ", " + i);
-//                }
-//                if (weightVal > bestWeightVal) {
-//                    bestWeightVal = weightVal;
-//                    bestFinalId = i;
-//                }
-//            }
-//        }
-        // Set the best first and last node ID's
+        // Print for debugging
         for (Integer nid: initialIds.keySet()) {
             System.out.print(nid + "->" + initialIds.get(nid) + " | ");
         }
@@ -202,7 +164,18 @@ public class ConsensusController {
     }
 
 
-
+    /**
+     To ensure that if we have a tie we actually choose the best one (lets for now say the
+     best one is the one which has a higher sequence content in that column (very unlikely
+     that this would be the same)
+     Set the best first and last node ID's
+     * @param ids
+     * @param nodeMap
+     * @param weightMap
+     * @param bestCount
+     * @param tagToLookFor
+     * @return
+     */
     public int getBestId(HashMap<Integer, Integer> ids, HashMap<Integer, Node> nodeMap,  HashMap<Integer, Double> weightMap, int bestCount, Character tagToLookFor) {
         ArrayList<Integer> bestIds = new ArrayList<>();
         for (Integer i: ids.keySet()) {

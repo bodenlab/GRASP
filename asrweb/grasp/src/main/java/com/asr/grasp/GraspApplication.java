@@ -757,6 +757,45 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
+    public HashMap<String, ArrayList<String>> getMapping() {
+        HashMap<String, ArrayList<String>> mapping = new HashMap<>();
+        // Get each recon label and set this as the key
+
+        ArrayList<String> r1258 = new ArrayList<>();
+        // N423
+        r1258.add("N9");
+        r1258.add("N1087");
+        r1258.add("N1088");
+        mapping.put("1612_base_dataset_08012019", r1258);
+
+
+        ArrayList<String> r3758 = new ArrayList<>();
+        // N423
+        r3758.add("N293");
+        r3758.add("N971");
+        r3758.add("N1770");
+        mapping.put("2500_4112_dhad_08012019", r3758);
+
+//        ArrayList<String> r6258 = new ArrayList<>();
+//        // N423
+//        r6258.add("N687");
+//        r6258.add("N739");
+//        r6258.add("N740");
+//        mapping.put("5000_6612_dhad_08012019", r6258);
+
+        ArrayList<String> r8758 = new ArrayList<>();
+        // N1
+        r8758.add("N9");
+        // N423
+        r8758.add("N1442");
+        // N560
+        r8758.add("N4236");
+
+        mapping.put("7500_9112_dhad_09012019", r8758);
+
+        return mapping;
+
+    }
 
     /**
      * Gets a joint reconstruction to add to the recon graph.
@@ -780,24 +819,46 @@ public class GraspApplication extends SpringBootServletInitializer {
         String nodeLabel = dataJson.getString("nodeLabel");
 
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
-        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
         if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
-            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+            int uid = loggedInUser.getId(); // DHAD membership name
+            // Get the mapping of reconstruction names
+            HashMap<String, ArrayList<String>> mapping = getMapping();
 
-            HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(currRecon.getId(), loggedInUser.getId(), nodeLabel, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+            for (String reconName: mapping.keySet()) {
+                // Get the ID of the recon
+                int reconId = reconController.getId(reconName, uid);
 
-            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
+                // For each node label of interest we want to get the mapping.
+                ArrayList<String> labels = mapping.get(reconName);
 
-            String supportedSeq = c.getSupportedSequence(true);
-            System.out.println(supportedSeq);
+                for (String nodeName : labels) {
+                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
+                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
 
-            String infUpdated = c.getAsJson().toString();
-            seqController.updateDBInference(currRecon.getId(), nodeLabel, infUpdated);
-            // Also want to update the Joint sequence
-            seqController.updateDBSequence(currRecon.getId(), nodeLabel, supportedSeq, true);
+                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
 
-            return infUpdated;
+                    HashMap<Integer, Double> weightmap = consensusController
+                            .getEdgeCountDict(reconId, uid, nodeName,
+                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
+                                    c.getInitialAndFinalNodeMap());
+
+                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
+                            consensusController.getBestInitialNodeId(),
+                            consensusController.getBestFinalNodeId());
+
+                    String supportedSeq = c.getSupportedSequence(true);
+                    System.out.println(supportedSeq);
+
+                    String infUpdated = c.getAsJson().toString();
+                    seqController.updateDBInference(reconId, nodeName, infUpdated);
+                    // Also want to update the Joint sequence
+                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+                }
+            }
+            return "";
         }
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
+
 //        if (loggedInUser.getUsername().equals("ariane4")) {
 //            int uid = 97; // DHAD membership name
 //            // Get the mapping of reconstruction names

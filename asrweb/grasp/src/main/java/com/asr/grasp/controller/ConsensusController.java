@@ -98,11 +98,15 @@ public class ConsensusController {
         // For each of the extentLabels we want to get their sequence
         // For the first one, we want to make a new HashMap for each position in the sequence
         HashMap<Integer, Double> weightMap = new HashMap<>();
+        int cnt = 0;
         for (String label: extentLabels) {
             String sequence = seqController.getSeqByLabel(label, reconId, Defines.EXTANT);
             // Add a terminating character.
             boolean first = true;
             int lastIdx = 0;
+            if (cnt % 100 == 0) {
+                System.out.println("PROCESSED: " + cnt);
+            }
             for (int i = 0; i < sequence.length(); i ++) {
                 double value = 0;
                 if (sequence.charAt(i) != '-') {
@@ -140,6 +144,7 @@ public class ConsensusController {
                 }
                 finalIds.put(lastIdx, totalCount + 1);
             }
+            cnt ++;
         }
 
         // Normalise it
@@ -179,8 +184,11 @@ public class ConsensusController {
      */
     public int getBestId(HashMap<Integer, Integer> ids, HashMap<Integer, Node> nodeMap,  HashMap<Integer, Double> weightMap, int bestCount, Character tagToLookFor) {
         ArrayList<Integer> bestIds = new ArrayList<>();
+        double errorMargin = 0.05 * numberSeqsUnderParent;
+
         for (Integer i: ids.keySet()) {
-            if (ids.get(i) == bestCount) {
+            // Check that the best IDS are with the error margin deemed to be 5% of the sequence count
+            if (ids.get(i) > bestCount - errorMargin) {
                 bestIds.add(i);
             }
         }
@@ -195,7 +203,6 @@ public class ConsensusController {
 
         ArrayList<Integer> bestIdsWithMet = new ArrayList<>();
         if (tagToLookFor != null) {
-
             for (Integer i : bestIds) {
                 if (nodeMap.get(i).getBase() == tagToLookFor) {
                     bestIdsWithMet.add(i);
@@ -224,7 +231,7 @@ public class ConsensusController {
         }
 
         if (bestBiDir.size() == 0) {
-            bestBiDir = bestIds;
+            bestBiDir = bestIdsWithMet;
         }
         for (Integer i: bestBiDir) {
             double weightVal = weightMap.get(i);

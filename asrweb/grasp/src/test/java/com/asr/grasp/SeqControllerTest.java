@@ -220,7 +220,7 @@ public class SeqControllerTest extends BaseTest {
     @Test
     public void testEdgeCounts () {
         setUpEnv();
-        ASRObject asr = setAsr("sp_cured3_wguide2");
+        ASRObject asr = setAsr("10");
         UserObject user = createAndRegisterUser("testuser", "testpassword");
 
         // Create a reconstruction from an ASR object
@@ -242,7 +242,7 @@ public class SeqControllerTest extends BaseTest {
         /**
          * Test that the counts are correct
          */
-        String label = "N0";
+        String label = "N1";
         PartialOrderGraph ancestor = joint.getGraph(label);
         // Insert it into the database
         // What we want to do here is perform two inserts -> one for the sequence so we can do

@@ -123,8 +123,9 @@ public class ConsensusController {
                                 bestInitialId = i;
                             }
                             initialIds.put(i, totalCount + 1);
-                            first = false;
+
                         }
+                        first = false;
                     }
 
                 }

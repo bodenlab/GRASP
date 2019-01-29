@@ -223,9 +223,10 @@ public class ConsensusObject {
             multiplier = numberSequencesUnderParent;
         }
 
-        if (edgeWeight > 0.99) {
-            multiplier = numberSequencesUnderParent;
-        }
+        // TODO: TEST WITH AND WITHOUT THIS!
+//        if (edgeWeight > 0.99) {
+//            multiplier = numberSequencesUnderParent;
+//        }
 
         if (weight == null) {
             // If we don't even have a weight just return the largest possible value for this path.

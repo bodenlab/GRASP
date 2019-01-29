@@ -520,10 +520,14 @@ public class TreeController {
         } else if (node.getScore() < bestNode.getScore()) {
             bestNode = node;
         } else if (node.getScore() == bestNode.getScore()) {
-            if (node.getExtC() <= bestNode.getExtC()) {
+            if (node.getExtC() < bestNode.getExtC()) {
                 //System.out.println("UPDATED:" + node.getLabel() + " from " + bestNode.getLabel());
                 bestNode = node;
             }
+            // lastly if they == the same choose the one with the most similar distance to root
+//            if (node.getExtC() == bestNode.getExtC()) {
+//                double distBest =  java.lang.Math.abs(bestNode.getDistanceToRoot() -
+//            }
         }
         //System.out.println(node.getLabel() + " " + score);
         return node.getScore();
@@ -538,6 +542,9 @@ public class TreeController {
     public double scoreNodes(ArrayList<String> extentList, ArrayList<String> extentNotIncludedList, TreeNodeObject node, Double distance) {
         int value = 1;
         if (node.isExtent()) {
+            if (!node.isInIntersection()) {
+                return  0.0;
+            }
             if (!extentList.contains(node.getLabel())) {
                 // Add a negative score for a mismatch
                 node.addToScore(value + ((extentList.size() - 1) * value));

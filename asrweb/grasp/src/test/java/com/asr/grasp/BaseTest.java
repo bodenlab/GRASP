@@ -60,6 +60,7 @@ public class BaseTest {
         UserObject user = new UserObject();
         user.setUsername(username);
         user.setPassword(password);
+        user.setEmail("temp");
         user.setPasswordMatch(password);
         int id = userController.getId(user);
         // if they have remove them and re-add them
@@ -76,6 +77,9 @@ public class BaseTest {
         user.setUsername(username);
         user.setPassword(password);
         user.setPasswordMatch(password);
+        user.setConfirmationToken(password);
+        user.setEmail(username);
+
         // Check if the user has already been registered
         int id = userController.getId(user);
         // if they have remove them and re-add them
@@ -83,7 +87,9 @@ public class BaseTest {
             userModel.deleteUser(userController.getId(user));
             user.setId(Defines.UNINIT);
         }
-        userController.register(user);
+        // Method to make it easier to register for the test
+        userController.register(user, password);
+        id = userController.getId(user);
         return user;
     }
 

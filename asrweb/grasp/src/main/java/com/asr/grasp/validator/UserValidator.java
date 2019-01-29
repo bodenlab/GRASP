@@ -20,19 +20,16 @@ public class UserValidator implements Validator {
     @Override
     public void validate(Object o, Errors errors) {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "username", "user.username.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "user.password.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "passwordMatch", "user.passwordMatch.empty");
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "email", "user.email.empty");
 
         user = (UserObject) o;
 
         if (user.getUsername().length() < 3 || user.getUsername().length() > 32)
             errors.rejectValue("username", "user.username.size");
 
-        if (user.getPassword().length() < 3 || user.getPassword().length() > 32)
-            errors.rejectValue("password", "user.password.size");
+        if (user.getEmail().length() < 3 || user.getEmail().length() > 32)
+            errors.rejectValue("email", "user.email.size");
 
-        if (!user.getPasswordMatch().equals(user.getPassword()))
-            errors.rejectValue("passwordMatch", "user.password.diff");
     }
 
 }

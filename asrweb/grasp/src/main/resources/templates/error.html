@@ -1,48 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8"></meta>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
-    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
-
-    <title>GRASP Ancestral Sequence Reconstruction</title>
-
-    <!-- Custom Fonts -->
-    <link rel="stylesheet" type="text/css" th:href="@{/css/lib/font-awesome.min.css}"></link>
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script type="text/javascript" th:src="@{/js/lib/html5shiv.js}"></script>
-    <script type="text/javascript" th:src="@{/js/lib/respond.min.js}"></script>
-    <![endif]-->
-
-    <link rel="stylesheet" th:href="@{/css/lib/bootstrap.min.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/lib/bootstrap-switch.min.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/bootstrap_override.css}"></link>
-    <link rel="stylesheet" th:href="@{/css/asr.css}"></link>
-
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-116832942-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-116832942-1');
-    </script>
-
-    <script th:src="@{/js/lib/canvasToBlob.js}"></script>
-    <script th:src="@{/js/lib/FileSaver.min.js}"></script>
-    <script th:src="@{/js/lib/d3min.js}"></script>
-    <script th:src="@{/js/lib/lodash.min.js}"></script>
-    <script th:src="@{/js/lib/jquery.min.js}"></script>
-    <script th:src="@{/js/lib/jquery-2.2.4.min.js}"></script>
-    <script th:src="@{/js/lib/bootstrap.min.js}"></script>
-    <script th:src="@{/js/lib/moderniser.js}"></script>
-    <script type="text/javascript" th:src="@{/js/lib/bootstrap-switch.min.js}"></script>
-
+<head th:replace="fragments/head_include :: head_include">
+    <!-- metas, link and scripts -->
 </head>
-
 <body class="container-fluid">
     <div th:replace="fragments/nav :: nav"></div>
 

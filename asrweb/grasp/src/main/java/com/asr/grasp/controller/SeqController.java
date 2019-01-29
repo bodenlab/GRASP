@@ -110,7 +110,7 @@ public class SeqController {
      * @param asrInstance
      * @return
      */
-    public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave) {
+    public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave, int userId) {
         List<String> insertedLabels = new ArrayList<>();
 
         for (String label: toSave) {
@@ -126,12 +126,11 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
+            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr));
+            HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, userId, label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
             // HERE WE NEED TO UPDATE TH UID THIS SHOULDN"T BE USED ATM
-            //ToDo: Here is where we can alter the consensus sequence.
-            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr),
-                    consensusController
-                            .getEdgeCountDict(reconId, 00000000000,
-                                    label));
+            // ToDo: Here is where we can alter the consensus sequence.
 
             String supportedSeq = c.getSupportedSequence(true);
             System.out.println(supportedSeq);
@@ -197,11 +196,11 @@ public class SeqController {
      * @param gappy
      */
     public boolean updateForNewConsensusTmp(String reconstructedAnsc, int reconId, int uid, String nodeName, boolean gappy) {
-        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),
-                consensusController
-                        .getEdgeCountDict(reconId, uid,
-                                nodeName));
+        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
 
+        System.out.println("LOOKING AT: " + nodeName);
         String supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);
 
@@ -411,7 +410,7 @@ public class SeqController {
         asrInstance.loadSequences(recon.getSequences());
         inferences.put("inferences", nodes);
        	ASRPOG asr = new ASRPOG(asrInstance.getModel(), asrInstance.getNumberThreads(), inferences, asrInstance.getSeqsAsEnum(), asrInstance.getTree());
-        insertSpecificJointsToDB(recon.getId(), asr, true, labels);
+        insertSpecificJointsToDB(recon.getId(), asr, true, labels, 000000);
 
     }
 

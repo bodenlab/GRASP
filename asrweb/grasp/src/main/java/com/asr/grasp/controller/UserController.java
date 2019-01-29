@@ -2,6 +2,7 @@ package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.UsersModel;
+import com.asr.grasp.objects.EmailObject;
 import com.asr.grasp.objects.GeneralObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
@@ -32,6 +33,8 @@ public class UserController {
     @Autowired
     ReconstructionsModel reconModel;
 
+    @Autowired
+    EmailController emailController;
 
     /**
      * Checks if we can Login the current user.
@@ -48,6 +51,24 @@ public class UserController {
 
         // Set the user's ID
         getId(user);
+        return err;
+    }
+
+    /**
+     * Allow the user to reset their password.
+     * @param user
+     * @return
+     */
+    public String setPassword(UserObject user) {
+        if (!user.getPassword().equals(user.getPasswordMatch())) {
+            return "user.password.diff";
+        }
+        if (user.getPassword().length() < 8 || user.getPassword().length() > 32) {
+            return "user.password.size";
+        }
+        String err = usersModel.resetPassword(user.getId(), user.getPassword());
+        user.setPasswordMatch(null);
+        user.setPassword(null);
         return err;
     }
 
@@ -69,12 +90,100 @@ public class UserController {
         return user.getId();
     }
 
+
+    /**
+     * generates a random confirmation token.
+     * @return
+     */
+    public String getAConfirmationToken() {
+        return usersModel.generateId().toString();
+    }
+
     /**
      * Registers the user.
      */
-    public String register(UserObject user) {
+    public String register(UserObject user, String confirmationToken) {
+        user.setConfirmationToken(confirmationToken);
+
         // Register the user
-        String err = usersModel.registerUser(user.getUsername(), user.getPassword());
+        String err = usersModel.registerUser(user.getUsername(), user.getEmail(), user.getConfirmationToken());
+
+        if (err != null) {
+            return err;
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param user
+     * @return
+     */
+    public String getEmail(UserObject user) {
+        return usersModel.getUsersEmail(user.getId());
+    }
+
+    /**
+     * Sends an email to a user with a confirmation token, resets their password to be that token.
+     *
+     * @param user
+     */
+    public String sendForgotPasswordEmail(UserObject user) {
+        user.setConfirmationToken(usersModel.generateId().toString());
+        String err = usersModel.resetPassword(user.getId(), user.getConfirmationToken());
+        if (err != null) {
+            return err;
+        }
+        EmailObject email = new EmailObject(user.getUsername(), getEmail(user), Defines.FORGOT_PASSWORD);
+        email.setContent("http://127.0.0.1:8080/reset-password-confirmation", user.getConfirmationToken());
+        emailController.sendEmail(email);
+        user.setConfirmationToken(null);
+        return null;
+    }
+
+
+    /**
+     * Send a registration email with the users confirmation token.
+     *
+     * @param user
+     */
+    public void sendRegistrationEmail(UserObject user) {
+        EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.REGISTRATION);
+        email.setContent("http://127.0.0.1:8080/confirm-registration", user.getConfirmationToken());
+        emailController.sendEmail(email);
+        user.setConfirmationToken(null);
+        // We remove the password
+        user.setEmail(null);
+    }
+
+    /**
+     * Registers the user.
+     */
+    public String confirmRegistration(UserObject user) {
+        // Register the user
+        String err = usersModel.loginUser(user.getUsername(), user.getConfirmationToken());
+        // We remove the password
+        user.setPassword(null);
+        user.setConfirmationToken(null);
+
+        if (err != null) {
+            return err;
+        }
+
+        // Set the user's ID
+        getId(user);
+
+        return null;
+    }
+
+
+    /**
+     * Registers the user.
+     */
+    public String registerForTest(UserObject user) {
+        // Register the user
+        String err = usersModel.registerUser(user.getUsername(), user.getPassword(), null);
         // We remove the password
         user.setPassword(null);
         user.setPasswordMatch(null);

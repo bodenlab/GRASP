@@ -148,11 +148,41 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
+     * Registers a new user account and sends the user to the accounts page.
+     */
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public ModelAndView registerUser(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+
+        userValidator.validate(user, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            return new ModelAndView("register");
+        }
+
+        // Register the user
+        String err = userController.register(user, userController.getAConfirmationToken());
+        if (err != null) {
+            model.addAttribute("warning", err);
+            return new ModelAndView("login");
+        }
+
+        // Send the confirmation email
+        userController.sendRegistrationEmail(user);
+        if (err != null) {
+            // ToDo: Probably should add an error here
+            return new ModelAndView("register");
+        }
+        loggedInUser = user;
+        return new ModelAndView("confirm_registration");
+    }
+
+    /**
      * This is actually to logout. Here we want to reset the loggedInUser and also the current
      * reconstruction and ASR.
      */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView showLoginForm(WebRequest request, Model model) {
+    public ModelAndView logoutUserAndGoToLoginPage(WebRequest request, Model model) {
         // Reset our variables.
         loggedInUser = new UserObject();
 
@@ -164,11 +194,209 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
 
         model.addAttribute("user", loggedInUser);
-        model.addAttribute("username", null);
+        model.addAttribute("email", null);
         needToSave = false;
         return new ModelAndView("login");
     }
 
+
+    /**
+     * Logs in the user and takes them to their account page.
+     */
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ModelAndView loginUser(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+
+        loginValidator.validate(user, bindingResult);
+
+        String err = userController.loginUser(user);
+        if (err != null) {
+            bindingResult.rejectValue("username", err);
+        }
+        if (bindingResult.hasErrors()) {
+            return new ModelAndView("login");
+        }
+
+        loggedInUser = user;
+
+        // ToDo: check the obsolete recons
+        //reconController.checkObsolete();
+
+        String errSave = null;
+        Boolean saved = false;
+        // If there is a current reconstruction save it.
+        if (currRecon.getLabel() != null) {
+            // Assume they input their email when they selected to save it.
+            if (email != null) {
+                loggedInUser.setEmail(email);
+            } else {
+                // ToDo: Fix this to ask for an email again.
+                loggedInUser.setEmail("noemail");
+            }
+            errSave = saveCurrRecon();
+            email = null;
+            saved = true;
+        }
+
+        // Get their accounts page after we have saved the reconstruction (if
+        // one existed).
+        ModelAndView mav = accountView.get(loggedInUser, userController);
+
+        // CHeck that err wasn't try
+        if (errSave != null) {
+            mav.addObject("warning", errSave);
+        } else {
+            mav.addObject("warning", null);
+        }
+        if (errSave == null && saved) {
+            mav.addObject("type", "saved");
+        }
+        saveController = new SaveController();
+        return mav;
+    }
+
+    /**
+     * Registers a new user account and sends the user to the accounts page.
+     *
+     * Checks the confirmation token is correct.
+     */
+    @RequestMapping(value = "/confirm-registration", method = RequestMethod.GET)
+    public ModelAndView confirmRegistration(Model model, HttpServletRequest request) {
+        model.addAttribute("user", loggedInUser);
+        return new ModelAndView("confirm_registration");
+    }
+
+    /**
+     * Registers a new user account and sends the user to the accounts page.
+     *
+     * Checks the confirmation token is correct.
+     */
+    @RequestMapping(value = "/confirm-registration", method = RequestMethod.POST)
+    public ModelAndView confirmRegistration(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+
+        String confirmed = userController.confirmRegistration(user);
+        ModelAndView mav = new ModelAndView("confirm_registration");
+
+        if (confirmed != null) {
+            mav.addObject("warning", confirmed);
+            return mav;
+        }
+        loggedInUser = user;
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("email", null);
+
+        return new ModelAndView("set_password");
+    }
+
+
+
+    @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.GET)
+    public ModelAndView resetPasswordConfirmation(Model model, HttpServletRequest request) {
+        model.addAttribute("user", loggedInUser);
+        return new ModelAndView("reset_password_confirmation");
+    }
+
+
+    @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.POST)
+    public ModelAndView resetPasswordConfirmation(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        model.addAttribute("user", loggedInUser);
+        return new ModelAndView("reset_password_confirmation");
+    }
+
+
+
+    /**
+     * Allows the user to set their password if they are already logged in or have provided
+     * a correct login token.
+     *
+     * @param user
+     * @param bindingResult
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/set-password", method = RequestMethod.POST)
+    public ModelAndView setPassword(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        // ToDo: Check the obsolete recons
+        //reconController.checkObsolete();
+        user.setId(loggedInUser.getId());
+        loggedInUser = user;
+        String err = userController.setPassword(user);
+        ModelAndView mav = new ModelAndView("set_password");
+        if (err != null) {
+            mav.addObject("warning", err);
+            return mav;
+        }
+        loggedInUser = user;
+
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("email", null);
+        // ToDo
+        return new ModelAndView("login");
+    }
+
+
+    /**
+     * @return
+     */
+    @RequestMapping(value = "/set-password", method = RequestMethod.GET)
+    public ModelAndView setPassword(Model model, HttpServletRequest request) {
+        // ToDo: Check the obsolete recons
+        //reconController.checkObsolete();
+        loggedInUser = new UserObject();
+        // ToDo
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("email", null);
+        return new ModelAndView("set_password");
+    }
+
+    /**
+     * Sends the user a token for their account based on their email address.
+     *
+     * @param user
+     * @param bindingResult
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/forgot-password", method = RequestMethod.POST)
+    public ModelAndView sendPasswordLink(@Valid @ModelAttribute("user") UserObject user,
+            BindingResult bindingResult, Model model, HttpServletRequest request) {
+        // ToDo: Check the obsolete recons
+        //reconController.checkObsolete();
+        loggedInUser = user;
+        // ToDo
+        String err = userController.sendForgotPasswordEmail(user);
+        ModelAndView mav = new ModelAndView("forgot_password");
+        if (err != null) {
+            mav.addObject("warning", err);
+            return mav;
+        }
+        return new ModelAndView("set_password");
+    }
+
+    /**
+     * Sends the user a token for their account based on their email address.
+     * @param model
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/forgot-password", method = RequestMethod.GET)
+    public ModelAndView sendPasswordLink(Model model, HttpServletRequest request) {
+        return new ModelAndView("forgot_password");
+    }
+
+
+    /**
+     * Returns the account page to the user.
+     *
+     * @param request
+     * @param model
+     * @return
+     */
     @RequestMapping(value = "/account", method = RequestMethod.GET)
     public ModelAndView showAccount(WebRequest request, Model model) {
         // ToDo: Check the obsolete recons
@@ -360,145 +588,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         return err;
     }
 
-    /**
-     * Logs in the user and takes them to their account page.
-     */
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ModelAndView loginUser(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
-
-        loginValidator.validate(user, bindingResult);
-
-        // If we have passed the validation this means that the username and
-        // password are correct.
-        String err = userController.loginUser(user);
-        if (err != null) {
-            bindingResult.rejectValue("username", err);
-        }
-        if (bindingResult.hasErrors()) {
-            return new ModelAndView("login");
-        }
-
-        loggedInUser = user;
-
-        // ToDo: check the obsolete recons
-        //reconController.checkObsolete();
-
-        String errSave = null;
-        Boolean saved = false;
-        // If there is a current reconstruction save it.
-        if (currRecon.getLabel() != null) {
-            // Assume they input their email when they selected to save it.
-            if (email != null) {
-                loggedInUser.setEmail(email);
-            } else {
-                // ToDo: Fix this to ask for an email again.
-                loggedInUser.setEmail("noemail");
-            }
-            errSave = saveCurrRecon();
-            email = null;
-            saved = true;
-        }
-
-        // Get their accounts page after we have saved the reconstruction (if
-        // one existed).
-        ModelAndView mav = accountView.get(loggedInUser, userController);
-
-        // CHeck that err wasn't try
-        if (errSave != null) {
-            mav.addObject("warning", errSave);
-        } else {
-            mav.addObject("warning", null);
-        }
-        if (errSave == null && saved == true) {
-            mav.addObject("type", "saved");
-        }
-        saveController = new SaveController();
-        return mav;
-    }
-
-    /**
-     * Registers a new user account and sends the user to the accounts page.
-     */
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ModelAndView registerUser(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
-
-        userValidator.validate(user, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            return new ModelAndView("register");
-        }
-
-        String err = userController.register(user);
-
-        if (err != null) {
-            // Probably should add an error here
-            return new ModelAndView("register");
-        }
-        // Otherwise we want to get the now logged in user by ID
-        userController.getId(user);
-
-        // Set the loggedInUser
-        loggedInUser = user;
-
-        Boolean saved = false;
-        String errSave = null;
-        // If there is a current reconstruction save it.
-        if (currRecon.getLabel() != null) {
-            errSave = saveCurrRecon();
-            saved = true;
-        }
-
-        // Get their accounts page after we have saved the reconstruction (if
-        // one existed).
-        ModelAndView mav = accountView.get(loggedInUser, userController);
-
-        // CHeck that err wasn't try
-        if (err != null || errSave != null) {
-            mav.addObject("warning", err.toString() + errSave.toString());
-        } else {
-            mav.addObject("warning", null);
-        }
-        if (errSave == null && saved == true) {
-            mav.addObject("type", "saved");
-        }
-        return mav;
-    }
-
-//	/**
-//	 * ToDo: Implememnt send registration email. This will enable users to
-//	 * reset passwords etc.
-//	 * @param registered
-//	 * @return
-//	 */
-//	private User sendRegistrationEmail(User registered, HttpServletRequest request) {
-//		// Disable user until they click on confirmation link in email
-//		// registered.setEnabled(false);
-//
-//		// Generate random 36-character string token for confirmation link
-//		registered.setConfirmationToken(UUID.randomUUID().toString());
-//
-//		String appUrl = request.getScheme() + "://" + request.getServerName();
-//
-//		SimpleMailMessage registrationEmail = new SimpleMailMessage();
-//		registrationEmail.setTo(registered.getEmail());
-//		registrationEmail.setSubject("Registration Confirmation");
-//		registrationEmail.setText("To confirm your e-mail address, please click the link below:\n"
-//				+ appUrl + "/confirm?token=" + registered.getConfirmationToken());
-//		registrationEmail.setFrom("noreply@domain.com");
-//
-//		emailService.sendEmail(registrationEmail);
-//		return registered;
-//	}
-//
-//	private com.asr.grasp.User createUserAccount(com.asr.grasp.User user){
-//		return controller.registerNewUserAccount(user);
-//	}
-//
-//	private com.asr.grasp.User getUserAccount(com.asr.grasp.User user){
-//		return controller.getUserAccount(user);
-//	}
 
     /**
      * Show guide
@@ -568,7 +657,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // if a user is not logged in, prompt to Login
         if (loggedInUser.getUsername() == null || loggedInUser.getUsername() == "") {
-            ModelAndView mav = new ModelAndView("login");
+            ModelAndView mav = new ModelAndView("old_login");
             mav.addObject("user", loggedInUser);
             return mav;
         }
@@ -682,6 +771,46 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
+    public HashMap<String, ArrayList<String>> getMapping() {
+        HashMap<String, ArrayList<String>> mapping = new HashMap<>();
+        // Get each recon label and set this as the key
+
+        ArrayList<String> r1258 = new ArrayList<>();
+        // N423
+        r1258.add("N9");
+        r1258.add("N1087");
+        r1258.add("N1088");
+        mapping.put("1612_base_dataset_08012019", r1258);
+
+
+        ArrayList<String> r3758 = new ArrayList<>();
+        // N423
+        r3758.add("N293");
+        r3758.add("N971");
+        r3758.add("N1770");
+        mapping.put("2500_4112_dhad_08012019", r3758);
+
+//        ArrayList<String> r6258 = new ArrayList<>();
+//        // N423
+//        r6258.add("N687");
+//        r6258.add("N739");
+//        r6258.add("N740");
+//        mapping.put("5000_6612_dhad_08012019", r6258);
+
+        ArrayList<String> r8758 = new ArrayList<>();
+        // N1
+        r8758.add("N9");
+        // N423
+        r8758.add("N1442");
+        // N560
+        r8758.add("N4236");
+
+        mapping.put("7500_9112_dhad_09012019", r8758);
+
+        return mapping;
+
+    }
+
     /**
      * Gets a joint reconstruction to add to the recon graph.
      *
@@ -704,8 +833,78 @@ public class GraspApplication extends SpringBootServletInitializer {
         String nodeLabel = dataJson.getString("nodeLabel");
 
         // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
+        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
+            int uid = loggedInUser.getId(); // DHAD membership name
+            // Get the mapping of reconstruction names
+            HashMap<String, ArrayList<String>> mapping = getMapping();
+
+            for (String reconName: mapping.keySet()) {
+                // Get the ID of the recon
+                int reconId = reconController.getId(reconName, uid);
+
+                // For each node label of interest we want to get the mapping.
+                ArrayList<String> labels = mapping.get(reconName);
+
+                for (String nodeName : labels) {
+                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
+                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
+
+                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+
+                    HashMap<Integer, Double> weightmap = consensusController
+                            .getEdgeCountDict(reconId, uid, nodeName,
+                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
+                                    c.getInitialAndFinalNodeMap());
+
+                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
+                            consensusController.getBestInitialNodeId(),
+                            consensusController.getBestFinalNodeId());
+
+                    String supportedSeq = c.getSupportedSequence(true);
+                    System.out.println(supportedSeq);
+
+                    String infUpdated = c.getAsJson().toString();
+                    seqController.updateDBInference(reconId, nodeName, infUpdated);
+                    // Also want to update the Joint sequence
+                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+                }
+            }
+            return "";
+        }
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
 
+//        if (loggedInUser.getUsername().equals("ariane4")) {
+//            int uid = 97; // DHAD membership name
+//            // Get the mapping of reconstruction names
+//            HashMap<String, ArrayList<String>> mapping = getMapping();
+//
+//            for (String reconName: mapping.keySet()) {
+//                // Get the ID of the recon
+//                int reconId = reconController.getId(reconName, uid);
+//
+//                // For each node label of interest we want to get the mapping.
+//                ArrayList<String> labels = mapping.get(reconName);
+//
+//                for (String nodeName: labels) {
+//                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
+//                    reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
+//                    //ToDo: Here is where we can alter the consensus sequence.
+//                    HashMap<String, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName);
+//                    HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
+//                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),weightmap,  seqStartMap);
+//
+//
+//                    String supportedSeq = c.getSupportedSequence(true);
+//                    System.out.println(supportedSeq);
+//
+//                    String infUpdated = c.getAsJson().toString();
+//                    seqController.updateDBInference(reconId, nodeName, infUpdated);
+//                    // Also want to update the Joint sequence
+//                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+//                }
+//            }
+//            return reconstructedAnsc.toString();
+//        }
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
             JSONObject ancestor = asr.getAncestralGraphJSON(dataJson.getString("nodeLabel"));

@@ -4,17 +4,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
+import api.PartialOrderGraph;
 import com.asr.grasp.objects.ASRObject;
+import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 import java.util.HashMap;
+import json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reconstruction.ASRPOG;
+import vis.POAGJson;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {GraspConfig.class})
@@ -106,9 +110,13 @@ public class SeqControllerTest extends BaseTest {
         // Check these were saved in the DB
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
 
-        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
         System.out.println(seqMap.get("N22_68"));
-        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
+        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
+        //"SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
+        System.out.println(seqMap.get("N22_68"));
+        // old
+        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFS------"));
+        //"ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
         System.out.println(seqMap.get("N4_98"));
         // Delete the user to clean up the database will automatically delete
         // any reconstructions associated with the user and any consensus sequences.
@@ -209,5 +217,79 @@ public class SeqControllerTest extends BaseTest {
 
     }
 
+    @Test
+    public void testEdgeCounts () {
+        setUpEnv();
+        ASRObject asr = setAsr("10");
+        UserObject user = createAndRegisterUser("testuser", "testpassword");
+
+        // Create a reconstruction from an ASR object
+        ReconstructionObject recon = reconController.createFromASR(asr);
+
+        // Set the user to own the reconstruction
+        recon.setOwnerId(userController.getId(user));
+
+        // Test we can save the recon to the database
+        String err = reconController.save(user, recon);
+
+        assertThat(err, is(equalTo(null)));
+
+        ASRPOG joint = asr.getASRPOG(Defines.JOINT);
+
+        // Check saving it to the DB
+        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
+
+        /**
+         * Test that the counts are correct
+         */
+        String label = "N1";
+        PartialOrderGraph ancestor = joint.getGraph(label);
+        // Insert it into the database
+        // What we want to do here is perform two inserts -> one for the sequence so we can do
+        // motif searching
+        POAGJson ancsJson = new POAGJson(ancestor, true);
+        String ancsStr = ancsJson.toJSON().toString();
+        ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr));
+        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(recon.getId(), user.getId(), label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
+        String supportedSeq = c.getSupportedSequence(true);
+        System.out.println(supportedSeq);
+        // Check that they are as we would expect
+        assertThat(weightmap.get(0), equalTo(1.0));
+        assertThat(weightmap.get(1), equalTo(0.8));
+        assertThat(weightmap.get(2), equalTo(0.8));
+        assertThat(weightmap.get(3), equalTo(null));
+        assertThat(weightmap.get(4), equalTo(null));
+        assertThat(weightmap.get(5), equalTo(null));
+        assertThat(weightmap.get(6), equalTo(1.0));
+
+
+        assertThat("MGG---D", equalTo(supportedSeq));
+
+        label = "N3";
+        ancestor = joint.getGraph(label);
+        // Insert it into the database
+        // What we want to do here is perform two inserts -> one for the sequence so we can do
+        // motif searching
+        ancsJson = new POAGJson(ancestor, true);
+        ancsStr = ancsJson.toJSON().toString();
+        c = new ConsensusObject(new JSONObject(ancsStr));
+        weightmap = consensusController.getEdgeCountDict(recon.getId(), user.getId(), label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
+        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
+        // Check that they are as we would expect
+        assertThat(weightmap.get(0), equalTo(1.0));
+        assertThat(weightmap.get(1), equalTo(0.6666666666666666));
+        assertThat(weightmap.get(2), equalTo(0.6666666666666666));
+        assertThat(weightmap.get(3), equalTo(null));
+        assertThat(weightmap.get(4), equalTo(null));
+        assertThat(weightmap.get(5), equalTo(null));
+        assertThat(weightmap.get(6), equalTo(1.0));
+
+        supportedSeq = c.getSupportedSequence(true);
+        System.out.println(supportedSeq);
+        assertThat("MGG---D", equalTo(supportedSeq));
+
+        userModel.deleteUser(userController.getId(user));
+    }
 
 }

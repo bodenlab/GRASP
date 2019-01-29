@@ -97,6 +97,53 @@ public class TreeController {
          return runSimilarNodesEfficient(treeKnownAncs, treeUnknownAncs, sameTree);
      }
 
+    /**
+     * Gets similar nodes in a second reconstructed tree based on the nodes in the initial tree.
+     *
+     * @param user
+     * @param reconKnownAncsLabel
+     * @param reconUnknownAncsLabel
+     * @param ancsestorLabel
+     * @return
+     */
+    public ArrayList<String> getSimilarNodesTmp(UserObject user, String reconKnownAncsLabel,
+            String reconUnknownAncsLabel, String ancsestorLabel, int numSimilarNodes) {
+        int reconKnownAncsId = reconModel.getIdByLabel(reconKnownAncsLabel, user.getId());
+        int reconUnknownAncsId = reconModel.getIdByLabel(reconUnknownAncsLabel, user.getId());
+
+
+        // If either of the labels are incorrect then return
+        if (reconKnownAncsId == Defines.FALSE || reconUnknownAncsId == Defines.FALSE) {
+            return null;
+        }
+
+        // Otherwise get the trees
+        TreeObject treeKnownAncs = getById(reconKnownAncsId, user.getId());
+        TreeObject treeUnknownAncs = getById(reconUnknownAncsId, user.getId());
+
+        // If either of the trees weren't able to be parsed return
+        if (treeKnownAncs == null || treeUnknownAncs == null) {
+            return null;
+        }
+
+        // Setup the ordered nodes
+        orderedNodes = new PriorityQueue<>(10, new TreeNodeComparator());
+
+        getSimilarNodes(treeKnownAncs, treeUnknownAncs, ancsestorLabel);
+
+        ArrayList<String> retNodes = new ArrayList<>();
+
+        /**
+         * Convert the nodes to a JSON representation so we can view these on the front end.
+         */
+        for (int i = 0; i < numSimilarNodes; i ++) {
+            TreeNodeObject n = orderedNodes.poll();
+            retNodes.add(n.getOriginalLabel());
+            System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
+        }
+
+        return retNodes;
+    }
 
     /**
      * The method is as follows:
@@ -473,10 +520,14 @@ public class TreeController {
         } else if (node.getScore() < bestNode.getScore()) {
             bestNode = node;
         } else if (node.getScore() == bestNode.getScore()) {
-            if (node.getExtC() <= bestNode.getExtC()) {
+            if (node.getExtC() < bestNode.getExtC()) {
                 //System.out.println("UPDATED:" + node.getLabel() + " from " + bestNode.getLabel());
                 bestNode = node;
             }
+            // lastly if they == the same choose the one with the most similar distance to root
+//            if (node.getExtC() == bestNode.getExtC()) {
+//                double distBest =  java.lang.Math.abs(bestNode.getDistanceToRoot() -
+//            }
         }
         //System.out.println(node.getLabel() + " " + score);
         return node.getScore();
@@ -491,6 +542,9 @@ public class TreeController {
     public double scoreNodes(ArrayList<String> extentList, ArrayList<String> extentNotIncludedList, TreeNodeObject node, Double distance) {
         int value = 1;
         if (node.isExtent()) {
+            if (!node.isInIntersection()) {
+                return  0.0;
+            }
             if (!extentList.contains(node.getLabel())) {
                 // Add a negative score for a mismatch
                 node.addToScore(value + ((extentList.size() - 1) * value));

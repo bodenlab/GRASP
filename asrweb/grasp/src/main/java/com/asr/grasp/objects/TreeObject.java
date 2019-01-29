@@ -1,6 +1,5 @@
 package com.asr.grasp.objects;
 
-import dat.PhyloTree;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

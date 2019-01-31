@@ -216,8 +216,9 @@ public class ConsensusObject {
         // Edge weight is out of 100
         if (weightMap.get(to.getId()) == null) {
             // System.out.println("TRYING TO GET TO THE FINAL ID WHICH IS PAST THE FINAL NODE ID, dummy final: "+ finalNode.getId() + " to id:" + to.getId() +  "real final: " + bestFinalNode.getId());
-            return Double.MAX_VALUE;
+            return numberSequencesUnderParent;
         }
+
         Double weight = weightMap.get(to.getId()) * weightMap.get(from.getId());
         if (!isBidirectional) {
             multiplier = numberSequencesUnderParent;
@@ -238,17 +239,17 @@ public class ConsensusObject {
         if (val < 0) {
             // That is very strange and we need to return an error
             System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "VAL < 0: " + val);
-            val = Double.MAX_VALUE;
+            val = numberSequencesUnderParent;
         }
         if (val == 0 && multiplier != 1) {
             System.out.println("VAL == 0: " + val);
-            return Double.MIN_VALUE;
+            return 1;
         }
 
         val =  multiplier * val * positionDiff;
         if (val <= 0) {
             System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "VAL <= 0 AFTER MULTIPLY: " + val);
-            val = Double.MAX_VALUE;
+            val = numberSequencesUnderParent;
         }
         //System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + ", FINAL VALUE: " + val + ", weight:" + weight + ", edgeWeight: " + (1 - edgeWeight) + " positiondiff: " + positionDiff + " mutiplier: " + multiplier + " bidir: " + isBidirectional);
         return Math.abs(val);

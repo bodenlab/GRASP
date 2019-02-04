@@ -6,7 +6,7 @@
 	<groupId>com.asr</groupId>
 	<artifactId>GRASP</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>grasp</name>
 	<description>GRASP Ancestral Sequence Reconstruction</description>
@@ -28,7 +28,7 @@
 		<profile>
 			<id>release</id>
 			<properties>
-				<activatedProperties>release-override</activatedProperties>
+				<activatedProperties>dev-override</activatedProperties>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -119,6 +119,26 @@
 					<!-- this will get rid of version info from war file name -->
 					<finalName>${project.artifactId}</finalName>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.0</version>
+				<executions>
+					<execution>
+						<id>tomcat-run</id>
+						<goals>
+							<goal>exec-war-only</goal>
+						</goals>
+						<phase>package</phase>
+						<configuration>
+							<path>/</path>
+							<enableNaming>false</enableNaming>
+							<finalName>webapp.jar</finalName>
+							<charset>utf-8</charset>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

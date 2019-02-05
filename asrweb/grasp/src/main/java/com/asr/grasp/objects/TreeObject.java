@@ -115,6 +115,26 @@ public class TreeObject {
     }
 
     /**
+     * Gets a treeNodeObject via it's label.
+     * Used to determine which nodes are the children of a given node.
+     *
+     * @param label
+     * @return
+     */
+    public TreeNodeObject getNodeByOriginalLabel(String label) {
+        for (TreeNodeObject node: nodeList) {
+            if (node.getOriginalLabel().equals(label)) {
+                if (label.equals("N4_98")) {
+                    int i = 0;
+
+                }
+                return node;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Retures the extent nodes.
      * @return
      */

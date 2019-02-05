@@ -1,8 +1,9 @@
 package com.asr.grasp.objects;
 
+import com.asr.grasp.controller.SeqController;
+import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 
 /**
  * This is a class that is aimed to be used internally. The TreeNodeObject class was created to
@@ -12,6 +13,12 @@ import java.util.Iterator;
  * written by ariane @ 22/10/2018
  */
 public class TreeNodeObject {
+
+
+    // The below is just for the consensus creation
+    private int[] seqCountList;
+    int numSeqsUnderNode = 0;
+    // End
 
     private ArrayList<TreeNodeObject> children;
     private ArrayList<TreeNodeObject> leaves; // ToDo: review do we need this?
@@ -59,6 +66,80 @@ public class TreeNodeObject {
         this.parent = parent;
     }
 
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                      The below is used for the consensus generation
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
+
+    public int getNumSeqsUnderNode() {
+        return this.getLeafCount();
+    }
+
+    public boolean buildEdgeCountMap(SeqController seqController, int reconId) {
+        // Check if this is a leaf
+        if (this.label.equals("N4")) {
+            int o = 1;
+        }
+        if (this.seqCountList != null && this.seqCountList.length > 1) {
+            return true;
+        }
+
+        //
+        if (isExtent()) {
+            String sequence = seqController.getSeqByLabel(originalLabel, reconId, Defines.EXTANT);
+            seqCountList = new int[sequence.length()];
+            numSeqsUnderNode = 1;
+            for (int i = 0; i < sequence.length(); i ++) {
+                if (sequence.charAt(i) != '-') {
+                    seqCountList[i] = 1;
+                } else {
+                    seqCountList[i] = 0;
+                }
+            }
+        }
+
+        // Go through each of the children
+        // If it's the first child just set this count list to be that one.
+        boolean first = true;
+        for (TreeNodeObject tno: getChildren()) {
+            int [] countList = tno.getSeqCountList();
+
+            if (countList == null || countList.length < 1) {
+
+                tno.buildEdgeCountMap(seqController, reconId);
+                countList = tno.getSeqCountList();
+            }
+            if (first) {
+                for ()
+                this.seqCountList = countList;
+                first = false;
+            } else {
+                // Add that count to this one.
+                for (int i = 0; i < countList.length; i ++) {
+                    this.seqCountList[i] += countList[i];
+                }
+            }
+            numSeqsUnderNode += tno.getNumSeqsUnderNode();
+            System.out.println(tno.label + " " + tno.numSeqsUnderNode +  " " + tno.seqCountList[0]);
+        }
+
+        return false;
+    }
+
+    public int[] getSeqCountList() {
+        return seqCountList;
+    }
+
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                      End consensus generation code
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
 
     /**
      * Quick method to set that this is a node we need to include in the counting.

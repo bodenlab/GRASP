@@ -847,73 +847,73 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
         String nodeLabel = dataJson.getString("nodeLabel");
-
-        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("ariane2")) {
-            int reconId = currRecon.getId();
-            String nodeName = nodeLabel;
-            int uid = loggedInUser.getId();
-            String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
-
-            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-
-            HashMap<Integer, Double> weightmap = consensusController
-                    .getEdgeCountDict(reconId, uid, nodeName,
-                            c.getPossibleInitialIds(), c.getPossibleFinalIds(),
-                            c.getInitialAndFinalNodeMap());
-
-            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
-                    consensusController.getBestInitialNodeId(),
-                    consensusController.getBestFinalNodeId());
-
-            String supportedSeq = c.getSupportedSequence(true);
-            System.out.println(supportedSeq);
-
-            String infUpdated = c.getAsJson().toString();
-            return infUpdated;
-            //seqController.updateDBInference(reconId, nodeName, infUpdated);
-            // Also want to update the Joint sequence
-            //seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
-        }
-
-        // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
-        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
-            int uid = loggedInUser.getId(); // DHAD membership name
-            // Get the mapping of reconstruction names
-            HashMap<String, ArrayList<String>> mapping = getMapping();
-
-            for (String reconName: mapping.keySet()) {
-                // Get the ID of the recon
-                int reconId = reconController.getId(reconName, uid);
-
-                // For each node label of interest we want to get the mapping.
-                ArrayList<String> labels = mapping.get(reconName);
-
-                for (String nodeName : labels) {
-                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
-                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
-
-                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-
-                    HashMap<Integer, Double> weightmap = consensusController
-                            .getEdgeCountDict(reconId, uid, nodeName,
-                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
-                                    c.getInitialAndFinalNodeMap());
-
-                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
-                            consensusController.getBestInitialNodeId(),
-                            consensusController.getBestFinalNodeId());
-
-                    String supportedSeq = c.getSupportedSequence(true);
-                    System.out.println(supportedSeq);
-
-                    String infUpdated = c.getAsJson().toString();
-                    seqController.updateDBInference(reconId, nodeName, infUpdated);
-                    // Also want to update the Joint sequence
-                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
-                }
-            }
-            return "";
-        }
+//
+//        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("ariane2")) {
+//            int reconId = currRecon.getId();
+//            String nodeName = nodeLabel;
+//            int uid = loggedInUser.getId();
+//            String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
+//
+//            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+//
+//            HashMap<Integer, Double> weightmap = consensusController
+//                    .getEdgeCountDict(reconId, uid, nodeName,
+//                            c.getPossibleInitialIds(), c.getPossibleFinalIds(),
+//                            c.getInitialAndFinalNodeMap());
+//
+//            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
+//                    consensusController.getBestInitialNodeId(),
+//                    consensusController.getBestFinalNodeId());
+//
+//            String supportedSeq = c.getSupportedSequence(true);
+//            System.out.println(supportedSeq);
+//
+//            String infUpdated = c.getAsJson().toString();
+//            return infUpdated;
+//            //seqController.updateDBInference(reconId, nodeName, infUpdated);
+//            // Also want to update the Joint sequence
+//            //seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+//        }
+//
+//        // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
+//        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
+//            int uid = loggedInUser.getId(); // DHAD membership name
+//            // Get the mapping of reconstruction names
+//            HashMap<String, ArrayList<String>> mapping = getMapping();
+//
+//            for (String reconName: mapping.keySet()) {
+//                // Get the ID of the recon
+//                int reconId = reconController.getId(reconName, uid);
+//
+//                // For each node label of interest we want to get the mapping.
+//                ArrayList<String> labels = mapping.get(reconName);
+//
+//                for (String nodeName : labels) {
+//                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
+//                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
+//
+//                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+//
+//                    HashMap<Integer, Double> weightmap = consensusController
+//                            .getEdgeCountDict(reconId, uid, nodeName,
+//                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
+//                                    c.getInitialAndFinalNodeMap());
+//
+//                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
+//                            consensusController.getBestInitialNodeId(),
+//                            consensusController.getBestFinalNodeId());
+//
+//                    String supportedSeq = c.getSupportedSequence(true);
+//                    System.out.println(supportedSeq);
+//
+//                    String infUpdated = c.getAsJson().toString();
+//                    seqController.updateDBInference(reconId, nodeName, infUpdated);
+//                    // Also want to update the Joint sequence
+//                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+//                }
+//            }
+//            return "";
+//        }
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
 
         if (reconstructedAnsc == null) {
@@ -1156,13 +1156,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
 
         this.asr = asrForm;
-        // ToDo: Also check here that they have a unique label
-        String err = null;
-        if (asr.getLabel().equals("")) {
-            err = "recon.require.label";
-        } else {
-            err = reconController.isLabelUnique(asr.getLabel());
-        }
 
         // Check if the reconstruction is in the sample list
         if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getLabel())) {
@@ -1178,6 +1171,14 @@ public class GraspApplication extends SpringBootServletInitializer {
                 return mav;
             }
             return mav;
+        }
+
+        // ToDo: Also check here that they have a unique label
+        String err = null;
+        if (asr.getLabel().equals("")) {
+            err = "recon.require.label";
+        } else {
+            err = reconController.isLabelUnique(asr.getLabel());
         }
 
         if (err != null) {

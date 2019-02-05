@@ -1,6 +1,5 @@
 package com.asr.grasp.utils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -108,5 +107,5 @@ public class Defines {
     public static final int S_NAME = 0;
     public static final int S_SCORE = 1;
 
-    public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList("Afriat-Jurnou", "CliftonandJackson", "Hudson", "CYP2U1");
+    public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList();//"Afriat-Jurnou", "CliftonandJackson", "Hudson", "CYP2U1");
 }

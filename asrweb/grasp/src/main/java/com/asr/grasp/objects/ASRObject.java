@@ -603,6 +603,7 @@ public class ASRObject {
                 setTreeFilepath(sessionDir + treeFile.getOriginalFilename());
             } else {
                 // performing reconstruction on test data
+
                 File alnFile = new File(Thread.currentThread()
                         .getContextClassLoader().getResource(dataPath + data + ".aln")
                         .toURI());

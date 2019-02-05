@@ -483,14 +483,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
-    /**
-     * Loads a reconstruction based on the ID. ID is the reconstruction ID.
-     */
-    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"load", "id"})
-    public ModelAndView loadRecon(@RequestParam("load") String load,
-            @RequestParam("id") int id, WebRequest
-            webrequest, Model model) {
 
+    /**
+     * Loads the reconstruction by an ID
+     * @param id
+     * @return
+     */
+    private ModelAndView loadReconById(int id) {
         // Here since we store the current reconsruction we just need to
         // update the reconstruction that it is pointing at.
 
@@ -499,7 +498,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         // We want to return that the reconstruction doesn't exist if it
         // isn't in the db or the user doesn't have access
         if (recon == null) {
-            return showError(model);
+            return null;
         }
 
         // Otherwise we want to set this for the user.
@@ -540,6 +539,23 @@ public class GraspApplication extends SpringBootServletInitializer {
         reconstructedNodes = new ArrayList<>();
         msa = new JSONObject(currRecon.getMsa());
         ancestor = new JSONObject(recon.getAncestor());
+        return mav;
+    }
+
+    /**
+     * Loads a reconstruction based on the ID. ID is the reconstruction ID.
+     */
+    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"load", "id"})
+    public ModelAndView loadRecon(@RequestParam("load") String load,
+            @RequestParam("id") int id, WebRequest
+            webrequest, Model model) {
+
+        ModelAndView mav =  loadReconById(id);
+        // We want to return that the reconstruction doesn't exist if it
+        // isn't in the db or the user doesn't have access
+        if (mav == null) {
+            return showError(model);
+        }
 
         return mav;
     }
@@ -1146,6 +1162,22 @@ public class GraspApplication extends SpringBootServletInitializer {
             err = "recon.require.label";
         } else {
             err = reconController.isLabelUnique(asr.getLabel());
+        }
+
+        // Check if the reconstruction is in the sample list
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getLabel())) {
+            // We just want to load an already existing reconstruction
+            int reconId = reconController.getId(asr.getLabel(), Defines.PUBLIC_USER);
+            ModelAndView mav = loadReconById(reconId);
+            if (mav == null) {
+                mav = new ModelAndView("index");
+                mav.addObject("error", true);
+                mav.addObject("errorMessage", "Issue loading default reconstruction. Please try again.");
+                mav.addObject("user", loggedInUser);
+                mav.addObject("username", loggedInUser.getUsername());
+                return mav;
+            }
+            return mav;
         }
 
         if (err != null) {

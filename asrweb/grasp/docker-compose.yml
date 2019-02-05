@@ -1,0 +1,23 @@
+version: '2'
+services:
+    web:
+      image: grasp/graspapp:latest
+      ports:
+          - 8080:8080
+      depends_on:
+          - db
+    db:
+        container_name: my_db
+        image: postgres:11.1
+        volumes:
+            - my_db:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_PASSWORD=1234
+            - POSTGRES_USER=postgres
+            - POSTGRES_DB=grasp
+            - PGDATA=/var/lib/postgresql/data/pgdata
+        ports:
+            - 5434:5432
+
+volumes:
+    my_db: {}

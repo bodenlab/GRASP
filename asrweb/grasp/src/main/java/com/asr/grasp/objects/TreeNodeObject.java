@@ -113,14 +113,15 @@ public class TreeNodeObject {
                 countList = tno.getSeqCountList();
             }
             if (first) {
-                for ()
-                this.seqCountList = countList;
-                first = false;
-            } else {
-                // Add that count to this one.
-                for (int i = 0; i < countList.length; i ++) {
-                    this.seqCountList[i] += countList[i];
+                this.seqCountList = new int[countList.length];
+                for (int i = 0; i < countList.length; i++) {
+                    this.seqCountList[i] = 0;
                 }
+                first = false;
+            }
+            // Add that count to this one.
+            for (int i = 0; i < countList.length; i ++) {
+                this.seqCountList[i] += countList[i];
             }
             numSeqsUnderNode += tno.getNumSeqsUnderNode();
             System.out.println(tno.label + " " + tno.numSeqsUnderNode +  " " + tno.seqCountList[0]);

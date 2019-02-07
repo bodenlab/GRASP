@@ -9,6 +9,7 @@ import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
+import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -158,9 +159,7 @@ public class SeqController {
         List<String> insertedLabels = new ArrayList<>();
         List<String> labels = asrInstance.getAncestralSeqLabels();
         TreeObject tree = consensusController.getEdgeMapping(reconId, userId);
-        for (TreeNodeObject tno: tree.getAncestorList()) {
-            System.out.println("L: " + tno.getLabel() + " N: " + tno.getNumSeqsUnderNode() + " C: " + tno.getSeqCountList()[0]);
-        }
+
         for (String label: labels) {
             System.out.println("Running " +  label );
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
@@ -171,12 +170,11 @@ public class SeqController {
             String ancsStr = ancsJson.toJSON().toString();
 
             // ToDo: remove once the speedy method has been implemented
-            System.out.println(tree.getNodeByOriginalLabel(label).getLabel() + " " + tree.getNodeByOriginalLabel(label).getNumSeqsUnderNode() + " " +  tree.getNodeByOriginalLabel(label).getSeqCountList()[0]);
-            //boolean inserted = updateForConsensus(reconId, label, tree.getNodeByOriginalLabel(label), ancsStr, gappy);
-//
-//            if (!inserted) {
-//                return null;
-            //}
+            boolean inserted = updateForConsensus(reconId, label, tree.getNodeByOriginalLabel(label), ancsStr, gappy);
+
+            if (!inserted) {
+                return null;
+            }
              /*
                  Old METHOD: UNCOMMENT ONCE UPDATED:
 

@@ -1,4 +1,4 @@
 FROM java:8
 EXPOSE 8080
-ADD /target/graspapp-1.jar grasp.jar
+ADD /target/grasp_app-2.jar grasp.jar
 ENTRYPOINT ["java","-jar","grasp.jar"]

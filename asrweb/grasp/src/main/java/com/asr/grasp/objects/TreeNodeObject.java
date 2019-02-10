@@ -3,6 +3,7 @@ package com.asr.grasp.objects;
 import com.asr.grasp.controller.SeqController;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -18,6 +19,15 @@ public class TreeNodeObject {
     // The below is just for the consensus creation
     private int[] seqCountList;
     int numSeqsUnderNode = 0;
+    int positionOfFirstView = 0; // This is the taxonomic information we want to view first (i.e.
+    // the taxonomic value that first deviates i.e. more than a count of 1 in there
+    // End
+
+    // The below is just for the Taxanomic information retrieval
+    private int[] taxanomicCounts;
+    HashMap<Integer, HashMap<String, Integer>> taxonomicMap;
+    /* TaxonomicMap keeps track of the list of different items for each taxonomic rank, the length
+     * of each of these hashmaps then makes up the taxonomic count. */
     // End
 
     private ArrayList<TreeNodeObject> children;
@@ -65,6 +75,16 @@ public class TreeNodeObject {
         }
         this.parent = parent;
     }
+
+    /**
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                      The below is used for the taxonomic information
+     *
+     * ---------------------------------------------------------------------------------------------
+     */
+
+
 
     /**
      * ---------------------------------------------------------------------------------------------

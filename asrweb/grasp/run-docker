@@ -1,3 +1,2 @@
 cp pom-docker.xml pom.xml
-./mvnw clean package
 ./mvnw install dockerfile:build

@@ -31,6 +31,8 @@ public class Defines {
     public static final int NO_ACCESS = -111;
     public static final int PUBLIC_USER = -23;
 
+    public static final String PUBLIC_USERNAME = "public_user"; // Owns the default reconstructions
+
 
     /**
      * Deletions / cleanup

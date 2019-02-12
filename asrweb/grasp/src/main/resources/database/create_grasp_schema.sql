@@ -6,6 +6,8 @@ CREATE USER web_user WITH ROLE web_role;
 
 ALTER USER web_user WITH ENCRYPTED PASSWORD 'strongpassword';
 
+CREATE EXTENSION pgcrypto;
+
 \c grasp_db;
 
 CREATE EXTENSION pgcrypto;

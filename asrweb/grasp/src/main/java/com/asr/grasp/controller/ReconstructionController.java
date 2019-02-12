@@ -55,6 +55,9 @@ public class ReconstructionController {
      * @return
      */
     public int getId(String label, int userId) {
+        if (userId == Defines.PUBLIC_USER) {
+            return Defines.EXAMPLE_RECONSTRUCTIONS_MAP.get(label);
+        }
         return reconModel.getIdByLabel(label, userId);
     }
 

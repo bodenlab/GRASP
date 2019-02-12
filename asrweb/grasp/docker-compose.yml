@@ -4,7 +4,7 @@ services:
       container_name: app_container
       image: grasp/grasp_app:latest
       ports:
-          - 8080:8080
+          - 8089:8080
       depends_on:
           - db
     db:
@@ -13,12 +13,13 @@ services:
         volumes:
             - db_container:/var/lib/postgresql/data
         environment:
-            - POSTGRES_PASSWORD=adummypassword
-            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=astrongpassword
+            - POSTGRES_USER=web_user
             - POSTGRES_DB=grasp_db
             - PGDATA=/var/lib/postgresql/data/pgdata
         ports:
             - 5434:5432
+
 
 volumes:
     db_container: {}

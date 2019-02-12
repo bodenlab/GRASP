@@ -1158,9 +1158,9 @@ public class GraspApplication extends SpringBootServletInitializer {
         this.asr = asrForm;
 
         // Check if the reconstruction is in the sample list
-        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getLabel())) {
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
             // We just want to load an already existing reconstruction
-            int reconId = reconController.getId(asr.getLabel(), Defines.PUBLIC_USER);
+            int reconId = reconController.getId(asr.getData(), Defines.PUBLIC_USER);
             ModelAndView mav = loadReconById(reconId);
             if (mav == null) {
                 mav = new ModelAndView("index");

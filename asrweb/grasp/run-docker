@@ -1,2 +1,0 @@
-cp pom-docker.xml pom.xml
-./mvnw install dockerfile:build

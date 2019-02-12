@@ -9,7 +9,6 @@ import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
-import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.FileWriter;

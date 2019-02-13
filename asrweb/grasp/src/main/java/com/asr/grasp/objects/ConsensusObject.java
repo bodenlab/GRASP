@@ -150,14 +150,6 @@ public class ConsensusObject {
     }
 
     /**
-     * Simplest version where we format the JSON object.
-     * @param unformattedJson
-     */
-    public ConsensusObject(JSONObject unformattedJson) {
-        formatJSON(unformattedJson);
-    }
-
-    /**
      * Format the JSON object into Java objects for processing.
      * @param unformattedJson
      */
@@ -238,43 +230,6 @@ public class ConsensusObject {
     }
 
 
-    /**
-     * Gets the possible ids that could be teh initial node.
-     *
-     * @return
-     */
-    public ArrayList<Integer> getPossibleInitialIds() {
-        return this.possibleInitialIds;
-    }
-
-    /**
-     * Returns a list f possible terminating node identifiers.
-     * @return
-     */
-    public ArrayList<Integer> getPossibleFinalIds() {
-        return this.possibleFinalIds;
-    }
-
-    public HashMap<Integer, Node> getInitialAndFinalNodeMap() {
-        return this.initialAndFinalNodeMap;
-    }
-
-//    /**
-//     * This class initialiser takes the unformatted JSON object from the controller in the GRASP
-//     * application.
-//     * Need to match up the nodes and the edges. We do
-//     */
-//    public void setParams(HashMap<Integer, Double> weightMap, int numberSeqsUnderNode, int bestInitialNodeId, int bestFinalNodeId) {
-//        this.weightMap = weightMap;
-//        this.numberSeqsUnderNode = numberSeqsUnderNode;
-//
-//        weightMap.put(bestFinalNodeId, 1.0);
-//        weightMap.put(bestInitialNodeId, 1.0);
-//
-//        // Run consensus gen
-//        bestInitialNode = nodeMap.get(bestInitialNodeId);
-//        bestFinalNode = nodeMap.get(bestFinalNodeId);
-//    }
 
     /**
      * Converts the consensus object into the JSON representation required by the grasp app.
@@ -479,13 +434,6 @@ public class ConsensusObject {
             }
             // Otherwise add this to the closedSet
             closedSet.add(current);
-//            try {
-//                System.out.println(
-//                        cameFrom.get(current).node.getId() + "->" + current.getId() + " " + cameFrom
-//                                .get(current).node.base + "->" + current.base);
-//            } catch (Exception e) {
-//
-//            }
 
             if (printout) {
                 System.out.println("Looking at edges from: " + current.getId());

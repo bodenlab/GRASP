@@ -213,34 +213,6 @@ public class SeqController {
 
 
     /**
-     * A temporary method to allow us to use an alternate consensus method generation technique.
-     * @param reconstructedAnsc
-     * @param reconId
-     * @param uid
-     * @param nodeName
-     * @param gappy
-     */
-//    public boolean updateForNewConsensusTmp(String reconstructedAnsc, int reconId, int uid, String nodeName, boolean gappy) {
-//        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-//        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
-//        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
-//
-//        System.out.println("LOOKING AT: " + nodeName);
-//        String supportedSeq = c.getSupportedSequence(true);
-//        System.out.println(supportedSeq);
-//
-//        String infUpdated = c.getAsJson().toString();
-//        boolean inserted = infModel.insertIntoDb(reconId, nodeName, infUpdated);
-//        if (!inserted) {
-//            return false;
-//        }
-//        // Also want to update the Joint sequence
-//        inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, Defines.JOINT, gappy);
-//        return inserted;
-//    }
-
-
-    /**
      * Insert a single joint instance into the database.
      *
      * @param reconId

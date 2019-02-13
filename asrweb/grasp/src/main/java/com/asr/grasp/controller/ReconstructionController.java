@@ -55,9 +55,6 @@ public class ReconstructionController {
      * @return
      */
     public int getId(String label, int userId) {
-        if (userId == Defines.PUBLIC_USER) {
-            return Defines.EXAMPLE_RECONSTRUCTIONS_MAP.get(label);
-        }
         return reconModel.getIdByLabel(label, userId);
     }
 
@@ -92,6 +89,19 @@ public class ReconstructionController {
         // Check we can get the reconsrtcution
         ReconstructionObject reconstruction = reconModel.getMiniById(reconId, user
                 .getId());
+        return reconstruction;
+    }
+
+    /**
+     * Gets a reconstruction by its ID. Loads a cut down version of a reconstruction.
+     * This is used to load a saved reconstruction.
+     *
+     * @param reconLabel
+     * @return
+     */
+    public ReconstructionObject getByLabel(String reconLabel) {
+        // Check we can get the reconsrtcution
+        ReconstructionObject reconstruction = reconModel.getMiniByLabel(reconLabel);
         return reconstruction;
     }
 

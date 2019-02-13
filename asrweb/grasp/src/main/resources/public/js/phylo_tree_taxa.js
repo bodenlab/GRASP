@@ -338,7 +338,7 @@ var getCommonTaxon = function (node) {
     return;
   }
   // var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
-  var ranks = ["domain", "superkingdom", "kingdom", "phylum", "class_t", "order_t", "family_t", "genus", "species"]
+  var ranks = ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"]
 
   var taxonomy = {};
   for (var rank in ranks) {
@@ -480,7 +480,8 @@ var add_taxonomy_modal_info = function (node, group, options) {
           .attr("opacity", 1)
           .attr("transform", "translate(" + x + "," + y_text + ")")
           .text(function () {
-            return rank.charAt(0).toUpperCase() + rank.slice(1).split("_")[0]
+            let rank_text = rank.split('_')[1]
+            return rank_text.charAt(0).toUpperCase() + rank_text.slice(1)
                 + ": " + tax;
           });
           counter++;
@@ -500,8 +501,9 @@ var add_taxonomy_modal_info = function (node, group, options) {
         .attr("opacity", 1)
         .attr("transform", "translate(" + x + "," + y_text + ")")
         .text(function () {
-          return rank_differ.charAt(0).toUpperCase() + rank_differ.slice(
-              1).split("_")[0]
+          let rank_text = rank.split('_')[1]
+          return rank_text.charAt(0).toUpperCase() + rank_text.slice(
+              1)
               + ": ";
         });
         tax = tax_info[rank_differ];

@@ -484,25 +484,10 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
 
-    /**
-     * Loads the reconstruction by an ID
-     * @param id
-     * @return
-     */
-    private ModelAndView loadReconById(int id) {
-        // Here since we store the current reconsruction we just need to
-        // update the reconstruction that it is pointing at.
-
-        ReconstructionObject recon = reconController.getById(id,
-                loggedInUser);
-        // We want to return that the reconstruction doesn't exist if it
-        // isn't in the db or the user doesn't have access
-        if (recon == null) {
-            return null;
-        }
+    private ModelAndView loadRecon() {
 
         // Otherwise we want to set this for the user.
-        userController.setCurrRecon(recon, loggedInUser);
+        userController.setCurrRecon(currRecon, loggedInUser);
 
         currRecon = loggedInUser.getCurrRecon();
 
@@ -514,13 +499,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("tree", currRecon.getReconTree());
 
         // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(recon.getAncestor()));
+        String graphs = asr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(currRecon.getAncestor()));
 
         mav.addObject("graph", graphs);
 
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
-        mav.addObject("inferenceType", recon.getInferenceType());
-        mav.addObject("node", recon.getNode());
+        mav.addObject("inferenceType", currRecon.getInferenceType());
+        mav.addObject("node", currRecon.getNode());
         mav.addObject("results", true);
 
         mav.addObject("user", loggedInUser);
@@ -538,8 +523,48 @@ public class GraspApplication extends SpringBootServletInitializer {
         // the initial iteration.
         reconstructedNodes = new ArrayList<>();
         msa = new JSONObject(currRecon.getMsa());
-        ancestor = new JSONObject(recon.getAncestor());
+        ancestor = new JSONObject(currRecon.getAncestor());
         return mav;
+    }
+
+    /**
+     * Loads the reconstruction by an ID
+     * @param id
+     * @return
+     */
+    private ModelAndView loadReconById(int id) {
+        // Here since we store the current reconsruction we just need to
+        // update the reconstruction that it is pointing at.
+        ReconstructionObject recon = reconController.getById(id,
+                loggedInUser);
+
+        // We want to return that the reconstruction doesn't exist if it
+        // isn't in the db or the user doesn't have access
+        if (recon == null) {
+            return null;
+        }
+        currRecon = recon;
+        return loadRecon();
+    }
+
+    /**
+     * Loads the reconstruction by it's label, this is only allowed for those included in the public
+     * domain.
+     * @param label
+     * @return
+     */
+    private ModelAndView loadReconByLabel(String label) {
+        // Here since we store the current reconsruction we just need to
+        // update the reconstruction that it is pointing at.
+        ReconstructionObject recon = reconController.getByLabel(label);
+
+        // We want to return that the reconstruction doesn't exist if it
+        // isn't in the db or the user doesn't have access
+        if (recon == null) {
+            return null;
+        }
+        currRecon = recon;
+        return loadRecon();
     }
 
     /**
@@ -1160,8 +1185,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Check if the reconstruction is in the sample list
         if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
             // We just want to load an already existing reconstruction
-            int reconId = reconController.getId(asr.getData(), Defines.PUBLIC_USER);
-            ModelAndView mav = loadReconById(reconId);
+            ModelAndView mav = loadReconByLabel(asr.getData());
             if (mav == null) {
                 mav = new ModelAndView("index");
                 mav.addObject("error", true);

@@ -361,6 +361,44 @@ public class ReconstructionsModel extends BaseModel {
      *
      * @return null if no reconstruction matches those configs
      */
+    public ReconstructionObject getMiniByLabel(String reconLabel) {
+        String query = "SELECT id, owner_id, " +
+                "ancestor, " +
+                "inference_type, label, " +
+                "model, msa, node, reconstructed_tree" +
+                " FROM " +
+                "web.reconstructions WHERE " +
+                "label=?;";
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setString(1, reconLabel);
+
+            ResultSet rawRecons = statement.executeQuery();
+            con.close();
+            // If we have an entry convert it to the correct format.
+            closeCon(con);
+
+            if (rawRecons.next()) {
+                return createMiniFromDB(rawRecons);
+            }
+            return null;
+        } catch (Exception e) {
+            closeCon(con);
+            System.out.println(e);
+        }
+        return null;
+    }
+
+
+    /**
+     * Gets a reconstruction by ID. A user ID is also passed so we need to
+     * confirm that the user has access to this reconstruction.
+     *
+     * @return null if no reconstruction matches those configs
+     */
     public ReconstructionObject getMiniById(int reconId, int userId) {
         String query = "SELECT r.id, r.owner_id, " +
                 "r.ancestor, r" +

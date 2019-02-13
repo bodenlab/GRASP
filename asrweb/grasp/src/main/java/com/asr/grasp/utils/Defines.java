@@ -1,9 +1,7 @@
 package com.asr.grasp.utils;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Add in any defines that will be used across the platform.
@@ -112,12 +110,5 @@ public class Defines {
     public static final int S_SCORE = 1;
 
     public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList("tawfik", "hudson", "clifton", "cyp2u1");
-
-    public static final HashMap<String, Integer> EXAMPLE_RECONSTRUCTIONS_MAP = new HashMap<String, Integer>() {{
-        put("tawfik", 1);
-        put("cyp2u1", 2);
-        put("hudson", 3);
-        put("clifton", 4);
-    }};
 
 }

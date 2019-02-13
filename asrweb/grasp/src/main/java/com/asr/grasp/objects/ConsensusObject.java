@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Stack;
 import json.JSONArray;
 import json.JSONObject;
+import org.springframework.security.access.method.P;
 import vis.Defines;
 import vis.POAGJson;
 
@@ -19,17 +20,21 @@ public class ConsensusObject {
 
     HashMap<Integer,  Node> nodeMap;
     ArrayList< Edge> edges;
+
     // These are the nodes that are dummy start and end nodes in the original version.
     // We keep them as they are used on the front end for signifying the start and end terminals.
     Node initialNode;
     Node finalNode;
     int numberNodes;
+
     // Map with heuristics
     HashMap<Integer, Double> cost = new HashMap<>();
-    HashMap<Integer, Double> weightMap;
-    int numberSequencesUnderParent = -1;
-    HashMap<Integer, Integer> possibleInitialIds;
-    HashMap<Integer, Integer> possibleFinalIds;
+    double[] weightArray;
+    int[] countArray;
+
+    int numberSeqsUnderNode;
+    ArrayList<Integer> possibleInitialIds;
+    ArrayList<Integer> possibleFinalIds;
 
     HashMap<Integer, Edge> initialAndFinalEdges;
     HashMap<Integer, Node> initialAndFinalNodeMap;
@@ -38,16 +43,109 @@ public class ConsensusObject {
     Node bestInitialNode;
     Node bestFinalNode;
 
-    public ConsensusObject(POAGJson poagJson) {
+    public ConsensusObject(int[] edgeCounts, int numberSeqsUnderNode) {
+        weightArray = new double[edgeCounts.length];
+        for (int i = 0; i < edgeCounts.length; i ++) {
+            weightArray[i] = (edgeCounts[i] * 1.0) /numberSeqsUnderNode;
+        }
+        this.numberSeqsUnderNode = numberSeqsUnderNode;
+        this.countArray = edgeCounts;
+        cost = new HashMap<>();
+    }
 
+    public double[] getWeightArray() {
+        return this.weightArray;
+    }
+
+    private int getBestCount(ArrayList<Integer> possibleIds) {
+        // Here we want to get the best count in the node dictionary.
+        int bestCount = 0;
+        for (Integer initialId: possibleIds) {
+            int thisCount = countArray[initialId];
+            if (thisCount > bestCount) {
+                bestCount = thisCount;
+            }
+        }
+        return bestCount;
     }
 
 
     /**
-     * Simplest version where we format the JSON object.
+     To ensure that if we have a tie we actually choose the best one (lets for now say the
+     best one is the one which has a higher sequence content in that column (very unlikely
+     that this would be the same)
+     Set the best first and last node ID's
+     * @param ids
+     * @param tagToLookFor
+     * @return
+     */
+    public int getBestId(ArrayList<Integer> ids, Character tagToLookFor) {
+        ArrayList<Integer> bestIds = new ArrayList<>();
+        double errorMargin = 0.05 * numberSeqsUnderNode;
+        int bestCount = getBestCount(ids);
+        for (Integer i: ids) {
+            // Check that the best IDS are with the error margin deemed to be 5% of the sequence count
+            if (countArray[i] > bestCount - errorMargin) {
+                bestIds.add(i);
+            }
+        }
+
+        if (bestIds.size() == 0) {
+            System.out.println("ERROR!");
+            return ids.get(0);
+        }
+        if (bestIds.size() == 1) {
+            return bestIds.get(0);
+        }
+
+        ArrayList<Integer> bestIdsWithMet = new ArrayList<>();
+        if (tagToLookFor != null) {
+            for (Integer i : bestIds) {
+                if (nodeMap.get(i).getBase() == tagToLookFor) {
+                    bestIdsWithMet.add(i);
+                }
+            }
+
+            if (bestIdsWithMet.size() == 1) {
+                return bestIdsWithMet.get(0);
+            }
+        }
+        // If none had a met start tag we want to change it back to the original bestIds
+        if (bestIdsWithMet.size() == 0) {
+            bestIdsWithMet = bestIds;
+        }
+
+        double bestWeightVal = 0.0;
+        int bestFinalId = 0;
+        ArrayList<Integer> bestBiDir = new ArrayList<>();
+        for (Integer i : bestIdsWithMet) {
+            if (nodeMap.get(i).getBiDir()) {
+                bestBiDir.add(i);
+            }
+        }
+        if (bestBiDir.size() == 1) {
+            return bestBiDir.get(0);
+        }
+
+        if (bestBiDir.size() == 0) {
+            bestBiDir = bestIdsWithMet;
+        }
+        for (Integer i: bestBiDir) {
+            double weightVal = countArray[i];
+            if (weightVal > bestWeightVal) {
+                bestWeightVal = weightVal;
+                bestFinalId = i;
+            }
+        }
+        return bestFinalId;
+    }
+
+    /**
+     * This is used so we can create a consensus object and add the unformatted json after,
+     * used to make it more efficient when we build the map at the start.
      * @param unformattedJson
      */
-    public ConsensusObject(JSONObject unformattedJson) {
+    public void setJsonObject(JSONObject unformattedJson) {
         formatJSON(unformattedJson);
     }
 
@@ -80,8 +178,8 @@ public class ConsensusObject {
             }
         }
 
-        possibleInitialIds = new HashMap<>();
-        possibleFinalIds = new HashMap<>();
+        possibleInitialIds = new ArrayList<>();
+        possibleFinalIds = new ArrayList<>();
 
         // Iterate through each edge and add it to the edge array
         for (int e = 0; e < jsonEdges.length(); e++) {
@@ -92,13 +190,6 @@ public class ConsensusObject {
 
             boolean reciprocated = edgeJson.getInt(Defines.E_RECIPROCATED) == Defines.TRUE;
             double weight = edgeJson.getDouble(Defines.E_WEIGHT);
-//            double weight = 0.0;
-//            try {
-//                weight = weightMap.get(toId) * ;
-//            } catch (Exception eE) {
-//                System.out.println("UNABLE to get mapping:" + fromId + '-' + toId);
-//            }
-//            edgeJson.put(Defines.E_WEIGHT, weight * 100);
             Edge edge = new Edge(fromId, toId, weight, reciprocated, edgeJson, e);
             edges.add(edge);
             // Add the edge to the node map
@@ -106,7 +197,7 @@ public class ConsensusObject {
             // If the from ID is the initial node id then we want to keep track of the possible
             // node IDs that were part of this.
             if (fromId == initialId) {
-                possibleInitialIds.put(toId, 0);
+                possibleInitialIds.add(toId);
                 initialAndFinalEdges.put(toId, edge);
                 // Want to set that this node is bi-dir
                 Node node = nodeMap.get(toId);
@@ -114,10 +205,9 @@ public class ConsensusObject {
                 initialAndFinalNodeMap.put(toId, node);
 
             }
-
             // Similarly, if the toId is the final node ID we want to keep track of this
             if (toId == endId) {
-                possibleFinalIds.put(fromId, 0);
+                possibleFinalIds.add(fromId);
                 initialAndFinalEdges.put(fromId, edge);
                 // set whether it is bidirectional or not
                 Node node = nodeMap.get(fromId);
@@ -126,52 +216,20 @@ public class ConsensusObject {
 
             }
         }
-
-        // Set these so we're able to get the edges that are from these
         this.initialNode = nodeMap.get(initialId);
         this.finalNode = nodeMap.get(endId);
+        // Calculate the best initial and final IDs
+        initialId = getBestId(possibleInitialIds, 'M');
+        endId = getBestId(possibleFinalIds, null);
+        // Set these so we're able to get the edges that are from these
+        this.bestInitialNode = nodeMap.get(initialId);
+        this.bestFinalNode = nodeMap.get(endId);
+
         // Set the numberof nodes to be the end ID
         numberNodes = nodeMap.size();
     }
 
 
-    /**
-     * Gets the possible ids that could be teh initial node.
-     *
-     * @return
-     */
-    public HashMap<Integer, Integer> getPossibleInitialIds() {
-        return this.possibleInitialIds;
-    }
-
-    /**
-     * Returns a list f possible terminating node identifiers.
-     * @return
-     */
-    public HashMap<Integer, Integer> getPossibleFinalIds() {
-        return this.possibleFinalIds;
-    }
-
-    public HashMap<Integer, Node> getInitialAndFinalNodeMap() {
-        return this.initialAndFinalNodeMap;
-    }
-
-    /**
-     * This class initialiser takes the unformatted JSON object from the controller in the GRASP
-     * application.
-     * Need to match up the nodes and the edges. We do
-     */
-    public void setParams(HashMap<Integer, Double> weightMap, int numberSequencesUnderParent, int bestInitialNodeId, int bestFinalNodeId) {
-        this.weightMap = weightMap;
-        this.numberSequencesUnderParent = numberSequencesUnderParent;
-
-        weightMap.put(bestFinalNodeId, 1.0);
-        weightMap.put(bestInitialNodeId, 1.0);
-
-        // Run consensus gen
-        bestInitialNode = nodeMap.get(bestInitialNodeId);
-        bestFinalNode = nodeMap.get(bestFinalNodeId);
-    }
 
     /**
      * Converts the consensus object into the JSON representation required by the grasp app.
@@ -209,24 +267,17 @@ public class ConsensusObject {
     private double heuristicCostEstimate(Edge edge, Node from, Node to, boolean isBidirectional) {
 
         int multiplier = 1;
-        double edgeWeight = 1 - (edge.getWeight()/100);
         int positionDiff = java.lang.Math.abs(to.getId() - from.getId());
         positionDiff = (positionDiff > 0) ? positionDiff : 1;
 
-        // Edge weight is out of 100
-        if (weightMap.get(to.getId()) == null) {
-            // System.out.println("TRYING TO GET TO THE FINAL ID WHICH IS PAST THE FINAL NODE ID, dummy final: "+ finalNode.getId() + " to id:" + to.getId() +  "real final: " + bestFinalNode.getId());
+        if (to.getId() == finalNode.getId() || from.getId() == initialNode.getId()) {
+            System.out.println("PASSED FINAL NODE OR TRYING FROM WRONG INITIAL NODE: " + from.getId() + "->" + to.getId());
             return Double.MAX_VALUE;
         }
-        Double weight = weightMap.get(to.getId()) * weightMap.get(from.getId());
+        Double weight = weightArray[to.getId()] * weightArray[from.getId()];
         if (!isBidirectional) {
-            multiplier = numberSequencesUnderParent;
+            multiplier = numberSeqsUnderNode;
         }
-
-        // TODO: TEST WITH AND WITHOUT THIS!
-//        if (edgeWeight > 0.99) {
-//            multiplier = numberSequencesUnderParent;
-//        }
 
         if (weight == null) {
             // If we don't even have a weight just return the largest possible value for this path.
@@ -234,25 +285,24 @@ public class ConsensusObject {
             return Double.MAX_VALUE;
         }
 
-        double val = ((1 - weight) + 1); // * (edgeWeight + 1);
+        double val = ((1 - weight) + 1); //
         if (val < 0) {
             // That is very strange and we need to return an error
             System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "VAL < 0: " + val);
-            val = Double.MAX_VALUE;
+            val = numberSeqsUnderNode;
         }
         if (val == 0 && multiplier != 1) {
             System.out.println("VAL == 0: " + val);
-            return Double.MIN_VALUE;
+            return 1;
         }
 
         val =  multiplier * val * positionDiff;
         if (val <= 0) {
             System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + "VAL <= 0 AFTER MULTIPLY: " + val);
-            val = Double.MAX_VALUE;
+            val = numberSeqsUnderNode;
         }
-        //System.out.println("RUNNING: " + from.getId() + "->" + to.getId() + ", FINAL VALUE: " + val + ", weight:" + weight + ", edgeWeight: " + (1 - edgeWeight) + " positiondiff: " + positionDiff + " mutiplier: " + multiplier + " bidir: " + isBidirectional);
-        return Math.abs(val);
 
+        return Math.abs(val);
     }
 
 
@@ -384,13 +434,6 @@ public class ConsensusObject {
             }
             // Otherwise add this to the closedSet
             closedSet.add(current);
-//            try {
-//                System.out.println(
-//                        cameFrom.get(current).node.getId() + "->" + current.getId() + " " + cameFrom
-//                                .get(current).node.base + "->" + current.base);
-//            } catch (Exception e) {
-//
-//            }
 
             if (printout) {
                 System.out.println("Looking at edges from: " + current.getId());

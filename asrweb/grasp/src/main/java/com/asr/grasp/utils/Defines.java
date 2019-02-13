@@ -1,5 +1,8 @@
 package com.asr.grasp.utils;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Add in any defines that will be used across the platform.
  */
@@ -26,6 +29,9 @@ public class Defines {
     public static final int MEMBER_ACCESS = 100;
     public static final int OWNER_ACCESS = 220;
     public static final int NO_ACCESS = -111;
+    public static final int PUBLIC_USER = -23;
+
+    public static final String PUBLIC_USERNAME = "public_user"; // Owns the default reconstructions
 
 
     /**
@@ -102,4 +108,7 @@ public class Defines {
      */
     public static final int S_NAME = 0;
     public static final int S_SCORE = 1;
+
+    public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList("tawfik", "hudson", "clifton", "cyp2u1");
+
 }

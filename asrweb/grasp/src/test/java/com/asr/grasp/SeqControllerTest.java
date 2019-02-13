@@ -8,6 +8,7 @@ import api.PartialOrderGraph;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
+import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
@@ -111,7 +112,7 @@ public class SeqControllerTest extends BaseTest {
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
 
         System.out.println(seqMap.get("N22_68"));
-        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
+        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFG------"));
         //"SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
         System.out.println(seqMap.get("N22_68"));
         // old
@@ -249,19 +250,21 @@ public class SeqControllerTest extends BaseTest {
         // motif searching
         POAGJson ancsJson = new POAGJson(ancestor, true);
         String ancsStr = ancsJson.toJSON().toString();
-        ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr));
-        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(recon.getId(), user.getId(), label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
-        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
+        TreeNodeObject node = consensusController.getEdgeMappingForNode(recon.getId(), user.getId(), label);
+        ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+        c.setJsonObject(new JSONObject(ancsStr));
+        // ToDO:
         String supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);
+        double[] weightArr = c.getWeightArray();
         // Check that they are as we would expect
-        assertThat(weightmap.get(0), equalTo(1.0));
-        assertThat(weightmap.get(1), equalTo(0.8));
-        assertThat(weightmap.get(2), equalTo(0.8));
-        assertThat(weightmap.get(3), equalTo(null));
-        assertThat(weightmap.get(4), equalTo(null));
-        assertThat(weightmap.get(5), equalTo(null));
-        assertThat(weightmap.get(6), equalTo(1.0));
+        assertThat(weightArr[0], equalTo(1.0));
+        assertThat(weightArr[1], equalTo(0.8));
+        assertThat(weightArr[2], equalTo(0.8));
+        assertThat(weightArr[3], equalTo(0.0));
+        assertThat(weightArr[4], equalTo(0.0));
+        assertThat(weightArr[5], equalTo(0.0));
+        assertThat(weightArr[6], equalTo(1.0));
 
 
         assertThat("MGG---D", equalTo(supportedSeq));
@@ -273,17 +276,21 @@ public class SeqControllerTest extends BaseTest {
         // motif searching
         ancsJson = new POAGJson(ancestor, true);
         ancsStr = ancsJson.toJSON().toString();
-        c = new ConsensusObject(new JSONObject(ancsStr));
-        weightmap = consensusController.getEdgeCountDict(recon.getId(), user.getId(), label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
-        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
+        node = consensusController.getEdgeMappingForNode(recon.getId(), user.getId(), label);
+        c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+        c.setJsonObject(new JSONObject(ancsStr));
+
+        weightArr = c.getWeightArray();
+        // ToDO:
+        supportedSeq = c.getSupportedSequence(true);
         // Check that they are as we would expect
-        assertThat(weightmap.get(0), equalTo(1.0));
-        assertThat(weightmap.get(1), equalTo(0.6666666666666666));
-        assertThat(weightmap.get(2), equalTo(0.6666666666666666));
-        assertThat(weightmap.get(3), equalTo(null));
-        assertThat(weightmap.get(4), equalTo(null));
-        assertThat(weightmap.get(5), equalTo(null));
-        assertThat(weightmap.get(6), equalTo(1.0));
+        assertThat(weightArr[0], equalTo(1.0));
+        assertThat(weightArr[1], equalTo(0.6666666666666666));
+        assertThat(weightArr[2], equalTo(0.6666666666666666));
+        assertThat(weightArr[3], equalTo(0.0));
+        assertThat(weightArr[4], equalTo(0.0));
+        assertThat(weightArr[5], equalTo(0.0));
+        assertThat(weightArr[6], equalTo(1.0));
 
         supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);

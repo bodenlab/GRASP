@@ -93,6 +93,19 @@ public class ReconstructionController {
     }
 
     /**
+     * Gets a reconstruction by its ID. Loads a cut down version of a reconstruction.
+     * This is used to load a saved reconstruction.
+     *
+     * @param reconLabel
+     * @return
+     */
+    public ReconstructionObject getByLabel(String reconLabel) {
+        // Check we can get the reconsrtcution
+        ReconstructionObject reconstruction = reconModel.getMiniByLabel(reconLabel);
+        return reconstruction;
+    }
+
+    /**
      * Gets a reconstruction by its ID.
      *
      * This is used to load a saved reconstruction. We need all the parameters in this case

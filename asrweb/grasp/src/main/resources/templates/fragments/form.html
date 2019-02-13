@@ -53,6 +53,8 @@
                                             }
                                             $('#lbl-filetree').removeAttr('disabled');
                                             $('#filetree').removeAttr('disabled');
+                                            $('#label').removeAttr('disabled');
+                                            $('#email').removeAttr('disabled');
                                             $('#label').focus();
                                         } else {
                                             $("#label").val(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
@@ -66,6 +68,8 @@
                                             $('#fileseq').attr('disabled', true);
                                             $('#lbl-filetree').attr('disabled', true);
                                             $('#filetree').attr('disabled', true);
+                                            $('#label').attr('disabled', true);
+                                            $('#email').attr('disabled', true);
                                             $('#submit-btn').focus();
                                         }
                                     };

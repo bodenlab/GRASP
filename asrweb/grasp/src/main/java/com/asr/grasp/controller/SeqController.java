@@ -6,6 +6,8 @@ import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
+import com.asr.grasp.objects.TreeNodeObject;
+import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
 import dat.POGraph;
 import java.io.BufferedWriter;
@@ -126,12 +128,10 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
-            ConsensusObject c = new ConsensusObject(new JSONObject(ancsStr));
-            HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, userId, label, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
-            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
-            // HERE WE NEED TO UPDATE TH UID THIS SHOULDN"T BE USED ATM
-            // ToDo: Here is where we can alter the consensus sequence.
-
+            TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
+            ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+            c.setJsonObject(new JSONObject(ancsStr));
+            // ToDO:
             String supportedSeq = c.getSupportedSequence(true);
             System.out.println(supportedSeq);
 
@@ -157,6 +157,8 @@ public class SeqController {
     public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy, int userId) {
         List<String> insertedLabels = new ArrayList<>();
         List<String> labels = asrInstance.getAncestralSeqLabels();
+        TreeObject tree = consensusController.getEdgeMapping(reconId, userId);
+
         for (String label: labels) {
             System.out.println("Running " +  label );
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
@@ -167,7 +169,7 @@ public class SeqController {
             String ancsStr = ancsJson.toJSON().toString();
 
             // ToDo: remove once the speedy method has been implemented
-            boolean inserted = updateForNewConsensusTmp(ancsStr, reconId, userId, label, gappy);
+            boolean inserted = updateForConsensus(reconId, label, tree.getNodeByOriginalLabel(label), ancsStr, gappy);
 
             if (!inserted) {
                 return null;
@@ -189,16 +191,11 @@ public class SeqController {
 
     /**
      * A temporary method to allow us to use an alternate consensus method generation technique.
-     * @param reconstructedAnsc
-     * @param reconId
-     * @param uid
-     * @param nodeName
      * @param gappy
      */
-    public boolean updateForNewConsensusTmp(String reconstructedAnsc, int reconId, int uid, String nodeName, boolean gappy) {
-        ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-        HashMap<Integer, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName, c.getPossibleInitialIds(), c.getPossibleFinalIds(), c.getInitialAndFinalNodeMap());
-        c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(), consensusController.getBestInitialNodeId(), consensusController.getBestFinalNodeId());
+    public boolean updateForConsensus(int reconId, String nodeName, TreeNodeObject node, String reconstructedAnsc, boolean gappy) {
+        ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+        c.setJsonObject(new JSONObject(reconstructedAnsc));
 
         System.out.println("LOOKING AT: " + nodeName);
         String supportedSeq = c.getSupportedSequence(true);

@@ -483,27 +483,11 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
-    /**
-     * Loads a reconstruction based on the ID. ID is the reconstruction ID.
-     */
-    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"load", "id"})
-    public ModelAndView loadRecon(@RequestParam("load") String load,
-            @RequestParam("id") int id, WebRequest
-            webrequest, Model model) {
 
-        // Here since we store the current reconsruction we just need to
-        // update the reconstruction that it is pointing at.
-
-        ReconstructionObject recon = reconController.getById(id,
-                loggedInUser);
-        // We want to return that the reconstruction doesn't exist if it
-        // isn't in the db or the user doesn't have access
-        if (recon == null) {
-            return showError(model);
-        }
+    private ModelAndView loadRecon() {
 
         // Otherwise we want to set this for the user.
-        userController.setCurrRecon(recon, loggedInUser);
+        userController.setCurrRecon(currRecon, loggedInUser);
 
         currRecon = loggedInUser.getCurrRecon();
 
@@ -515,13 +499,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("tree", currRecon.getReconTree());
 
         // add msa and inferred ancestral graph
-        String graphs = asr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(recon.getAncestor()));
+        String graphs = asr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(currRecon.getAncestor()));
 
         mav.addObject("graph", graphs);
 
         // add attribute to specify to view results (i.e. to show the graph, tree, etc)
-        mav.addObject("inferenceType", recon.getInferenceType());
-        mav.addObject("node", recon.getNode());
+        mav.addObject("inferenceType", currRecon.getInferenceType());
+        mav.addObject("node", currRecon.getNode());
         mav.addObject("results", true);
 
         mav.addObject("user", loggedInUser);
@@ -539,7 +523,64 @@ public class GraspApplication extends SpringBootServletInitializer {
         // the initial iteration.
         reconstructedNodes = new ArrayList<>();
         msa = new JSONObject(currRecon.getMsa());
-        ancestor = new JSONObject(recon.getAncestor());
+        ancestor = new JSONObject(currRecon.getAncestor());
+        return mav;
+    }
+
+    /**
+     * Loads the reconstruction by an ID
+     * @param id
+     * @return
+     */
+    private ModelAndView loadReconById(int id) {
+        // Here since we store the current reconsruction we just need to
+        // update the reconstruction that it is pointing at.
+        ReconstructionObject recon = reconController.getById(id,
+                loggedInUser);
+
+        // We want to return that the reconstruction doesn't exist if it
+        // isn't in the db or the user doesn't have access
+        if (recon == null) {
+            return null;
+        }
+        currRecon = recon;
+        return loadRecon();
+    }
+
+    /**
+     * Loads the reconstruction by it's label, this is only allowed for those included in the public
+     * domain.
+     * @param label
+     * @return
+     */
+    private ModelAndView loadReconByLabel(String label) {
+        // Here since we store the current reconsruction we just need to
+        // update the reconstruction that it is pointing at.
+        ReconstructionObject recon = reconController.getByLabel(label);
+
+        // We want to return that the reconstruction doesn't exist if it
+        // isn't in the db or the user doesn't have access
+        if (recon == null) {
+            return null;
+        }
+        currRecon = recon;
+        return loadRecon();
+    }
+
+    /**
+     * Loads a reconstruction based on the ID. ID is the reconstruction ID.
+     */
+    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"load", "id"})
+    public ModelAndView loadRecon(@RequestParam("load") String load,
+            @RequestParam("id") int id, WebRequest
+            webrequest, Model model) {
+
+        ModelAndView mav =  loadReconById(id);
+        // We want to return that the reconstruction doesn't exist if it
+        // isn't in the db or the user doesn't have access
+        if (mav == null) {
+            return showError(model);
+        }
 
         return mav;
     }
@@ -831,50 +872,37 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
         String nodeLabel = dataJson.getString("nodeLabel");
-
-        // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
-        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
-            int uid = loggedInUser.getId(); // DHAD membership name
-            // Get the mapping of reconstruction names
-            HashMap<String, ArrayList<String>> mapping = getMapping();
-
-            for (String reconName: mapping.keySet()) {
-                // Get the ID of the recon
-                int reconId = reconController.getId(reconName, uid);
-
-                // For each node label of interest we want to get the mapping.
-                ArrayList<String> labels = mapping.get(reconName);
-
-                for (String nodeName : labels) {
-                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
-                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
-
-                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-
-                    HashMap<Integer, Double> weightmap = consensusController
-                            .getEdgeCountDict(reconId, uid, nodeName,
-                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
-                                    c.getInitialAndFinalNodeMap());
-
-                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
-                            consensusController.getBestInitialNodeId(),
-                            consensusController.getBestFinalNodeId());
-
-                    String supportedSeq = c.getSupportedSequence(true);
-                    System.out.println(supportedSeq);
-
-                    String infUpdated = c.getAsJson().toString();
-                    seqController.updateDBInference(reconId, nodeName, infUpdated);
-                    // Also want to update the Joint sequence
-                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
-                }
-            }
-            return "";
-        }
-        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
-
-//        if (loggedInUser.getUsername().equals("ariane4")) {
-//            int uid = 97; // DHAD membership name
+//
+//        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("ariane2")) {
+//            int reconId = currRecon.getId();
+//            String nodeName = nodeLabel;
+//            int uid = loggedInUser.getId();
+//            String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
+//
+//            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+//
+//            HashMap<Integer, Double> weightmap = consensusController
+//                    .getEdgeCountDict(reconId, uid, nodeName,
+//                            c.getPossibleInitialIds(), c.getPossibleFinalIds(),
+//                            c.getInitialAndFinalNodeMap());
+//
+//            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
+//                    consensusController.getBestInitialNodeId(),
+//                    consensusController.getBestFinalNodeId());
+//
+//            String supportedSeq = c.getSupportedSequence(true);
+//            System.out.println(supportedSeq);
+//
+//            String infUpdated = c.getAsJson().toString();
+//            return infUpdated;
+//            //seqController.updateDBInference(reconId, nodeName, infUpdated);
+//            // Also want to update the Joint sequence
+//            //seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
+//        }
+//
+//        // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
+//        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
+//            int uid = loggedInUser.getId(); // DHAD membership name
 //            // Get the mapping of reconstruction names
 //            HashMap<String, ArrayList<String>> mapping = getMapping();
 //
@@ -885,14 +913,20 @@ public class GraspApplication extends SpringBootServletInitializer {
 //                // For each node label of interest we want to get the mapping.
 //                ArrayList<String> labels = mapping.get(reconName);
 //
-//                for (String nodeName: labels) {
+//                for (String nodeName : labels) {
 //                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
-//                    reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
-//                    //ToDo: Here is where we can alter the consensus sequence.
-//                    HashMap<String, Double> weightmap = consensusController.getEdgeCountDict(reconId, uid, nodeName);
-//                    HashMap<Integer, Integer> seqStartMap = consensusController.getNumSeqsStarted();
-//                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc),weightmap,  seqStartMap);
+//                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
 //
+//                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
+//
+//                    HashMap<Integer, Double> weightmap = consensusController
+//                            .getEdgeCountDict(reconId, uid, nodeName,
+//                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
+//                                    c.getInitialAndFinalNodeMap());
+//
+//                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
+//                            consensusController.getBestInitialNodeId(),
+//                            consensusController.getBestFinalNodeId());
 //
 //                    String supportedSeq = c.getSupportedSequence(true);
 //                    System.out.println(supportedSeq);
@@ -903,8 +937,10 @@ public class GraspApplication extends SpringBootServletInitializer {
 //                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
 //                }
 //            }
-//            return reconstructedAnsc.toString();
+//            return "";
 //        }
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
+
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
             JSONObject ancestor = asr.getAncestralGraphJSON(dataJson.getString("nodeLabel"));
@@ -1145,6 +1181,22 @@ public class GraspApplication extends SpringBootServletInitializer {
             BindingResult bindingResult, Model model, HttpServletRequest request) throws Exception {
 
         this.asr = asrForm;
+
+        // Check if the reconstruction is in the sample list
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
+            // We just want to load an already existing reconstruction
+            ModelAndView mav = loadReconByLabel(asr.getData());
+            if (mav == null) {
+                mav = new ModelAndView("index");
+                mav.addObject("error", true);
+                mav.addObject("errorMessage", "Issue loading default reconstruction. Please try again.");
+                mav.addObject("user", loggedInUser);
+                mav.addObject("username", loggedInUser.getUsername());
+                return mav;
+            }
+            return mav;
+        }
+
         // ToDo: Also check here that they have a unique label
         String err = null;
         if (asr.getLabel().equals("")) {

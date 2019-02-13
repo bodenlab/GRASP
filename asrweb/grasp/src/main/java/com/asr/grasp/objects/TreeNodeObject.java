@@ -56,6 +56,7 @@ public class TreeNodeObject {
     // Used to uniquely identify a node, used during the mapping process.
     private int id;
     private boolean inIntersection = false;
+    private boolean isRoot = false;
 
     public TreeNodeObject(String label, TreeNodeObject parent, Double distance, int id, boolean extent) {
         this.children = new ArrayList<>();
@@ -148,6 +149,14 @@ public class TreeNodeObject {
         }
 
         return false;
+    }
+
+    public void setIsRoot() {
+        this.isRoot = true;
+    }
+
+    public boolean getIsRoot() {
+        return this.isRoot;
     }
 
     public int[] getSeqCountList() {

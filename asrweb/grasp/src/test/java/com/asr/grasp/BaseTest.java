@@ -132,6 +132,7 @@ public class BaseTest {
         seqController.setSeqModel(seqModel);
         seqController.setInfModel(infModel);
         seqController.setConsensusController(consensusController);
+        seqController.setReconstructionsModel(reconModel);
 
         treeModel = new TreeModel();
         treeModel.setDBConfig(dbUrl, dbPassword, dbUser);

@@ -172,6 +172,7 @@ public class TreeObject {
 
         root = parseNewick(sb.toString(), root); //null parent for root
         reader.close();
+        root.setIsRoot();
     }
 
 
@@ -201,6 +202,7 @@ public class TreeObject {
      */
     private TreeNodeObject parseNewick(String newickStr, TreeNodeObject parent) {
         root = parseNewick(newickStr, parent, new ArrayList<>(), 0, 0);
+        root.setIsRoot();
         return root;
     }
 

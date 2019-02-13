@@ -169,6 +169,28 @@ public class ReconstructionsModel extends BaseModel {
     }
 
     /**
+     * Creates the insert statement for a reconstruction.
+     */
+    public boolean updateInference(int reconId, String inference) {
+        String query = "UPDATE web.reconstructions SET ancestor=? where id=?;";
+        Connection con = null;
+        boolean result = true;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setString(1, inference);
+            statement.setInt(2, reconId);
+            statement.executeUpdate();
+        } catch (Exception e) {
+            System.out.print(e);
+            result = false;
+        }
+        closeCon(con);
+        return result;
+    }
+
+    /**
      * Convert the reconstruction MSA to an encoded version so we don't store everything.
      * structure {max_depth:0, nodes:[], edges:[]}
      * a Node object: {consensus: bool, mutants:[obj], x: int, y:int, label:string, class: empty, lane: int, graph:[obj], seq:[obj]}
@@ -225,6 +247,7 @@ public class ReconstructionsModel extends BaseModel {
 
         } catch (Exception e) {
             result = "recon.insert.fail";
+            System.out.println(e);
         }
         closeCon(con);
         return result;

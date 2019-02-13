@@ -2,6 +2,7 @@ package com.asr.grasp.controller;
 
 import api.PartialOrderGraph;
 import com.asr.grasp.model.InferenceModel;
+import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.objects.ConsensusObject;
@@ -45,6 +46,8 @@ public class SeqController {
     @Autowired
     private SeqModel seqModel;
 
+    @Autowired
+    private ReconstructionsModel reconstructionsModel;
 
     private String logFileName;
 
@@ -208,6 +211,10 @@ public class SeqController {
         }
         // Also want to update the Joint sequence
         inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, Defines.JOINT, gappy);
+        // Check if this is the root node, if so also update the consensus in the reconstruction
+        if (inserted && node.getIsRoot()) {
+            inserted = reconstructionsModel.updateInference(reconId, infUpdated);
+        }
         return inserted;
     }
 
@@ -466,5 +473,9 @@ public class SeqController {
 
     public void setConsensusController(ConsensusController consensusController) {
         this.consensusController = consensusController;
+    }
+
+    public void setReconstructionsModel(ReconstructionsModel reconstructionsModel) {
+        this.reconstructionsModel = reconstructionsModel;
     }
 }

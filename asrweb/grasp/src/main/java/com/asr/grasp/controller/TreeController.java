@@ -252,19 +252,6 @@ public class TreeController {
             JSONArray node = new JSONArray();
             node.put(Defines.S_NAME, n.getOriginalLabel());
             node.put(Defines.S_SCORE, n.getScore());
-            // ToDo: Remove and move to allow users to download in the download section
-            // ToDo: Only keeping in interim
-//            if (user.getUsername().equals("ariane2")) {
-//                node.put(2, "saveCSV");
-//                node.put(3, n.getLeafCount());
-//                node.put(4, n.getDistanceToRoot());
-//                node.put(5, treeKnownAncs.getNodeByLabel(ancsestorLabel).getDistanceToRoot());
-//                node.put(6, n.getIncCnt());
-//                node.put(7, n.getNoIncCnt());
-//                node.put(8, n.getInc());
-//                node.put(9, n.getNoInc());
-//                node.put(10, n.getExtC());
-//            }
             retNodes.put(node);
 
             System.out.println("NODE: " + n.getLabel() + ", score: " + n.getScore() + ", dist: " + n.getDistanceToRoot());// + " orig-dist: " + node.getDistanceToRoot());
@@ -272,6 +259,8 @@ public class TreeController {
 
         return retNodes;
     }
+
+    
 
     /**
      * Gets all the matching nodes (1:1) for two given trees.
@@ -355,25 +344,22 @@ public class TreeController {
             /**
              * If you want to save all of them uncomment the while loop
              */
-//            while (orderedNodes.size() > 1) {
-                TreeNodeObject n = orderedNodes.poll();
-                JSONArray jsonNode = new JSONArray();
-                jsonNode.put(node.getOriginalLabel());
-                jsonNode.put(n.getOriginalLabel());
-                jsonNode.put(n.getScore());
-                jsonNode.put(n.getExtC());
-                jsonNode.put(origDistToRoot);
-                jsonNode.put(n.getDistanceToRoot());
-                retNodes.put(jsonNode);
+            TreeNodeObject n = orderedNodes.poll();
+            JSONArray jsonNode = new JSONArray();
+            jsonNode.put(node.getOriginalLabel());
+            jsonNode.put(n.getOriginalLabel());
+            jsonNode.put(n.getScore());
+            jsonNode.put(n.getExtC());
+            jsonNode.put(origDistToRoot);
+            jsonNode.put(n.getDistanceToRoot());
+            retNodes.put(jsonNode);
 
-                if (!ancsestorLabel.equals(n.getLabel())) {
-                    System.out.println(
-                            "NODE: " + ancsestorLabel + " UNMATCHED:" + n.getLabel() + ", score: "
-                                    + bestNode
-                                    .getScore());
-                }
-//                System.out.println(node.getOriginalLabel() + " : " + n.getOriginalLabel() + ", " + n.getScore() + ", "  + n.getExtC() + ", " + n.getDistanceToRoot() + " vs " + origDistToRoot );
-//            }
+            if (!ancsestorLabel.equals(n.getLabel())) {
+                System.out.println(
+                        "NODE: " + ancsestorLabel + " UNMATCHED:" + n.getLabel() + ", score: "
+                                + bestNode
+                                .getScore());
+            }
         }
 
         return retNodes;

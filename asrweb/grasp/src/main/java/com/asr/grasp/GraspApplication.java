@@ -53,6 +53,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Value;
+import reconstruction.ASRPOG;
 
 
 @Controller
@@ -778,6 +779,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     public @ResponseBody
     String showStatus(@RequestParam("request") String request, Model model) throws Exception {
 
+
         String status = recon.getStatus();
         if (runningMarginal) {
             return getStatusFromAsr(status, marginalAsr);
@@ -872,73 +874,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
         String nodeLabel = dataJson.getString("nodeLabel");
-//
-//        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("ariane2")) {
-//            int reconId = currRecon.getId();
-//            String nodeName = nodeLabel;
-//            int uid = loggedInUser.getId();
-//            String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
-//
-//            ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-//
-//            HashMap<Integer, Double> weightmap = consensusController
-//                    .getEdgeCountDict(reconId, uid, nodeName,
-//                            c.getPossibleInitialIds(), c.getPossibleFinalIds(),
-//                            c.getInitialAndFinalNodeMap());
-//
-//            c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
-//                    consensusController.getBestInitialNodeId(),
-//                    consensusController.getBestFinalNodeId());
-//
-//            String supportedSeq = c.getSupportedSequence(true);
-//            System.out.println(supportedSeq);
-//
-//            String infUpdated = c.getAsJson().toString();
-//            return infUpdated;
-//            //seqController.updateDBInference(reconId, nodeName, infUpdated);
-//            // Also want to update the Joint sequence
-//            //seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
-//        }
-//
-//        // Return the reconstruction as JSON (note if we don't have it we need to create the recon)
-//        if (loggedInUser.getId() != Defines.UNINIT && loggedInUser.getUsername().equals("dev")) {
-//            int uid = loggedInUser.getId(); // DHAD membership name
-//            // Get the mapping of reconstruction names
-//            HashMap<String, ArrayList<String>> mapping = getMapping();
-//
-//            for (String reconName: mapping.keySet()) {
-//                // Get the ID of the recon
-//                int reconId = reconController.getId(reconName, uid);
-//
-//                // For each node label of interest we want to get the mapping.
-//                ArrayList<String> labels = mapping.get(reconName);
-//
-//                for (String nodeName : labels) {
-//                    System.out.println("RUNNING RE-GEN FOR: " + reconName + " LABEL: " + nodeName);
-//                    String reconstructedAnsc = seqController.getInfAsJson(reconId, nodeName);
-//
-//                    ConsensusObject c = new ConsensusObject(new JSONObject(reconstructedAnsc));
-//
-//                    HashMap<Integer, Double> weightmap = consensusController
-//                            .getEdgeCountDict(reconId, uid, nodeName,
-//                                    c.getPossibleInitialIds(), c.getPossibleFinalIds(),
-//                                    c.getInitialAndFinalNodeMap());
-//
-//                    c.setParams(weightmap, consensusController.getNumberSeqsUnderParent(),
-//                            consensusController.getBestInitialNodeId(),
-//                            consensusController.getBestFinalNodeId());
-//
-//                    String supportedSeq = c.getSupportedSequence(true);
-//                    System.out.println(supportedSeq);
-//
-//                    String infUpdated = c.getAsJson().toString();
-//                    seqController.updateDBInference(reconId, nodeName, infUpdated);
-//                    // Also want to update the Joint sequence
-//                    seqController.updateDBSequence(reconId, nodeName, supportedSeq, true);
-//                }
-//            }
-//            return "";
-//        }
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
 
         if (reconstructedAnsc == null) {
@@ -1160,6 +1095,11 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (runningMarginal) {
             graphs = marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
             runningMarginal = false;
+            // int reconId, String label, ASRPOG asrInstance, boolean gappy
+            // Set to be gappy
+            seqController.insertSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
+            // Saves this Marginal reconstruction to the DB so the user can access it later.
+            graphs = marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
         } else {
             // add msa and inferred ancestral graph
             graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
@@ -1456,12 +1396,18 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/", method = RequestMethod.GET, params = "download", produces = "application/zip")
     public void showForm(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        // Check if we are getting all the joint reconstructions
-        ArrayList<String> ancs = new ArrayList<>();
-        // If we have nothing just return
-        if (request.getParameter("graphs-input").length() < 1) {
-            return;
+
+        // Check if we are getting all the marginal reconstructions
+        ArrayList<String> ancsMarginal = new ArrayList<>();
+
+        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg")
+                .equalsIgnoreCase("on")) {
+            ancsMarginal = seqController.getAllSeqLabels(currRecon.getId(), Defines.MARGINAL);
+            Collections.sort(ancsMarginal, new NaturalOrderComparator());
         }
+
+        ArrayList<String> ancs = new ArrayList<>();
+
         if (request.getParameter("graphs-input") != null && request.getParameter("graphs-input").length() > 2) {
             if (request.getParameter("graphs-input").equals("all")) {
                 ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
@@ -1473,12 +1419,8 @@ public class GraspApplication extends SpringBootServletInitializer {
                 }
             }
             // Sort the array
-
             Collections.sort(ancs, new NaturalOrderComparator());
-
         }
-
-
 
 
         response.setStatus(HttpServletResponse.SC_OK);
@@ -1517,10 +1459,7 @@ public class GraspApplication extends SpringBootServletInitializer {
                 .equalsIgnoreCase("on")) {
             asr.saveMSA(tempDir + "/");
         }
-        if (request.getParameter("check-pog-marg") != null && request.getParameter("check-pog-marg")
-                .equalsIgnoreCase("on")) {
-            asr.saveAncestorGraph(request.getParameter("node-label"), tempDir + "/", false);
-        }
+
         if (request.getParameter("check-marg-dist") != null && request
                 .getParameter("check-marg-dist").equalsIgnoreCase("on")) {
             asr.saveMarginalDistribution(tempDir, request.getParameter("joint-node"));
@@ -1539,6 +1478,32 @@ public class GraspApplication extends SpringBootServletInitializer {
             for (String nodeLabel: ancs) {
                 seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT, "");
             }
+            bw.close();
+        }
+
+        if (ancsMarginal.size() > 0) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/marginal_recon.fa", false));
+            for (String nodeLabel: ancsMarginal) {
+                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.MARGINAL, "");
+            }
+            bw.close();
+        }
+
+
+        // Write a simple readme to a file incase they have downloaded nothing
+        if (ancsMarginal.size() == 0 && ancs.size() == 0 && request.getParameter("check-recon-tree") == null) {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/README.md", false));
+            bw.write("WARNING: You didn't select anything to download! You need to: \n "
+                    + "1. Be logged in;\n"
+                    + "2. Have saved your reconstruction;\n"
+                    + "3. Have made your reconstruction since November 2018; \n"
+                    + "\n"
+                    + "If you have done the above, you will also have needed to select at least 1 of the following:\n"
+                    + "1. Checked the box: Phylogenetic tree download\n"
+                    + "2. Checked the box: Marginal reconstruction (and have completed at least 1 marginal reconstruction since March 2019; \n"
+                    + "3. Checked the box: Joint reconstructions AND selected either ALL or a list of downloadable joint reconstructions from the DROPDOWN list.\n"
+                    + "\n"
+                    + "If you have any isses, please contact us, see the about section :)  " );
             bw.close();
         }
 

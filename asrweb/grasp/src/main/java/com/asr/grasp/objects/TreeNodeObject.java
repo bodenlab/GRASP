@@ -101,9 +101,6 @@ public class TreeNodeObject {
 
     public boolean buildEdgeCountMap(SeqController seqController, int reconId) {
         // Check if this is a leaf
-        if (this.label.equals("N4")) {
-            int o = 1;
-        }
         if (this.seqCountList != null && this.seqCountList.length > 1) {
             return true;
         }
@@ -145,7 +142,6 @@ public class TreeNodeObject {
                 this.seqCountList[i] += countList[i];
             }
             numSeqsUnderNode += tno.getNumSeqsUnderNode();
-            System.out.println(tno.label + " " + tno.numSeqsUnderNode +  " " + tno.seqCountList[0]);
         }
 
         return false;

@@ -82,6 +82,7 @@ public class ASRObject {
      ****** Setters and getters for ASR attributes (forms, etc, automatically call these)
      ******************************************************************************************************************/
 
+
     /**
      * To allow us to perform logic such as getting all joints from the ASRPOG joint
      * and save these to the database.
@@ -147,8 +148,10 @@ public class ASRObject {
         this.workingNodeLabel = node;
     }
     public String getWorkingNodeLabel() {
+
         if (workingNodeLabel == null)
             workingNodeLabel = asrController.getRootTreeLabel();
+        this.label = workingNodeLabel;
         return this.workingNodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }

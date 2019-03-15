@@ -303,7 +303,22 @@
   <div style="display: none;">
     <script type="text/javascript" th:inline="javascript">
 
+
+
       /*<![CDATA[*/
+
+      // Disable the download button when the user isn't logged in
+      var username = /*[[${username}]]*/ ;
+      if (username !== null) {
+
+        $('#download-form').prop("disabled", false);
+
+        $('#download-form').prop("title", "You can only download results when you are logged in and have saved a reconstruction!");
+      } else {
+        $('#download-form').prop("disabled", true);
+      }
+
+
 
       if ($('.infer-label').text() === "joint") {
         $('#mutant-btn').prop("disabled", true);
@@ -367,6 +382,25 @@
         saved = /*[[${saved}]]*/
         run_asr_app(json_str, recon, label, inf, node, protIds);
       });
+
+      $("#download-form").click(function () {
+        if (!saved) {
+          alert(
+              "Sorry you can't download results when you haven't saved a reconstruction, please click the save in the top left corner and re-open this reconstruction once it has completely saved!");
+          $('#check-seq-marg').prop("disabled", true);
+          $('#check-seq-joint').prop("disabled", true);
+          $('#download-btn').prop("disabled", true);
+          $('#check-recon-tree').prop("disabled", true);
+
+
+        } else {
+          $('#check-seq-marg').prop("disabled", false);
+          $('#check-seq-joint').prop("disabled", false);
+          $('#check-seq-joint').prop("disabled", false);
+          $('#check-recon-tree').prop("disabled", false);
+        }
+      })
+
 
       /**
        * have a popup to stop users from exiting the reconstruction page when they

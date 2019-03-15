@@ -5,6 +5,8 @@ import com.asr.grasp.objects.EmailObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import json.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -159,10 +161,11 @@ public class SaveController implements Runnable {
                             System.out.print(i + ",     ");
                         }
                     }
+
                 }
 
                 seqController.insertSpecificJointsToDB(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
-                        saveGappySeq, nodeLabels, user.getId());
+                        saveGappySeq, nodeLabels, user.getId(), currRecon.getLabel());
             } else {
                 seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
                         saveGappySeq, user.getId());

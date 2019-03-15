@@ -10,6 +10,7 @@ import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
+import com.sun.java.swing.plaf.motif.resources.motif;
 import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -115,37 +116,51 @@ public class SeqController {
      * @param asrInstance
      * @return
      */
-    public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave, int userId) {
+    public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave, int userId, String reconLabel) {
         List<String> insertedLabels = new ArrayList<>();
+        try {
+            BufferedWriter bw = new BufferedWriter(
+                    new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving_consensus.csv", false));
+            bw.write("Label,Time (ms)");
+            for (String label : toSave) {
+                long startTime = System.nanoTime();
+                System.out.println("Running " + label);
+                PartialOrderGraph ancestor = asrInstance.getGraph(label);
+                // Insert it into the database
+                // What we want to do here is perform two inserts -> one for the sequence so we can do
+                // motif searching
+                POAGJson ancsJson = new POAGJson(ancestor, gappy);
+                String ancsStr = ancsJson.toJSON().toString();
 
-        for (String label: toSave) {
-            System.out.println("Running " + label);
-            PartialOrderGraph ancestor = asrInstance.getGraph(label);
-            // Insert it into the database
-            // What we want to do here is perform two inserts -> one for the sequence so we can do
-            // motif searching
-            POAGJson ancsJson = new POAGJson(ancestor, gappy);
-            String ancsStr = ancsJson.toJSON().toString();
+                boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+                if (!inserted) {
+                    return null;
+                }
+                TreeNodeObject node = consensusController
+                        .getEdgeMappingForNode(reconId, userId, label);
+                ConsensusObject c = new ConsensusObject(node.getSeqCountList(),
+                        node.getNumSeqsUnderNode());
+                c.setJsonObject(new JSONObject(ancsStr));
+                // ToDO:
+                String supportedSeq = c.getSupportedSequence(true);
+                System.out.println(supportedSeq);
 
-            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
-            if (!inserted) {
-                return null;
+                String infUpdated = c.getAsJson().toString();
+                updateDBInference(reconId, label, infUpdated);
+                // Also want to update the Joint sequence
+                inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
+                        gappy);
+                long endTime = System.nanoTime();
+                long duration = (endTime - startTime)/100000;
+                bw.write(label + "," + duration + "\n");
             }
-            TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
-            ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
-            c.setJsonObject(new JSONObject(ancsStr));
-            // ToDO:
-            String supportedSeq = c.getSupportedSequence(true);
-            System.out.println(supportedSeq);
-
-            String infUpdated = c.getAsJson().toString();
-            updateDBInference(reconId, label, infUpdated);
-            // Also want to update the Joint sequence
-            inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
-                            gappy);
+            System.out.println("\n Finished Inserting Joint recons.");
+            bw.close();
+            return insertedLabels;
+        } catch (Exception e) {
+            System.out.println("\n UNABLE TO INSERT RECONS IO EXCEPTION.");
         }
-        System.out.println("\n Finished Inserting Joint recons.");
-        return insertedLabels;
+        return null;
     }
 
     /**
@@ -172,7 +187,7 @@ public class SeqController {
             String ancsStr = ancsJson.toJSON().toString();
 
             // ToDo: remove once the speedy method has been implemented
-            boolean inserted = updateForConsensus(reconId, label, tree.getNodeByOriginalLabel(label), ancsStr, gappy);
+            boolean inserted = updateForConsensus(reconId, label, tree.getNodeByOriginalLabel(label), ancsStr, Defines.JOINT, gappy);
 
             if (!inserted) {
                 return null;
@@ -196,7 +211,7 @@ public class SeqController {
      * A temporary method to allow us to use an alternate consensus method generation technique.
      * @param gappy
      */
-    public boolean updateForConsensus(int reconId, String nodeName, TreeNodeObject node, String reconstructedAnsc, boolean gappy) {
+    public boolean updateForConsensus(int reconId, String nodeName, TreeNodeObject node, String reconstructedAnsc, int reconType, boolean gappy) {
         ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
         c.setJsonObject(new JSONObject(reconstructedAnsc));
 
@@ -210,7 +225,7 @@ public class SeqController {
             return false;
         }
         // Also want to update the Joint sequence
-        inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, Defines.JOINT, gappy);
+        inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, reconType, gappy);
         // Check if this is the root node, if so also update the consensus in the reconstruction
         if (inserted && node.getIsRoot()) {
             inserted = reconstructionsModel.updateInference(reconId, infUpdated);
@@ -222,20 +237,24 @@ public class SeqController {
     /**
      * Insert a single joint instance into the database.
      *
+     * This is primarily used for saving the marginal reconstruction.
+     *
      * @param reconId
      * @param label
      * @param asrInstance
      * @return
      */
-    public String insertJointToDb(int reconId, String label, ASRPOG asrInstance, boolean gappy) {
-        List<String> labels = asrInstance.getAncestralSeqLabels();
-        POGraph ancestor = asrInstance.getAncestor(label);
+    public String insertSeqIntoDb(int reconId, String label, ASRPOG asrInstance, int userId, int reconType, boolean gappy) {
+        TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
+        PartialOrderGraph ancestor = asrInstance.getGraph(label);
         // Insert it into the database
-        String insertedAncs = ancestor.getSupportedSequence(gappy);
-        boolean inserted = seqModel.insertIntoDb(reconId, label, insertedAncs, Defines.JOINT, gappy);
-        if (inserted) {
-            return insertedAncs;
-        }
+        // What we want to do here is perform two inserts -> one for the sequence so we can do
+        // motif searching
+        POAGJson ancsJson = new POAGJson(ancestor, gappy);
+        String ancsStr = ancsJson.toJSON().toString();
+
+        // Need to be able to take a null for the marginal
+        boolean inserted = updateForConsensus(reconId, label, node, ancsStr, reconType, gappy);
         return null;
     }
 
@@ -414,7 +433,7 @@ public class SeqController {
         asrInstance.loadSequences(recon.getSequences());
         inferences.put("inferences", nodes);
        	ASRPOG asr = new ASRPOG(asrInstance.getModel(), asrInstance.getNumberThreads(), inferences, asrInstance.getSeqsAsEnum(), asrInstance.getTree());
-        insertSpecificJointsToDB(recon.getId(), asr, true, labels, 000000);
+        insertSpecificJointsToDB(recon.getId(), asr, true, labels, 000000, null);
 
     }
 

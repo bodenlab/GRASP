@@ -120,7 +120,7 @@ public class SeqController {
         List<String> insertedLabels = new ArrayList<>();
         try {
             BufferedWriter bw = new BufferedWriter(
-                    new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving.csv", false));
+                    new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving_consensus.csv", false));
             bw.write("Label,Time (ms)");
             for (String label : toSave) {
                 long startTime = System.nanoTime();
@@ -160,6 +160,7 @@ public class SeqController {
         } catch (Exception e) {
             System.out.println("\n UNABLE TO INSERT RECONS IO EXCEPTION.");
         }
+        return null;
     }
 
     /**

@@ -121,7 +121,7 @@ public class SeqController {
         try {
             BufferedWriter bw = new BufferedWriter(
                     new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving_consensus.csv", false));
-            bw.write("Label,Time (ms)");
+            bw.write("Label,Time (ms), Num Children\n");
             for (String label : toSave) {
                 long startTime = System.nanoTime();
                 System.out.println("Running " + label);
@@ -152,7 +152,7 @@ public class SeqController {
                         gappy);
                 long endTime = System.nanoTime();
                 long duration = (endTime - startTime)/100000;
-                bw.write(label + "," + duration + "\n");
+                bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
             }
             System.out.println("\n Finished Inserting Joint recons.");
             bw.close();

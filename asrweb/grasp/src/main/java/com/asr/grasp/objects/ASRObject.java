@@ -151,7 +151,6 @@ public class ASRObject {
 
         if (workingNodeLabel == null)
             workingNodeLabel = asrController.getRootTreeLabel();
-        this.label = workingNodeLabel;
         return this.workingNodeLabel; }
     public void setModel(String model) { this.model = model; }
     public String getModel() { return this.model; }

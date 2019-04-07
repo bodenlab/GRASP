@@ -20,6 +20,7 @@ import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.util.FileCopyUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -597,6 +599,9 @@ public class GraspApplication extends SpringBootServletInitializer {
         saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
         saveController.initialiseForReconstruction(asr);
         saveController.start();
+
+        // Remove the reference to the thread otherwise GC won't be able to clean it up.
+        saveController = null;
     }
 
 
@@ -1312,34 +1317,23 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/download-tutorial-files", method = RequestMethod.GET, produces = "application/zip")
     public void downloadTutorial(HttpServletRequest request, HttpServletResponse response)
             throws IOException, URISyntaxException {
+
+        // Don't copy to an actual folder on the server just serve the files immidiately
         response.setStatus(HttpServletResponse.SC_OK);
         response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Tutorial.zip\"");
 
-        // create temporary folder to send output as zipped files
-        createTemporarySessionFolder();
-
-        String tempDir = asr.getSessionDir() + "/GRASP_Tutorial";
-        File sessionDir = new File(tempDir);
-        if (sessionDir.exists()) {
-            for (File file : sessionDir.listFiles()) {
-                file.delete();
-            }
-            sessionDir.delete();
+        try {
+            // get your file as InputStream
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                    "data/app/tutorial/tutorial.zip");
+            // copy it to response's OutputStream
+            FileCopyUtils.copy(is, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            System.out.println("Error writing file to output stream. Filename was" + ex.toString());
+            throw new RuntimeException("IOError writing file to output stream");
         }
-        sessionDir.mkdir();
 
-        // copy output files to temporary folder, or generate output where needed and save in temporary folder
-        File tutorialFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource(
-                        "data/app/tutorial/GRASPTutorial.fasta")
-                        .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.fasta")).toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
-
-        // send output folder to client
-        ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
-        zipFiles(sessionDir, zout);
-        zout.close();
     }
 
     /**

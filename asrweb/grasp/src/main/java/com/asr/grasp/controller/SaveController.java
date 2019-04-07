@@ -179,6 +179,17 @@ public class SaveController implements Runnable {
             System.out.println("Couldn't run the saving thread: " + e);
             isSaving = false;
         }
+
+        // Set asr & all other variables to null so that GC knows to clean this up.
+        asr = null;
+        reconController = null;
+        seqController = null;
+        emailController = null;
+        userController = null;
+        treeController = null;
+        currRecon = null;
+        inference = null;
+
     }
 
     /**

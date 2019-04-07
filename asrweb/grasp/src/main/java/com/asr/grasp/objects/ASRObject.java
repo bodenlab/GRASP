@@ -7,8 +7,6 @@ import dat.Enumerable;
 import java.util.HashMap;
 import java.util.Map;
 import json.JSONObject;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;

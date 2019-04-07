@@ -9,7 +9,6 @@ import com.asr.grasp.controller.TreeController;
 import com.asr.grasp.objects.ASRObject;
 import com.asr.grasp.controller.ReconstructionController;
 import com.asr.grasp.controller.UserController;
-import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.objects.ShareObject;
@@ -18,16 +17,12 @@ import com.asr.grasp.utils.NaturalOrderComparator;
 import com.asr.grasp.validator.LoginValidator;
 import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import java.util.HashMap;
 import json.JSONArray;
 import json.JSONObject;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -44,18 +39,10 @@ import org.springframework.util.FileCopyUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.springframework.beans.factory.annotation.Value;
-import reconstruction.ASRPOG;
 
 
 @Controller
@@ -819,45 +806,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
-    public HashMap<String, ArrayList<String>> getMapping() {
-        HashMap<String, ArrayList<String>> mapping = new HashMap<>();
-        // Get each recon label and set this as the key
-
-        ArrayList<String> r1258 = new ArrayList<>();
-        // N423
-        r1258.add("N9");
-        r1258.add("N1087");
-        r1258.add("N1088");
-        mapping.put("1612_base_dataset_08012019", r1258);
-
-
-        ArrayList<String> r3758 = new ArrayList<>();
-        // N423
-        r3758.add("N293");
-        r3758.add("N971");
-        r3758.add("N1770");
-        mapping.put("2500_4112_dhad_08012019", r3758);
-
-//        ArrayList<String> r6258 = new ArrayList<>();
-//        // N423
-//        r6258.add("N687");
-//        r6258.add("N739");
-//        r6258.add("N740");
-//        mapping.put("5000_6612_dhad_08012019", r6258);
-
-        ArrayList<String> r8758 = new ArrayList<>();
-        // N1
-        r8758.add("N9");
-        // N423
-        r8758.add("N1442");
-        // N560
-        r8758.add("N4236");
-
-        mapping.put("7500_9112_dhad_09012019", r8758);
-
-        return mapping;
-
-    }
 
     /**
      * Gets a joint reconstruction to add to the recon graph.
@@ -1294,19 +1242,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
-
     /**
-     * Creates a temporary session folder for users to save data in.
+     * ---------------------------------------------------------------------------------------------
+     *
+     *                                  Downloads section.
+     *
+     * ---------------------------------------------------------------------------------------------
      */
-    public void createTemporarySessionFolder() {
-        if (asr.getSessionDir() == null) {
-            File sessionDir = new File(sessionPath + asr.getSessionId());
-            if (!sessionDir.exists()) {
-                sessionDir.mkdir();
-            }
-            asr.setSessionDir(sessionDir.getAbsolutePath() + "/");
-        }
-    }
 
     /**
      * Download files from reconstruction
@@ -1315,8 +1257,7 @@ public class GraspApplication extends SpringBootServletInitializer {
      * @param response HTTP response to send data to client
      */
     @RequestMapping(value = "/download-tutorial-files", method = RequestMethod.GET, produces = "application/zip")
-    public void downloadTutorial(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, URISyntaxException {
+    public void downloadTutorial(HttpServletRequest request, HttpServletResponse response) {
 
         // Don't copy to an actual folder on the server just serve the files immidiately
         response.setStatus(HttpServletResponse.SC_OK);
@@ -1337,193 +1278,183 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
-     * Download files from reconstruction
+     * Download either the marginal or the joint reconstruction.
      *
-     * @param request HTTP request (form request specifying parameters)
-     * @param response HTTP response to send data to client
+     * @param type
+     * @return
      */
-    @RequestMapping(value = "/download-tutorial-files-aln", method = RequestMethod.GET, produces = "application/zip")
-    public void downloadTutorialAln(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, URISyntaxException {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Tutorial.zip\"");
+    @RequestMapping(value = "/download-ancs" , method = RequestMethod.GET)
+    public @ResponseBody String downloadJoint(String type) {
+        String err = verify();
 
-        // create temporary folder to send output as zipped files
-        createTemporarySessionFolder();
-
-        String tempDir = asr.getSessionDir() + "/GRASP_Tutorial";
-        File sessionDir = new File(tempDir);
-        if (sessionDir.exists()) {
-            for (File file : sessionDir.listFiles()) {
-                file.delete();
-            }
-            sessionDir.delete();
+        // Check if we have an error.
+        if (err != null) {
+            return err;
         }
-        sessionDir.mkdir();
 
-        // copy output files to temporary folder, or generate output where needed and save in temporary folder
-        File tutorialFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource(
-                        "data/app/tutorial/GRASPTutorial.aln")
-                        .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.aln")).toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
-        tutorialFile = new File(
-                Thread.currentThread().getContextClassLoader().getResource(
-                        "data/app/tutorial/GRASPTutorial.nwk")
-                        .toURI());
-        Files.copy(tutorialFile.toPath(), (new File(tempDir + "/GRASPTutorial.nwk")).toPath(),
-                StandardCopyOption.REPLACE_EXISTING);
+        int ancsType = Defines.JOINT;
 
-        // send output folder to client
-        ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
-        zipFiles(sessionDir, zout);
-        zout.close();
+
+        if (!type.equals("joint")) {
+            ancsType = Defines.MARGINAL;
+        }
+
+        ArrayList<String> ancs = seqController.getAllSeqLabels(currRecon.getId(),ancsType);
+        Collections.sort(ancs, new NaturalOrderComparator());
+
+        String fastaFileString = "";
+        for (String nodeLabel: ancs) {
+            fastaFileString += ">" + nodeLabel + "\n";
+            fastaFileString += seqController.getSeqByLabel(nodeLabel, currRecon.getId(), ancsType) + "\n";
+        }
+
+        // Return the string
+        return fastaFileString;
     }
 
     /**
-     * Download files from reconstruction
-     *
-     * @param request HTTP request (form request specifying parameters)
-     * @param response HTTP response to send data to client
+     * Download the annotated phylogenetic tree
+     * @return
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET, params = "download", produces = "application/zip")
-    public void showForm(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+    @RequestMapping(value = "/download-tree" , method = RequestMethod.GET)
+    public @ResponseBody String downloadTree() {
+        String err = verify();
 
-        // Check if we are getting all the marginal reconstructions
-        ArrayList<String> ancsMarginal = new ArrayList<>();
-
-        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg")
-                .equalsIgnoreCase("on")) {
-            ancsMarginal = seqController.getAllSeqLabels(currRecon.getId(), Defines.MARGINAL);
-            Collections.sort(ancsMarginal, new NaturalOrderComparator());
+        // Check if we have an error.
+        if (err != null) {
+            return err;
         }
 
-        ArrayList<String> ancs = new ArrayList<>();
-
-        if (request.getParameter("graphs-input") != null && request.getParameter("graphs-input").length() > 2) {
-            if (request.getParameter("graphs-input").equals("all")) {
-                ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
-            } else {
-                String tmp = request.getParameter("graphs-input");
-                JSONArray graphs = new JSONArray(tmp);
-                for (int i = 0; i < graphs.length(); i++) {
-                    ancs.add(graphs.getString(i));
-                }
-            }
-            // Sort the array
-            Collections.sort(ancs, new NaturalOrderComparator());
-        }
-
-
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader("Content-Disposition",
-                "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
-
-        // create temporary folder to send output as zipped files
-        createTemporarySessionFolder();
-
-        String tempDir = asr.getSessionDir() + "/GRASP_" + asr.getLabel();
-        File sessionDir = new File(tempDir);
-        if (sessionDir.exists()) {
-            for (File file : sessionDir.listFiles()) {
-                file.delete();
-            }
-            sessionDir.delete();
-        }
-        sessionDir.mkdir();
-
-        // copy output files to temporary folder, or generate output where needed and save in temporary folder
-        if (request.getParameter("check-recon-tree") != null && request
-                .getParameter("check-recon-tree").equalsIgnoreCase("on")) {
-            File nwkFile = new File(asr.getSessionDir() + asr.getReconstructedTreeFileName());
-            if (nwkFile.exists()) {
-                Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName()))
-                                .toPath(),
-                        (new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                // This means we have a saved reconstruction so we want to write it to a file.
-                String reconTree = treeController.getReconTreeById(currRecon.getId(), loggedInUser.getId());
-                treeController.saveTree(tempDir + "/reconstructed_tree.nwk", reconTree);
-            }
-        }
-        if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa")
-                .equalsIgnoreCase("on")) {
-            asr.saveMSA(tempDir + "/");
-        }
-
-        if (request.getParameter("check-marg-dist") != null && request
-                .getParameter("check-marg-dist").equalsIgnoreCase("on")) {
-            asr.saveMarginalDistribution(tempDir, request.getParameter("joint-node"));
-        }
-        if (request.getParameter("check-pog-joint-single") != null && request
-                .getParameter("check-pog-joint-single").equalsIgnoreCase("on")) {
-            asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
-        }
-        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg")
-                .equalsIgnoreCase("on")) {
-            asr.saveConsensusMarginal(
-                    tempDir + "/" + request.getParameter("joint-node") + "_consensus");
-        }
-        if (ancs.size() > 0) {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/joint_recon.fa", false));
-            for (String nodeLabel: ancs) {
-                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT, "");
-            }
-            bw.close();
-        }
-
-        if (ancsMarginal.size() > 0) {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/marginal_recon.fa", false));
-            for (String nodeLabel: ancsMarginal) {
-                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.MARGINAL, "");
-            }
-            bw.close();
-        }
-
-
-        // Write a simple readme to a file incase they have downloaded nothing
-        if (ancsMarginal.size() == 0 && ancs.size() == 0 && request.getParameter("check-recon-tree") == null) {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/README.md", false));
-            bw.write("WARNING: You didn't select anything to download! You need to: \n "
-                    + "1. Be logged in;\n"
-                    + "2. Have saved your reconstruction;\n"
-                    + "3. Have made your reconstruction since November 2018; \n"
-                    + "\n"
-                    + "If you have done the above, you will also have needed to select at least 1 of the following:\n"
-                    + "1. Checked the box: Phylogenetic tree download\n"
-                    + "2. Checked the box: Marginal reconstruction (and have completed at least 1 marginal reconstruction since March 2019; \n"
-                    + "3. Checked the box: Joint reconstructions AND selected either ALL or a list of downloadable joint reconstructions from the DROPDOWN list.\n"
-                    + "\n"
-                    + "If you have any isses, please contact us, see the about section :)  " );
-            bw.close();
-        }
-
-        // send output folder to client
-        ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
-        zipFiles(sessionDir, zout);
-        zout.close();
-
+        return treeController.getReconTreeById(currRecon.getId(), loggedInUser.getId());
     }
 
 
-
-    /**
-     * Helper functions to zip files/directories
-     **/
-    private void zipFiles(File folder, ZipOutputStream zout) throws IOException {
-        for (File file : folder.listFiles()) {
-            if (file.isFile()) {
-                zout.putNextEntry(new ZipEntry(file.getName()));
-                FileInputStream fis = new FileInputStream(file);
-                IOUtils.copy(fis, zout);
-                fis.close();
-                zout.closeEntry();
-            }
-        }
-    }
+//    /**
+//     * Download files from reconstruction
+//     *
+//     * @param request HTTP request (form request specifying parameters)
+//     * @param response HTTP response to send data to client
+//     */
+//    @RequestMapping(value = "/", method = RequestMethod.GET, params = "download", produces = "application/zip")
+//    public void showForm(HttpServletRequest request, HttpServletResponse response)
+//            throws IOException {
+//
+//        // Check if we are getting all the marginal reconstructions
+//        ArrayList<String> ancsMarginal = new ArrayList<>();
+//
+//        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg")
+//                .equalsIgnoreCase("on")) {
+//            ancsMarginal = seqController.getAllSeqLabels(currRecon.getId(), Defines.MARGINAL);
+//            Collections.sort(ancsMarginal, new NaturalOrderComparator());
+//        }
+//
+//        ArrayList<String> ancs = new ArrayList<>();
+//
+//        if (request.getParameter("graphs-input") != null && request.getParameter("graphs-input").length() > 2) {
+//            if (request.getParameter("graphs-input").equals("all")) {
+//                ancs = seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT);
+//            } else {
+//                String tmp = request.getParameter("graphs-input");
+//                JSONArray graphs = new JSONArray(tmp);
+//                for (int i = 0; i < graphs.length(); i++) {
+//                    ancs.add(graphs.getString(i));
+//                }
+//            }
+//            // Sort the array
+//            Collections.sort(ancs, new NaturalOrderComparator());
+//        }
+//
+//
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        response.setHeader("Content-Disposition",
+//                "attachment; filename=\"GRASP_" + asr.getLabel() + ".zip\"");
+//
+//        // create temporary folder to send output as zipped files
+//        createTemporarySessionFolder();
+//
+//        String tempDir = asr.getSessionDir() + "/GRASP_" + asr.getLabel();
+//        File sessionDir = new File(tempDir);
+//        if (sessionDir.exists()) {
+//            for (File file : sessionDir.listFiles()) {
+//                file.delete();
+//            }
+//            sessionDir.delete();
+//        }
+//        sessionDir.mkdir();
+//
+//        // copy output files to temporary folder, or generate output where needed and save in temporary folder
+//        if (request.getParameter("check-recon-tree") != null && request
+//                .getParameter("check-recon-tree").equalsIgnoreCase("on")) {
+//            File nwkFile = new File(asr.getSessionDir() + asr.getReconstructedTreeFileName());
+//            if (nwkFile.exists()) {
+//                Files.copy((new File(asr.getSessionDir() + asr.getReconstructedTreeFileName()))
+//                                .toPath(),
+//                        (new File(tempDir + "/" + asr.getReconstructedTreeFileName())).toPath(),
+//                        StandardCopyOption.REPLACE_EXISTING);
+//            } else {
+//                // This means we have a saved reconstruction so we want to write it to a file.
+//                String reconTree = treeController.getReconTreeById(currRecon.getId(), loggedInUser.getId());
+//                treeController.saveTree(tempDir + "/reconstructed_tree.nwk", reconTree);
+//            }
+//        }
+//        if (request.getParameter("check-pog-msa") != null && request.getParameter("check-pog-msa")
+//                .equalsIgnoreCase("on")) {
+//            asr.saveMSA(tempDir + "/");
+//        }
+//
+//        if (request.getParameter("check-marg-dist") != null && request
+//                .getParameter("check-marg-dist").equalsIgnoreCase("on")) {
+//            asr.saveMarginalDistribution(tempDir, request.getParameter("joint-node"));
+//        }
+//        if (request.getParameter("check-pog-joint-single") != null && request
+//                .getParameter("check-pog-joint-single").equalsIgnoreCase("on")) {
+//            asr.saveAncestorGraph(request.getParameter("joint-node"), tempDir + "/", true);
+//        }
+//        if (request.getParameter("check-seq-marg") != null && request.getParameter("check-seq-marg")
+//                .equalsIgnoreCase("on")) {
+//            asr.saveConsensusMarginal(
+//                    tempDir + "/" + request.getParameter("joint-node") + "_consensus");
+//        }
+//        if (ancs.size() > 0) {
+//            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/joint_recon.fa", false));
+//            for (String nodeLabel: ancs) {
+//                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.JOINT, "");
+//            }
+//            bw.close();
+//        }
+//
+//        if (ancsMarginal.size() > 0) {
+//            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/marginal_recon.fa", false));
+//            for (String nodeLabel: ancsMarginal) {
+//                seqController.saveAncestorToFile(bw, nodeLabel, currRecon.getId(), Defines.MARGINAL, "");
+//            }
+//            bw.close();
+//        }
+//
+//
+//        // Write a simple readme to a file incase they have downloaded nothing
+//        if (ancsMarginal.size() == 0 && ancs.size() == 0 && request.getParameter("check-recon-tree") == null) {
+//            BufferedWriter bw = new BufferedWriter(new FileWriter(tempDir + "/README.md", false));
+//            bw.write("WARNING: You didn't select anything to download! You need to: \n "
+//                    + "1. Be logged in;\n"
+//                    + "2. Have saved your reconstruction;\n"
+//                    + "3. Have made your reconstruction since November 2018; \n"
+//                    + "\n"
+//                    + "If you have done the above, you will also have needed to select at least 1 of the following:\n"
+//                    + "1. Checked the box: Phylogenetic tree download\n"
+//                    + "2. Checked the box: Marginal reconstruction (and have completed at least 1 marginal reconstruction since March 2019; \n"
+//                    + "3. Checked the box: Joint reconstructions AND selected either ALL or a list of downloadable joint reconstructions from the DROPDOWN list.\n"
+//                    + "\n"
+//                    + "If you have any isses, please contact us, see the about section :)  " );
+//            bw.close();
+//        }
+//
+//        // send output folder to client
+//        ZipOutputStream zout = new ZipOutputStream(response.getOutputStream());
+//        zipFiles(sessionDir, zout);
+//        zout.close();
+//
+//    }
 
     private String checkErrors(ASRObject asr) {
         String message = null;

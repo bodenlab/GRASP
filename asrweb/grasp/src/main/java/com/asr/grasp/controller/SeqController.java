@@ -386,6 +386,7 @@ public class SeqController {
         return seqModel.getSeqByLabel(label, reconId, reconMethod);
     }
 
+
     /**
      * Saves an ancestor node to a file.
      * @param fileWriter

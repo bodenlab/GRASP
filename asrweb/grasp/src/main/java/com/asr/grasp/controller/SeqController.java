@@ -305,6 +305,15 @@ public class SeqController {
         if (userAccess == Defines.NO_ACCESS) {
             return new JSONArray().put("NO ACCESS");
         }
+        if (motif.length() < 1) {
+            return new JSONArray().put("You need to enter at least a character.");
+        }
+        // Change the string to uppercase
+        motif = motif.toUpperCase();
+        // Here we should test adding the % flags on either side
+        if (motif.charAt(0) != '%') {
+            motif = "%" + motif + "%";
+        }
         ArrayList<String> ancestorLabelsWithMotif = findAllWithMotif(reconId, motif);
         JSONArray ancestorLabelsWithMotifJSON = new JSONArray();
         for (String label: ancestorLabelsWithMotif) {

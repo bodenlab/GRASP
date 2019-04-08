@@ -182,6 +182,7 @@ public class ReconstructionsModel extends BaseModel {
             statement.setString(1, inference);
             statement.setInt(2, reconId);
             statement.executeUpdate();
+
         } catch (Exception e) {
             System.out.print(e);
             result = false;
@@ -404,6 +405,9 @@ public class ReconstructionsModel extends BaseModel {
             // If we have an entry convert it to the correct format.
             closeCon(con);
 
+            // Update when it was last accessed.
+            updateLastAccessedOnLabel(reconLabel);
+
             if (rawRecons.next()) {
                 return createMiniFromDB(rawRecons);
             }
@@ -444,6 +448,9 @@ public class ReconstructionsModel extends BaseModel {
             // If we have an entry convert it to the correct format.
             closeCon(con);
 
+            // Update when it was last accessed.
+            updateLastAccessed(reconId);
+
             if (rawRecons.next()) {
                 return createMiniFromDB(rawRecons);
             }
@@ -453,6 +460,24 @@ public class ReconstructionsModel extends BaseModel {
             System.out.println(e);
         }
         return null;
+    }
+
+    /**
+     * Update when a reconstruction was last updated.
+     * @param reconLabel
+     */
+    private void updateLastAccessedOnLabel(String reconLabel) {
+        String query = "UPDATE web.reconstructions SET updated_at=now() where label=?;";
+        updateDateOnString(query, reconLabel);
+    }
+
+    /**
+     * Update when a reconstruction was last updated.
+     * @param reconId
+     */
+    private void updateLastAccessed(int reconId) {
+        String query = "UPDATE web.reconstructions SET updated_at=now() where id=?;";
+        updateDateOnId(query, reconId);
     }
 
 
@@ -487,6 +512,8 @@ public class ReconstructionsModel extends BaseModel {
             if (rawRecons.next()) {
                 return createFromDB(rawRecons);
             }
+            // Update when it was last accessed.
+            updateLastAccessed(reconId);
             return null;
         } catch (Exception e) {
             System.out.println(e);
@@ -717,9 +744,9 @@ public class ReconstructionsModel extends BaseModel {
         String query = "DELETE FROM web.share_users WHERE r_id = ? AND u_id =" +
                 " ?;";
         if (runTwoUpdateQuery(query, reconId, userId, 1, 2) == null) {
-            return "fail";
+            return null;
         }
-        return null;
+        return "fail";
     }
 
     /**

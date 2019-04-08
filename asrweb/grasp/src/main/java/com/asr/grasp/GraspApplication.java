@@ -416,6 +416,33 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     }
 
+    /***
+     * Removes a users access to a reconstruction so it no longer shows on their page.
+     *
+     * @return the view for the account page.
+     */
+    @RequestMapping(value = "/", method = RequestMethod.GET, params =
+            {"remove", "id"})
+    public ModelAndView remove(@RequestParam("remove") String delete,
+            @RequestParam("id") int reconId, WebRequest
+            webrequest, Model model) {
+
+        ModelAndView mav = accountView.get(loggedInUser, userController);
+        // Need to check if the users details were correct
+        String err = reconController.removeSharedRecon(reconId, loggedInUser);
+
+        if (err != null) {
+            mav.addObject("warning", err);
+            mav.addObject("message", "Unable to remove your access to the reconstruction, error: " + err);
+        } else {
+            mav.addObject("type", "remove");
+            mav.addObject("warning", null);
+            mav.addObject("message", "Successfully removed your access to the reconstruction.");
+        }
+
+        return mav;
+    }
+
     /**
      * ToDo need to change to int reconId from long id. Deletes a reconstruction
      *
@@ -433,9 +460,11 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (err != null) {
             mav.addObject("warning", err);
+            mav.addObject("message", "Unable to delete the reconstruction, error: " + err);
         } else {
-            mav.addObject("type", "deleted");
-            mav.addObject("warning", null);
+            mav.addObject("warning", "delete");
+            mav.addObject("type", "shared");
+            mav.addObject("message", "Successfully deleted reconstruction.");
         }
 
         return mav;
@@ -457,6 +486,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (err != null) {
             mav.addObject("warning", err);
+            mav.addObject("error", err);
         } else {
             mav.addObject("type", "shared");
             mav.addObject("warning", null);

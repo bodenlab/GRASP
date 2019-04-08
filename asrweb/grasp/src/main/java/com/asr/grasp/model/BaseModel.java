@@ -280,6 +280,59 @@ public class BaseModel {
     }
 
     /**
+     * An Update query that updates a time based on the id
+     *
+     * For update commands we have the ID at the end, so it should always be
+     * at the last index of the query (i.e. SELECT * FROM .... WHERE ... <- ID)
+     *
+     * @param query
+     * @return
+     */
+    public boolean updateDateOnId(String query, int id) {
+        Connection con = null;
+        boolean results = false;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setInt(1, id);
+            statement.executeUpdate();
+            results = true;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        closeCon(con);
+        return results;
+    }
+
+    /**
+     * An Update query that updates a time based on the id
+     *
+     * For update commands we have the ID at the end, so it should always be
+     * at the last index of the query (i.e. SELECT * FROM .... WHERE ... <- ID)
+     *
+     * @param query
+     * @return
+     */
+    public boolean updateDateOnString(String query, String label) {
+        Connection con = null;
+        boolean results = false;
+        try {
+            con = DriverManager.getConnection(dbUrl, dbUsername,
+                    dbPassword);
+            PreparedStatement statement = con.prepareStatement(query);
+            statement.setString(1, label);
+            statement.executeUpdate();
+            results = true;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        closeCon(con);
+        return results;
+    }
+
+
+    /**
      * An Update query that updates a string based on an ID.
      *
      * For update commands we have the ID at the end, so it should always be

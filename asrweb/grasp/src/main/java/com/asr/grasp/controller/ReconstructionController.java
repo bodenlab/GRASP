@@ -200,6 +200,27 @@ public class ReconstructionController {
      * @param loggedInUser
      * @return
      */
+    public String removeSharedRecon(int reconId, UserObject loggedInUser) {
+        // Check if this is the currect reonstruction. If it is we can just
+        // get the owner ID from currentRecon
+        int access = getUsersAccess(reconId, loggedInUser);
+        if (access == Defines.MEMBER_ACCESS) {
+            return reconModel.removeUsersAccess(reconId,
+                    loggedInUser.getId());
+        }
+        return "fail";
+    }
+
+    /**
+     * Remove a users membership access to that reconstruction.
+     *
+     * Must be performed by the owner of the reconstruction.
+     *
+     * @param reconId
+     * @param username
+     * @param loggedInUser
+     * @return
+     */
     public String removeUsersAccess(int reconId, String username, UserObject
             loggedInUser) {
         // Get the userId of the user we want to save that reconstruction with

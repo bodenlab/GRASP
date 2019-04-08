@@ -12,21 +12,22 @@
     <div class="content-section-b ">
         <div class="container">
             <div id="recon-success" class="alert alert-success hidden" role="alert">
-                Successfully <span id="recon-edit-type"></span> reconstruction!
+                Successfully <span id="recon-edit-type"></span> reconstruction! You may need to refresh this page to see the changes.
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div id="recon-warning" class="alert alert-warning hidden" role="alert">
-                <!--Your reconstruction will be saved for <span id="num-recons"></span> month/s. After this time, it will no longer be accessible here.-->
-                Your reconstruction will be saved until you delete it.
+                <small class="form-text text-danger"
+                       th:text="${message}">Error</small>
 
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div id="recon-error" class="alert alert-danger hidden" role="alert">
-                User <span id="share-user"></span> does not exist. Share unsuccessful.
+                <small class="form-text text-danger"
+                       th:text="${message}">Error</small>
             </div>
             <table class="table table-hover">
                 <thead>
@@ -73,6 +74,7 @@
                     <td th:text="${{recon.updatedAt}}"></td>
                     <!--<td th:text="${recon.inferenceType}"></td>-->
                     <!--<td th:text="${recon.node}"></td>-->
+                    <td><a th:href="@{/(remove='t',id=${recon.id})}" title="Remove access"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
                     <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
                 </tr>
                 </tbody>

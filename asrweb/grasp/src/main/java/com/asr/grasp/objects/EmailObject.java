@@ -53,6 +53,8 @@ public class EmailObject {
                 + " Please try again, if you have this issue again, please send the GRASP team an email and "
                 + "forward on the following error: \n"
                 + "\t" + errorMessage + "\n"
+                + " Also please attach your files you were trying to run as this will help us to diagnose the issue.\n"
+                + " Note: there are a number of common errors that occur, for these, please visit: http://grasp.scmb.uq.edu.au/guide#errors-nav\n"
                 + " Cheers, \n The grasp team :) ";
         this.subject = "Reconstruction complete at GRASP";
     }

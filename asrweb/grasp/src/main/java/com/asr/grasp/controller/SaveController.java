@@ -176,6 +176,15 @@ public class SaveController implements Runnable {
             emailController.sendEmail(email);
             isSaving = false;
         } catch (Exception e) {
+            try {
+                // Now we want to send an email notifying the user that their reconstruction is complete
+                EmailObject email = new EmailObject(user.getUsername(), user.getEmail(),
+                        Defines.RECONSTRUCTION);
+                email.setContentError(currRecon.getLabel(), e.getMessage());
+                emailController.sendEmail(email);
+            } catch (Exception e2) {
+                System.out.println("Couldn't send the error email: " + e2);
+            }
             System.out.println("Couldn't run the saving thread: " + e);
             isSaving = false;
         }
@@ -189,7 +198,7 @@ public class SaveController implements Runnable {
         treeController = null;
         currRecon = null;
         inference = null;
-
+        isSaving = false;
     }
 
     /**

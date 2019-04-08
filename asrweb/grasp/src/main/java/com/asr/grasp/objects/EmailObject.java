@@ -47,6 +47,16 @@ public class EmailObject {
         this.subject = "Reset password at GRASP";
     }
 
+    public void setContentError(String reconName, String errorMessage) {
+        this.content = "Dear " + username + ", \n "
+                + " Unfortunately your reconstruction " + reconName + " wasn't able to complete!\n"
+                + " Please try again, if you have this issue again, please send the GRASP team an email and "
+                + "forward on the following error: \n"
+                + "\t" + errorMessage + "\n"
+                + " Cheers, \n The grasp team :) ";
+        this.subject = "Reconstruction complete at GRASP";
+    }
+
     public void setContent(String reconName) {
         this.content = "Dear " + username + ", \n "
                 + " Yay your reconstruction " + reconName + " is now complete!\n"

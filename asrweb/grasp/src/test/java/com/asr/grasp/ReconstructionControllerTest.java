@@ -25,6 +25,7 @@ public class ReconstructionControllerTest extends BaseTest {
          * Tests that the ASR module is acting as expected.
          */
         setUpEnv();
+        String filename = "tawfik";
 
         ASRObject asr = new ASRObject();
         asr.setData("tawfik");
@@ -35,6 +36,8 @@ public class ReconstructionControllerTest extends BaseTest {
         asr.setNodeLabel(asr.getNodeLabel());
 
         try {
+            asr.loadExtants(dataPath + filename + ".aln");
+            asr.loadTree(dataPath + filename + ".nwk");
             asr.runReconstruction();
         } catch (Exception e) {
             // Fail on error

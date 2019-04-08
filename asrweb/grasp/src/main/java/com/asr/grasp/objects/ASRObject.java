@@ -4,6 +4,7 @@ import com.asr.grasp.controller.ASRController;
 import com.asr.grasp.utils.Defines;
 import dat.EnumSeq;
 import dat.Enumerable;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -226,6 +227,34 @@ public class ASRObject {
             reconstructedTree = asrController.getReconstructedNewick();
     }
 
+    /**
+     * Load the alignments directly from the file uploaded by the user. This one is done when
+     * we are actually loading a file (i.e. in the tests)
+     *
+     * @throws IOException
+     */
+    public void loadExtants(String filename) throws IOException {
+        FileReader fr = new FileReader(filename);
+        // We open the file once to have a look at what the first line is
+        BufferedReader bufferedAlnFile = new BufferedReader(fr);
+        String line = bufferedAlnFile.readLine();
+        // We then close this so we can re-open it without compromising the first line.
+        bufferedAlnFile.close();
+
+        // Re-open the file so we have a fresh buffered reader.
+        BufferedReader bufferedAlnFileFresh = new BufferedReader(new FileReader(filename));
+
+        if (line.startsWith("CLUSTAL"))
+            extants = EnumSeq.Gappy.loadClustal(bufferedAlnFileFresh, Enumerable.aacid_ext);
+        else if (line.startsWith(">"))
+            extants = EnumSeq.Gappy.loadFasta(bufferedAlnFileFresh, Enumerable.aacid_ext, '-');
+        else
+            throw new RuntimeException("Alignment should be in Clustal or Fasta format");
+
+        bufferedAlnFileFresh.close();
+        numAlnCols = extants.get(0).length();
+        numExtantSequences = extants.size();
+    }
 
     /**
      * Load the alignments directly from the file uploaded by the user.
@@ -255,6 +284,24 @@ public class ASRObject {
         bufferedAlnFileFresh.close();
         numAlnCols = extants.get(0).length();
         numExtantSequences = extants.size();
+    }
+
+    /**
+     * Method used in the tests.
+     *
+     * @param filename
+     * @throws IOException
+     */
+    public void loadTree(String filename) throws IOException {
+        if (tree != null)
+            return;
+        BufferedReader tree_file = new BufferedReader(new FileReader(filename));
+        String line = tree_file.readLine();
+        tree = line;
+        while ((line = tree_file.readLine()) != null)
+            tree += line;
+        tree_file.close();
+
     }
 
     private void loadTree() throws IOException {

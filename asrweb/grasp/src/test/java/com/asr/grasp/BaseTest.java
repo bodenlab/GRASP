@@ -31,7 +31,8 @@ public class BaseTest {
      *
      * ------------------------------------------------------------------------
      */
-    // -------------------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER -------
+    // ---------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER where the data is for GRASP ------
+    String dataPath = "/Users/ariane/Documents/boden/apps/ASR/asrweb/grasp/src/main/resources/data/test/";
     // ------------------------------------------------------------------------
     String dbPassword = "strongpassword";
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp_db";
@@ -168,6 +169,7 @@ public class BaseTest {
      * @return
      */
     public ASRObject setAsr(String data) {
+        String filename = data;
         ASRObject asr = new ASRObject();
         asr.setDataPath("data/test/");
         asr.setData(data);
@@ -176,6 +178,8 @@ public class BaseTest {
         asr.setWorkingNodeLabel("N0");
         asr.setNodeLabel("N0");
         try {
+            asr.loadExtants(dataPath + filename + ".aln");
+            asr.loadTree(dataPath + filename + ".nwk");
             asr.runReconstruction();
         } catch (Exception e) {
             // Fail on error

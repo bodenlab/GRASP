@@ -32,7 +32,7 @@ public class BaseTest {
      * ------------------------------------------------------------------------
      */
     // ---------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER where the data is for GRASP ------
-    String dataPath = "........./ASR/asrweb/grasp/src/main/resources/data/test/";
+    String dataPath = TestPropertiesOverride.testFilePath;
     // ------------------------------------------------------------------------
     String dbPassword = "strongpassword";
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp_db";

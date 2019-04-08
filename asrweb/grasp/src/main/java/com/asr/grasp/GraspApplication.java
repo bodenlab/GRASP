@@ -1,6 +1,5 @@
 package com.asr.grasp;
 
-import com.asr.grasp.controller.ConsensusController;
 import com.asr.grasp.controller.EmailController;
 import com.asr.grasp.controller.SaveController;
 import com.asr.grasp.controller.SeqController;
@@ -42,16 +41,12 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.springframework.beans.factory.annotation.Value;
 
 
 @Controller
 @SpringBootApplication
 @SessionScope
 public class GraspApplication extends SpringBootServletInitializer {
-
-    @Value("${project.sessionPath}")
-    private String sessionPath;
 
     private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
 
@@ -87,9 +82,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     @Autowired
     private TreeController treeController;
-
-    @Autowired
-    private ConsensusController consensusController;
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -1043,10 +1035,10 @@ public class GraspApplication extends SpringBootServletInitializer {
     String returnASRGraph(@RequestParam("getrecongraph") String getrecongraph, Model model,
             HttpServletRequest request) {
 
-        String graphs = "";
+        String graphs;
 
         if (runningMarginal) {
-            graphs = marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
+            marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
             runningMarginal = false;
             // int reconId, String label, ASRPOG asrInstance, boolean gappy
             // Set to be gappy
@@ -1111,7 +1103,7 @@ public class GraspApplication extends SpringBootServletInitializer {
                 "NEW, request_addr: " + request.getRemoteAddr() + ", infer_type: " + asr
                         .getInferenceType());// + ", mem_bytes: " + ObjectSizeCalculator.getObjectSize(asr));
 
-        Exception exception = asr.runForSession(sessionPath);
+        Exception exception = asr.runForSession();
 
         if (exception != null) {
             ModelAndView mav = new ModelAndView("index");

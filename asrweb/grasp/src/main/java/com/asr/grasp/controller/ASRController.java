@@ -18,14 +18,13 @@ import java.util.List;
  * Created by marnie
  */
 public class ASRController {
-    private int NUM_THREADS = 5;
 
-    private String sessionId = "";
-    private String sessionDir = null;
+    private int NUM_THREADS = 5;
 
     // ASR object to store joint reconstruction for showing resulting graphs of different nodes without performing the
     // reconstruction with each node view query
     private ASRPOG asrJoint = null;
+
     private Map<String, List<Inference>>  jointInferences = null;
 
     // ASR object to store marginal reconstruction of current node (if given)
@@ -42,7 +41,7 @@ public class ASRController {
     private String rootLabel = null;
 
     public ASRController() {
-        this.sessionId = "grasp" + System.currentTimeMillis();
+
     }
 
     /**
@@ -64,21 +63,12 @@ public class ASRController {
     }
 
     /*******************************************************************************************************************
-     ****** Setters and getters for ASR attributes
-     ******************************************************************************************************************/
-
-    public void setSessionDir(String dir) { this.sessionDir = dir; }
-    public String getSessionDir() { return this.sessionDir; }
-    public String getSessionId() { return this.sessionId; }
-
-    /*******************************************************************************************************************
      ****** ASR functional methods
      ******************************************************************************************************************/
 
     public void performAlignment(String filepath) throws IOException {
         msa = new MSA(filepath);
     }
-
 
     /**
      * Return the list of joint inferences these can then be iterated through
@@ -95,8 +85,9 @@ public class ASRController {
         if (jointInferences != null) {
             asrJoint = new ASRPOG(model, NUM_THREADS, jointInferences, extants, tree);
             performedJoint = true;
-        } else
+        } else {
             asrJoint = new ASRPOG(model, NUM_THREADS);
+        }
         asrMarginal = new ASRPOG(model, NUM_THREADS, node);
         msaGraph = new POGraph(extants);
     }
@@ -134,13 +125,9 @@ public class ASRController {
         return true;
     }
 
-
-//    public void runReconstruction(String treeNewick, List<Gappy<Enumerable>> sequences, boolean jointInference, POGraph msa) throws InterruptedException {
-
-
-        /**
-         * Run marginal reconstruction using saved data and specified options
-         */
+    /**
+     * Run marginal reconstruction using saved data and specified options
+     */
     private boolean runReconstructionMarginal(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String nodeLabel) throws InterruptedException {
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
             asrMarginal = new ASRPOG(model, NUM_THREADS, nodeLabel);

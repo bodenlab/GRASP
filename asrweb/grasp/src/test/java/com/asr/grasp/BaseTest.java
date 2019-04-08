@@ -32,7 +32,6 @@ public class BaseTest {
      * ------------------------------------------------------------------------
      */
     // -------------------- CHANGE THIS PATH TO A PATH ON YOUR COMPUTER -------
-    String sessionPath = TestPropertiesOverride.sessionPath;
     // ------------------------------------------------------------------------
     String dbPassword = "strongpassword";
     String dbUrl = "jdbc:postgresql://localhost:5432/grasp_db";
@@ -176,7 +175,6 @@ public class BaseTest {
         asr.setLabel("test-test-test-" + data);
         asr.setWorkingNodeLabel("N0");
         asr.setNodeLabel("N0");
-        asr.runForSession(sessionPath);
         try {
             asr.runReconstruction();
         } catch (Exception e) {

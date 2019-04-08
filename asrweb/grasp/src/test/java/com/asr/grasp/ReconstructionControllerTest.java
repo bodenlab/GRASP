@@ -33,7 +33,6 @@ public class ReconstructionControllerTest extends BaseTest {
         asr.setModel("JTT");
         asr.setWorkingNodeLabel(asr.getNodeLabel());
         asr.setNodeLabel(asr.getNodeLabel());
-        asr.runForSession(sessionPath);
 
         try {
             asr.runReconstruction();

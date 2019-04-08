@@ -18,7 +18,6 @@ public class ASRThread implements Runnable {
     private Boolean addNode;
     private UserObject owner;
     private final Thread thread;
-    private ReconstructionController reconController;
 
     public ASRThread(ASRObject asr, String inference, String node, Boolean addNode, Logger logger, UserObject owner, ReconstructionController reconController) {
         this.asr = asr;
@@ -30,7 +29,6 @@ public class ASRThread implements Runnable {
         this.asr.setWorkingNodeLabel(node);
         this.asr.setNodeLabel(node);
         this.owner = owner;
-        this.reconController = reconController;
         this.thread = new Thread(this, "ASR-" + System.nanoTime());
         thread.start();
     }

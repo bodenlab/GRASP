@@ -4,17 +4,15 @@ import com.asr.grasp.controller.ASRController;
 import com.asr.grasp.utils.Defines;
 import dat.EnumSeq;
 import dat.Enumerable;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import json.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import reconstruction.ASRPOG;
@@ -104,66 +102,87 @@ public class ASRObject {
     public boolean getSave() { return this.save; }
     public void setSave(boolean save) { this.save = save;}
 
-
-    public String getLabel() {
-        return this.label;
-    }
-    public void setLabel(String label) {
-        this.label = label.replace(" ", "").trim();
-    }
-    public MultipartFile getAlnFile() { return this.alnFile; }
     public void setAlnFile(MultipartFile alnFile) {
         this.alnFile = alnFile;
     }
+
     public MultipartFile getTreeFile() {
         return this.treeFile;
     }
+
     public void setTreeFile(MultipartFile treeFile) {
         this.treeFile = treeFile;
     }
+
     public MultipartFile getSeqFile() {
         return this.seqFile;
     }
     public void setSeqFile(MultipartFile seqFile) {
         this.seqFile = seqFile;
     }
-    public String getAlnFilepath() { return this.alnFilepath; }
+
+    public String getLabel() {
+        return this.label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label.replace(" ", "").trim();
+    }
+
+    public MultipartFile getAlnFile() { return this.alnFile; }
+
+
     public void setAlnFilepath(String alnFilepath) { this.alnFilepath = alnFilepath; }
-    public String getTreeFilepath() { return this.treeFilepath; }
+
     public void setTreeFilepath(String treeFilepath) { this.treeFilepath = treeFilepath; }
+
     public String getInferenceType() { return this.inferenceType; }
+
     public void setInferenceType(String infType) { this.inferenceType = infType; }
-    public boolean getPerformAlignment() { return this.performAlignment; }
+
     public void setPerformAlignment(boolean performAlignment) { this.performAlignment = performAlignment; }
+
     public void setNodeLabel(String node) {
         this.nodeLabel = node; }
+
     public String getNodeLabel() {
         if (nodeLabel == null)
             nodeLabel = asrController.getRootTreeLabel();
         return this.nodeLabel;
     }
+
     public void setWorkingNodeLabel(String node) {
         this.workingNodeLabel = node;
     }
+
     public String getWorkingNodeLabel() {
 
         if (workingNodeLabel == null)
             workingNodeLabel = asrController.getRootTreeLabel();
         return this.workingNodeLabel; }
+
     public void setModel(String model) { this.model = model; }
+
     public String getModel() { return this.model; }
 
 
     public void setPrevProgress(int progress) { this.prevProgress = progress; }
-    public int getPrevProgress() { return this.prevProgress; }
-    public void setFirstPass(boolean flag) { this.firstPass = flag; }
-    public boolean getFirstPass() { return this.firstPass; }
-    public void setData(String data) { this.data = data; }
-    public String getData() { return this.data; }
-    public void setTree(String tree) { this.tree = tree; }
-    public String getTree() { return this.tree; }
-    public boolean getLoaded() { return this.loaded; }
 
+    public int getPrevProgress() { return this.prevProgress; }
+
+    public void setFirstPass(boolean flag) { this.firstPass = flag; }
+
+    public boolean getFirstPass() { return this.firstPass; }
+
+    public void setData(String data) { this.data = data; }
+
+    public String getData() { return this.data; }
+
+    public void setTree(String tree) { this.tree = tree; }
+
+    public String getTree() { return this.tree; }
+
+    public boolean getLoaded() { return this.loaded; }
 
     // Logging functions
     public int getNumberBases(){
@@ -183,7 +202,6 @@ public class ASRObject {
     /*******************************************************************************************************************
      ****** ASR functional methods
      ******************************************************************************************************************/
-
 
     public void loadParameters() {
         asrController.loadParameters(model, NUM_THREADS, nodeLabel, extants, tree, msa);
@@ -208,26 +226,42 @@ public class ASRObject {
             reconstructedTree = asrController.getReconstructedNewick();
     }
 
+
+    /**
+     * Load the alignments directly from the file uploaded by the user.
+     *
+     * @throws IOException
+     */
     public void loadExtants() throws IOException {
-        if (extants != null || alnFilepath == null)
+        if (extants != null || alnFile == null)
             return;
-        BufferedReader aln_file = new BufferedReader(new FileReader(alnFilepath));
-        String line = aln_file.readLine();
+        InputStream is = alnFile.getInputStream();
+        // We open the file once to have a look at what the first line is
+        BufferedReader bufferedAlnFile = new BufferedReader(new InputStreamReader(is));
+        String line = bufferedAlnFile.readLine();
+        // We then close this so we can re-open it without compromising the first line.
+        bufferedAlnFile.close();
+
+        // Re-open the file so we have a fresh buffered reader.
+        BufferedReader bufferedAlnFileFresh = new BufferedReader(new InputStreamReader(alnFile.getInputStream()));
+
         if (line.startsWith("CLUSTAL"))
-            extants = EnumSeq.Gappy.loadClustal(alnFilepath, Enumerable.aacid_ext);
+            extants = EnumSeq.Gappy.loadClustal(bufferedAlnFileFresh, Enumerable.aacid_ext);
         else if (line.startsWith(">"))
-            extants = EnumSeq.Gappy.loadFasta(alnFilepath, Enumerable.aacid_ext, '-');
+            extants = EnumSeq.Gappy.loadFasta(bufferedAlnFileFresh, Enumerable.aacid_ext, '-');
         else
             throw new RuntimeException("Alignment should be in Clustal or Fasta format");
-        aln_file.close();
+
+        bufferedAlnFileFresh.close();
         numAlnCols = extants.get(0).length();
         numExtantSequences = extants.size();
     }
 
     private void loadTree() throws IOException {
-        if (tree != null || treeFilepath == null)
+        if (tree != null || treeFile == null)
             return;
-        BufferedReader tree_file = new BufferedReader(new FileReader(treeFilepath));
+        InputStream is = treeFile.getInputStream();
+        BufferedReader tree_file = new BufferedReader(new InputStreamReader(is));
         String line = tree_file.readLine();
         tree = line;
         while ((line = tree_file.readLine()) != null)
@@ -360,15 +394,6 @@ public class ASRObject {
     }
 
     /**
-     * Get the filename of the reconstructed phylogenetic tree
-     *
-     * @return  filename
-     */
-    public String getReconstructedTreeFileName() {
-        return label + "_recon.nwk";
-    }
-
-    /**
      * Get the number of threads used for reconstruction.
      *
      * @return number of threads
@@ -427,71 +452,6 @@ public class ASRObject {
             }
     }
 
-    /**
-     * Save ancestor graph
-     *
-     * @param label     label of ancestor
-     * @param filepath  filepath of where to save graph
-     * @param joint     flag: true, get from joint recon, false, get from marginal
-     */
-    public void saveAncestorGraph(String label, String filepath, boolean joint) {
-        asrController.saveAncestorGraph(label, filepath, joint);
-    }
-
-    public void saveTree(String filepath) throws IOException {
-        asrController.saveTree(filepath);
-    }
-
-    /**
-     * Save graphs of all ancestors (joint)
-     *
-     * @param filepath  filepath of where to save ancestor graphs
-     */
-    public void saveAncestors(String filepath) {
-        asrController.saveAllAncestors(filepath);
-    }
-
-    public void saveAncestors(String filepath, String[] labels) {
-        for (String a : labels)
-            asrController.saveAncestorGraph(a, filepath, true);
-    }
-
-    /**
-     * Save consensus sequence of marginal node
-     *
-     * @param filepath  filepath of where to save consensus sequence
-     * @throws IOException
-     */
-    public void saveConsensusMarginal(String filepath) throws IOException {
-        asrController.saveConsensusMarginal(filepath);
-    }
-
-    /**
-     * Save marginal distribution matrix of marginal node
-     *
-     * @param filepath  filepath of where to save distribution
-     * @param node      node label or MSA for sequence alignment
-     * @throws IOException
-     */
-    public void saveMarginalDistribution(String filepath, String node) throws IOException {
-        asrController.saveMarginalDistribution(filepath, node);
-
-    }
-
-    /**
-     * Save consensus sequence of marginal node
-     *
-     * @param filepath  filepath of where to save consensus sequence
-     * @throws IOException
-     */
-    public void saveConsensusJoint(String filepath, String label) throws IOException {
-        asrController.saveConsensusJoint(filepath, label);
-    }
-
-    public void saveConsensusJoint(String filepath, String[] labels) throws IOException {
-        asrController.saveConsensusJoint(filepath, labels);
-    }
-
     public int getReconCurrentNodeId() {
         return asrController.getReconCurrentNodeId(inferenceType);
     }
@@ -512,18 +472,6 @@ public class ASRObject {
      */
     public JSONObject getAncestralGraphJSON(String nodeLabel) {
         return asrController.getAncestralGraphJSON(inferenceType, nodeLabel);
-    }
-
-    public void setSessionDir(String path) {
-        asrController.setSessionDir(path);
-    }
-
-    public String getSessionDir(){
-        return asrController.getSessionDir();
-    }
-
-    public String getSessionId(){
-        return asrController.getSessionId();
     }
 
     /**
@@ -562,69 +510,15 @@ public class ASRObject {
         return combinedPoags.toString();
     }
 
-    /**
-     * -------------------------------------------------------------------------
-     *          User Interaction Methods
-     * -------------------------------------------------------------------------
-     */
-    /**
-     * Runs an ASR on a Session, the user has uploaded files or chosen one of
-     * the example datasets.
-     *
-     * @param sessionPath
-     * @return
-     */
-    public Exception runForSession(String sessionPath) {
+    public Exception runForSession() {
         try {
-            File sessionDir = new File(sessionPath + getSessionId());
-            if (!sessionDir.exists())
-                sessionDir.mkdir();
-
-            setSessionDir(sessionDir.getAbsolutePath() + "/");
-
-            if (seqFile != null || alnFile != null) {
-                // aligning input data before performing reconstruction
-                if (seqFile != null) {
-                    seqFile.transferTo(new File(sessionDir +
-                            seqFile.getOriginalFilename()));
-                    setAlnFilepath(sessionDir + seqFile
-                            .getOriginalFilename());
-                    setPerformAlignment(true);
-                }
-                // performing reconstruction on already aligned data
-                if (alnFile != null) {
-                    alnFile.transferTo(new File(sessionDir + alnFile
-                            .getOriginalFilename()));
-                    setAlnFilepath(sessionDir + alnFile
-                            .getOriginalFilename());
-                }
-                getTreeFile().transferTo(new File(sessionDir + treeFile
-                        .getOriginalFilename()));
-                setTreeFilepath(sessionDir + treeFile.getOriginalFilename());
-            } else {
-                // performing reconstruction on test data
-
-                File alnFile = new File(Thread.currentThread()
-                        .getContextClassLoader().getResource(dataPath + data + ".aln")
-                        .toURI());
-                setAlnFilepath(sessionDir + data + ".aln");
-                Files.copy(alnFile.toPath(), (new File(alnFilepath)).toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-                File treeFile = new File(Thread.currentThread()
-                        .getContextClassLoader().getResource(dataPath + data + ".nwk")
-                        .toURI());
-                setTreeFilepath(sessionDir + data + ".nwk");
-                Files.copy(treeFile.toPath(), (new File(treeFilepath)).toPath(),
-                        StandardCopyOption.REPLACE_EXISTING);
-            }
-            // Return that it was a success
-            return null;
+            loadExtants();
         } catch (Exception e) {
-            System.err.println(e);
+            System.out.println("" + e.getMessage());
             return e;
         }
+        return null;
     }
-
 
     public List<EnumSeq.Gappy<Enumerable>> getSeqsAsEnum() {
         return this.extants;

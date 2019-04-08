@@ -1463,7 +1463,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
       drawCon = true;
 
     }
-    console.log(edge[E_CONSENSUS])
+
     group.append("path")
             .attr("d", line_function(line_points))
             .attr("class", 'poag')

@@ -111,6 +111,18 @@ function runPhyloTree() {
 }
 
 
+function increaseDepth() {
+  phylo_options.tree.depth += 1;
+  drawPhyloTree();
+}
+
+function decreaseDepth() {
+  phylo_options.tree.depth -= 1;
+  if (phylo_options.tree.depth <= 1) {
+    phylo_options.tree.depth = 1;
+  }
+  drawPhyloTree();
+}
 
 /**
  * Set up the phylo tree
@@ -128,9 +140,5 @@ function drawPhyloTree() {
   nodes = nodes.concat(getNodesEqualToDepth(phylo_options.tree.depth));
 
   drawTree(nodes, branches);
-
-  // Draw the branches and the node
-  assignNumChildren(phylo_options.tree.root);
-  //collapseSubtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
 
 }

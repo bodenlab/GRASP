@@ -89,6 +89,7 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
      */
     graph_array.push(JSON.parse(json_str));
 
+
     /**
      *
      * Run Tree setup

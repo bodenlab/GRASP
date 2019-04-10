@@ -41,9 +41,30 @@ function setupCrossFilter() {
  * @param name
  */
 function getNodeLessThanDepth(depth) {
-  return phylo_options.data.depth_dimension.filter(function(d) {
+
+  let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
         return d < depth;
-      });
+      }).top(Infinity);
+
+
+  nodesIn.forEach(function(d) {
+    d[T_TERMINATED] = false;
+  });
+
+  // Concat the nodes and the terminating nodes
+  return nodesIn;
+}
+
+function getNodesEqualToDepth(depth) {
+  let nodesOut = phylo_options.data.depth_dimension.filter(function(d) {
+    return d === depth;
+  }).top(Infinity);
+
+  nodesOut.forEach(function(d) {
+    d[T_TERMINATED] = true;
+  });
+  return nodesOut;
+
 }
 
 
@@ -74,8 +95,8 @@ function getNodesWithTaxa(name) {
  */
 function getBranchesWithNodeID(nodeIds) {
   return phylo_options.data.branch_dimension.filter(function(d) {
-    return nodeIds.includes(d)
-  });
+    return nodeIds.includes(d);
+  }).top(Infinity);
 }
 
 
@@ -300,6 +321,7 @@ function makeChild(node, left, depth) {
   child[T_Y] = node[T_Y];
   child[T_X] = node[T_X];
   child[T_DEPTH] = depth;
+  child[T_BRANCH_LEN] = node[T_BRANCH_LEN];
   child[T_NUM_EXTANTS] = node[T_NUM_EXTANTS];
   child[T_COLLAPSED] = false;
   child[T_TERMINATED] = false;
@@ -471,6 +493,8 @@ function addChildrenNodes(node, initial) {
     for (let n in node[T_CHILDREN]) {
 
       if (n === '0') {
+        node[T_CHILDREN][0][T_DEPTH] = node[T_DEPTH] + 1;
+        let left_child = makeChild(node[T_CHILDREN][0], true, node[T_DEPTH] + 1);
 
         // Make the branch from parent out to children x's
         // Check if both children exist
@@ -478,43 +502,40 @@ function addChildrenNodes(node, initial) {
         branch_parent[B_ID] = node[T_ID];                 /*B_ID*/
         branch_parent[B_Y1] = node[T_Y];                  /*B_Y1*/
         branch_parent[B_Y2] = node[T_Y];                  /*B_Y2*/
-        branch_parent[B_X1] = node[T_CHILDREN][0][T_X];   /*B_X1*/
+        branch_parent[B_X1] = left_child[T_X];   /*B_X1*/
         branch_parent[B_X2] = node[T_CHILDREN][node[T_CHILDREN].length - 1][T_X];  /*B_X2*/
+
 
         // Make each of the children branches, these are vertical connectors
         // between the parent center branch and the child nodes.
         let branch_left_child = dataStruct();
         branch_left_child[B_ID] = node[T_ID];                 /*B_ID*/
         branch_left_child[B_Y1] = node[T_Y];                  /*B_Y1*/
-        branch_left_child[B_Y2] = node[T_CHILDREN][0][T_Y];   /*B_Y2*/
-        branch_left_child[B_X1] = node[T_CHILDREN][0][T_X];
-        branch_left_child[B_X2] = node[T_CHILDREN][0][T_X];
-        branch_left_child[B_LABEL] = node[T_CHILDREN][0][T_BRANCH_LEN];
+        branch_left_child[B_Y2] = left_child[T_Y];   /*B_Y2*/
+        branch_left_child[B_X1] = left_child[T_X];
+        branch_left_child[B_X2] = left_child[T_X];
+        branch_left_child[B_LABEL] = left_child[T_BRANCH_LEN];
 
         // Add the branches to a list of all branches to be drawn later
         phylo_options.tree.all_branches.push(branch_parent);
         phylo_options.tree.all_branches.push(branch_left_child);
 
-        node[T_CHILDREN][0][T_DEPTH] = node[T_DEPTH] + 1;
-        let left_child = makeChild(node[T_CHILDREN][0], true, node[T_DEPTH] + 1);
-
         phylo_options.tree.all_nodes.push(left_child);
 
       } else {
+        node[T_CHILDREN][n][T_DEPTH] = node[T_DEPTH] + 1;
+
+        let right_child = makeChild(node[T_CHILDREN][n], false, node[T_DEPTH] + 1);
 
         let branch_right_child = dataStruct();
         branch_right_child[B_ID] = node[T_ID];                 /*B_ID*/
         branch_right_child[B_Y1] = node[T_Y];                  /*B_Y1*/
-        branch_right_child[B_Y2] = node[T_CHILDREN][n][T_Y];   /*B_Y2*/
-        branch_right_child[B_X1] = node[T_CHILDREN][n][T_X];
-        branch_right_child[B_X2] = node[T_CHILDREN][n][T_X];
-        branch_right_child[B_LABEL] = node[T_CHILDREN][n][T_BRANCH_LEN];
+        branch_right_child[B_Y2] = right_child[T_Y];   /*B_Y2*/
+        branch_right_child[B_X1] = right_child[T_X];
+        branch_right_child[B_X2] = right_child[T_X];
+        branch_right_child[B_LABEL] = right_child[T_BRANCH_LEN];
 
         phylo_options.tree.all_branches.push(branch_right_child);
-
-        node[T_CHILDREN][n][T_DEPTH] = node[T_DEPTH] + 1;
-        let right_child = makeChild(node[T_CHILDREN][n], false, node[T_DEPTH] + 1);
-
         phylo_options.tree.all_nodes.push(right_child);
 
       }

@@ -116,100 +116,21 @@ function runPhyloTree() {
  * Set up the phylo tree
  */
 function drawPhyloTree() {
-  let nodes = getNodeLessThanDepth(10).top(Infinity);
+  let nodes = getNodeLessThanDepth(phylo_options.tree.depth);
 
   // Get the node ids from these
   let node_ids = nodes.map(a => a[T_ID]);
 
-  let branches = getBranchesWithNodeID(node_ids).top(Infinity);
+  let branches = getBranchesWithNodeID(node_ids);
+
+  // Here we add in the nodes (but we didn't want the branches for these ones
+  // as they are terminated)
+  nodes = nodes.concat(getNodesEqualToDepth(phylo_options.tree.depth));
 
   drawTree(nodes, branches);
 
   // Draw the branches and the node
   assignNumChildren(phylo_options.tree.root);
   //collapseSubtree(phylo_options.tree.root, phylo_options.tree.initial_node_num);
-
-}
-
-/**
- *  Actions for the context menu.
- *
- *  1. Add joint reconstruction
- *  2. Add marginal reconstruction
- *  3. view joint
- *  4. collapse subtree
- *  5. expand subtree
- */
-function contextMenuAction(call, node_fill, node_id) {
-
-  let call_type = call.attr("name");
-
-  phylo_options.tree.collapsed_selection = null;
-
-  document.getElementById('reset-button').disabled = true;
-
-  if (call_type === "View joint reconstruction") {
-
-    select_node(call.attr("id"));
-    refresh_tree();
-    displayJointGraph(call.attr("id"), node_fill, true);
-    reset_poag_stack();
-
-  } else if (call_type === "Add joint reconstruction") {
-
-    document.getElementById('reset-button').disabled = false;
-    d3.select("#fill-" + node_id).attr("stroke",
-        phylo_options.style.stacked_colour);
-    displayJointGraph(call.attr("id"), node_fill, false);
-
-  } else if (call_type === "Expand subtree") {
-
-    let node = phylo_options.tree.node_dict[node_id];
-    phylo_options.tree.collapsed_selection = node;
-    let ind = phylo_options.tree.collapse_under.indexOf(node);
-
-    if (ind === -1) {
-      return;
-    }
-
-    phylo_options.tree.collapse_under.splice(ind, 1);
-    set_children_un_collapsed(node);
-    node[T_TERMINATED] = false;
-    collapse_subtree(node, phylo_options.tree.expand_node_num);
-    refresh_tree();
-
-  } else if (call_type === "Collapse subtree") {
-
-    let node = phylo_options.tree.node_dict[node_id];
-
-    if (phylo_options.tree.collapse_under.indexOf(node) > -1) {
-
-      return; // already collapsed
-
-    }
-
-    set_children_collapsed(node);
-    node[T_TERMINATED] = true;
-    phylo_options.tree.collapsed_selection = node;
-    node[T_COLLAPSED] = false;
-    phylo_options.tree.collapse_under.push(node);
-    refresh_tree()
-
-  } else if (call_type === "Expand subtree and collapse others") {
-
-    let node = phylo_options.tree.node_dict[node_id];
-    phylo_options.tree.collapsed_selection = node;
-    expand_and_collapse_others(node);
-
-  } else {
-
-    select_node(call.attr("id"));
-    perform_marginal(call.attr("id"), node_fill);
-    reset_poag_stack();
-
-    /**
-     * ToDo : may need to move the reset POAG stack function back above.
-     */
-  }
 
 }

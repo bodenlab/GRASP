@@ -196,3 +196,7 @@ const B_X2 = 'x2';
 const B_LABEL = 'len';
 
 const COLOUR = 'colour';
+const FILL = 'fill';
+const OPACITY = 'opacity';
+const STROKE = 'stroke';
+const STROKE_WIDTH = 'stroke_w';

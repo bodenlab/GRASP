@@ -697,14 +697,14 @@ var on_contextmenu = function (node_name, node_fill, node_id) {
 };
 
 /**
- * Appends text to the branch as it is an additive tree element.
- *
- * Parameters:
- *      group:  the group which the node is appended to.
- *
- *      node:   contains information about the branch, i.e.
- *              label, x and y coords.
- */
+* Appends text to the branch as it is an additive tree element.
+*
+* Parameters:
+*      group:  the group which the node is appended to.
+*
+*      node:   contains information about the branch, i.e.
+*              label, x and y coords.
+*/
 var draw_branch_text = function (group, branch) {
   var options = phylo_options.style;
 
@@ -838,6 +838,7 @@ var set_phylo_params = function (tree_div, tree_string) {
   phylo_options.svg_info.div_id = tree_div;
   phylo_options.svg_info.width = '100%';//window.innerWidth - 200;
   phylo_options.tree_string = tree_string;
+  phylo_options = setup_phylo_svg(phylo_options);
   phylo_options = setup_phylo_svg(phylo_options);
 };
 
@@ -1409,7 +1410,7 @@ var get_distance_from_root = function (node, depth, phylo_options, initial) {
  *
  */
 var assign_num_children = function (node) {
-  if (node[T_CHILDREN] != undefined) {
+  if (node[T_CHILDREN] !== undefined) {
     var left_child_count = node[T_CHILDREN][0][T_MAX_CHILDREN] + 2;
     var right_child_count = node[T_CHILDREN][1][T_MAX_CHILDREN] + 2;
 
@@ -1857,272 +1858,6 @@ var select_node = function (node) {
   }
 };
 
-/**
- * Tress Drawing algorithm using buchheim method.
- *
- * Adapted from: https://llimllib.github.io/pymag-trees/
- *
- * Method:
- *      1.  Post order traversal of the Tree to assign
- *          initial x coords.
- *          if node.children == undefined:
- *
- *              a. if node == left most child:
- *                      -> then need to find whether there
- *                      is a "brother" of this node on the LHS
- *                      if so, add the x coord of the brother + distance
- *              b. if not:
- *                      -> assign the x corrd based on the mid point
- *                      of the children of the node.
- *                      -> check if there is a left brother of the node
- *                      if so add a mod (SHIFT) so we can ensure that
- *                      there are no overlaps.
- *
- *
- *
- */
-
-/**
- * A helper function to assign the y coordinate so that we group the
- * coordinates by the y coord rather than the depth.
- *
- * i.e. used when we are creating an additive tree rather than a
- * cladogram -> the nodes are thus placed at depths dependent on how far from the root they
- * are rather than the pre defined depth.
- *
- * https://stackoverflow.com/questions/8584902/get-closest-number-out-of-array
- */
-var assign_depth_from_y = function (num, arr) {
-
-  var curr = arr[0];
-  var diff = Math.abs(num - curr);
-  for (var val = 0; val < arr.length; val++) {
-    var newdiff = Math.abs(num - arr[val]);
-    if (newdiff < diff) {
-      diff = newdiff;
-      curr = arr[val];
-    }
-  }
-  return curr;
-
-};
-
-/**
- * The main function which assigns the node x and y coords.
- * These are done in a recursive manner.
- *
- * 1. depth - how far down the tree the node occurs.
- * 2. mod   - how far we need to move the node to the
- *            right when whave clashes (i.e. for x coord).
- * 3. is_left - whether it is a right or left child (assuming
- *          bifurcating trees).
- * 4. raw_x - the x coord without factoring the width
- *          of the page into account. In this function
- *          the raw_x is preliminary as we update it based on
- *          the contour and mod.
- */
-var setup = function (node, depth) {
-  node[T_DEPTH] = depth;
-  node[T_MOD] = 0;
-  node[T_RAW_X] = 0;
-
-  if (depth > phylo_options.tree.max_y) {
-    phylo_options.tree.max_y = depth;
-  }
-
-  if (node[T_CHILDREN] == undefined) {
-    node[T_RAW_X] = 0;
-    node[T_MOD] = 0;
-    node[T_IS_LEFT] = true;
-    return node;
-  }
-
-  if (node[T_CHILDREN].length == 1) {
-    node[T_RAW_X] = setup(node[T_CHILDREN][0], depth + 1)[T_RAW_X];
-    node[T_IS_LEFT] = true;
-    node[T_MOD] = 0;
-    return node;
-  }
-
-  var left = setup(node[T_CHILDREN][0], depth + 1);
-  var right = setup(node[T_CHILDREN][1], depth + 1);
-
-  // Set the left node and right node tags
-  left[T_IS_LEFT] = true;
-  right[T_IS_LEFT] = false;
-
-  node[T_RAW_X] = fix_subtrees(left, right);
-
-  if (node[T_RAW_X] < phylo_options.tree.min_x) {
-    phylo_options.tree.min_x = node[T_RAW_X];
-  }
-
-  return node;
-};
-
-/**
- * add mods is a second walk through of the tree.
- * Adds the offsets to the nodes that were calculated when
- * we did the first walk of the tree and came accross
- * the clashes.
- *
- * Parameters:
- *      modsum: the cummlative offset from the root of the tree
- *          to add to the x-coord of the node.
- *      node: the node we are currently adding the mod to.
- *
- * Recurs on the children of the node.
- */
-var add_mods = function (node, modsum) {
-//    if (phylo_options.tree.min_x < 0) {
-  // Don't want to have negative x values so we shift everything
-  // by the minimum x.
-//        node[T_RAW_X] += (-1 * phylo_options.tree.min_x);
-//    }
-
-  node[T_RAW_X] = node[T_RAW_X] + modsum;
-
-  // Keep track of the largest x coord
-  if (node[T_RAW_X] > phylo_options.tree.max_x) {
-    phylo_options.tree.max_x = node[T_RAW_X] + 1;
-  }
-
-  for (var child in node[T_CHILDREN]) {
-    add_mods(node[T_CHILDREN][child], modsum + node[T_MOD]);
-  }
-
-  // Add the node to a list of nodes so that we can just draw all
-  // in a single function that itterates over the array.
-  phylo_options.tree.tree_nodes.push(node);
-
-};
-
-var contour = function (left, right, max_offset, left_offset, right_offset,
-    left_outer, right_outer) {
-
-  var delta = left[T_RAW_X] + left_offset - (right[T_RAW_X] + right_offset);
-
-  if (max_offset === undefined || delta > max_offset) {
-    max_offset = delta;
-  }
-
-  if (left_outer === undefined) {
-    left_outer = left;
-  }
-
-  if (right_outer === undefined) {
-    right_outer = right;
-  }
-
-  var lo = next_left(left_outer);
-  var li = next_right(left);
-  var ri = next_left(right);
-  var ro = next_right(right_outer);
-
-  if (li !== undefined && ri !== undefined) {
-    left_offset += left[T_MOD];
-    right_offset += right[T_MOD];
-    return contour(li, ri, max_offset, left_offset, right_offset, lo, ro);
-  }
-  return [
-      li,
-      ri,
-      max_offset,
-      left_offset,
-      right_offset,
-      lo,
-      ro
-  ]
-  // return {
-  //   'li': li,
-  //   'ri': ri,
-  //   'max_offset': max_offset,
-  //   'left_offset': left_offset,
-  //   'right_offset': right_offset,
-  //   'lo': left_outer,
-  //   'ro': right_outer
-  // };
-};
-
-/**
- * Helper function which returns the thread of the next node
- * if one exists.
- *
- * Otherwise if the node has a left child we return that.
- *
- * Undefined is returned otherwise.
- */
-var next_left = function (node) {
-  if (node[T_THREAD] !== undefined) {
-    return node[T_THREAD];
-  }
-  if (node[T_CHILDREN] !== undefined) {
-    return node[T_CHILDREN][0];
-  }
-  return undefined;
-};
-
-/**
- * Similar to the next_left function.
- */
-var next_right = function (node) {
-  if (node[N_THREAD] !== undefined) {
-    return node[N_THREAD];
-  }
-  if (node[T_CHILDREN] !== undefined) {
-    return node[T_CHILDREN][1];
-  }
-  return undefined;
-};
-
-/**
- * fix_subtrees updates the subtrees of a node.
- *
- * This is done itterattively so that each time we progress up the levels
- * of the trees we know we don't have to fix any lower trees as they
- * have already been fixed.
- *
- * Parameters:
- *      left    - the left child of the node, contains the left subtree.
- *      right   - the right child of th node, contains the right subtree.
- *
- * Returns:
- *      half way between the left and right sub tree children nodes.
- */
-var fix_subtrees = function (left, right) {
-  // The first time we get the contours we have to srat it with
-  // no offsets etc.
-  var contours = contour(left, right, null, null, null, null, null);
-  // Contours is recursively called on the tree to determine how far
-  // we need to offset the top nodes to ensure that none of the
-  // lower subtrees are conflicting in the x nodes.
-  var diff = contours[T_MAX_OFFSET];
-  var ri = contours[T_RI];
-  var ro = contours[T_RO];
-  var lo = contours[T_LO];
-  var li = contours[T_LI];
-  var left_offset = contours[T_LEFT_OFFSET];
-  var right_offset = contours[T_RIGHT_OFFSET];
-
-  diff += 1;
-  diff += (right[T_RAW_X] + diff + left[T_RAW_X]) % 2;
-  right[N_MOD] = diff;
-  right[T_RAW_X] += diff;
-
-  if (right.children !== undefined) {
-    right_offset += diff;
-  }
-
-  if (ri !== undefined && li === undefined) {
-    lo[N_THREAD] = ri;
-    lo[N_MOD] = right_offset - left_offset;
-  } else if (li !== undefined && ri === undefined) {
-    ro[N_THREAD] = li;
-    ro[N_MOD] = left_offset - right_offset;
-  }
-
-  return (left[T_RAW_X] + right[T_RAW_X]) / 2;
-};
 
 var refresh_tree = function () {
   if (document.getElementById("additive-toggle").innerHTML.split(" | ")[1] === "Additive") {

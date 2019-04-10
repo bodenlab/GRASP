@@ -95,8 +95,10 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
      */
     set_recon_label(label);
     set_inf_type(inf);
-    set_phylo_params("#phylo-tree", recon);
-    run_phylo_tree();
+    setPhyloParams("#phylo-tree", recon);
+    //set_phylo_params("#phylo-tree", recon);
+    runPhyloTree();
+    //run_phylo_tree();
     // phylo_options.tree.selected_node[T_ID] = node;
     refresh_tree(); // to set height properly
     selectedNode = phylo_options.tree.selected_node[T_ID];
@@ -104,12 +106,17 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
-    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID])
+    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID]);
+
     poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node[T_NAME]];
     poags.options.name_to_merged_id[phylo_options.tree.selected_node[T_NAME]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+
     redraw_poags();
+
     poags.retain_previous_position = true;
+
     refresh_elements();
+
     // Once everything is complete we want to start getting the taxonIds
     setUpTaxonomy(proteinIds.ncbi, proteinIds.uniprot, proteinIds.ncbi_mapping, proteinIds.uniprot_mapping);
 }

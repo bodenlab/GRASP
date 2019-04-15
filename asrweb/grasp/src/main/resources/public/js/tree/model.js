@@ -326,7 +326,8 @@ function makeChild(node, left, depth) {
   child[T_COLLAPSED] = false;
   child[T_TERMINATED] = false;
   child[T_CONTAINS_SEARCH] = false;
-  child[T_CHILDREN] = node[T_CHILDREN]
+  child[T_CHILDREN] = node[T_CHILDREN];
+  child[T_DIST_FROM_ROOT] = node[T_DIST_FROM_ROOT];
 
   if (node[T_COMMON_TAXA] === undefined) {
 
@@ -407,12 +408,6 @@ function getDistanceFromRoot(node, depth, phylo_options, initial) {
 
     // Set the max children of the node to be 0.
     node[T_MAX_CHILDREN] = 0;
-
-    if (initial) {
-
-      phylo_options.tree.extants.push(node);
-
-    }
 
     return;
   }
@@ -500,9 +495,11 @@ function addChildrenNodes(node, initial) {
         // Check if both children exist
         let branch_parent = dataStruct();
         branch_parent[B_ID] = node[T_ID];                 /*B_ID*/
-        branch_parent[B_Y1] = node[T_Y];                  /*B_Y1*/
-        branch_parent[B_Y2] = node[T_Y];                  /*B_Y2*/
+        branch_parent[B_Y1] = node[T_DIST_FROM_ROOT];                  /*B_Y1*/
+        branch_parent[B_Y2] = node[T_DIST_FROM_ROOT];                  /*B_Y2*/
         branch_parent[B_X1] = left_child[T_X];   /*B_X1*/
+        branch_parent[B_Y1_DEPTH] = node[T_DEPTH];                  /*B_Y1*/
+        branch_parent[B_Y2_DEPTH] = left_child[T_DEPTH];   /*B_Y2*/
         branch_parent[B_X2] = node[T_CHILDREN][node[T_CHILDREN].length - 1][T_X];  /*B_X2*/
 
 
@@ -510,10 +507,12 @@ function addChildrenNodes(node, initial) {
         // between the parent center branch and the child nodes.
         let branch_left_child = dataStruct();
         branch_left_child[B_ID] = node[T_ID];                 /*B_ID*/
-        branch_left_child[B_Y1] = node[T_Y];                  /*B_Y1*/
-        branch_left_child[B_Y2] = left_child[T_Y];   /*B_Y2*/
+        branch_left_child[B_Y1] = node[T_DIST_FROM_ROOT];                  /*B_Y1*/
+        branch_left_child[B_Y2] = left_child[T_DIST_FROM_ROOT];   /*B_Y2*/
         branch_left_child[B_X1] = left_child[T_X];
         branch_left_child[B_X2] = left_child[T_X];
+        branch_left_child[B_Y1_DEPTH] = node[T_DEPTH];                  /*B_Y1*/
+        branch_left_child[B_Y2_DEPTH] = left_child[T_DEPTH];   /*B_Y2*/
         branch_left_child[B_LABEL] = left_child[T_BRANCH_LEN];
 
         // Add the branches to a list of all branches to be drawn later
@@ -529,8 +528,10 @@ function addChildrenNodes(node, initial) {
 
         let branch_right_child = dataStruct();
         branch_right_child[B_ID] = node[T_ID];                 /*B_ID*/
-        branch_right_child[B_Y1] = node[T_Y];                  /*B_Y1*/
-        branch_right_child[B_Y2] = right_child[T_Y];   /*B_Y2*/
+        branch_right_child[B_Y1] = node[T_DIST_FROM_ROOT];                  /*B_Y1*/
+        branch_right_child[B_Y2] = right_child[T_DIST_FROM_ROOT];   /*B_Y2*/
+        branch_right_child[B_Y1_DEPTH] = node[T_DEPTH];                  /*B_Y1*/
+        branch_right_child[B_Y2_DEPTH] = right_child[T_DEPTH];   /*B_Y2*/
         branch_right_child[B_X1] = right_child[T_X];
         branch_right_child[B_X2] = right_child[T_X];
         branch_right_child[B_LABEL] = right_child[T_BRANCH_LEN];

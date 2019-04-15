@@ -9,10 +9,6 @@
 
 function initPhyloOptions() {
 
-  phylo_options.group  = phylo_options.svg.append("g")
-  .attr("transform", "translate(" + phylo_options.svg_info.margin.left + ","
-      + phylo_options.svg_info.margin.top + ")");
-
   phylo_options.tree.all_nodes = [];
   phylo_options.tree.all_branches = [];
 
@@ -22,8 +18,6 @@ function initPhyloOptions() {
  * Sets up the tree and calls the other functions
  */
 function runPhyloTree() {
-  // Make sure the group has no children
-  initPhyloOptions();
 
   let tree_json = parseNewick(phylo_options.tree_string);
 
@@ -74,7 +68,12 @@ function runPhyloTree() {
   /* Set the max x */
   phylo_options.tree.max_x = phylo_options.leaf_count;
 
+
+  // Set up the svg
+  phylo_options = setupPhyloSvg(phylo_options);
   phylo_options = makeTreeScale(phylo_options);
+
+
   tree_json[T_Y] = phylo_options.y_scale(0);
 
   tree_json[T_X] = phylo_options.x_scale(tree_json[T_RAW_X]);
@@ -97,8 +96,6 @@ function runPhyloTree() {
 
   setupCrossFilter();
 
-  // Create our crossfilter reference
-  drawPhyloTree();
 
   let ancs = [];
   nodes.forEach(function(node) {
@@ -140,5 +137,7 @@ function drawPhyloTree() {
   nodes = nodes.concat(getNodesEqualToDepth(phylo_options.tree.depth));
 
   drawTree(nodes, branches);
+
+  resizePhyloHeight();
 
 }

@@ -194,6 +194,8 @@ const B_Y2 = 'y2';
 const B_X1 = 'x1';
 const B_X2 = 'x2';
 const B_LABEL = 'len';
+const B_Y1_DEPTH = 'y1d';
+const B_Y2_DEPTH = 'y1d';
 
 const COLOUR = 'colour';
 const FILL = 'fill';

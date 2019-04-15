@@ -96,9 +96,16 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
      */
     set_recon_label(label);
     set_inf_type(inf);
-    setPhyloParams("#phylo-tree", recon);
+
     //set_phylo_params("#phylo-tree", recon);
+  phylo_options.svg_info.div_id = "#phylo-tree";
+  phylo_options.tree_string = recon;
     runPhyloTree();
+  setPhyloParams("#phylo-tree", recon);
+
+
+  // Create our crossfilter reference
+    drawPhyloTree();
     //run_phylo_tree();
     // phylo_options.tree.selected_node[T_ID] = node;
     refresh_tree(); // to set height properly

@@ -21,6 +21,7 @@ let phylo_options = {
   },
   extentMapping: {},
   svg_info: {
+    scale: 1,
     div_id: "phylo-tree", // The ID of the div you want to draw the graph in.
     width: 5000, // Very large to be able to accomadate the larger trees (we then zoom in)
     height: 5000,
@@ -208,7 +209,7 @@ function makeTreeScale(phylo_options) {
     .attr("width", phylo_options.legend.width)
     .attr("x", 25)
     .attr("y", 0)
-    .attr("height", phylo_options.svg_info.height)
+    .attr("height", window.innerHeight/3)
     .style("fill", "url(#gradient)");
 
   phylo_options.legend_group.append("g")
@@ -219,7 +220,7 @@ function makeTreeScale(phylo_options) {
     .call(y_axis);
 
   phylo_options.legend.colour_scale = d3.scale.linear()
-    .domain(linspace(0, phylo_options.svg_info.height, 2))
+    .domain(linspace(0,  window.innerHeight/3, 2))
     .range(phylo_options.legend.colours);
 
   phylo_options.y_scale = y_scale;
@@ -312,8 +313,8 @@ function setupPhyloSvg(phylo_options) {
     .call(drag);
 
   var rect = svg.append("rect")
-  .attr("width", options.width)
-  .attr("height", options.height  + options.margin.top + options.margin.bottom)
+  .attr("width", window.innerWidth)
+  .attr("height", window.innerHeight)
   .style("fill", "none")
   .style("pointer-events", "all");
 

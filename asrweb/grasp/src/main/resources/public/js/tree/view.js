@@ -24,7 +24,7 @@ let phylo_options = {
     div_id: "phylo-tree", // The ID of the div you want to draw the graph in.
     width: 5000, // Very large to be able to accomadate the larger trees (we then zoom in)
     height: 5000,
-    margin: {top: 50, left: 50, bottom: 50, right: 0},
+    margin: {top: 20, left: 20, bottom: 20, right: 0},
     stroke: "#AEB6BF",
     stroke_width: "1px",
     number_aixs_ticks: 10,
@@ -182,7 +182,7 @@ function makeTreeScale(phylo_options) {
 
   let y_scale = d3.scale.linear()
     .domain([0, max_y])
-    .range([0, phylo_options.svg_info.height]);
+    .range([0, phylo_options.svg_info.fake_height]);
 
   let y_axis = d3.svg.axis()
     .scale(y_scale)
@@ -224,6 +224,7 @@ function makeTreeScale(phylo_options) {
 
   phylo_options.y_scale = y_scale;
   phylo_options.x_scale = x_scale;
+
   return phylo_options;
 }
 
@@ -296,6 +297,7 @@ function setupPhyloSvg(phylo_options) {
   if (height < window.innerHeight/3) {
     height = window.innerHeight/3;
   }
+
   options.width = width;
   options.height = height;
 
@@ -319,8 +321,12 @@ function setupPhyloSvg(phylo_options) {
 
   let group = svg.append("g").attr("transform", "translate(" + options.margin.left + "," + options.margin.top + ")");
 
+  if (height < width/3) {
+    height = width/3;
+  }
+
   phylo_options.svg_info.width = options.width;
-  phylo_options.svg_info.height = options.height - 100; //- options.margin.top - options.margin.bottom; Takje away abiut for the last label
+  phylo_options.svg_info.fake_height = height - 100; //- options.margin.top - options.margin.bottom; Takje away abiut for the last label
   phylo_options.svg = svg;
   phylo_options.group = group;
   phylo_options.legend_group = legend_group;
@@ -347,7 +353,7 @@ function makeVeriticalTree() {
 
 
 function zoomed() {
-  phylo_options.group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  phylo_options.group.attr("transform", "translate(" + d3.event.translate + ")scale(" + phylo_options.svg_info.scale * d3.event.scale + ")");
 }
 
 function dragstarted(d) {
@@ -374,23 +380,11 @@ function dragended(d) {
   let options = phylo_options.svg_info;
   let scale = (window.innerWidth - 200) /options.width;
   if (scale !== 1) {
+    phylo_options.svg_info.scale = scale;
     phylo_options.group.attr("transform", "translate(" + options.margin.left
         + "," + options.margin.top + ") rotate("
         + phylo_options.svg_info.rotation + ") scale (" + scale + ")");
   }
-
-//
-//   for (let e in phylo_options.tree.extants) {
-//     if (phylo_options.tree.extants[e][T_NAME].length * 7 > phylo_options.tree.extant_label_height) {
-//       phylo_options.tree.extant_label_height = phylo_options.tree.extants[e][T_NAME].length * 7;
-//     }
-//   }
-//
-//   phylo_options.svg.attr("height", phylo_options.svg_info.height
-//       + phylo_options.tree.extant_label_height);
-//
-//   phylo_options.legend.height = phylo_options.svg_info.height + 0.25
-//       * phylo_options.tree.extant_label_height;
 
 }
 
@@ -434,6 +428,20 @@ function clearSvg() {
  * -----------------------------------------------------------------------------
  */
 
+function clicked(d) {
+  let width = phylo_options.svg_info.width;
+  let height = phylo_options.svg_info.height;
+  let scale = phylo_options.svg_info.scale;
+  var x, y, k;
+
+  x =  d3.select(d).attr("cx");
+  y = d3.select(d).attr("cy");
+  k = 4;
+  phylo_options.group.transition()
+  .duration(750)
+  .attr("transform", "translate(" + width/2 + "," + height/2 + ")scale(" +scale * k + ")translate(" + -x + "," + -y + ")");
+
+}
 
 
 function scaleYValNode(yVal) {
@@ -655,10 +663,15 @@ function drawPhyloCircle(group, nodes) {
     menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, id);
 
   })
-  .on("click", function (d) {
+  .on("click", function(d) {
+    clicked(this)
     this.parentNode.appendChild(this);
     onClick(d);
   });
+  // .on("click", function (d) {
+  //   this.parentNode.appendChild(this);
+  //   onClick(d);
+  // });
 
 }
 

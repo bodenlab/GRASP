@@ -73,6 +73,7 @@ function runPhyloTree() {
   phylo_options = setupPhyloSvg(phylo_options);
   phylo_options = makeTreeScale(phylo_options);
 
+  phylo_options.tree.depth = phylo_options.tree.max_depth;
 
   tree_json[T_Y] = phylo_options.y_scale(0);
 
@@ -141,3 +142,5 @@ function drawPhyloTree() {
   resizePhyloHeight();
 
 }
+
+

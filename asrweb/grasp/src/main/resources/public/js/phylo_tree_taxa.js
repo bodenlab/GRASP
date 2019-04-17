@@ -138,23 +138,24 @@ function runTaxaAjax() {
 /**
  * Helper function to get NCBI or uniprot ID. Modularises it out so it can change.
  */
-function getId(extentId, type) {
-  if (type == NCBI_VALUE) {
-    return phylo_options.tree.extants[extentId][T_NAME].split(".")[0]
-  } else if (type == UNIPROT_VALUE) {
-    return phylo_options.tree.extants[extentId][T_NAME].split("|")[1]
+function getId(node, type) {
+  if (type === NCBI_VALUE) {
+    return node[T_NAME].split(".")[0]
+  } else if (type === UNIPROT_VALUE) {
+    return node[T_NAME].split("|")[1]
   }
   // Otherwise it hasn't been specified so we need to determine it from the identifier.
-  if (phylo_options.tree.extants[extentId][T_NAME].substr(2, 1) == "|") {
-    return phylo_options.tree.extants[extentId][T_NAME].split("|")[1];
+  if (node[T_NAME].substr(2, 1) === "|") {
+    return node[T_NAME].split("|")[1];
   }
-  return phylo_options.tree.extants[extentId][T_NAME].split(".")[0];
+  return node[T_NAME].split(".")[0];
 }
 
 /**
  * Adds the taxonomic info to the tree.
  */
 function applyTaxonInfo(taxonInfo) {
+  let extants = getExtantNodes();
   let ncbiTaxa = [];
   let uniprotTaxa = [];
   if (taxonInfo[NCBI] !== undefined) {
@@ -170,12 +171,15 @@ function applyTaxonInfo(taxonInfo) {
       taxaInfoDict[t.id] = t;
     }
   });
-  for (let i in phylo_options.tree.extants) {
-    let name = getId(i);
+
+  extants.forEach(function(node) {
+    let name = getId(node);
     let taxaId = parseInt(idMapping[name]);
     let taxaInfo = taxaInfoDict[taxaId];
-    phylo_options.tree.extants[i][T_TAXA] = taxaInfo;
-  }
+    node[T_TAXA] = taxaInfo;
+    phylo_options.tree.node_dict[node[T_ID]][T_TAXA] = taxaInfo;
+  });
+
   getCommonTaxon(phylo_options.tree.root);
   $('#taxonomy-info-alert').addClass("hidden");
   refresh_tree();
@@ -401,26 +405,13 @@ var getCommonTaxon = function (node) {
   node[T_TAXA] = taxonomy;
 
   // update node for drawing
+
+  // ToDo: REMOVE THIS FUNCTION IT IS VERY BAD
   set_common_tax_node(node);
 }
 
 var set_common_tax_node = function (node) {
-  for (var n in phylo_options.tree.all_nodes) {
-    var phylo_node = phylo_options.tree.all_nodes[n];
-    if (phylo_node[T_ID] === node[T_ID]) {
-      phylo_node[T_COMMON_RANK] = node[T_COMMON_TAXA].common_rank;
-      phylo_node[T_COMMON_TAXA] = node[T_COMMON_TAXA].common_taxonomy;
-      phylo_options.tree.node_dict[node[T_ID]][T_COMMON_TAXA] = node[T_COMMON_TAXA];
-      // add common_taxonomy to poags info for name labelling
-      if (phylo_node[T_COMMON_TAXA] != undefined) {
-        poags.taxonomy[node[T_NAME]] = node[T_COMMON_TAXA].common_rank.charAt(0).toUpperCase()
-            +
-            node[T_COMMON_TAXA].common_rank.slice(1) + ": "
-            + node[T_COMMON_TAXA].common_taxonomy;
-      }
-      return;
-    }
-  }
+  phylo_options.tree.node_dict[node[T_ID]][T_COMMON_TAXA] =  node[T_COMMON_TAXA];
 }
 
 /**
@@ -434,12 +425,14 @@ var set_common_tax_node = function (node) {
  * @param options
  */
 
-var add_taxonomy_modal_info = function (node, group, options) {
+var add_taxonomy_modal_info = function (nodeOriginal, group, options) {
 
   var x = 0;
   var y = 20;
 
-  if (node[T_COMMON_RANK] === undefined && !node[T_EXTANT]) {
+  let node = phylo_options.tree.node_dict[nodeOriginal[T_ID]];
+
+  if (node[T_COMMON_TAXA][T_COMMON_RANK] === undefined && !node[T_EXTANT]) {
     group.append("text")
     .attr("id", "text-modal-tax-" + node[T_ID])
     .attr("name", node.name)
@@ -455,8 +448,8 @@ var add_taxonomy_modal_info = function (node, group, options) {
     return;
   }
 
-  var node_info = phylo_options.tree.node_dict[node[T_ID]];
-  var tax_info = node_info[T_TAXA];
+  var node_info = node;
+  var tax_info = node[T_TAXA];
 
   var counter = 0;
   var padding = 20;
@@ -528,7 +521,7 @@ var draw_histogram_taxonomy = function (node, taxonomy, group, options, x, y) {
 
   for (var tax in taxonomy) {
     var height = rect_height * (taxonomy[tax]
-        / phylo_options.tree.node_dict[node[T_ID]][T_NUM_EXTANTS]);
+        / node[T_NUM_EXTANTS]);
     var x_t = x + count * col_width;
     var y_t = y + rect_height - height;
     var c = options.hist_colours[count % options.hist_colours.length]

@@ -20,11 +20,17 @@ function setupCrossFilter() {
     console.log(d[T_DIST_FROM_ROOT])
     return d[T_DEPTH]
   });
+
   phylo_options.data.taxa_dimension = phylo_options.data.node_db.dimension(function(d) {
     return d[T_TAXA]
   });
+
   phylo_options.data.node_name = phylo_options.data.node_db.dimension(function(d) {
     return d[T_NAME]
+  });
+
+  phylo_options.data.extent_dimension = phylo_options.data.node_db.dimension(function(d) {
+    return d[T_EXTANT]
   });
 
 
@@ -50,7 +56,7 @@ function getNodeLessThanDepth(depth) {
   nodesIn.forEach(function(d) {
     d[T_TERMINATED] = false;
   });
-
+  clearFilters();
   // Concat the nodes and the terminating nodes
   return nodesIn;
 }
@@ -63,8 +69,30 @@ function getNodesEqualToDepth(depth) {
   nodesOut.forEach(function(d) {
     d[T_TERMINATED] = true;
   });
+  clearFilters();
   return nodesOut;
 
+}
+/**
+ * Get nodes with a certain name.
+ *
+ * @param name
+ */
+function getExtantNodes() {
+
+  let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
+    return true;
+  }).top(Infinity);
+
+  let extants = [];
+  nodesIn.forEach(function(d) {
+    if (d[T_EXTANT] === true) {
+      extants.push(d);
+    }
+  });
+  clearFilters();
+  // Concat the nodes and the terminating nodes
+  return extants;
 }
 
 
@@ -74,7 +102,9 @@ function getNodesEqualToDepth(depth) {
  * @param name
  */
 function getNodeWithName(name) {
-  return phylo_options.data.node_name.filter(name);
+  let root =  phylo_options.data.node_name.filter(name).top(Infinity);
+  clearFilters();
+  return root;
 }
 
 /**
@@ -109,6 +139,7 @@ function clearFilters() {
   phylo_options.data.depth_dimension.filterAll();
   phylo_options.data.taxa_dimension.filterAll();
   phylo_options.data.branch_dimension.filterAll();
+  phylo_options.data.node_name.filterAll();
 
 }
 /**
@@ -219,7 +250,7 @@ function assignExtantCount(node = {}) {
       }
 
       if (child[T_NUM_EXTANTS] === 0) {
-
+        child[T_NUM_EXTANTS] = 1;
         num_extants += 1;
 
       } else {

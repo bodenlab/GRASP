@@ -92,6 +92,32 @@ function runPhyloTree() {
     phylo_options.tree.selected_node = nodes[0]; // set root node as selected (initial)
   }
 
+
+
+//
+//   let node_names = [];
+//
+//   nodes.forEach(function(node) {
+//     node_names.push(node[T_ID]);
+//   });
+//
+//   // use Jquery autocomplete
+// ////////////////////////////////
+//   $( "#node-search-box" ).autocomplete({
+//     source: node_names
+//   });
+//
+//
+//
+// // submit genes button
+//   $("#node-search-box").keyup(function (e) {
+//     if (e.keyCode == 13) {
+//       // Do something
+//       // console.log('pressed enter');
+//       findNode();
+//     }
+//   });
+
   // Add the children
   addChildrenNodes(phylo_options.tree.root, true);
 
@@ -99,15 +125,28 @@ function runPhyloTree() {
 
 
   let ancs = [];
+  phylo_options.tree.extants = [];
+
   nodes.forEach(function(node) {
     if (!node[T_EXTANT]) {
       ancs.push(node);
+    } else {
+      phylo_options.tree.extants.push(node);
     }
   });
   initDownloadOptions(ancs);
 
 }
 
+
+// find gene in clustergram
+function findNode(){
+  // get the searched gene
+  let node = $('#node_search_box').val();
+
+  d3.select("#fill-" + node).attr('fill', 'red');
+  clicked("#" + node);
+}
 
 function increaseDepth() {
   phylo_options.tree.depth += 1;
@@ -140,7 +179,46 @@ function drawPhyloTree() {
   drawTree(nodes, branches);
 
   resizePhyloHeight();
-
+  // var width = 960,
+  //     height = 500,
+  //     color = d3.scale.category20c();
+  //
+  // var treemap = d3.layout.treemap()
+  // .padding(4)
+  // .size([width, height])
+  // .value(function(d) {
+  //   return d[T_NUM_EXTANTS]; });
+  //
+  // var svg = d3.select("body").append("svg")
+  // .attr("width", width)
+  // .attr("height", height)
+  // .append("g")
+  // .attr("transform", "translate(-.5,-.5)");
+  //
+  //
+  // var cell = svg.data([phylo_options.tree.root]).selectAll("g")
+  // .data(treemap.nodes)
+  // .enter().append("g")
+  // .attr("class", "cell")
+  // .attr("transform", function(d) {
+  //   return "translate(" + d.x + "," + d.y + ")";
+  // });
+  //
+  // cell.append("rect")
+  // .attr("width", function(d) {
+  //   return d.dx; })
+  // .attr("height", function(d) {
+  //   return d.dy; })
+  // .style("fill", function(d) {
+  //   return d[T_CHILDREN] ? color(d[T_NAME]) : color(d[T_NAME]); });
+  //
+  // cell.append("text")
+  // .attr("x", function(d) { return d.dx / 2; })
+  // .attr("y", function(d) { return d.dy / 2; })
+  // .attr("dy", ".35em")
+  // .attr("text-anchor", "middle")
+  // .text(function(d) {
+  //   return d[T_CHILDREN] ? undefined : d[T_NAME]; });
 }
 
 

@@ -276,12 +276,6 @@ var zoom = d3.behavior.zoom()
 .scaleExtent([1, 10])
 .on("zoom", zoomed);
 
-var drag = d3.behavior.drag()
-.origin(function(d) { return d; })
-.on("dragstart", dragstarted)
-.on("drag", dragged)
-.on("dragend", dragended);
-
 
 function setupPhyloSvg(phylo_options) {
   let tree_div = phylo_options.svg_info.div_id;
@@ -310,7 +304,6 @@ function setupPhyloSvg(phylo_options) {
   .append("g")
     .attr("transform", "translate(" + options.margin.left + "," + options.margin.right + ")")
     .call(zoom)
-    .call(drag);
 
   var rect = svg.append("rect")
   .attr("width", window.innerWidth)
@@ -435,6 +428,8 @@ function clicked(d) {
   let scale = phylo_options.svg_info.scale;
   var x, y, k;
 
+  highlightNodeToRoot(d3.select(d).attr("id").split('-')[1]);
+
   x =  d3.select(d).attr("cx");
   y = d3.select(d).attr("cy");
   k = 4;
@@ -442,6 +437,32 @@ function clicked(d) {
   .duration(750)
   .attr("transform", "translate(" + width/2 + "," + height/2 + ")scale(" +scale * k + ")translate(" + -x + "," + -y + ")");
 
+}
+
+var parents = [];
+
+function getParentsToRoot(node) {
+  if (node[T_PARENT] !== undefined && node[T_PARENT] !== null) {
+    parents.push(node[T_PARENT][T_ID]);
+    getParentsToRoot(node[T_PARENT]);
+  }
+}
+
+
+function highlightNodeToRoot(nodeId) {
+  let node = phylo_options.tree.node_dict[nodeId];
+  getParentsToRoot(node);
+  let branches = getBranchesWithNodeID(parents);
+
+  branches.forEach(function(branch) {
+    // phylo_options.group.selectAll('line')
+    // .filter(function(d) { return d[B_ID] == branch[B_ID]; })
+    // .style('fill', function(d, i) {
+    //   // here you can affect just the red circles (bc their ArtistID is 1)
+    // })
+    d3.select('#branch-' + branch[B_ID] + "-left").style('stroke', 'green');
+    d3.select('#branch-' + branch[B_ID] + "-right").style('stroke', 'green');
+  })
 }
 
 
@@ -529,7 +550,13 @@ function drawPhyloBranches(phylo_options, branches) {
         y2 = phylo_options.y_scale(branch[B_Y2_DEPTH]);
       }
       group.append("line")
-      .attr("class", "branch")
+      .attr("class", "branch-" + branch[B_ID])
+      .attr("id", function () {
+        if (branch[B_Y1] !== branch[B_Y2]) {
+          return  "branch-" + branch[B_ID] + "-left";
+        }
+        return  "branch-" + branch[B_ID] + "-right";
+      })
       .style("stroke", options.branch_stroke)
       .style("stroke-width", options.branch_stroke_width)
       .attr("x1", branch[B_X1])

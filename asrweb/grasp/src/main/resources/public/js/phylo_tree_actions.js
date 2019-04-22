@@ -20,6 +20,7 @@ let rotatePhyloTree = function() {
 
 
 
+
 var expand_all_nodes = function () {
   phylo_options.tree.collapse_under = [];
   phylo_options.tree.collapsed_selection = null;
@@ -30,72 +31,76 @@ var expand_all_nodes = function () {
   refresh_tree();
 }
 
-var search_tree = function (search, clear, exact) {
+var searchTree = function (search, clear, exact) {
   var terms = search.split("*"); // wildcard '*'
   var found_in_any = false; // keep track of if found in ANY extants (for populating parent nodes)
-  for (var n in phylo_options.tree.extants) {
-    var extant = phylo_options.tree.extants[n];
-    var found = false;
-    if (search != "") {
+  let extants = getNodeLessThanDepth(phylo_options.tree.max_depth);
+
+  extants.forEach(function(e) {
+    let extant = phylo_options.tree.node_dict[e[T_ID]];
+    let found = false;
+    if (search !== "") {
       var ind = 0;
       for (var s in terms) {
         if ((!exact && extant[T_NAME].substring(ind,
                 extant[T_NAME].length).toLowerCase().includes(
                 terms[s].toLowerCase()))
-            || (exact && extant[T_NAME] == search)) {
+            || (exact && extant[T_NAME] === search)) {
           ind = extant[T_NAME].indexOf(terms[s]) + terms[s].length - 1;
           found = true;
+          extant[T_CONTAINS_SEARCH] = true;
         } else {
           if (extant[T_TAXA] !== undefined && extant[T_TAXA] !== null) {
-            var ranks = ["domain", "kingdom", "phylum", "class", "order",
-              "family", "genus", "species"]
-
-            for (var rank in ranks) {
-              var tax = extant[T_TAXA][ranks[rank]];
+            for (let rank in RANKS) {
+              var tax = extant[T_TAXA][RANK[rank]];
               if (tax !== undefined && tax !== null) {
                 if ((!exact && tax.substring(ind,
                         tax.length).toLowerCase().includes(
                         terms[s].toLowerCase()))
-                    || (exact && tax == search)) {
+                    || (exact && tax === search)) {
                   ind = tax.indexOf(terms[s]) + terms[s].length - 1;
                   found = true;
+                  extant[T_CONTAINS_SEARCH] = true;
                   break;
                 }
               }
             }
           } else {
             found = false;
+            e[T_CONTAINS_SEARCH] = false;
             break;
           }
         }
         if (found) {
+          extant[T_CONTAINS_SEARCH] = true;
           break;
         }
       }
-    }
-    if (clear === true || found === true || extant[T_CONTAINS_SEARCH]
-        == undefined) {
       extant[T_CONTAINS_SEARCH] = found;
+    } else {
+      extant[T_CONTAINS_SEARCH] = false;
     }
-  }
-  // if extant contains a search term, then iterate up the tree to indicate to all ancestral nodes that a child
-  // contains the search term (this will be used when nodes are collapsed)
-  // update parents to show if children contains search terms
-  set_all_contains_search(phylo_options.tree.root, false);
-  for (var n in phylo_options.tree.extants) {
-    var extant = phylo_options.tree.extants[n];
-    if (extant[T_CONTAINS_SEARCH]) {
-      var parent = extant[T_PARENT];
-      // only search until constains_search is true (may have been set from a different extant)
-      while (parent != undefined && (parent[T_CONTAINS_SEARCH] == undefined
-          || !parent[T_CONTAINS_SEARCH])) {
-        parent[T_CONTAINS_SEARCH] = true;
-        parent = parent[T_PARENT];
+  });
+
+  for (let n in phylo_options.tree.node_dict) {
+    let e = phylo_options.tree.node_dict[n];
+    if (e[T_CONTAINS_SEARCH]) {
+      if (e[T_EXTANT]) {
+        d3.select("#text-" + e[T_ID]).style('fill', phylo_options.style.hover_fill);
+      } else {
+        d3.select("#fill-" + e[T_ID]).attr("stroke-width", "20px");
+        d3.select("#fill-" + e[T_ID]).attr("stroke", phylo_options.style.hover_fill);
+      }
+    } else {
+      if (e[T_EXTANT]) {
+        d3.select("#text-" + e[T_ID]).style('fill', 'black');
+      } else {
+        d3.select("#fill-" + e[T_ID]).attr("stroke-width", 0)
       }
     }
   }
-  refresh_tree();
-}
+
+};
 
 /**
  * Set all parent nodes to specified flag

@@ -320,7 +320,7 @@ function setupPhyloSvg(phylo_options) {
   }
 
   phylo_options.svg_info.width = options.width;
-  phylo_options.svg_info.fake_height = height - 100; //- options.margin.top - options.margin.bottom; Takje away abiut for the last label
+  phylo_options.svg_info.fake_height = height * 0.75; //- options.margin.top - options.margin.bottom; Takje away abiut for the last label
   phylo_options.svg = svg;
   phylo_options.group = group;
   phylo_options.legend_group = legend_group;
@@ -586,7 +586,7 @@ function drawBranchText(group, branch) {
   let options = phylo_options.style;
 
   group.append("text")
-  .attr("class", "branch")
+  .attr("id", "branch-text-" + branch[B_ID])
   .text(branch[B_LABEL].toFixed(4)) // Limit to 4 decimal places
   .attr("class", "branch-text")
   .attr("text-anchor", "middle")

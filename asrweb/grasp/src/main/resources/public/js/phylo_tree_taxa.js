@@ -6,6 +6,9 @@ const UNIPROT = "uniprot";
 /**
  * Stores the ID maping, it is used to collect information while the reconstruction is loading
  */
+var ranks =  ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"];//["domain", "kingdom", "phylum", "class", "order","family", "genus", "species"]
+var RANKS = ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"];
+
 let idMapping = {};
 // We use the to save flag to indicate whether or not we have any information to
 let idMappingToSave = {toSave: true, NCBI: [], UNIPROT: []};
@@ -318,52 +321,38 @@ function getTaxonIdFromUniprot(extantNames, extentList) {
 }
 
 
-var add_warning = function (list, type, msg) {
-
-  let list_string = "";
-
-  for (let i = 0; i < list.length; i++) {
-    list_string += list[i] + ", "
-  }
-  // Remove final comma
-  list_string = list_string.substring(0, list_string.length - 2)
-  $(type).removeClass("hidden").html(msg + list_string)
-
-};
-
-
 
 /**
  * Get the most common taxonomy labels for each ancestral node by counting all unique extant taxonomy labels
- * and ranking based on highest number
+ * and ranking based on highest number.
+ *
+ * We want to keep track of the taxonomy that was shared between the children.
  */
 var getCommonTaxon = function (node) {
-  if (node[T_CHILDREN] == undefined) {
+  if (node[T_CHILDREN] === undefined) {
     return;
   }
-  // var ranks = ["superdomain", "domain", "subdomain", "superkingdom", "kingdom", "subkingdom", "superphylum", "phylum", "subphylum", "superclass", "class", "subbclass", "superorder", "order", "suborder", "superfamily", "family", "subfamily", "supergenus", "genus", "subgenus", "superspecies", "species", "subspecies"]
-  var ranks = ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"]
 
-  var taxonomy = {};
-  for (var rank in ranks) {
-    taxonomy[ranks[rank]] = {};
+  let taxonomy = {};
+  for (let rank in RANKS) {
+    taxonomy[RANKS[rank]] = {};
   }
-  for (var n in node[T_CHILDREN]) {
-    var child = node[T_CHILDREN][n];
-    if (child[T_TAXA] == undefined) {
+  for (let n in node[T_CHILDREN]) {
+    let child = node[T_CHILDREN][n];
+    if (child[T_TAXA] === undefined) {
       getCommonTaxon(child);
     }
 
-    if (child[T_TAXA] != undefined && child[T_TAXA] != null) {
-      for (var rank in ranks) {
-        var tax = taxonomy[ranks[rank]];
-        var child_labels = {};
-        if (!(child[T_CHILDREN] == undefined)) {
-          for (var r in child[T_TAXA][ranks[rank]]) {
-            child_labels[r] = child[T_TAXA][ranks[rank]][r];
+    if (child[T_TAXA] !== undefined && child[T_TAXA] != null) {
+      for (let rank in RANKS) {
+        let tax = taxonomy[RANKS[rank]];
+        let child_labels = {};
+        if (!(child[T_CHILDREN] === undefined)) {
+          for (let r in child[T_TAXA][RANKS[rank]]) {
+            child_labels[r] = child[T_TAXA][RANKS[rank]][r];
           }
         } else {
-          child_labels[child[T_TAXA][ranks[rank]]] = 1;
+          child_labels[child[T_TAXA][RANKS[rank]]] = 1;
         }
         for (var label in child_labels) {
           var count = child_labels[label];
@@ -382,7 +371,7 @@ var getCommonTaxon = function (node) {
 
   // find first rank that differs (not including undefined)
   for (var r in ranks) {
-    var tax = taxonomy[ranks[r]]
+    var tax = taxonomy[RANKS[r]]
     var keys = Object.keys(tax)
     if ((keys.includes('undefined') && keys.length > 2) || (!keys.includes(
             'undefined') && keys.length > 1)) {
@@ -506,65 +495,76 @@ var add_taxonomy_modal_info = function (nodeOriginal, group, options) {
     }
   }
 }
+// Define the div for the tooltip
+var div = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("opacity", 0);
 
-var draw_histogram_taxonomy = function (node, taxonomy, group, options, x, y) {
-  var num_cols = Object.keys(taxonomy).length;
-  // TODO: limit to N taxonomic ranks
+function draw_histogram_taxonomy(node, taxonomy, group, options) {
 
-  var col_width = options.modal_width / num_cols;
-  var rect_height = options.hist_height;
+  let width = 800,
+      height = 400,
+      color = d3.scale.category20c();
 
-  var hist_svg = group.append("svg")
-  .attr("id", "tax_hist_svg");
+  var treemap = d3.layout.treemap()
+  .padding(4)
+  .size([width, height])
+  .value(function (d) {
+    return d[T_NUM_EXTANTS];
+  });
 
-  var count = 0;
+  var svg = group.append("svg").append("svg")
+  .attr("width", width)
+  .attr("height", height)
+  .append("g")
+  .attr("transform", "translate(-.5,-.5)");
 
-  for (var tax in taxonomy) {
-    var height = rect_height * (taxonomy[tax]
-        / node[T_NUM_EXTANTS]);
-    var x_t = x + count * col_width;
-    var y_t = y + rect_height - height;
-    var c = options.hist_colours[count % options.hist_colours.length]
-    hist_svg.append("rect")
-    .attr("id", "rect-tax-" + count)
-    .attr("class", function () {
-      return "bar2 movable";
-    })
-    .attr("x", x_t)
-    .attr("y", y_t)
-    .attr("width", col_width - 1) // -1 for white space between bars
-    .attr("height", height)
-    .attr("fill", c);
+  var cell = svg.data([node]).selectAll("g")
+  .data(treemap.nodes)
+  .enter().append("g")
+  .attr("class", "cell")
+  .attr("transform", function (d) {
+    return "translate(" + d.x + "," + d.y + ")";
+  });
 
-    // add number of extants above rectangle
-    var x_t_r = x_t + col_width / 2 - 5;
-    var y_t_r = y + rect_height + 2;
-    var y_t_l = y_t - 5;
-    hist_svg.append("text")
-    .attr("id", "text-tax-num-" + count)
-    .attr("font-family", options.font_family)
-    .attr("font-size", 10)
-    .attr("fill", "black")
-    .attr("text-anchor", "start")
-    .attr("opacity", 0.7)
-    .attr("transform", "translate(" + x_t_r + "," + y_t_l + ")")
-    .text(function () {
-      return taxonomy[tax];
-    });
+  cell.append("rect")
+  .attr("width", function (d) {
+    return d.dx;
+  })
+  .attr("height", function (d) {
+    return d.dy;
+  })
+  .style("fill", function (d) {
+    return d[T_CHILDREN] ? color(d[T_COMMON_TAXA][T_COMMON_RANK]) : color(d[T_TAXA]['t_species']);
+  })
+  .on("mouseover", function(d) {
+    let text = d[T_CHILDREN] ?  d[T_COMMON_TAXA][T_COMMON_RANK] : d[T_TAXA]['t_species'];
 
-    // add label under rectangle
-    hist_svg.append("text")
-    .attr("id", "text-tax-label-" + count)
-    .attr("font-family", options.font_family)
-    .attr("font-size", options.font_size)
-    .attr("fill", "black")
-    .attr("text-anchor", "start")
-    .attr("opacity", 1)
-    .attr("transform", "translate(" + x_t_r + "," + y_t_r + ") rotate(90)")
-    .text(function () {
-      return tax;
-    });
+    div.transition()
+    .duration(200)
+    .style("opacity", .9);
 
-    count++;
-  }
+    div.html(text + "<br/>")
+    .style("left", (d3.event.pageX) + "px")
+    .style("top", (d3.event.pageY - 28) + "px");
+  })
+  .on("mouseout", function(d) {
+    div.transition()
+    .duration(500)
+    .style("opacity", 0);
+  });
+
+  cell.append("text")
+  .attr("x", function (d) {
+    return d.dx / 2;
+  })
+  .attr("y", function (d) {
+    return d.dy / 2;
+  })
+  .attr("dy", ".35em")
+  .attr("text-anchor", "middle")
+  .text(function (d) {
+    return d[T_CHILDREN] ? undefined : d[T_TAXA]['t_species'];//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
+  });
+
 }

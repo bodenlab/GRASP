@@ -234,6 +234,7 @@ var resize_phylo_height = function () {
 
 };
 
+
 /**
  * Appends a circle to the group element.
  * This is the node which the user will interact with i.e.

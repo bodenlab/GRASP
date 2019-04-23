@@ -371,15 +371,24 @@ var getCommonTaxon = function (node) {
 
   // find first rank that differs (not including undefined)
   for (var r in ranks) {
-    var tax = taxonomy[RANKS[r]]
-    var keys = Object.keys(tax)
-    if ((keys.includes('undefined') && keys.length > 2) || (!keys.includes(
-            'undefined') && keys.length > 1)) {
-      differ_rank = r
+    var tax = taxonomy[RANKS[r]];
+    var keys = Object.keys(tax);
+    if (keys.length > 1) {
+      for (let kIdx in keys) {
+        if (keys[kIdx] != "undefined" && /\S/.test(keys[kIdx] )) {
+          differ_rank = r;
+          break;
+        }
+      }
+    } else {
+      if (keys[0] != "undefined" && /\S/.test(keys[0])) {
+        common_tax = Object.keys(tax)[0];
+        common_rank = r;
+      }
+    }
+    if (differ_rank !== null) {
       break;
     }
-    common_tax = Object.keys(tax)[0];
-    common_rank = r;
   }
 
   var common = {};
@@ -389,18 +398,19 @@ var getCommonTaxon = function (node) {
     common.common_rank = ranks[common_rank];
   }
   common.common_taxonomy = common_tax;
-  common.differ_rank = ranks[r];
+  common.differ_rank = ranks[differ_rank];
   node[T_COMMON_TAXA] = common;
   node[T_TAXA] = taxonomy;
 
   // update node for drawing
 
   // ToDo: REMOVE THIS FUNCTION IT IS VERY BAD
-  set_common_tax_node(node);
+  set_common_tax_node(node, taxonomy);
 }
 
-var set_common_tax_node = function (node) {
+var set_common_tax_node = function (node, taxonomy) {
   phylo_options.tree.node_dict[node[T_ID]][T_COMMON_TAXA] =  node[T_COMMON_TAXA];
+  phylo_options.tree.node_dict[node[T_ID]][T_TAXA] = taxonomy;
 }
 
 /**
@@ -413,6 +423,59 @@ var set_common_tax_node = function (node) {
  * @param group
  * @param options
  */
+
+/**
+ * Return the taxa information as a text for tooltip hover.
+ * @param taxa
+ */
+function getTaxaAsText(taxa, commonTaxa, extant, name) {
+  var ranks =  ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"]
+  var rankDisplay =  {"t_domain": "Domain", "t_superkingdom": "Super Kingdom", "t_kingdom": "Kingdom", "t_phylum": "Phylum", "t_class_t": "Class", "t_order_t": "Order", "t_family": "Family", "t_genus": "Genus", "t_species": "Species"};
+
+  let textDisplay = "<strong>" + name + "</strong></br>";
+
+  ranks.forEach(function(rank) {
+    if (taxa[rank] !== "" && taxa[rank] !== undefined) {
+      let drawnStart = false;
+
+
+      if (extant) {
+        if (taxa[rank] != "undefined" && /\S/.test(taxa[rank])) {
+          if (rank === commonTaxa) {
+            textDisplay += "<strong>"
+          }
+          textDisplay += rankDisplay[rank] + ': ';
+          textDisplay += taxa[rank] + "</br>"
+          drawnStart = true;
+        }
+      } else {
+        // For each element in the taxa we want to display how many of each
+
+        for (let tIdx in taxa[rank]) {
+          let taxaValue = taxa[rank][tIdx];
+          if (tIdx != "undefined" && /\S/.test(tIdx) && drawnStart == false) {
+            if (rank === commonTaxa) {
+              textDisplay += "<strong>"
+            }
+            textDisplay += rankDisplay[rank] + ': ';
+            drawnStart = true;
+          }
+          if (tIdx != "undefined" && /\S/.test(tIdx)) {
+            textDisplay += tIdx + "(" + taxaValue + ") "
+          }
+        }
+        if (drawnStart) {
+          textDisplay += "</br>"
+        }
+      }
+      if (rank === commonTaxa && drawnStart) {
+        textDisplay += "</strong>"
+      }
+    }
+  });
+  return textDisplay;
+}
+
 
 var add_taxonomy_modal_info = function (nodeOriginal, group, options) {
 
@@ -498,6 +561,7 @@ var add_taxonomy_modal_info = function (nodeOriginal, group, options) {
 // Define the div for the tooltip
 var div = d3.select("body").append("div")
 .attr("class", "tooltip")
+.attr("id", "tooltip-treemap")
 .style("opacity", 0);
 
 function draw_histogram_taxonomy(node, taxonomy, group, options) {
@@ -513,11 +577,16 @@ function draw_histogram_taxonomy(node, taxonomy, group, options) {
     return d[T_NUM_EXTANTS];
   });
 
+
+
   var svg = group.append("svg").append("svg")
   .attr("width", width)
   .attr("height", height)
   .append("g")
   .attr("transform", "translate(-.5,-.5)");
+
+  svg.append("text")
+  .text(getTaxaAsText(node))
 
   var cell = svg.data([node]).selectAll("g")
   .data(treemap.nodes)
@@ -534,12 +603,21 @@ function draw_histogram_taxonomy(node, taxonomy, group, options) {
   .attr("height", function (d) {
     return d.dy;
   })
+  .style("margin", "5px")
+  .attr("stroke", d => d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_COMMON_RANK]]) : color(d[T_TAXA]['t_order']))
+  .attr("stroke-width",  d =>d[T_CHILDREN] ? "2px": "1px")
   .style("fill", function (d) {
-    return d[T_CHILDREN] ? color(d[T_COMMON_TAXA][T_COMMON_RANK]) : color(d[T_TAXA]['t_species']);
+    return d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_COMMON_RANK]]) : getFillForNode(d);
   })
   .on("mouseover", function(d) {
-    let text = d[T_CHILDREN] ?  d[T_COMMON_TAXA][T_COMMON_RANK] : d[T_TAXA]['t_species'];
-
+    //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 1);
+    let text = "";
+    if (d[T_EXTANT]) {
+      text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME]);
+    } else {
+      text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
+          d[T_EXTANT], d[T_NAME]);
+    }
     div.transition()
     .duration(200)
     .style("opacity", .9);
@@ -549,12 +627,14 @@ function draw_histogram_taxonomy(node, taxonomy, group, options) {
     .style("top", (d3.event.pageY - 28) + "px");
   })
   .on("mouseout", function(d) {
+    //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 0);
     div.transition()
     .duration(500)
     .style("opacity", 0);
   });
 
   cell.append("text")
+  .attr("id", d => "taxa-text-" + d[T_ID])
   .attr("x", function (d) {
     return d.dx / 2;
   })
@@ -564,7 +644,7 @@ function draw_histogram_taxonomy(node, taxonomy, group, options) {
   .attr("dy", ".35em")
   .attr("text-anchor", "middle")
   .text(function (d) {
-    return d[T_CHILDREN] ? undefined : d[T_TAXA]['t_species'];//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
+    return d[T_CHILDREN] ? undefined : d[T_TAXA]['t_species'].charAt(0) + ".";//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
   });
 
 }

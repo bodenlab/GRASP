@@ -1,3 +1,17 @@
+div.tooltip {
+  position: absolute;
+  text-align: left;
+  min-width: 300px;
+  min-height: 100px;
+  padding: 10px;
+  display: block;
+  font: 12px sans-serif;
+  background: #f9faff;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+  white-space: nowrap;
+}
 
 .tree-selection-brush .extent {
     fill-opacity: .05;

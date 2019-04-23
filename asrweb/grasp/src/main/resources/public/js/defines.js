@@ -172,7 +172,7 @@ const T_NUM_EXTANTS = 'n_extants';
 const T_COMMON_TAXA = 'common_taxa';
 const T_COMMON_RANK = 'common_rank';
 const T_TAXA = 'taxa';
-const T_DIFFER_RANK = 'diff_rank';
+const T_DIFFER_RANK = 'differ_rank';
 const T_DEPTH = 'depth';
 
 // Used when making the tree

@@ -17,7 +17,6 @@ function setupCrossFilter() {
   phylo_options.data.node_db = crossfilter(phylo_options.tree.all_nodes);
 
   phylo_options.data.depth_dimension = phylo_options.data.node_db.dimension(function(d) {
-    console.log(d[T_DIST_FROM_ROOT])
     return d[T_DEPTH]
   });
 

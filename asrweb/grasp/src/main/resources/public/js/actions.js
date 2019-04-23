@@ -1,46 +1,3 @@
-/**
- *  ------------------------------------------------------------------
- *                          Main Function 
- *                          
- *   Runs the JS commands for the phylo tree and the POAG.
- *  ------------------------------------------------------------------
- */
-//
-// $(function() {
-//   $('#multiselect-download').multiselect({
-//     includeSelectAllOption: true,
-//     selectAllJustVisible: false,
-//     enableFiltering: true,
-//     selectAllValue: 'select-all-value'
-//   })
-// });
-
-/**
- * Gets the items that a user has selected for download.
- * Currently this just consists of the values in the Select Box (that the user
- * has checked) for the joint reconstructions.
- *
- * @param elemId
- * @returns {string}
- */
-let getSelectedValuesForDownload = function (elemId) {
-    let vals = $('select#' + elemId).val();
-    if (vals === null) {
-        vals = [];
-    }
-    for (let v in vals) {
-        if (vals[v] === "All") {
-            return "all";
-        }
-    }
-
-    if (vals.length > 20) {
-      alert('If you are selecting more than 20 please choose the select all option.');
-      return "all";
-    }
-    return JSON.stringify(vals);
-
-}
 
 /**
  * Saves the current reconstruction, the user inputs an email and they get
@@ -89,27 +46,41 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
      */
     graph_array.push(JSON.parse(json_str));
 
+
     /**
      *
      * Run Tree setup
      */
     set_recon_label(label);
     set_inf_type(inf);
-    set_phylo_params("#phylo-tree", recon);
-    run_phylo_tree();
-    // phylo_options.tree.selected_node[T_ID] = node;
-    refresh_tree(); // to set height properly
+
+    //set_phylo_params("#phylo-tree", recon);
+  phylo_options.svg_info.div_id = "#phylo-tree";
+  phylo_options.tree_string = recon;
+
+    runPhyloTree();
+    // Set up the svg
+    setupPhyloSvg(phylo_options);
+    makeTreeScale(phylo_options);
+    drawPhyloTree();
+
     selectedNode = phylo_options.tree.selected_node[T_ID];
+
     refresh_elements();
     populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
-    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID])
+    setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID]);
+
     poags.options.poagColours["poag" + (Object.keys(poags.options.poagColours).length + 1)] = poags.options.names_to_colour[phylo_options.tree.selected_node[T_NAME]];
     poags.options.name_to_merged_id[phylo_options.tree.selected_node[T_NAME]] = ["poag" + (Object.keys(poags.options.poagColours).length + 1)];
+
     redraw_poags();
+
     poags.retain_previous_position = true;
+
     refresh_elements();
+
     // Once everything is complete we want to start getting the taxonIds
     setUpTaxonomy(proteinIds.ncbi, proteinIds.uniprot, proteinIds.ncbi_mapping, proteinIds.uniprot_mapping);
 }

@@ -1,7 +1,7 @@
 /*
 ** Perform marginal reconstruction of the selected tree node
 */
-var perform_marginal = function (node_name, node_fill) {
+var perform_marginal = function (node_name) {
   $("#status").text("");
   $('#progress-status').fadeIn();
   $('#progress').removeClass('disable');

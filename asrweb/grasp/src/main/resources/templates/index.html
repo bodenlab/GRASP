@@ -80,7 +80,7 @@
 
     <!-- Footer -->
     <div th:replace="fragments/footer :: footer"></div>
-
+    <script type="text/javascript" th:src="@{/js/lib/crossfilter.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/colour_defs.js}"></script>
     <script type="text/javascript" th:src="@{/js/defines.js}"></script>
     <script type="text/javascript" th:src="@{/js/phylo_tree_taxa.js}"></script>
@@ -89,12 +89,13 @@
     <script type="text/javascript" th:src="@{/js/actions.js}"></script>
     <script type="text/javascript" th:src="@{/js/asr.js}"></script>
     <script type="text/javascript" th:src="@{/js/phylo_tree_options.js}"></script>
-    <script type="text/javascript" th:src="@{/js/phylo_tree_draw.js}"></script>
+    <!--<script type="text/javascript" th:src="@{/js/phylo_tree_draw.js}"></script>-->
     <script type="text/javascript" th:src="@{/js/phylo_tree_actions.js}"></script>
     <script type="text/javascript" th:src="@{/js/phylo_tree_options.js}"></script>
     <script type="text/javascript" th:src="@{/js/consensus.js}"></script>
-    <script type="text/javascript" th:src="@{/js/download.js}"></script>
-
+    <script type="text/javascript" th:src="@{/js/tree/model.js}"></script>
+    <script type="text/javascript" th:src="@{/js/tree/view.js}"></script>
+    <script type="text/javascript" th:src="@{/js/tree/controller.js}"></script>
 </body>
 
 </html>

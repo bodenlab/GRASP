@@ -99,8 +99,16 @@
         <p>e.g. "XP_005287999.1|Chordata_Testu...." etc </p>
       </div>
 
-      <div class="col-xs-12">
-        <div>
+      <div>
+
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-4" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Tree Vis Options
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2"
+                  onclick="annotateTaxonomy()">Annotate taxonomy
+          </button>
           <button type="button" id="extant-text-toggle" class="btn btn-default col-xs-2"
                   onclick="toggle_extant_text()">View extant labels | ON
           </button>
@@ -120,19 +128,20 @@
                   onclick="save_phylo_svg_to_png()">Save tree
           </button>
         </div>
-        <div>
+      </div>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-4" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Tree Search Options
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
           <input type="text" class="form-input col-xs-4 no-padding" style="height: 2.1em;"
                  placeholder="Search for terms (use wildcard *)" id="search" name="search"
-                 oninput="search_tree(this.value, true, false);"/>
+                 oninput="searchTree(this.value, true, false);"/>
           <button type="button" id="find-motif" class="btn btn-default col-xs-2"
                   onclick="getNodesWithMotif()">Find motif
           </button>
           <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
                  placeholder="Motif (use wildcard *)" id="find-motif-value" name="motif-value"/>
-
-          <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2"
-                  onclick="annotateTaxonomy()">Annotate taxonomy
-          </button>
 
           <!--<div class="col-xs-2 no-padding" id="node-search">-->
             <!--<button type="button"-->
@@ -142,10 +151,7 @@
             <!--</button>-->
             <!--<ul class="dropdown-menu" id="node-id-menu">-->
             <!--</ul>-->
-
           <!--</div>-->
-        </div>
-        <div>
           <button type="button" id="find-similar-nodes" class="btn btn-default col-xs-4"
                   onclick="getSimilarNodes()">Find similar nodes in another reconstructed tree
           </button>
@@ -173,6 +179,19 @@
           <!--</div>-->
           <!-- ToDo: probably want to have an auto search -->
         </div>
+        </div>
+        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="plus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="increaseDepth()">
+          +
+        </button>
+        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="minus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="decreaseDepth()">
+          -
+        </button>
+        <!--<button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="hosizontal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="makeHorizontalTree()">-->
+          <!--Horizontal-->
+        <!--</button>-->
+        <!--<button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="veritcal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="makeVeriticalTree()">-->
+          <!--Veritcal-->
+        <!--</button>-->
       </div>
 
         <!--<svg id="svg-scrim" class="svg svg-scrim">-->

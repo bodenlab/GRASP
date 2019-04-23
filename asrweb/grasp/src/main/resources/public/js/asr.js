@@ -258,6 +258,9 @@ $(window).resize(function () {
     clearTimeout(window.resizedFinished);
     window.resizedFinished = setTimeout(function () {
         refresh_labels();
+
+        // We need to re-set the size of the SVG
+        setupPhyloSvg(phylo_options);
         refresh_tree();
         redraw_poags();
         poags.page_width = $(window).width();

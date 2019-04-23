@@ -118,6 +118,19 @@ function getNodesWithTaxa(name) {
   });
 }
 
+function getMaxDistToRootVisible(depth) {
+  let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
+    return d < depth;
+  }).top(Infinity);
+
+  let maxDistToRoot = 0;
+  nodesIn.forEach(function(d) {
+    if (d[T_DIST_FROM_ROOT] > maxDistToRoot) {
+      maxDistToRoot = d[T_DIST_FROM_ROOT];
+    }
+  });
+  return maxDistToRoot;
+}
 /**
  * Get branches with a sepcific node id
  *
@@ -603,39 +616,39 @@ function assignNodeCoords(node, depth) {
 
   if (!additive) {
 
-    node[T_Y] = phylo_options.y_scale(node[T_DIST_FROM_ROOT]);
+    node[T_Y] = node[T_DIST_FROM_ROOT];
 
   } else {
 
-    node[T_Y] = phylo_options.y_scale(depth);
+    node[T_Y] = depth;
   }
 
   // Check that the node.x is not NAN
   if (node[T_IS_LEFT]) {
     // We add a instep if it is on the LHS and RHS so that we
     // don't get overlap.
-    node[T_X] = phylo_options.x_scale(node[T_RAW_X] + node_instep);
+    node[T_X] = node[T_RAW_X] + node_instep;
 
   } else {
 
-    node[T_X] = phylo_options.x_scale(node[T_RAW_X] - node_instep);
+    node[T_X] = node[T_RAW_X] - node_instep;
   }
 
   if (node[T_CHILDREN] === undefined) {
 
     if (additive === true) {
 
-      node[T_Y] -= phylo_options.y_scale(0.2);
+      node[T_Y] -= 0.2;
 
     }
 
     if (node[T_IS_LEFT]) {
 
-      node[T_X] = phylo_options.x_scale(node[T_RAW_X] + node_instep);
+      node[T_X] = node[T_RAW_X] + node_instep;
 
     } else {
 
-      node[T_X] = phylo_options.x_scale(node[T_RAW_X] - node_instep);
+      node[T_X] = node[T_RAW_X] - node_instep;
 
     }
   }

@@ -98,7 +98,7 @@ let phylo_options = {
 
     // ----------------- Text ------------------//
     font_family: "Varela Round, sans-serif",
-    font_size: "10px",
+    font_size: "6px",
     font_colour: "#24232d",
     search_colour: "#87dded",
 
@@ -130,11 +130,22 @@ let phylo_options = {
 var refresh_tree = function () {
   if (document.getElementById("additive-toggle").innerHTML.split(" | ")[1] === "Additive") {
     phylo_options.tree.additive = true;
+
+    // For this we need to change the whole setup.
+    setupPhyloSvg(phylo_options);
+    // We also want to reset the scale
+    makeTreeScale(phylo_options);
+    // Redraw the tree
+    drawPhyloTree();
   } else {
     phylo_options.tree.additive = false;
+    // For this we need to change the whole setup.
+    setupPhyloSvg(phylo_options);
+    // We also want to reset the scale
+    makeTreeScale(phylo_options);
+    // Redraw the tree
+    drawPhyloTree();
   }
-  phylo_options.svg_info.width = window.innerWidth - 200;
-
   if (document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1]
       === "ON") {
     phylo_options.svg.selectAll('text.branch-text').attr("opacity", 1);
@@ -162,14 +173,15 @@ var refresh_tree = function () {
       $(this).attr("opacity", 1);
     });
   }
-  drawPhyloTree();
-
 };
 
 /**
  * Makes the tree scale
  */
 function makeTreeScale(phylo_options) {
+  phylo_options.legend_group.selectAll("*").remove();
+  phylo_options.svg.selectAll("defs").remove();
+
 
   let additive = phylo_options.tree.additive;
 
@@ -177,13 +189,12 @@ function makeTreeScale(phylo_options) {
 
   if (additive === false) {
 
-    max_y = phylo_options.tree.longest_distance_from_root_to_extant * (phylo_options.tree.depth / phylo_options.tree.max_depth);
-
+    max_y = getMaxDistToRootVisible(phylo_options.tree.depth);
   }
 
   let y_scale = d3.scale.linear()
     .domain([0, max_y])
-    .range([0, phylo_options.svg_info.fake_height]);
+    .range([0, phylo_options.svg_info.fake_height - 100]);
 
   let y_axis = d3.svg.axis()
     .scale(y_scale)
@@ -209,7 +220,7 @@ function makeTreeScale(phylo_options) {
     .attr("width", phylo_options.legend.width)
     .attr("x", 25)
     .attr("y", 0)
-    .attr("height", window.innerHeight/3)
+    .attr("height", (phylo_options.svg_info.fake_height - 100) * phylo_options.svg_info.scale)
     .style("fill", "url(#gradient)");
 
   phylo_options.legend_group.append("g")
@@ -220,7 +231,7 @@ function makeTreeScale(phylo_options) {
     .call(y_axis);
 
   phylo_options.legend.colour_scale = d3.scale.linear()
-    .domain(linspace(0,  window.innerHeight/3, 2))
+    .domain([0, max_y])
     .range(phylo_options.legend.colours);
 
   phylo_options.y_scale = y_scale;
@@ -264,9 +275,9 @@ function getFillForNode(node) {
   } else {
 
     if (phylo_options.tree.additive) {
-      return phylo_options.legend.colour_scale(node[T_DIST_FROM_ROOT]);
+      return phylo_options.legend.colour_scale(node[T_DEPTH]);
     }
-    return phylo_options.legend.colour_scale(node[T_DEPTH]);
+    return phylo_options.legend.colour_scale(node[T_DIST_FROM_ROOT]);
   }
 
 }
@@ -277,21 +288,37 @@ var zoom = d3.behavior.zoom()
 .on("zoom", zoomed);
 
 
+
+function getWindowSize(phylo_options) {
+
+}
+
+
 function setupPhyloSvg(phylo_options) {
+
   let tree_div = phylo_options.svg_info.div_id;
+
+  d3.select(tree_div).select("svg").remove();
 
   let options = phylo_options.svg_info;
 
-  let width = phylo_options.tree.max_x * 10; // Set the width based on the number of nodes
+  let width = getNodeLessThanDepth(phylo_options.tree.depth).length * 6; // Set the width based on the number of nodes
+
   if (width < window.innerWidth - 200) {
-    width = window.innerWidth - 200
+    width = window.innerWidth - 200;
+    phylo_options.style.font_size = "12px";
   }
 
-  let height = phylo_options.tree.max_depth * 10; // Set height based on the depth
+  // We want to keep the proportion of the window to 500 height
 
-  if (height < window.innerHeight/3) {
-    height = window.innerHeight/3;
-  }
+  let height = 500; //(window.innerHeight/2) - 200;
+
+  let proportion = (window.innerWidth - 200) / 500;// (window.innerHeight/2);
+  //
+  // if (width/height !== proportion) {
+  //   height = height * options.width / (window.innerWidth - 200);
+  // }
+
 
   options.width = width;
   options.height = height;
@@ -313,14 +340,12 @@ function setupPhyloSvg(phylo_options) {
 
   let legend_group = svg.append("g").attr("transform", "translate(" + options.margin.left + "," + options.margin.top + ")");
 
-  let group = svg.append("g").attr("transform", "translate(" + options.margin.left + "," + options.margin.top + ")");
+  phylo_options.svg_info.scale = (window.innerWidth - 200)/ options.width;
 
-  if (height < width/3) {
-    height = width/3;
-  }
+  let group = svg.append("g").attr("transform", "translate(" + options.margin.left + "," + options.margin.top + ")scale(" + phylo_options.svg_info.scale + ")");
 
   phylo_options.svg_info.width = options.width;
-  phylo_options.svg_info.fake_height = height * 0.75; //- options.margin.top - options.margin.bottom; Takje away abiut for the last label
+  phylo_options.svg_info.fake_height = height * 0.75 * (1/phylo_options.svg_info.scale); //- options.margin.top - options.margin.bottom; Takje away abiut for the last label
   phylo_options.svg = svg;
   phylo_options.group = group;
   phylo_options.legend_group = legend_group;
@@ -389,13 +414,6 @@ function initDownloadOptions(options) {
   });
 }
 
-function setPhyloParams(tree_div, tree_string) {
-  // Make sure the group has no children
-  initPhyloOptions();
-
-}
-
-
 function clearSvg() {
   let group = phylo_options.group;
   group.selectAll("path").remove();
@@ -422,6 +440,9 @@ function clearSvg() {
  * -----------------------------------------------------------------------------
  */
 
+/**
+ * The below zooms to a node.
+ */
 function clicked(d) {
   let width = phylo_options.svg_info.width;
   let height = phylo_options.svg_info.height;
@@ -441,6 +462,10 @@ function clicked(d) {
 
 var parents = [];
 
+/**
+ * Here we get the parent to the root this allows us to highlight branches
+ * @param node
+ */
 function getParentsToRoot(node) {
   if (node[T_PARENT] !== undefined && node[T_PARENT] !== null) {
     parents.push(node[T_PARENT][T_ID]);
@@ -448,7 +473,11 @@ function getParentsToRoot(node) {
   }
 }
 
-
+/**
+ * Hightlight the root to the node.
+ *
+ * @param nodeId
+ */
 function highlightNodeToRoot(nodeId) {
   let node = phylo_options.tree.node_dict[nodeId];
   getParentsToRoot(node);
@@ -559,8 +588,8 @@ function drawPhyloBranches(phylo_options, branches) {
       })
       .style("stroke", options.branch_stroke)
       .style("stroke-width", options.branch_stroke_width)
-      .attr("x1", branch[B_X1])
-      .attr("x2", branch[B_X2])
+      .attr("x1", phylo_options.x_scale(branch[B_X1]))
+      .attr("x2", phylo_options.x_scale(branch[B_X2]))
       .attr("y1", y1)
       .attr("y2", y2);
 
@@ -591,9 +620,9 @@ function drawBranchText(group, branch) {
   .attr("class", "branch-text")
   .attr("text-anchor", "middle")
   .attr("font-family", options.font_family)
-  .attr("font-size", options.font_size)
+  .style("font-size", options.font_size)
   .attr("fill", options.branch_stroke)
-  .attr("transform", "translate(" + branch[B_X1] + 5 + "," + (branch[B_Y1]
+  .attr("transform", "translate(" + phylo_options.x_scale(branch[B_X1]) + 5 + "," + (branch[B_Y1]
       + branch[B_Y2]) / 2 + ") rotate(90) translate(1,-5)")
   .attr("opacity", 0);
 }
@@ -608,32 +637,33 @@ function drawCollapsedSymbol(group, node) {
 
   let y = scaleYValNode(node) + 20;
 
+  let x = phylo_options.x_scale(node[T_X])
   group.append("path")
   .attr("id", "path-" + node[T_ID])
   .attr("class", "collapsed-node")
   .attr("d", d3.svg.symbol().type(options.collapsed_symbol).size(70))
-  .attr("transform", "translate(" + node[T_X] + "," + scaleYValNode(node) + ")")
+  .attr("transform", "translate(" + x + "," + scaleYValNode(node) + ")")
   .style("fill", options.collapsed_colour);
 
   group.append("text")
   .attr("id", "text-coll-" + node[T_ID])
   .attr("name", node[T_NAME])
   .attr("font-family", options.font_family)
-  .attr("font-size", options.font_size)
+  .style("font-size", options.font_size)
   .attr("fill", node[T_CONTAINS_SEARCH] ? options.search_colour : options.font_colour)
   .attr("text-anchor", "middle")
-  .attr("transform", "translate(" + node[T_X] + "," + y + ")")
+  .attr("transform", "translate(" + x + "," + y + ")")
   .text("(" + node[T_NUM_EXTANTS] + ")");
 
   group.append("text")
   .attr("id", "text-tax-" + node[T_ID])
   .attr("name", node[T_NAME])
   .attr("font-family", options.font_family)
-  .attr("font-size", options.font_size)
+  .style("font-size", options.font_size)
   .attr("font-style", "italic")
   .attr("fill", node[T_CONTAINS_SEARCH] ? options.search_colour : options.font_colour)
   .attr("text-anchor", "start")
-  .attr("transform", "translate(" + node[T_X] + "," +  (y + 10) + ") rotate(" + 90
+  .attr("transform", "translate(" + x + "," +  (y + 10) + ") rotate(" + 90
       + ") translate(2,2)")
   .text(function () {
     if (node[T_COMMON_RANK] === null || node[T_COMMON_RANK] === undefined) {
@@ -670,7 +700,7 @@ function drawPhyloCircle(group, nodes) {
   .attr("id", d => "fill-" + d[T_ID])
   .attr("name", d => d[T_NAME])
   .attr("class", d => d[T_EXTANT] ? 'extant' : 'node')
-  .attr("cx", d => d[T_X])
+  .attr("cx", d => phylo_options.x_scale(d[T_X]))
   .attr("cy", d => scaleYValNode(d))
   .attr("r", options.node_radius)
   .attr("fill", d => getFillForNode(d))
@@ -692,14 +722,9 @@ function drawPhyloCircle(group, nodes) {
 
   })
   .on("click", function(d) {
-    clicked(this)
     this.parentNode.appendChild(this);
     onClick(d);
   });
-  // .on("click", function (d) {
-  //   this.parentNode.appendChild(this);
-  //   onClick(d);
-  // });
 
 }
 
@@ -725,8 +750,8 @@ function drawPhyloText(group, d) {
   .attr("class", d[T_EXTANT] ? 'extent' : 'node')
   .attr("name", d[T_NAME])
   .attr("font-family", options.font_family)
-  .attr("font-size", options.font_size)
-  .attr("fill", "#2b2b2b") //node[COLOUR])
+  .style("font-size", options.font_size)
+  .style("fill", "#2b2b2b") //node[COLOUR])
   .attr("text-anchor", d[T_EXTANT] ? 'start' : 'middle')
   .attr("opacity", function () {
     if (d[T_EXTANT] || (phylo_options.tree.collapsed_selection != null
@@ -738,7 +763,7 @@ function drawPhyloText(group, d) {
   })
   .attr("transform", function () {
     let deg = d[T_EXTANT] ? 90 : 0;
-    let x = d[T_X];
+    let x = phylo_options.x_scale(d[T_X]);
     let y = scaleYValNode(d);
     return  "translate(" + x + "," + y + ") rotate(" + deg
     + ") translate(2,2)";

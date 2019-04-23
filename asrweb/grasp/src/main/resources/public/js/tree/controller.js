@@ -68,16 +68,11 @@ function runPhyloTree() {
   /* Set the max x */
   phylo_options.tree.max_x = phylo_options.leaf_count;
 
-
-  // Set up the svg
-  phylo_options = setupPhyloSvg(phylo_options);
-  phylo_options = makeTreeScale(phylo_options);
-
   phylo_options.tree.depth = phylo_options.tree.max_depth;
 
-  tree_json[T_Y] = phylo_options.y_scale(0);
+  tree_json[T_Y] = 0;
 
-  tree_json[T_X] = phylo_options.x_scale(tree_json[T_RAW_X]);
+  tree_json[T_X] = tree_json[T_RAW_X];
 
   //phylo_options.tree.node_depth_dict[1] = [];
   //phylo_options.tree.node_depth_dict[1].push(tree_json);
@@ -91,32 +86,6 @@ function runPhyloTree() {
   if (phylo_options.tree.selected_node === null) {
     phylo_options.tree.selected_node = nodes[0]; // set root node as selected (initial)
   }
-
-
-
-//
-//   let node_names = [];
-//
-//   nodes.forEach(function(node) {
-//     node_names.push(node[T_ID]);
-//   });
-//
-//   // use Jquery autocomplete
-// ////////////////////////////////
-//   $( "#node-search-box" ).autocomplete({
-//     source: node_names
-//   });
-//
-//
-//
-// // submit genes button
-//   $("#node-search-box").keyup(function (e) {
-//     if (e.keyCode == 13) {
-//       // Do something
-//       // console.log('pressed enter');
-//       findNode();
-//     }
-//   });
 
   // Add the children
   addChildrenNodes(phylo_options.tree.root, true);
@@ -135,7 +104,6 @@ function runPhyloTree() {
     }
   });
   initDownloadOptions(ancs);
-
 }
 
 
@@ -150,6 +118,9 @@ function findNode(){
 
 function increaseDepth() {
   phylo_options.tree.depth += 1;
+  setupPhyloSvg(phylo_options);
+  // We also want to reset the scale
+  makeTreeScale(phylo_options);
   drawPhyloTree();
 }
 
@@ -158,6 +129,9 @@ function decreaseDepth() {
   if (phylo_options.tree.depth <= 1) {
     phylo_options.tree.depth = 1;
   }
+  setupPhyloSvg(phylo_options);
+  // We also want to reset the scale
+  makeTreeScale(phylo_options);
   drawPhyloTree();
 }
 
@@ -179,47 +153,6 @@ function drawPhyloTree() {
   drawTree(nodes, branches);
 
   resizePhyloHeight();
-
-  // var width = 960,
-  //     height = 500,
-  //     color = d3.scale.category20c();
-  //
-  // var treemap = d3.layout.treemap()
-  // .padding(4)
-  // .size([width, height])
-  // .value(function(d) {
-  //   return d[T_NUM_EXTANTS]; });
-  //
-  // var svg = d3.select("body").append("svg")
-  // .attr("width", width)
-  // .attr("height", height)
-  // .append("g")
-  // .attr("transform", "translate(-.5,-.5)");
-  //
-  //
-  // var cell = svg.data([phylo_options.tree.root]).selectAll("g")
-  // .data(treemap.nodes)
-  // .enter().append("g")
-  // .attr("class", "cell")
-  // .attr("transform", function(d) {
-  //   return "translate(" + d.x + "," + d.y + ")";
-  // });
-  //
-  // cell.append("rect")
-  // .attr("width", function(d) {
-  //   return d.dx; })
-  // .attr("height", function(d) {
-  //   return d.dy; })
-  // .style("fill", function(d) {
-  //   return d[T_CHILDREN] ? color(d[T_NAME]) : color(d[T_NAME]); });
-  //
-  // cell.append("text")
-  // .attr("x", function(d) { return d.dx / 2; })
-  // .attr("y", function(d) { return d.dy / 2; })
-  // .attr("dy", ".35em")
-  // .attr("text-anchor", "middle")
-  // .text(function(d) {
-  //   return d[T_CHILDREN] ? undefined : d[T_NAME]; });
 }
 
 

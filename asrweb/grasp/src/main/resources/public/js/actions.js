@@ -1,46 +1,3 @@
-/**
- *  ------------------------------------------------------------------
- *                          Main Function 
- *                          
- *   Runs the JS commands for the phylo tree and the POAG.
- *  ------------------------------------------------------------------
- */
-//
-// $(function() {
-//   $('#multiselect-download').multiselect({
-//     includeSelectAllOption: true,
-//     selectAllJustVisible: false,
-//     enableFiltering: true,
-//     selectAllValue: 'select-all-value'
-//   })
-// });
-
-/**
- * Gets the items that a user has selected for download.
- * Currently this just consists of the values in the Select Box (that the user
- * has checked) for the joint reconstructions.
- *
- * @param elemId
- * @returns {string}
- */
-let getSelectedValuesForDownload = function (elemId) {
-    let vals = $('select#' + elemId).val();
-    if (vals === null) {
-        vals = [];
-    }
-    for (let v in vals) {
-        if (vals[v] === "All") {
-            return "all";
-        }
-    }
-
-    if (vals.length > 20) {
-      alert('If you are selecting more than 20 please choose the select all option.');
-      return "all";
-    }
-    return JSON.stringify(vals);
-
-}
 
 /**
  * Saves the current reconstruction, the user inputs an email and they get
@@ -100,16 +57,15 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     //set_phylo_params("#phylo-tree", recon);
   phylo_options.svg_info.div_id = "#phylo-tree";
   phylo_options.tree_string = recon;
+
     runPhyloTree();
-  setPhyloParams("#phylo-tree", recon);
-
-
-  // Create our crossfilter reference
+    // Set up the svg
+    setupPhyloSvg(phylo_options);
+    makeTreeScale(phylo_options);
     drawPhyloTree();
-    //run_phylo_tree();
-    // phylo_options.tree.selected_node[T_ID] = node;
-    refresh_tree(); // to set height properly
+
     selectedNode = phylo_options.tree.selected_node[T_ID];
+
     refresh_elements();
     populate_search_node_list(phylo_options.tree.all_nodes);
 

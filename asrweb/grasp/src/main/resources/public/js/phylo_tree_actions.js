@@ -31,17 +31,16 @@ var expand_all_nodes = function () {
   refresh_tree();
 }
 
-var searchTree = function (search, clear, exact) {
-  var terms = search.split("*"); // wildcard '*'
-  var found_in_any = false; // keep track of if found in ANY extants (for populating parent nodes)
+let searchTree = function (search, clear, exact) {
+  let terms = search.split("*"); // wildcard '*'
   let extants = getNodeLessThanDepth(phylo_options.tree.max_depth);
 
   extants.forEach(function(e) {
     let extant = phylo_options.tree.node_dict[e[T_ID]];
     let found = false;
     if (search !== "") {
-      var ind = 0;
-      for (var s in terms) {
+      let ind = 0;
+      for (let s in terms) {
         if ((!exact && extant[T_NAME].substring(ind,
                 extant[T_NAME].length).toLowerCase().includes(
                 terms[s].toLowerCase()))

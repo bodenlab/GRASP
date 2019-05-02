@@ -1739,43 +1739,31 @@ var context_menu_action = function (call, node_fill, node_id) {
   var call_type = call.attr("name");
   phylo_options.tree.collapsed_selection = null;
   document.getElementById('reset-button').disabled = true;
-  if (call_type == "View joint reconstruction") {
+  if (call_type === "View joint reconstruction") {
     select_node(call.attr("id"));
     refresh_tree();
-
     displayJointGraph(call.attr("id"), node_fill, true);
     reset_poag_stack();
-  } else if (call_type == "Add joint reconstruction") {
+  } else if (call_type === "Add joint reconstruction") {
     document.getElementById('reset-button').disabled = false;
     d3.select("#fill-" + node_id).attr("stroke",
         phylo_options.style.stacked_colour);
     displayJointGraph(call.attr("id"), node_fill, false);
-  } else if (call_type == "Expand subtree") {
+  } else if (call_type === "Expand subtree") {
     var node = phylo_options.tree.node_dict[node_id];
     phylo_options.tree.collapsed_selection = node;
-    var ind = phylo_options.tree.collapse_under.indexOf(node);
-    if (ind == -1) {
-      return;
-    }
-    phylo_options.tree.collapse_under.splice(ind, 1);
-    set_children_un_collapsed(node);
-    node[T_TERMINATED] = false;
-    collapse_subtree(node, phylo_options.tree.expand_node_num);
+    node[T_EXPANDED] = true;
     refresh_tree();
-
-  } else if (call_type == "Collapse subtree") {
-    var node = phylo_options.tree.node_dict[node_id];
-    if (phylo_options.tree.collapse_under.indexOf(node) > -1) {
-      return; // already collapsed
-    }
-    set_children_collapsed(node);
-    node[T_TERMINATED] = true;
+  } else if (call_type === "Collapse subtree") {
+    let node = phylo_options.tree.node_dict[node_id];
+    node[T_EXPANDED] = false;
     phylo_options.tree.collapsed_selection = node;
     node[T_COLLAPSED] = false;
     phylo_options.tree.collapse_under.push(node);
-    refresh_tree()
-  } else if (call_type == "Expand subtree and collapse others") {
-    var node = phylo_options.tree.node_dict[node_id];
+    refresh_tree();
+    redraw_phylo_tree();
+  } else if (call_type === "Expand subtree and collapse others") {
+    let node = phylo_options.tree.node_dict[node_id];
     phylo_options.tree.collapsed_selection = node;
     expand_and_collapse_others(node);
   } else {
@@ -1790,59 +1778,6 @@ var context_menu_action = function (call, node_fill, node_id) {
 
 };
 
-/*
-var show_expand_collapse_node = function (node) {
-    for (var n in phylo_options.tree.node_dict) {
-        if (n.id != node.id) {
-
-        }
-    }
-    node.attr("r", options.hover_radius);
-    node.attr("opacity", 0.2);
-}*/
-
-/**
- *  Sets all the children of a node to be collapsed.
- *
- */
-var set_children_collapsed = function (node) {
-  node[T_COLLAPSED] = true;
-  node[T_TERMINATED] = false;
-  //if (node.parent_node !== undefined) {
-  //    node.parent_node[T_TERMINATED] = true;
-  //}
-
-  // Remove all nodes from the collapse under array
-  var ind = phylo_options.tree.collapse_under.indexOf(node);
-  if (ind != -1) {
-    phylo_options.tree.collapse_under.splice(ind, 1);
-  }
-
-  for (var n in node[T_CHILDREN]) {
-    set_children_collapsed(node[T_CHILDREN][n]);
-  }
-};
-
-/**
- * Sets all the children of a node back to being not collapsed.
- */
-var set_children_un_collapsed = function (node) {
-  node[T_COLLAPSED] = false;
-  for (var n in node[T_CHILDREN]) {
-    if (node[T_CHILDREN][n][T_TERMINATED]) {
-      return;
-    }
-    set_children_un_collapsed(node[T_CHILDREN][n]);
-  }
-};
-
-var set_children_un_terminated = function (node) {
-  node[T_TERMINATED] = false;
-  node[T_COLLAPSED] = false;
-  for (var n in node[T_CHILDREN]) {
-    set_children_un_terminated(node[T_CHILDREN][n]);
-  }
-};
 
 /**
  * Indicate that the node has been selected, and set all other nodes to be not selected (boolean flag node param).

@@ -40,6 +40,14 @@ function setupCrossFilter() {
 
 }
 
+function getNodesLessAndEqualToDepth(depth) {
+
+  let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
+    return d <= depth;
+  }).top(Infinity);
+  clearFilters();
+  return nodesIn;
+}
 /**
  * Get nodes with a certain name.
  *
@@ -48,12 +56,14 @@ function setupCrossFilter() {
 function getNodeLessThanDepth(depth) {
 
   let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
-        return d < depth;
+        return d <= depth;
       }).top(Infinity);
 
 
   nodesIn.forEach(function(d) {
-    d[T_TERMINATED] = false;
+    if (d[T_DEPTH] === depth) {
+      d[T_TERMINATED] = true;
+    }
   });
   clearFilters();
   // Concat the nodes and the terminating nodes

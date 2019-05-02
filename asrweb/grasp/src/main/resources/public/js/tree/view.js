@@ -32,6 +32,7 @@ let phylo_options = {
     rotation: 0,
   },
   tree: {
+    current_visible_nodes: [],
     flipped: true,
     longest_distance_from_root_to_extant: 0,
     extant_label_height: 200,
@@ -73,6 +74,7 @@ let phylo_options = {
     extent_radius: 5,
     node_radius: 5,
     hover_radius: 20,
+    under_node_multiplier: 1.1,
     under_node_multiplier: 1.1,
     /**
      * There is a "white" node under each
@@ -178,14 +180,16 @@ var refresh_tree = function () {
 /**
  * Makes the tree scale
  */
-function makeTreeScale(phylo_options) {
+function makeTreeScale(phylo_options, nodes) {
+
   phylo_options.legend_group.selectAll("*").remove();
   phylo_options.svg.selectAll("defs").remove();
 
+  nodes = phylo_options.tree.current_visible_nodes;
 
   let additive = phylo_options.tree.additive;
 
-  let max_y = phylo_options.tree.depth; //max_depth;
+  let max_y = phylo_options.tree.depth;
 
   if (additive === false) {
 
@@ -201,10 +205,24 @@ function makeTreeScale(phylo_options) {
     .orient("left")
     .ticks(6);
 
-  let x_scale = d3.scale.linear()
-    .domain([phylo_options.tree.min_x - 2, phylo_options.tree.max_x])
-    .range([phylo_options.legend.width + phylo_options.svg_info.margin.left,
-      phylo_options.svg_info.width]);
+  if (nodes === undefined) {
+
+    nodes = getNodesLessAndEqualToDepth(phylo_options.tree.depth);
+
+  }
+  let nodeXs = [];
+  nodes.forEach(function(node) {
+    nodeXs.push(node[T_X]);
+  });
+
+  phylo_options.tree.max_x = nodes.length;
+
+  nodeXs.sort(function(a, b){return a - b});
+
+  let x_scale  = d3.scale.ordinal()
+  .domain(nodeXs)
+  .rangePoints([phylo_options.legend.width + phylo_options.svg_info.margin.left,
+    phylo_options.svg_info.width - 100 ]);
 
   let legend = phylo_options.svg.append("defs").append(
       "svg:linearGradient").attr("id", "gradient").attr("x1", "100%").attr("y1",
@@ -220,13 +238,13 @@ function makeTreeScale(phylo_options) {
     .attr("width", phylo_options.legend.width)
     .attr("x", 25)
     .attr("y", 0)
+    .attr("transform", "translate(" + -30 + ",0)")
     .attr("height", (phylo_options.svg_info.fake_height - 100) * phylo_options.svg_info.scale)
     .style("fill", "url(#gradient)");
 
   phylo_options.legend_group.append("g")
     .attr("class", "axis")
     .attr("stroke", phylo_options.branch_stroke)
-    .attr("transform", "translate(" + 30 + ",0)")
     .attr("stroke-width", "0px")
     .call(y_axis);
 
@@ -302,7 +320,7 @@ function setupPhyloSvg(phylo_options) {
 
   let options = phylo_options.svg_info;
 
-  let width = getNodeLessThanDepth(phylo_options.tree.depth).length * 6; // Set the width based on the number of nodes
+  let width = (getNodesLessAndEqualToDepth(phylo_options.tree.depth).length + 2)* 6; // Set the width based on the number of nodes
 
   if (width < window.innerWidth - 200) {
     width = window.innerWidth - 200;
@@ -331,12 +349,13 @@ function setupPhyloSvg(phylo_options) {
   .append("g")
     .attr("transform", "translate(" + options.margin.left + "," + options.margin.right + ")")
     .call(zoom)
-
-  var rect = svg.append("rect")
-  .attr("width", window.innerWidth)
-  .attr("height", window.innerHeight)
-  .style("fill", "none")
-  .style("pointer-events", "all");
+    .on("drag", null);
+  //
+  // var rect = svg.append("rect")
+  // .attr("width", window.innerWidth)
+  // .attr("height", window.innerHeight)
+  // .style("fill", "none")
+  // .style("pointer-events", "zoom");
 
   let legend_group = svg.append("g").attr("transform", "translate(" + options.margin.left + "," + options.margin.top + ")");
 
@@ -373,19 +392,6 @@ function makeVeriticalTree() {
 
 function zoomed() {
   phylo_options.group.attr("transform", "translate(" + d3.event.translate + ")scale(" + phylo_options.svg_info.scale * d3.event.scale + ")");
-}
-
-function dragstarted(d) {
-  d3.event.sourceEvent.stopPropagation();
-  d3.select(this).classed("dragging", true);
-}
-
-function dragged(d) {
-  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
-}
-
-function dragended(d) {
-  d3.select(this).classed("dragging", false);
 }
 
 
@@ -551,13 +557,13 @@ function drawPhyloNodes(phylo_options, nodes) {
     }
   });
 
+  // Add the node
+  drawPhyloCircle(nodeGroup, nodesWithCircle);
+
   // Add the node label
   nodesWithText.forEach(function(node) {
     drawPhyloText(textGroup, node);
   });
-
-  // Add the node label
-  drawPhyloCircle(nodeGroup, nodesWithCircle);
 }
 
 
@@ -643,7 +649,14 @@ function drawCollapsedSymbol(group, node) {
   .attr("class", "collapsed-node")
   .attr("d", d3.svg.symbol().type(options.collapsed_symbol).size(70))
   .attr("transform", "translate(" + x + "," + scaleYValNode(node) + ")")
-  .style("fill", options.collapsed_colour);
+  .style("fill", options.collapsed_colour)
+  .on("contextmenu", function (d) {
+      let id = d3.select(this).attr("id").split("path-")[1];
+      let node_name = phylo_options.tree.node_dict[id][T_NAME];
+      d3.event.preventDefault();
+      menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, id);
+
+    });
 
   group.append("text")
   .attr("id", "text-coll-" + node[T_ID])
@@ -671,7 +684,7 @@ function drawCollapsedSymbol(group, node) {
     }
     return node[T_COMMON_RANK].charAt(0).toUpperCase() + node[T_COMMON_RANK].slice(1)
         + ": " + node[T_COMMON_TAXA];
-  });
+  })
 }
 
 /**
@@ -1159,15 +1172,23 @@ function contextMenuAction(call, nodeId) {
 
   } else if (call_type === "Expand subtree") {
 
-      set_children_un_collapsed(node);
+     phylo_options.tree.node_dict[nodeId][T_EXPANDED] = true;
 
-      collapse_subtree(node, phylo_options.tree.expand_node_num);
+    drawPhyloTree();
 
   } else if (call_type === "Collapse subtree") {
 
+    phylo_options.tree.node_dict[nodeId][T_EXPANDED] = false;
+    drawPhyloTree();
 
   } else if (call_type === "Expand subtree and collapse others") {
 
+
+    phylo_options.tree.node_dict[nodeId][T_EXPANDED] = true;
+
+    phylo_options.tree.depth = 1;
+
+    drawPhyloTree();
 
 
   } else {

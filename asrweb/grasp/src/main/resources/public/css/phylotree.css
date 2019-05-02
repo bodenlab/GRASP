@@ -19,10 +19,6 @@ div.tooltip {
     shape-rendering: crispEdges;
 }
 
-.tree-scale-bar text {
-  font: sans-serif;
-}
-
 .y.axis line {
   stroke: #fff;
 }

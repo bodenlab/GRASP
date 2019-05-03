@@ -25,7 +25,6 @@ const T_BRANCH_LEN = 'branch_len';
 const T_LEFT = 'is_left'; // Whether it is a left or right child bool
 const T_RAW_X = 'raw_x';
 const T_IS_ROOT = 'is_root';
-
 // This gets removed before we save the tree to crossfilter.
 const T_INFO = [T_DIST_FROM_ROOT, T_MAX_CHILDREN, T_BRANCH_LEN, T_LEFT, T_RAW_X, T_IS_ROOT];
 

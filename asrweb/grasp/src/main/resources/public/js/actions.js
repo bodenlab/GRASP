@@ -67,7 +67,6 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
     selectedNode = phylo_options.tree.selected_node[T_ID];
 
     refresh_elements();
-    populate_search_node_list(phylo_options.tree.all_nodes);
 
     // draw poags
     setup_poags(json_str, true, true, false, phylo_options.tree.selected_node[T_ID]);
@@ -83,30 +82,6 @@ var run_asr_app = function(json_str, recon, label, inf, node, proteinIds) {
 
     // Once everything is complete we want to start getting the taxonIds
     setUpTaxonomy(proteinIds.ncbi, proteinIds.uniprot, proteinIds.ncbi_mapping, proteinIds.uniprot_mapping);
-}
-
-var populate_search_node_list = function (nodes) {
-    // empty list
-    var ul = $('#node-id-menu');
-    ul.empty();
-    for (var n in nodes) {
-        var lbl = nodes[n][T_NAME];
-        if (lbl.length > 1) {
-            // add to list
-            var li = $('<li/>');
-            var a = $('<a/>');
-            a.text(lbl);
-            a.click(function() {
-                console.log(this.text);
-                var name = this.text;
-                // find the node and set visibility of the hover circle
-                var node = $("[id^=fill][id$='"+name+"']");
-                on_node_mouseover(node);
-            });
-            a.appendTo(li);
-            li.appendTo(ul);
-        }
-    }
 }
 
 

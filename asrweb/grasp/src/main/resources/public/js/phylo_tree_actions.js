@@ -33,51 +33,56 @@ var expand_all_nodes = function () {
 
 let searchTree = function (search, clear, exact) {
   let terms = search.split("*"); // wildcard '*'
-  let extants = getNodeLessThanDepth(phylo_options.tree.max_depth);
+  let nodes = phylo_options.tree.node_dict;
 
-  extants.forEach(function(e) {
-    let extant = phylo_options.tree.node_dict[e[T_ID]];
+  Object.keys(nodes).forEach(function(e) {
+    let node = nodes[e];
     let found = false;
     if (search !== "") {
       let ind = 0;
       for (let s in terms) {
-        if ((!exact && extant[T_NAME].substring(ind,
-                extant[T_NAME].length).toLowerCase().includes(
+        if ((!exact && node[T_NAME].substring(ind,
+                node[T_NAME].length).toLowerCase().includes(
                 terms[s].toLowerCase()))
-            || (exact && extant[T_NAME] === search)) {
-          ind = extant[T_NAME].indexOf(terms[s]) + terms[s].length - 1;
+            || (exact && node[T_NAME] === search)) {
+          ind = node[T_NAME].indexOf(terms[s]) + terms[s].length - 1;
           found = true;
-          extant[T_CONTAINS_SEARCH] = true;
+          node[T_CONTAINS_SEARCH] = true;
         } else {
-          if (extant[T_TAXA] !== undefined && extant[T_TAXA] !== null) {
-            for (let rank in RANKS) {
-              var tax = extant[T_TAXA][RANK[rank]];
-              if (tax !== undefined && tax !== null) {
-                if ((!exact && tax.substring(ind,
+          if (node[T_TAXA] !== undefined && node[T_TAXA] !== null) {
+            let tax = node[T_TEXT];
+            if (tax === undefined) {
+              if (node[T_EXTANT]) {
+                tax = getTaxaAsText(node[T_TAXA], "NONE", node[T_EXTANT], node[T_NAME]);
+              } else {
+                tax = getTaxaAsText(node[T_TAXA], node[T_COMMON_TAXA][T_DIFFER_RANK],
+                    node[T_EXTANT], node[T_NAME]);
+              }
+              node[T_TEXT] = tax;
+            }
+            if ((!exact && tax.substring(ind,
                         tax.length).toLowerCase().includes(
                         terms[s].toLowerCase()))
                     || (exact && tax === search)) {
                   ind = tax.indexOf(terms[s]) + terms[s].length - 1;
                   found = true;
-                  extant[T_CONTAINS_SEARCH] = true;
+                  node[T_CONTAINS_SEARCH] = true;
                   break;
                 }
-              }
-            }
           } else {
             found = false;
-            e[T_CONTAINS_SEARCH] = false;
+            node[T_CONTAINS_SEARCH] = false;
             break;
           }
         }
         if (found) {
-          extant[T_CONTAINS_SEARCH] = true;
+          node[T_CONTAINS_SEARCH] = true;
           break;
         }
       }
-      extant[T_CONTAINS_SEARCH] = found;
+      node[T_CONTAINS_SEARCH] = found;
     } else {
-      extant[T_CONTAINS_SEARCH] = false;
+      node[T_CONTAINS_SEARCH] = false;
     }
   });
 
@@ -87,7 +92,7 @@ let searchTree = function (search, clear, exact) {
       if (e[T_EXTANT]) {
         d3.select("#text-" + e[T_ID]).style('fill', phylo_options.style.hover_fill);
       } else {
-        d3.select("#fill-" + e[T_ID]).attr("stroke-width", "20px");
+        d3.select("#fill-" + e[T_ID]).attr("stroke-width", "10px");
         d3.select("#fill-" + e[T_ID]).attr("stroke", phylo_options.style.hover_fill);
       }
     } else {

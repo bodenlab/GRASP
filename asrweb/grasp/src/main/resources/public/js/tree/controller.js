@@ -118,7 +118,6 @@ function increaseDepth() {
   phylo_options.tree.depth += 1;
   setupPhyloSvg(phylo_options);
   // We also want to reset the scale
-  makeTreeScale(phylo_options);
   drawPhyloTree();
 }
 
@@ -129,7 +128,6 @@ function decreaseDepth() {
   }
   setupPhyloSvg(phylo_options);
   // We also want to reset the scale
-  makeTreeScale(phylo_options);
   drawPhyloTree();
 }
 /**
@@ -270,6 +268,8 @@ function drawPhyloTree() {
   phylo_options.tree.current_visible_nodes = visibleNodes;
 
   // We also want to reset the scale
+  clearSvg();
+
   makeTreeScale(phylo_options);
 
   drawTree(visibleNodes, branches);

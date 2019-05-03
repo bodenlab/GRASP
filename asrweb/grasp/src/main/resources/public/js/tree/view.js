@@ -136,8 +136,6 @@ var refresh_tree = function () {
 
     // For this we need to change the whole setup.
     setupPhyloSvg(phylo_options);
-    // We also want to reset the scale
-    makeTreeScale(phylo_options);
     // Redraw the tree
     drawPhyloTree();
   } else {
@@ -145,8 +143,6 @@ var refresh_tree = function () {
     // For this we need to change the whole setup.
     setupPhyloSvg(phylo_options);
     // We also want to reset the scale
-    makeTreeScale(phylo_options);
-    // Redraw the tree
     drawPhyloTree();
   }
   if (document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1]
@@ -349,8 +345,6 @@ function setupPhyloSvg(phylo_options) {
   .attr("class", "svg")
   .append("g")
     .attr("transform", "translate(" + options.margin.left + "," + options.margin.right + ")")
-    .call(zoom)
-    .on("drag", null);
   //
   // var rect = svg.append("rect")
   // .attr("width", window.innerWidth)
@@ -456,10 +450,10 @@ function clicked(d) {
   let scale = phylo_options.svg_info.scale;
   var x, y, k;
 
-  highlightNodeToRoot(d3.select(d).attr("id").split('-')[1]);
+  //highlightNodeToRoot(d3.select(d).attr("id").split('-')[1]);
 
-  x =  d3.select(d).attr("cx");
-  y = d3.select(d).attr("cy");
+  x =  d.attr("cx");
+  y = d.attr("cy");
   k = 4;
   phylo_options.group.transition()
   .duration(750)
@@ -517,8 +511,6 @@ function scaleYValNode(yVal) {
 
 
 function drawTree(nodes, branches) {
-  clearSvg();
-  makeTreeScale(phylo_options);
   drawPhyloBranches(phylo_options, branches);
   drawPhyloNodes(phylo_options, nodes);
 }
@@ -540,6 +532,7 @@ function drawPhyloNodes(phylo_options, nodes) {
   let symbolGroup = group.append('g');
   let nodeGroup = group.append('g');
 
+
   let nodesWithCircle = [];
   let nodesWithText = [];
   let terminatedNodes = [];
@@ -554,6 +547,7 @@ function drawPhyloNodes(phylo_options, nodes) {
 
     if (!node[T_EXTANT] && node[T_TERMINATED]) {
       terminatedNodes.push(node);
+      nodesWithCircle.push(node);
       drawCollapsedSymbol(symbolGroup, node);
     }
   });
@@ -562,9 +556,21 @@ function drawPhyloNodes(phylo_options, nodes) {
   drawPhyloCircle(nodeGroup, nodesWithCircle);
 
   // Add the node label
-  nodesWithText.forEach(function(node) {
+  nodesWithText.forEach(function (node) {
     drawPhyloText(textGroup, node);
   });
+
+  // if (nodesWithText.length < 50) {
+  //   nodesWithText.forEach(function (node) {
+  //     drawPhyloText(textGroup, node);
+  //   });
+  // } else if (nodesWithText.length < 100) {
+  //   nodesWithText.forEach(function (node, i) {
+  //     if (i % 2 == 0) {
+  //       drawPhyloText(textGroup, node);
+  //     }
+  //   });
+  // }
 }
 
 
@@ -629,8 +635,8 @@ function drawBranchText(group, branch) {
   .attr("font-family", options.font_family)
   .style("font-size", options.font_size)
   .attr("fill", options.branch_stroke)
-  .attr("transform", "translate(" + phylo_options.x_scale(branch[B_X1]) + 5 + "," + (branch[B_Y1]
-      + branch[B_Y2]) / 2 + ") rotate(90) translate(1,-5)")
+  .attr("transform", "translate(" + phylo_options.x_scale(branch[B_X1]) + 5 + "," + phylo_options.y_scale((branch[B_Y1]
+      + branch[B_Y2]) / 2) + ") rotate(90) translate(1,-5)")
   .attr("opacity", 0);
 }
 
@@ -651,13 +657,6 @@ function drawCollapsedSymbol(group, node) {
   .attr("d", d3.svg.symbol().type(options.collapsed_symbol).size(70))
   .attr("transform", "translate(" + x + "," + scaleYValNode(node) + ")")
   .style("fill", options.collapsed_colour)
-  .on("contextmenu", function (d) {
-      let id = d3.select(this).attr("id").split("path-")[1];
-      let node_name = phylo_options.tree.node_dict[id][T_NAME];
-      d3.event.preventDefault();
-      menu(d3.mouse(this)[0], d3.mouse(this)[1], node_name, id);
-
-    });
 
   group.append("text")
   .attr("id", "text-coll-" + node[T_ID])
@@ -720,6 +719,7 @@ function drawPhyloCircle(group, nodes) {
   .attr("fill", d => getFillForNode(d))
   .attr("data-toggle", "modal")
   .attr("data-target", "#resultsTreeModal")
+  .attr("opacity", d => d[T_TERMINATED] ? 0 : 1)
   .on("mouseover", function(d) {
     let node = d3.select(this);
     onMouseover(node, d);
@@ -738,8 +738,7 @@ function drawPhyloCircle(group, nodes) {
   .on("click", function(d) {
     this.parentNode.appendChild(this);
     onClick(d);
-  });
-
+  })
 }
 
 
@@ -779,10 +778,44 @@ function drawPhyloText(group, d) {
     let deg = d[T_EXTANT] ? 90 : 0;
     let x = phylo_options.x_scale(d[T_X]);
     let y = scaleYValNode(d);
+    if (!d[T_EXTANT]) {
+      y += 10;
+    }
     return  "translate(" + x + "," + y + ") rotate(" + deg
     + ") translate(2,2)";
   })
-  .text(d[T_NAME]);
+  .text(d[T_NAME])
+  .on("mouseover", function() {
+    let id = d3.select(this).attr("id").split("text-")[1];
+    d = phylo_options.tree.node_dict[id];
+    let text = "";
+    if (d[T_TEXT] !== undefined) {
+      text = d[T_TEXT];
+    } else {
+      // Check if we've already assigned the taxanomic text to this
+      if (d[T_EXTANT]) {
+        text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME]);
+      } else {
+        text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
+            d[T_EXTANT], d[T_NAME]);
+      }
+      d[T_TEXT] = text;
+    }
+
+    div.transition()
+    .duration(200)
+    .style("opacity", .9);
+
+    div.html(text + "<br/>")
+    .style("left", (d3.event.pageX) + "px")
+    .style("top", (d3.event.pageY - 28) + "px");
+  })
+  .on("mouseout", function(d) {
+    //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 0);
+    div.transition()
+    .duration(500)
+    .style("opacity", 0);
+  });
 }
 
 
@@ -811,7 +844,7 @@ let toggle_branch_text = function () {
 let toggle_node_text = function () {
   let button_text = document.getElementById('node-text-toggle').innerHTML.split(
       " | ")[1];
-  phylo_options.svg.selectAll('circle.node').each(function () {
+  phylo_options.svg.selectAll('circle').each(function () {
     $(this).attr("opacity", ($(this).attr("opacity") === 1) ? 0 : 1);
   });
   phylo_options.svg.selectAll('text.node').each(function () {
@@ -1015,17 +1048,7 @@ function onClick(node) {
   .attr("transform", "translate(0,20)")
   .text(node[T_NAME]);
 
-  // find number in histogram (only want modal large if there are many items in the histogram)
-  let node_info = phylo_options.tree.node_dict[node[T_ID]];
-
-  if ($(window).width() > options.modal_min_width && node_info[T_COMMON_TAXA]
-      !== undefined) {
-    let tax_diff = node_info[T_TAXA][node_info[T_COMMON_TAXA].differ_rank];
-    options.modal_width = 0.8 * $(window).width() - 2
-        * options.modal_min_width / Object.keys(tax_diff).length;
-  } else {
-    options.modal_width = options.modal_min_width;
-  }
+  options.modal_width = options.modal_min_width;
   let modal_container = d3.select("#modalTree")
   .append("svg")
   .attr("id", "usedTreeModal")
@@ -1059,18 +1082,14 @@ function onMouseover(node, d) {
 
   if (phylo_options.tree.selected_nodes.includes(node)) {
 
-    node.attr("stroke", phylo_options.style.select_colour);
-    node.attr("stroke-width", 3 * options.stroke_width);
+    node.style("stroke", phylo_options.style.select_colour);
+    node.style("stroke-width", 3 * options.stroke_width);
 
   } else {
-
-    node.attr("stroke", phylo_options.style.hover_stroke);
-    node.attr("stroke-width",  options.hover_stroke_width);
+    node.attr("stroke-width", "0px");
 
   }
-
-  node.attr("opacity", 0.2);
-  node.attr("stroke-width", "0px");
+  node.style("opacity", 0.2);
 
   d3.select("#text-" + id).attr("opacity", 1);
 
@@ -1110,8 +1129,11 @@ function onMouseout(node, d) {
     node.attr("stroke-width", options.stroke_width);
 
   }
-
-  node.attr("opacity", 1);
+  if (node[T_TERMINATED]) {
+    node.style("opacity", 0);
+  } else {
+    node.style("opacity", 1);
+  }
 
 }
 
@@ -1184,13 +1206,15 @@ function contextMenuAction(call, nodeId) {
 
   } else if (call_type === "Expand subtree and collapse others") {
 
-
     phylo_options.tree.node_dict[nodeId][T_EXPANDED] = true;
 
     phylo_options.tree.depth = 1;
 
     drawPhyloTree();
 
+  } else if (call_type === "Zoom to node") {
+
+    doubleClicked(call);
 
   } else {
 

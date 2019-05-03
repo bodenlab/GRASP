@@ -844,16 +844,12 @@ let toggle_branch_text = function () {
 let toggle_node_text = function () {
   let button_text = document.getElementById('node-text-toggle').innerHTML.split(
       " | ")[1];
-  phylo_options.svg.selectAll('circle').each(function () {
-    $(this).attr("opacity", ($(this).attr("opacity") === 1) ? 0 : 1);
-  });
-  phylo_options.svg.selectAll('text.node').each(function () {
-    $(this).attr("opacity", ($(this).attr("opacity") === 1) ? 0 : 1);
-  });
   if (button_text === "ON") {
+    phylo_options.svg.selectAll('text.node').attr("opacity", 1);
     document.getElementById(
         'node-text-toggle').innerHTML = "View node labels | OFF";
   } else {
+    phylo_options.svg.selectAll('text.node').attr("opacity", 0);
     document.getElementById(
         'node-text-toggle').innerHTML = "View node labels | ON";
   }
@@ -871,7 +867,7 @@ var toggle_additive = function () {
         'additive-toggle').innerHTML = "View tree type | Additive";
   }
   clear_svg();
-  refresh_tree();
+  drawPhyloTree();
 };
 
 var toggle_extant_text = function () {

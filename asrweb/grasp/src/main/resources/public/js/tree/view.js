@@ -32,6 +32,7 @@ let phylo_options = {
     rotation: 0,
   },
   tree: {
+    update_depth: false,
     current_visible_nodes: [],
     flipped: true,
     longest_distance_from_root_to_extant: 0,

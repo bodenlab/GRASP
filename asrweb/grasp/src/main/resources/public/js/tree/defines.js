@@ -17,7 +17,7 @@ const T_COMMON_RANK = 'common_rank';
 const T_TAXA = 'taxa';
 const T_DIFFER_RANK = 'differ_rank';
 const T_DEPTH = 'depth';
-
+const T_IS_SET = 'is_set';
 // Used when making the tree
 const T_DIST_FROM_ROOT = 'dist';
 const T_MAX_CHILDREN = 'max_children';

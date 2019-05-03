@@ -132,21 +132,34 @@ function decreaseDepth() {
   makeTreeScale(phylo_options);
   drawPhyloTree();
 }
-
 /**
  * At this point we only add the children nodes that are within the depth of
  * 3 from the last ancestor. This is done to
  */
-function addExpandedChildrenNodes(node, allChildren, isCollapsed) {
-  if (node[T_EXTANT] || node[T_DEPTH] + 3 > phylo_options.tree.depth) {
+function addExpandedChildrenNodes(node, allChildren, isCollapsed, depth) {
+  if (node[T_EXTANT]) {
     allChildren.push(node);
     node[T_COLLAPSED] = isCollapsed;
+    node[T_IS_SET] = true;
     return;
   }
-  node[T_CHILDREN].forEach(child => addExpandedChildrenNodes(child, allChildren, isCollapsed));
-  node[T_COLLAPSED] = isCollapsed;
-  allChildren.push(node);
+  if (node[T_DEPTH] === depth + 3) {
+    node[T_COLLAPSED] = isCollapsed;
+    node[T_TERMINATED] = true;
+    node[T_IS_SET] = true;
+    allChildren.push(node);
+    return;
+  }
+  if (node[T_DEPTH] < depth + 3) {
+    node[T_CHILDREN].forEach(child => addExpandedChildrenNodes(child, allChildren, isCollapsed, depth));
+    node[T_COLLAPSED] = isCollapsed;
+    node[T_IS_SET] = true;
+    allChildren.push(node);
+
+  }
+
 }
+
 
 
 /**
@@ -154,15 +167,15 @@ function addExpandedChildrenNodes(node, allChildren, isCollapsed) {
  * 3 from the last ancestor. This is done to
  */
 function setAllCollapsed(node, isCollapsed) {
+
   if (node[T_EXTANT]) {
     node[T_COLLAPSED] = isCollapsed;
     return;
   }
+
   node[T_CHILDREN].forEach(child => setAllCollapsed(child, isCollapsed));
   node[T_COLLAPSED] = isCollapsed;
 }
-
-
 
 /**
  * Add any parents of the node we were expanding so it doesn't look odd
@@ -185,20 +198,20 @@ function drawPhyloTree() {
   var nodes = getNodeLessThanDepth(phylo_options.tree.depth);
 
   let expandedNodes = [];
+
   nodes.sort(function(a, b){return a[T_DEPTH] - b[T_DEPTH]});
 
   let intermediateNodes = [];
+
   // Here we always need to iterate through and work out if there are any nodes
   // that should have their children added.
   nodes.forEach(function(node) {
-
     let nodeStored = phylo_options.tree.node_dict[node[T_ID]];
-
-    // Expand all nodes except those that are already collapsed (a user wouldn't have been able to click on this!)
     if (nodeStored[T_EXPANDED] === true && nodeStored[T_COLLAPSED] !== true) {
 
       // We want to add each of the children to the nodes object
-      addExpandedChildrenNodes(nodeStored, expandedNodes, false);
+      addExpandedChildrenNodes(nodeStored, expandedNodes, false,
+          nodeStored[T_DEPTH]);
 
       // Check if we also need to add the parents of this node
       if (nodeStored[T_DEPTH] > phylo_options.tree.depth) {
@@ -211,8 +224,10 @@ function drawPhyloTree() {
     if (nodeStored[T_EXPANDED] === false) {
       // We want to add each of the children to the nodes object
       // CHeck if this node has already been terminated
+
       if (nodeStored[T_COLLAPSED] !== true) {
         nodeStored[T_TERMINATED] = true;
+        nodeStored[T_IS_SET] = true;
         nodeStored[T_CHILDREN].forEach(child => setAllCollapsed(child, true));
       }
     }
@@ -221,7 +236,15 @@ function drawPhyloTree() {
       intermediateNodes.push(nodeStored);
     }
 
+    if (nodeStored[T_IS_SET] !== true) {
+      nodeStored[T_TERMINATED] = node[T_TERMINATED];
+    }
+
   });
+
+  // Add any expanded nodes
+
+  intermediateNodes = intermediateNodes.concat(expandedNodes);
 
   // Add any expanded nodes
   intermediateNodes = intermediateNodes.concat(expandedNodes);
@@ -232,15 +255,15 @@ function drawPhyloTree() {
 
     if (node[T_COLLAPSED] !== true) {
       // If it's not collapsed we want to see it
-        visibleNodes.push(node);
+      visibleNodes.push(node);
 
-        if (node[T_TERMINATED] !== true) {
-          // If it's not terminted we want to see the branches
-          nodeIdsForBranches.push(node[T_ID]);
+      if (node[T_TERMINATED] !== true) {
+        // If it's not terminted we want to see the branches
+        nodeIdsForBranches.push(node[T_ID]);
       }
     }
+    node[T_IS_SET] = false;
   });
-
 
   let branches = getBranchesWithNodeID(nodeIdsForBranches);
 

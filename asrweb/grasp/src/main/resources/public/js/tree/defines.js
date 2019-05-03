@@ -17,7 +17,7 @@ const T_COMMON_RANK = 'common_rank';
 const T_TAXA = 'taxa';
 const T_DIFFER_RANK = 'differ_rank';
 const T_DEPTH = 'depth';
-
+const T_IS_SET = 'is_set';
 // Used when making the tree
 const T_DIST_FROM_ROOT = 'dist';
 const T_MAX_CHILDREN = 'max_children';
@@ -25,7 +25,6 @@ const T_BRANCH_LEN = 'branch_len';
 const T_LEFT = 'is_left'; // Whether it is a left or right child bool
 const T_RAW_X = 'raw_x';
 const T_IS_ROOT = 'is_root';
-
 // This gets removed before we save the tree to crossfilter.
 const T_INFO = [T_DIST_FROM_ROOT, T_MAX_CHILDREN, T_BRANCH_LEN, T_LEFT, T_RAW_X, T_IS_ROOT];
 

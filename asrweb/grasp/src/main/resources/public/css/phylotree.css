@@ -12,15 +12,15 @@ div.tooltip {
   pointer-events: none;
   white-space: nowrap;
 }
-
+.modal-text-box {
+  padding-left: 30px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
 .tree-selection-brush .extent {
     fill-opacity: .05;
     stroke: #fff;
     shape-rendering: crispEdges;
-}
-
-.tree-scale-bar text {
-  font: sans-serif;
 }
 
 .y.axis line {

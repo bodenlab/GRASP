@@ -68,8 +68,6 @@ function runPhyloTree() {
   /* Set the max x */
   phylo_options.tree.max_x = phylo_options.leaf_count;
 
-  phylo_options.tree.depth = phylo_options.tree.max_depth;
-
   tree_json[T_Y] = 0;
 
   tree_json[T_X] = tree_json[T_RAW_X];
@@ -120,7 +118,6 @@ function increaseDepth() {
   phylo_options.tree.depth += 1;
   setupPhyloSvg(phylo_options);
   // We also want to reset the scale
-  makeTreeScale(phylo_options);
   drawPhyloTree();
 }
 
@@ -131,26 +128,151 @@ function decreaseDepth() {
   }
   setupPhyloSvg(phylo_options);
   // We also want to reset the scale
-  makeTreeScale(phylo_options);
   drawPhyloTree();
 }
+/**
+ * At this point we only add the children nodes that are within the depth of
+ * 3 from the last ancestor. This is done to
+ */
+function addExpandedChildrenNodes(node, allChildren, isCollapsed, depth) {
+  if (node[T_EXTANT]) {
+    allChildren.push(node);
+    node[T_COLLAPSED] = isCollapsed;
+    node[T_IS_SET] = true;
+    return;
+  }
+  if (node[T_DEPTH] === depth + 3) {
+    node[T_COLLAPSED] = isCollapsed;
+    node[T_TERMINATED] = true;
+    node[T_IS_SET] = true;
+    allChildren.push(node);
+    return;
+  }
+  if (node[T_DEPTH] < depth + 3) {
+    node[T_CHILDREN].forEach(child => addExpandedChildrenNodes(child, allChildren, isCollapsed, depth));
+    node[T_COLLAPSED] = isCollapsed;
+    node[T_IS_SET] = true;
+    allChildren.push(node);
+
+  }
+
+}
+
+
+
+/**
+ * At this point we only add the children nodes that are within the depth of
+ * 3 from the last ancestor. This is done to
+ */
+function setAllCollapsed(node, isCollapsed) {
+
+  if (node[T_EXTANT]) {
+    node[T_COLLAPSED] = isCollapsed;
+    return;
+  }
+
+  node[T_CHILDREN].forEach(child => setAllCollapsed(child, isCollapsed));
+  node[T_COLLAPSED] = isCollapsed;
+}
+
+/**
+ * Add any parents of the node we were expanding so it doesn't look odd
+ */
+function addExpandedParentNodes(node, allParents) {
+  if (node[T_PARENT] == null) {
+    node[T_COLLAPSED] = false;
+    return;
+  }
+  node[T_COLLAPSED] = false;
+  allParents.push(node[T_PARENT]);
+  addExpandedParentNodes(node[T_PARENT], allParents);
+}
+
 
 /**
  * Set up the phylo tree
  */
 function drawPhyloTree() {
-  let nodes = getNodeLessThanDepth(phylo_options.tree.depth);
+  var nodes = getNodeLessThanDepth(phylo_options.tree.depth);
 
-  // Get the node ids from these
-  let node_ids = nodes.map(a => a[T_ID]);
+  let expandedNodes = [];
 
-  let branches = getBranchesWithNodeID(node_ids);
+  nodes.sort(function(a, b){return a[T_DEPTH] - b[T_DEPTH]});
 
-  // Here we add in the nodes (but we didn't want the branches for these ones
-  // as they are terminated)
-  nodes = nodes.concat(getNodesEqualToDepth(phylo_options.tree.depth));
+  let intermediateNodes = [];
 
-  drawTree(nodes, branches);
+  // Here we always need to iterate through and work out if there are any nodes
+  // that should have their children added.
+  nodes.forEach(function(node) {
+    let nodeStored = phylo_options.tree.node_dict[node[T_ID]];
+    if (nodeStored[T_EXPANDED] === true && nodeStored[T_COLLAPSED] !== true) {
+
+      // We want to add each of the children to the nodes object
+      addExpandedChildrenNodes(nodeStored, expandedNodes, false,
+          nodeStored[T_DEPTH]);
+
+      // Check if we also need to add the parents of this node
+      if (nodeStored[T_DEPTH] > phylo_options.tree.depth) {
+        addExpandedParentNodes(nodeStored, expandedNodes);
+      }
+      nodeStored[T_TERMINATED] = false;
+    }
+
+    // Colapse all nodes
+    if (nodeStored[T_EXPANDED] === false) {
+      // We want to add each of the children to the nodes object
+      // CHeck if this node has already been terminated
+
+      if (nodeStored[T_COLLAPSED] !== true) {
+        nodeStored[T_TERMINATED] = true;
+        nodeStored[T_IS_SET] = true;
+        nodeStored[T_CHILDREN].forEach(child => setAllCollapsed(child, true));
+      }
+    }
+
+    if (nodeStored[T_COLLAPSED] !== true) {
+      intermediateNodes.push(nodeStored);
+    }
+
+    if (nodeStored[T_IS_SET] !== true) {
+      nodeStored[T_TERMINATED] = node[T_TERMINATED];
+    }
+
+  });
+
+  // Add any expanded nodes
+
+  intermediateNodes = intermediateNodes.concat(expandedNodes);
+
+  // Add any expanded nodes
+  intermediateNodes = intermediateNodes.concat(expandedNodes);
+  let nodeIdsForBranches = [];
+  let visibleNodes = [];
+
+  intermediateNodes.forEach(function(node) {
+
+    if (node[T_COLLAPSED] !== true) {
+      // If it's not collapsed we want to see it
+      visibleNodes.push(node);
+
+      if (node[T_TERMINATED] !== true) {
+        // If it's not terminted we want to see the branches
+        nodeIdsForBranches.push(node[T_ID]);
+      }
+    }
+    node[T_IS_SET] = false;
+  });
+
+  let branches = getBranchesWithNodeID(nodeIdsForBranches);
+
+  phylo_options.tree.current_visible_nodes = visibleNodes;
+
+  // We also want to reset the scale
+  clearSvg();
+
+  makeTreeScale(phylo_options);
+
+  drawTree(visibleNodes, branches);
 
   resizePhyloHeight();
 }

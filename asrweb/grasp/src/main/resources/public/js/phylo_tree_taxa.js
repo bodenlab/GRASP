@@ -476,6 +476,21 @@ function getTaxaAsText(taxa, commonTaxa, extant, name) {
   return textDisplay;
 }
 
+/**
+  Returns the colour for the common taxa
+ */
+function getTaxaColour(d, color) {
+  let colouridxs = {"t_domain": "#ca5959", "t_superkingdom":"#ffb380",
+    "t_kingdom":"#d4ff80",
+    "t_phylum": "#52ff86",
+    "t_class_t": "#5aecff",
+    "t_order_t": "#645fff",
+    "t_family":"#cba5ff",
+    "t_genus":"#ff9fc0",
+    "t_species":"#ff6cb4"};
+  let colour = colouridxs[d[T_COMMON_TAXA][T_DIFFER_RANK]];
+  return colour;
+}
 
 var add_taxonomy_modal_info = function (nodeOriginal, group, options) {
 
@@ -510,7 +525,7 @@ var div = d3.select("body").append("div")
 .style("opacity", 0);
 
 function draw_histogram_taxonomy(node, group) {
-  let color = d3.scale.category20c();
+  let color = d3.scale.category20b();
 
   var treemap = d3.layout.treemap()
   .padding(20)
@@ -552,10 +567,10 @@ function draw_histogram_taxonomy(node, group) {
     return d.dy;
   })
   .style("margin", "5px")
-  .attr("stroke", d => d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_COMMON_RANK]]) : color(d[T_TAXA]['t_order']))
-  .attr("stroke-width",  d =>d[T_CHILDREN] ? "2px": "1px")
+  .attr("stroke", d => d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_DIFFER_RANK]]) : color(d[T_TAXA]['t_order']))
+  .attr("stroke-width",  d =>d[T_CHILDREN] ? "2px": "2px")
   .style("fill", function (d) {
-    return d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_COMMON_RANK]]) : getFillForNode(d);
+    return d[T_CHILDREN] ? getTaxaColour(d, color) : getFillForNode(d);
   })
   .on("mouseover", function(d) {
     //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 1);
@@ -588,19 +603,19 @@ function draw_histogram_taxonomy(node, group) {
     .style("opacity", 0);
   });
 
-  //
-  // cell.append("text")
-  // .attr("id", d => "taxa-text-" + d[T_ID])
-  // .attr("x", function (d) {
-  //   return d.dx / 2;
-  // })
-  // .attr("y", function (d) {
-  //   return d.dy / 2;
-  // })
-  // .attr("dy", ".35em")
-  // .attr("text-anchor", "middle")
-  // .text(function (d) {
-  //   return d[T_CHILDREN] ? undefined : d[T_TAXA]['t_species'].charAt(0) + ".";//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
-  // });
+
+  cell.append("text")
+  .attr("id", d => "taxa-text-" + d[T_ID])
+  .attr("x", function (d) {
+    return d.dx / 2;
+  })
+  .attr("y", function (d) {
+    return d.dy / 2;
+  })
+  .attr("dy", ".35em")
+  .attr("text-anchor", "middle")
+  .text(function (d) {
+    return d[T_CHILDREN] ? "" : d.dx < 20 ? "" : d[T_TAXA]['t_species'].substr(0, 5) + "...";//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
+  });
 
 }

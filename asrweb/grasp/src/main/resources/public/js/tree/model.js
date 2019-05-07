@@ -17,19 +17,19 @@ function setupCrossFilter() {
   phylo_options.data.node_db = crossfilter(phylo_options.tree.all_nodes);
 
   phylo_options.data.depth_dimension = phylo_options.data.node_db.dimension(function(d) {
-    return d[T_DEPTH]
+    return d[T_DEPTH] ? d[T_DEPTH] : 0;
   });
 
   phylo_options.data.taxa_dimension = phylo_options.data.node_db.dimension(function(d) {
-    return d[T_TAXA]
+    return d[T_TAXA];// ? d[T_TAXA] : "";
   });
 
   phylo_options.data.node_name = phylo_options.data.node_db.dimension(function(d) {
-    return d[T_NAME]
+    return d[T_NAME] ? d[T_NAME] : "";
   });
 
   phylo_options.data.extent_dimension = phylo_options.data.node_db.dimension(function(d) {
-    return d[T_EXTANT]
+    return d[T_EXTANT] ? d[T_EXTANT] : false;
   });
 
 

@@ -201,10 +201,18 @@ function drawPhyloTree() {
 
   let intermediateNodes = [];
 
+  // Reset parameters.
+  for (let n in phylo_options.tree.node_dict) {
+    let node = phylo_options.tree.node_dict[n];
+    node[T_COLLAPSED] = undefined;
+    node[T_TERMINATED] = undefined;
+    node[T_IS_SET] = undefined;
+  }
   // Here we always need to iterate through and work out if there are any nodes
   // that should have their children added.
   nodes.forEach(function(node) {
     let nodeStored = phylo_options.tree.node_dict[node[T_ID]];
+    nodeStored[T_TERMINATED] = false;
     if (nodeStored[T_EXPANDED] === true && nodeStored[T_COLLAPSED] !== true) {
 
       // We want to add each of the children to the nodes object
@@ -216,6 +224,7 @@ function drawPhyloTree() {
         addExpandedParentNodes(nodeStored, expandedNodes);
       }
       nodeStored[T_TERMINATED] = false;
+
     }
 
     // Colapse all nodes
@@ -230,12 +239,16 @@ function drawPhyloTree() {
       }
     }
 
-    if (nodeStored[T_COLLAPSED] !== true) {
-      intermediateNodes.push(nodeStored);
+    if (nodeStored[T_IS_SET] !== true) {
+      if (nodeStored[T_DEPTH] === phylo_options.tree.depth) {
+        nodeStored[T_TERMINATED] = true;
+      } else {
+        nodeStored[T_TERMINATED] = false;
+      }
     }
 
-    if (nodeStored[T_IS_SET] !== true) {
-      nodeStored[T_TERMINATED] = node[T_TERMINATED];
+    if (nodeStored[T_COLLAPSED] !== true) {
+      intermediateNodes.push(nodeStored);
     }
 
   });
@@ -261,6 +274,7 @@ function drawPhyloTree() {
       }
     }
     node[T_IS_SET] = false;
+    node[T_COLLAPSED] = undefined;
   });
 
   let branches = getBranchesWithNodeID(nodeIdsForBranches);

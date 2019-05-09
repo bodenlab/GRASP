@@ -17,11 +17,11 @@ function setupCrossFilter() {
   phylo_options.data.node_db = crossfilter(phylo_options.tree.all_nodes);
 
   phylo_options.data.depth_dimension = phylo_options.data.node_db.dimension(function(d) {
-    return d[T_DEPTH] ? d[T_DEPTH] : 0;
+    return d[T_DEPTH] ? +d[T_DEPTH] : 0;
   });
 
   phylo_options.data.taxa_dimension = phylo_options.data.node_db.dimension(function(d) {
-    return d[T_TAXA];// ? d[T_TAXA] : "";
+    return d[T_TAXA] ? d[T_TAXA] : "";
   });
 
   phylo_options.data.node_name = phylo_options.data.node_db.dimension(function(d) {
@@ -40,8 +40,8 @@ function setupCrossFilter() {
 
 }
 
-function getNodesLessAndEqualToDepth(depth) {
-
+function getNodesLessAndEqualToDepth(depthIn) {
+  let depth = depthIn ? depthIn : 10;
   let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
     return d <= depth;
   }).top(Infinity);
@@ -53,7 +53,8 @@ function getNodesLessAndEqualToDepth(depth) {
  *
  * @param name
  */
-function getNodeLessThanDepth(depth) {
+function getNodeLessThanDepth(depthIn) {
+  let depth = depthIn ? depthIn : 10;
 
   let nodesIn = phylo_options.data.depth_dimension.filter(function(d) {
         return d <= depth;

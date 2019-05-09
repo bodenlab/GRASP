@@ -552,25 +552,33 @@ var draw_poag = function (poags, poag_name, nodes, edges, scale_y, group, poagPi
   // draw all reciprocated edges so that they are drawn on top of uni-directional ones
   for (var e in edges) {
     var edge = edges[e];
-    //if we have an out going edge
-    if (edge[E_TO] !== undefined) {
-      if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
-              && edge[E_TO][N_X] < poags.cur_x_max + 1)
-              || (edge[E_FROM][N_X] < poags.cur_x_max + 1
-                  && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
-        draw_edges(poags, edge, group, scale_y);
+    if ((edge[E_CONSENSUS] && poags.options.display.draw_consensus) || !poags.options.display.draw_consensus) {
+      //if we have an out going edge
+      if (edge[E_TO] !== undefined) {
+        if (edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
+                && edge[E_TO][N_X] < poags.cur_x_max + 1)
+                || (edge[E_FROM][N_X] < poags.cur_x_max + 1
+                    && edge[E_FROM][N_X] > poags.cur_x_min - 1))) {
+          draw_edges(poags, edge, group, scale_y);
+        }
       }
     }
   }
     // draw all not reciprocated edges first
     for (var e in edges) {
-        var edge = edges[e];
-      if (edge[E_TO] !== undefined) {
-        if (!edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
-                && edge[E_TO][N_X] < poags.cur_x_max + 1) || (edge[E_FROM][N_X]
-                < poags.cur_x_max + 1 && edge[E_FROM][N_X] > poags.cur_x_min
-                - 1))) {
-          draw_edges(poags, edge, group, scale_y);
+      var edge = edges[e];
+      if ((edge[E_CONSENSUS] && poags.options.display.draw_consensus) || !poags.options.display.draw_consensus) {
+
+        if (edge[E_TO] !== undefined) {
+
+            if (!edge[E_RECIPROCATED] && ((edge[E_TO][N_X] > poags.cur_x_min - 1
+                  && edge[E_TO][N_X] < poags.cur_x_max + 1)
+                  || (edge[E_FROM][N_X]
+                      < poags.cur_x_max + 1 && edge[E_FROM][N_X]
+                      > poags.cur_x_min
+                      - 1))) {
+            draw_edges(poags, edge, group, scale_y);
+          }
         }
       }
     }
@@ -1457,6 +1465,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
         stroke = edge_opt.reciprocated_stroke;
     }
     let drawCon = false;
+
     if (edge[E_CONSENSUS] && poags.options.display.draw_consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
         stroke = "#0008F8";
@@ -1470,11 +1479,12 @@ var draw_edges = function (poags, edge, group, scale_y) {
             .attr("id", 'edge-' + edge[E_FROM][UNIQUE_ID] + '-' + edge[E_TO][UNIQUE_ID])
             .attr("stroke-width", stroke_width)
             .attr("stroke", function() {
-              if (drawCon) {
-                return "#0008F8";
-              } else {
-                return colorScale(edge[E_WEIGHT])
-              }
+                return "#222";
+              // if (drawCon) {
+              //   return "#0008F8";
+              // } else {
+              //   return colorScale(edge[E_WEIGHT])
+              // }
             })
             .attr("stroke-dasharray", function() {
                 if (!edge[E_RECIPROCATED]) {
@@ -1483,7 +1493,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
                     return "0,0";
                 }
             })
-            .attr("opacity", 1) //edge_opt.opacity)
+            .attr("opacity", edge[E_WEIGHT]/100) //edge_opt.opacity)
             .attr("fill", "none")
             .attr("marker-mid", "url(#triangle-end)")
 

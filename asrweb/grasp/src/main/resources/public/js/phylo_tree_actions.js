@@ -21,15 +21,20 @@ let rotatePhyloTree = function() {
 
 
 
-var expand_all_nodes = function () {
-  phylo_options.tree.collapse_under = [];
-  phylo_options.tree.collapsed_selection = null;
-  set_children_un_terminated(phylo_options.tree.root);
-  collapse_subtree(phylo_options.tree.root, phylo_options.tree.all_nodes.length
-      - 1);
-  redraw_phylo_tree();
-  refresh_tree();
-}
+var expandAllNodes = function () {
+  if (Object.keys(phylo_options.tree.node_dict).length < 2000) {
+    // Change expanded to true for all nodes
+    for (let n in phylo_options.tree.node_dict) {
+      let node = phylo_options.tree.node_dict[n];
+      node[T_EXPANDED] = true;
+      node[T_COLLAPSED] = false;
+    }
+    phylo_options.tree.depth = phylo_options.tree.max_depth;
+    drawPhyloTree();
+  } else {
+    $('#expand-all-nodes-alert').removeClass("hidden");
+  }
+};
 
 let searchTree = function (search, clear, exact) {
   let terms = search.split("*"); // wildcard '*'

@@ -37,10 +37,11 @@
                                 <li>
                                     <h5>RAxML for Mac/Linux</h5>
                                     <ol>
-                                        <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running 'git clone https://github.com/stamatak/standard-RAxML.git' from your home directory in a terminal (command line) window</li>
-                                        <li>Navigate into the standard-RAxML directory using 'cd standard-RAxML'</li>
-                                        <li>Make the files by running 'make -f Makefile.PTHREADS.gcc'</li>
-                                        <li>Remove all output files that were created by running make 'rm *.o'</li>
+                                        <li>Download the source files from GitHub <a href="https://github.com/stamatak/standard-RAxML">here</a>, e.g. download the files or clone the repository by running <pre><code>git clone https://github.com/stamatak/standard-RAxML.git </code></pre>. from your home directory in a terminal (command line) window</li>
+                                        <li>Navigate into the standard-RAxML directory using
+                                            <pre><code>cd standard-RAxML </code></pre></li>
+                                        <li>Make the files by running <pre><code>make -f Makefile.PTHREADS.gcc</code></pre></li>
+                                        <li>Remove all output files that were created by running <pre><code>make 'rm *.o'</code></pre></li>
                                     </ol>
                                 </li>
                                 <li>
@@ -61,7 +62,7 @@
                         <h4>1. Align the extant sequences</h4>
                         <p>Align the sequences together using the default MAFFT settings. In effect, this step identifies the positions at which sequences are (putatively) homologous.<br></br>
                         In the console of your terminal window, type the following command in the same directory where you placed the downloaded tutorial .fasta file:</p>
-                        <p>mafft GRASPTutorial.fasta &gt; GRASPTutorial.aln</p>
+                        <p><pre><code>mafft GRASPTutorial.fasta &gt; GRASPTutorial.aln</code></pre></p>
                         <p>This will perform the multiple sequence alignment and save it to "GRASPTutorial.aln" in the same directory. By default, MAFFT uses the FASTA format, with an additional "gap" character.</p>
                     </div>
                     <div class="step">
@@ -70,7 +71,7 @@
                         <p>If you are using the user interface, use 'GRASPTutorial.aln' as the input alignment and follow the prompts in the interface. Save the resulting tree, and move to Step 3.</p>
                         <p>If you are using the command line version (recommended), type the following command in terminal from within the directory where you installed RAxML.
                         <br></br><em>Note: you will need to copy the input file (GRASPTutorial.aln) into the RAxML directory.</em></p>
-                        <p>./raxmlHPC-PTHREADS -m PROTGAMMAJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</p>
+                        <p><pre><code>./raxmlHPC-PTHREADS -m PROTGAMMAJTT -p 23456 -n GRASPTutorial.nwk -s GRASPTutorial.aln</code></pre></p>
                         <p class="col-xs-4">-m PROTGAMMAJTT</p>
                         <p class="col-xs-8">PROTGAMMAJTT specifies to optimise substitution rates, use a GAMMA model of rate heterogeneity, and
                             use the JTT amino acid substitution matrix.</p>
@@ -105,7 +106,7 @@
                         <p><em>Note: Since FigTree surrounds the labels with quotation marks, the labels will not match those in the alignment file and will cause an error
                             when attempting to run the reconstruction.</em></p>
                         <p>You can open the Newick file in a text editor to remove all single quotation marks from the labels, or more simply use a command such as "tr" to delete all occurrences of "&#39;":</p>
-                        <p>tr -d &#92;&#39; &lt; GRASPTutorial_FigTree.nwk &gt; GRASPTutorial.nwk</p>
+                        <p><pre><code>tr -d &#92;&#39; &lt; GRASPTutorial_FigTree.nwk &gt; GRASPTutorial.nwk</code></pre></p>
                     </div>
                     </div>
                     <div class="step">

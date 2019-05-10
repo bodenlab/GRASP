@@ -347,6 +347,7 @@ public class ConsensusObject {
             cameFrom.remove(current);
             current = prevNode;
         }
+
         // Reverse and create a string
         while (!sequence.empty()) {
             sequenceString += sequence.pop();

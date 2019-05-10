@@ -98,6 +98,13 @@
           symbol.</p>
         <p>e.g. "XP_005287999.1|Chordata_Testu...." etc </p>
       </div>
+      <div id="expand-all-nodes-alert" class="alert alert-danger alert-dismissible hidden"
+           role="alert">
+        <button type="button" class="close" onClick="onMsgClose('#expand-all-nodes-alert')">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <p>You can only expand all nodes for reconstructions with less than 1000 sequences.</p>
+      </div>
 
       <div>
 
@@ -122,7 +129,7 @@
                   onclick="toggle_additive()">View tree type | Additive
           </button>
           <button type="button" id="expand-all-nodes" class="btn btn-default col-xs-2"
-                  onclick="expand_all_nodes()">Expand all nodes
+                  onclick="expandAllNodes()">Expand all nodes
           </button>
           <button type="button" id="saveButton" class="btn btn-default col-xs-2"
                   onclick="save_phylo_svg_to_png()">Save tree
@@ -181,12 +188,12 @@
         </div>
         </div>
         <!-- ToDo: ADD BACK IN -->
-        <!--<button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="plus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="increaseDepth()">-->
-          <!--+-->
-        <!--</button>-->
-        <!--<button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="minus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="decreaseDepth()">-->
-          <!-- - -->
-        <!--</button>-->
+        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="plus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="increaseDepth()">
+          +
+        </button>
+        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="minus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="decreaseDepth()">
+           -
+        </button>
         <!--<button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="hosizontal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="makeHorizontalTree()">-->
           <!--Horizontal-->
         <!--</button>-->

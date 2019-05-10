@@ -429,6 +429,9 @@ var set_common_tax_node = function (node, taxonomy) {
  * @param taxa
  */
 function getTaxaAsText(taxa, commonTaxa, extant, name) {
+  if (taxa === undefined) {
+    return "";
+  }
   var ranks =  ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"]
   var rankDisplay =  {"t_domain": "Domain", "t_superkingdom": "Super Kingdom", "t_kingdom": "Kingdom", "t_phylum": "Phylum", "t_class_t": "Class", "t_order_t": "Order", "t_family": "Family", "t_genus": "Genus", "t_species": "Species"};
 
@@ -450,7 +453,7 @@ function getTaxaAsText(taxa, commonTaxa, extant, name) {
         }
       } else {
         // For each element in the taxa we want to display how many of each
-
+        let count = 0; // Only want to display up to 5
         for (let tIdx in taxa[rank]) {
           let taxaValue = taxa[rank][tIdx];
           if (tIdx != "undefined" && /\S/.test(tIdx) && drawnStart == false) {
@@ -462,6 +465,11 @@ function getTaxaAsText(taxa, commonTaxa, extant, name) {
           }
           if (tIdx != "undefined" && /\S/.test(tIdx)) {
             textDisplay += tIdx + "(" + taxaValue + ") "
+          }
+          count += 1;
+          if (count > 5) {
+            textDisplay += " ...";
+            break;
           }
         }
         if (drawnStart) {
@@ -566,7 +574,7 @@ function draw_histogram_taxonomy(node, group) {
   .attr("height", function (d) {
     return d.dy;
   })
-  .style("margin", "5px")
+  // .style("margin", "5px")
   .attr("stroke", d => d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_DIFFER_RANK]]) : color(d[T_TAXA]['t_order']))
   .attr("stroke-width",  d =>d[T_CHILDREN] ? "2px": "2px")
   .style("fill", function (d) {

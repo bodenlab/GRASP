@@ -348,6 +348,10 @@ public class ConsensusObject {
             current = prevNode;
         }
 
+        for (int i = 0; i < bestInitialNode.getId(); i ++) {
+            sequenceString += '-';
+        }
+
         // Reverse and create a string
         while (!sequence.empty()) {
             sequenceString += sequence.pop();

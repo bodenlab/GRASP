@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+<body>
+<div th:fragment="workshop" class="panel panel-default" aria-expanded="false" id="workshop">
+    <div class="content-section-b" id="workshop-div">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h2 id="Getting-Started" class="section-heading">Reconstructing Terpene synthases: an illustrative example of using GRASP and associated programs</h2>
+                    <h3>Required software</h3>
+                    <p>
+                    <ul>
+                    <li>Clustal Omega - Multiple Sequence Alignment (MSA) tool that is based on profile hidden Markov models and scales well to many thousands of protein sequences. See Sievers and Higgins (2018).</li>
+                    <li>FastTree - Phylogenetic tree inference tool that processes very large numbers of sequences. See Price et al. (2010).</li>
+                    <li>Archaeopteryx - Phylogenetic tree visualisation tool that manages to display very large trees. See Han and Zmasek (2009).</li>
+                    <li>AliView - Alignment inspection tool. See Larsson (2014).</li>
+                    </ul>
+                    </p>
+                    <h3>Pre-requisites</h3>
+                    <div class="step">
+                        <h4>Install required software</h4>
+                        <p>Clustal Omega (<a href="http://www.clustal.org/omega/">http://www.clustal.org/omega/</a>) and FastTree (<a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
+                            If you do not have these already, install the software on your machine using the instructions found on the websites for your operating system. There are many alternative programs that can be used for the same purpose. See <a href="http://grasp.scmb.uq.edu.au/guide">the guide</a> for some suggestions.</p>
+                        <p>Archaeopteryx can be found here: <a href="https://sites.google.com/site/cmzmasek/home/software/archaeopteryx">https://sites.google.com/site/cmzmasek/home/software/archaeopteryx</a>. <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a> is a capable alternative for visualising phylogenetic trees.</p>
+                        <p>AliView can be found here: <a href="http://ormbunkar.se/aliview/">http://ormbunkar.se/aliview/</a>.</p>
+                    </div>
+                    <div class="step">
+                        <h4>Prepare the use of Python</h4>
+                        <p>
+                            binfpy is a Python library we have developed for doing simple bioinformatics tasks; we are using it below to automate some of the data processing and data analysis.
+                            Before trying to install and use it, you need to have Python and git installed on your system. You may have them already, but if not, here's what you need to do</p>
+                        <ul>
+                            <li>Install Python 3 or later, with standard data science libraries (NumPy, SciPy and Matplotlib); we recommend <a href="https://www.anaconda.com">the Anaconda distribution</a> which has everything you need and will work with most operating systems</li>
+                            <li>Install git; check out <a href="https://www.atlassian.com/git/tutorials/install-git">this guide</a></li>
+                        </ul>
+                        <p>Once Python and git are on your system, you can setup binfpy. The following command will download it and place it in a directory called "binfpy".</p>
+                        <p class="code-style"><pre><code>git clone http://bioinf1.scmb.uq.edu.au/opensource/binfpy.git</code></pre></p>
+                        <p>Next you add this directory to your PYTHONPATH system variable; how you do this will depend on your operating system. In MacOS/Linux, you can do it like so:</p>
+                        <p class="code-style"><pre><code>export PYTHONPATH=$PYTHONPATH:$PWD/binfpy/src</code></pre></p>
+                        <p>You should now be ready to use Python and binfpy as per the examples below.</p>
+                    </div>
+                    <div class="step">
+                        <h3>Collate sequence data, establish homology and infer phylogenetic relationships</h3>
+                        <div class="step">
+                            <h4>Find and download sequences</h4>
+                            <p>There are at least two principal ways of creating a data set from which you can infer ancestor proteins.
+                                <ul>
+                                <li>Search for potential homologs similar (in sequence) to a specified query protein or set of proteins; typically, this would involve using BLASTp for one or more proteins of specific interest</li>
+                                <li>Extract all homologs for a specified and defined family or sub-family from one or more databases; this can involve the use of Uniprot's query interface and subsequent filtering</li>
+                                </ul>
+                            </p>
+                            <p>Terpene synthases are involved in the pathways for generating chemically complex compounds know as terpenes, which naturally occur in plants.
+                                There is interest to understand the origins of terpenes, and if novel terpene synthases have the capacity to create novel terpenes and/or with greater efficiency.
+                                The following steps highlight the scope of extant terpene synthases and establish their (potential) evolutionary origins;
+                                when viewed jointly, the sequence composition of ancestor terpenes synthases may highlight what parts are important and which can be tinkered with.
+                            </p>
+                            <p>The Uniprot web interface can be used to extract all reviewed, eukaryotic terpene synthases, using the following query</p>
+                            <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family"</code></pre></p>
+                            <p>As at 2 May 2019, there are 294 reviewed, and 6082 unreviewed proteins that are deemed members of this family.
+                                To limit the time required for data processing, we will primarily analyse the reviewed members. (They are typically of good quality, after having passed Uniprot's review processes.)
+                                It is important to consider the value of using unreviewed data, to increase coverage and biological variation.
+                            </p>
+                            <p>The next couple of instructions are optional and meant to illustrate what you can do if you wanted to complete the whole process yourself; the final set of files are provided later.
+                                If you decide to download them yourself, save them as FASTA files and call them tps_reviewed.fa and tps_unreviewed.fa, respectively.
+                                In fact, using the Uniprot web page, you can edit the query to your liking.
+                            </p>
+                            <p>Bohlmann et al. (1998) identifies six sub-families of terpene synthases: tpsa, tpsb, tpsc, tpsd, tpse and tpsf.
+                                We will use these to inform our approach so you can download a few more files from querying Uniprot about them; for example
+                            </p>
+                            <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family tpsa subfamily" AND reviewed:yes</code></pre></p>
+                            <p>Download it as a FASTA file; for now call it tpsa.fa. Repeat this process for each subfamily.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <h4>Annotate extant sequences</h4>
+                        <p>While this step is optional, it may help interpreting some of the outputs below.
+                            We will be dealing with hundreds (or even thousands) of sequences, so it is useful to have access to additional information about them when available when looking at them collectively.</p>
+                        <p>We have developed a simple-to-use web tool <a href="http://bioinf.scmb.uq.edu.au/seqscrub">SeqScrub</a> that can enrich any FASTA file with taxonomic information available from NCBI.
+                            <a href="http://bioinf.scmb.uq.edu.au/seqscrub">SeqScrub</a> can also check if your data set has sequences that are out-of-date or contain invalid characters;
+                            this latter functionality is especially useful if you are scraping data from older databases.
+                        </p>
+                        <p>
+                            In our case we have other specialised information about the sequence data, like the subfamily to which sequences belong.
+                            For such tasks, there may not be a public tool that can help us; instead we write some Python code to add this information to our files.
+                        </p>
+                        <p>Start your Python interpreter, or (optionally) open a Jupyter Notebook</p>
+                        <p class="code-style"><pre><code>python</code></pre></p>
+                        <p>Here's some code</p>
+                        <p class="code-style"><pre><code>
+    import sequence # import the binfpy sequence package
+    # here we load all reviewed sequences and create a dictionary which will allow us to recall each by its name
+    findmyseq = {}
+    seqs = sequence.readFastaFile('tps_reviewed.fa', sequence.Protein_Alphabet, parse_defline=False)
+    print('Loaded', len(seqs), 'sequences')
+    for s in seqs:
+        findmyseq[s.name] = s
+    # next we load each of the sub-family specific FASTA files to collect the names of each sub-family
+    subfamily = ['a','b','c','d','e','f'] # all sub-families
+    subfnames = {} # a dictionary with names of members of each sub-family
+    for f in subfamily:
+        fseqs = sequence.readFastaFile('tps' + f + '.fa', sequence.Protein_Alphabet, parse_defline=False)
+        subfnames[f] = []
+        for s in fseqs:
+            subfnames[f].append(s.name)
+        print('Loaded', len(fseqs), 'sequences for sub-family tps' + f)
+    # finally we revisit the original sequence data to amend the name of those entries which belong to a sub-family
+    for s in seqs:
+        for f in subfamily:
+            if s.name in subfnames[f]:
+                s.info = s.info + ' SF=' + f # add another field to the header-line
+                s.name = s.name + '|Tps' + f # extend the sequence name (which is used later)
+                break
+    # save the sequences as a new FASTA file
+    sequence.writeFastaFile('tps_reviewed_v1.fa', seqs)
+                        </code></pre></p>
+                        <p>Now we have a new FASTA file tps_reviewed_v1.fa that we will use going forward.
+                            Since we amended the actual name, it will appear in the alignment file and the tree file that are generated from it.</p>
+                    </div>
+                    <div class="step">
+                        <h4>Align extant sequences</h4>
+                        <p></p>
+                        <p class="code-style"><pre><code>clustalo -i tps_reviewed_v1.fa -o tps_reviewed_v1.aln --output-order=tree-order</code></pre></p>
+                        <p>This will perform the multiple sequence alignment and save it to "tps_reviewed_v1.aln" in the same directory.
+                            By default, Clustal Omega uses the FASTA format, with an additional "gap" character.
+                            The switch "--output-order=tree-order" ensures that sequences are ordered so that they agree with how they are likely grouped in a phylogenetic analysis.</p>
+                    </div>
+                    <div class="step">
+                        <h4>Review alignment</h4>
+                        <p>Start AliView and load the alignment file.
+                            Look at it and ask if it successfully captures homologous regions amongst members.
+                            Conversely, consider it the alignment accurately separates sections that are not homologous.
+                            It is not unusual to see fragmentation at the termini, especially in light of selective presence of protein translocation signals.
+                            Fragmentation within the core areas of the alignment can be dubious, and we should consider sources of support for them; if there is little, we may want to exclude the sequence/s.
+                        </p>
+                        <p>
+                            In binfpy there is a function that will take a whole alignment and determine an "outlier" score for each sequence.
+                            Each column \(i\) in an alignment with \(m\) sequences has \(N_i^{G}\) gaps and \(N_i^{C}\) non-gap characters.
+                            The outlier score of a sequence within this alignment is
+                            \(\sum_i -log(log_m N_i^{x_i})
+                            \) where \(x_i\) is either \(G\) or \(C\), if the sequence has a gap or a non-gap character, respectively, at column \(i\).
+                            This entropy-based score is small for sequences which conform with the consensus state (whichever it is) and large for sequences that stray from it.
+                            One possibility is to use this score to evaluate each reviewed sequence when aligned against all of the other sequences, including the unreviewed ones.
+                            That way, we evaluate the extent to which they are outliers in a broader sense than if we were to look at them only in the context of the smaller, reviewed-only alignment.
+                        </p>
+                        <p>To carry out this initial filtering, align the complete set of terpene synthases (save as all.aln); then run the following code.</p>
+                        <p class="code-style"><pre><code>
+    import sequence
+    import numpy as np
+    aln = sequence.Alignment(sequence.readFastaFile('tps_all.aln', alphabet=sequence.Protein_Alphabet, gappy=True, ignore=True, parse_defline=False))
+    y, g, ins = aln.outliers()
+    ys = np.argsort(y)
+    keep = []
+    for i in ys: # go through each entry in the bigger alignment in ascending order of an aggregated
+        if aln[i].name in findmyseq:
+            if y[i] < 425:
+                print('Keep\t', findmyseq[aln[i].name].name, '\t', y[i])
+                keep.append(aln[i].name)
+            else:
+                print('Bin\t', findmyseq[aln[i].name].name, '\t', y[i])
+                print('Total kept:', len(keep))
+    filtered = []
+    for sname in findmyseq:
+        s = findmyseq[sname]
+        if sname in keep:
+            filtered.append(s)
+    sequence.writeFastaFile('tps_reviewed_v2.fa', filtered)
+                        </code></pre></p>
+                        <p>Note that we used a threshold "425" at which a sequence would be binned as an outlier.
+                            This value could be changed to be more or less sensitive to your expert taste;
+                            keep an eye on what the sequences that you filter out look like in the original alignment.
+                        </p>
+                    </div>
+                    <div class="step">
+                        <h4>Infer phylogenetic tree</h4>
+                        <p>Run a phylogenetic tree inference program on the alignment to generate a tree. This usually takes a few minutes, if not hours, depending on size of data set, and type of program. FastTree will infer a tree for 200+ terpene synthases in less than a minute though.</p>
+                        <p class="code-style"><pre><code>FastTree -out tps_reviewed_v2.nwk tps_reviewed_v2.aln</code></pre></p>
+                    </div>
+                    <div class="step">
+                        <h4>Review phylogenetic tree</h4>
+                        <p>Start Archaeopteryx and load the alignment file using the menu that appears.</p>
+                        <p class="code-style"><pre><code>Archaeopteryx</code></pre></p>
+                        <p>The first issue we need to resolve is to place the root of the tree correctly.
+                        <p>The basic tutorial used a outgroup, i.e. an additional homologous sequence (or set of sequences) that most probably would have diverged prior to the other family members.
+                        From prior expertise, we are thus able to identify the branch on which the ancestor of that earlier evolutionary event would be placed.
+                            As a consequence, we would know what branch point represents the ancestor of the members of interest. </p>
+                        <p>For the terpene synthases, we refer to a previous phylogenetic analysis, which identified the relationship between six sub-families (Tpsa-Tpsf; Bohlmann et al. 1998).
+                        Since we extended sequence names with that information in the original FASTA file, this info is now available for searching in our tree.
+                            Fortunately, Archaeopteryx provides a SEARCH function (see Figure 1).
+                        Once you have placed the root where it identifies an ancestor from which the sub-classes originate in a reasonable manner, save it to a new file, tps_reviewed_v2r.nwk.</p>
+                        <a id="tree_howtoroot-img"></a>
+                        <div class="col-xs-12">
+                            <div class="img" id="workshop_tps-nwk-img-div"></div>
+                        </div>
+                        <figcaption class="figure-caption">Figure 1.
+                            Archaeopteryx offers dual search fields (1), type "Tpsa" and "Tpsb" to search for entries with those two words, to be highlighted in two colours.
+                            Note that the inferred tree has an arbitrary root set, and may therefore show entries from the two sub-families ina disjointed manner (2).
+                            Find the point where the root should be for the sub-families to separate correctly,
+                            by first consulting with Bohlmann et al. (1998) then activating the "Root/Reroot" function, and clicking on a branch point (3).
+                        </figcaption>
+                    </div>
+                    <div class="step">
+                        <h4>Consider filtering the sequence set, re-aligning and inferring a new tree</h4>
+                        <p>At this stage it may be clear that sequences are placed poorly in the tree, suggesting that they are not aligned properly.
+                            It is also possible that some sequences cannot be adequately analysed, due to limitations in evolutionary models etc.
+                            For instance, larger re-arrangements can cause major problems, and in many instances it may be better to manually edit the alignment and/or exclude sequences entirely.
+                            Needless to say, make sure to record changes you make, and re-run alignment and tree inference.
+                            This may need to be done repeatedly, until you are happy that the alignment and tree only reflect actual evolutionary relationships.</p>
+                    </div>
+                    <div class="step">
+                        <h3>Infer ancestral sequences</h3>
+                        <div class="step">
+                            <p>If you skipped the practical data curation steps, or had had issues them, download an <a href="/download-tutorial-files-aln">alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
+                        </div>
+                        <div class="step">
+                            <h4>6. Perform the reconstruction using GRASP</h4>
+                            <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
+                            <p>GRASP may indicate that some of the sequences are obsolete.</p>
+                            <p>Note down any obsolete sequences and optionally remove these from the original extant sequence file.
+                                Perform the alignment and tree inference steps with the modified file (Steps 1-2).
+                                Repeat Step 6 with the new alignment and tree files. </p>
+                        </div>
+                        <div class="step">
+                            <h4>7. Inspect the reconstructed sequences</h4>
+                            <p>Explore GRASP:</p>
+
+                            <p class="col-xs-4"> Click Annotate
+                                Taxonomy at the top of the tree </p>
+                            <p class="col-xs-8">
+                                This will get the taxonomic information
+                                for the sequences.
+
+                                <em>Note:
+                                    taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em>
+                            </p>
+
+                            <p class="col-xs-4">Left-click on tree nodes</p>
+                            <p class="col-xs-8">This will show any taxonomic information (if available) of the selected ancestor.
+                                At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
+                                Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
+                                nodes in the tree) show the full available taxonomic information for that extant.
+                            </p>
+                            <p class="col-xs-4">Right-click on tree nodes</p>
+                            <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
+                                From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
+                                reconstruction graph that will be displayed below the current joint reconstruction. See <a href="http://grasp.scmb.uq.edu.au/guide#results-phylo-nav">the guide</a> for more details.</p>
+                            <p class="col-xs-4">Inspect the reconstructed ancestral POG</p>
+                            <p class="col-xs-8">At the bottom of the page you will see at least two partial order graphs. The top graph is the alignment graph (POAG; also referred to as MSA as it derives directly
+                                from the input multiple sequence alignment), and the bottom
+                                graph/s are the reconstructed ancestor graphs (POGs). Hovering over the graph nodes will display a popup showing a histogram of the characters in the
+                                alignment POAG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
+                                <br></br><br></br>
+                                We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
+                            <p>Explore the other display options on the page.</p>
+                        </div>
+                        <div class="step">
+                            <h4>8. Explore insertions and deletions</h4>
+                            <p>Identify the node that represents the ancestor of <em>only</em> the CYP2U1 sequences and infer the ancestor here.</p>
+                            <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both the CYP2U1 and CYP2R1 sequences.</em></p>
+                            <p class="question">What do the red circles in the navigation bar indicate?</p>
+                            <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
+                            <p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>
+                            <p class="question">Which sequences contribute to the edge in the (MSA) POAG that jumps the node that is missing from the CYP2U1 ancestor? Does this explain why this node isn't inferred in this ancestor?</p>
+                            <p>Take note of the node ID (i.e. the grey number under the node) of the first red circle.</p>
+                            <p>Infer the CYP2R1 ancestor and navigate to the node ID you took note of.</p>
+                            <p class="question">Is the node missing as well in the CYP2R1 ancestor? Similar to the CYP2U1 ancestor, does considering the sequences that contribute to the different edges explain why this node is inferred in this ancestor?</p>
+                            <p>Insertion or deletion events are also indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
+                                This means that groups of characters have been inferred to be parsimonious. The darker paths find greater support than the lighter paths; however, both could be considered.</p>
+                        </div>
+                        <div class="step">
+                            <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
+                            <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish.</p>
+                            <p><em>Note: the taxonomic name for the ray-finned fish is <a href="https://en.wikipedia.org/wiki/Actinopterygii">Actinopterygii</a> and because GRASP mapped the taxonomy successfully we should be able to search on the term "Actinopteri" which is the major class of ray-finned fish. </em></p>
+                            <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
+                            <p>Set up your data so you are displaying the (MSA) POAG, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously.</p>
+                            <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
+                            <p class="question">Can you identify differences between these inferred ancestors?</p>
+                            <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
+                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>
+                            <p> Look at the second grey box in the navigation bar and note the differences between the ancestors. </p>
+                            <p>Remember that GRASP indicates a more supported path (based on <a href="http://grasp.scmb.uq.edu.au/guide#bi-pars-nav">edge parsimony</a>) as a darker edge.</p>
+                            <p class="question"> Why does GRASP suggest two paths with greater support for the CYP2U1 ancestor? Why might it be useful to consider both paths when reconstructing an ancestor?</p>
+                        </div>
+                        <div class="step">
+                            <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>
+                            <p>Reconstruct the CYP2U1 ancestor.</p>
+                            <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.
+                                Consensus sequences only follow a single path, so you can use your alignment viewer to look at the downloaded results.</p>
+                            <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction
+                                (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
+                                at the top left corner and following the prompts for creating an account with GRASP.
+                                You can access the list of previously saved reconstructions by clicking your account name which will appear in the menu at the top right corner.</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cell border-box-sizing text_cell rendered">
+                <div class="inner_cell">
+                    <div class="text_cell_render border-box-sizing rendered_html">
+                        <h2 id="refs-nav">References</h2>
+                        <ol>
+                            <li>Sievers F and Higgins DG (2018) Clustal Omega for making accurate alignments of many protein sciences. <i>Protein Sci</i>. 27:135-145. <a href="https://doi.org/10.1002/pro.3290">DOI</a>.</li>
+                            <li>Price MN, Dehal PS and Arkin AP (2010) FastTree 2 -- Approximately Maximum-Likelihood Trees for Large Alignments. <i>PLoS ONE</i>. 5(3):e9490. <a href="https://doi.org/10.1371/journal.pone.0009490">DOI</a>.</li>
+                            <li>Han MV and Zmasek CM (2009) phyloXML: XML for evolutionary biology and comparative genomics. <i>BMC Bioinformatics</i>. 10:356. <a href="https://doi.org/10.1186/1471-2105-10-356">DOI</a>.</li>
+                            <li>Larsson A (2014) AliView: a fast and lightweight alignment viewer and editor for large data sets. <i>Bioinformatics</i>. 30(22): 3276-3278. <a href="http://dx.doi.org/10.1093/bioinformatics/btu531">DOI</a>.</li>
+                            <li>Bohlmann et al. (1998) Plant terpenoid synthases: Molecular biology and phylogenetic analysis. <i>PNAS</i>. Vol. 95, pp. 4126–4133.<a href="https://dx.doi.org/10.1073/pnas.95.8.4126">DOI</a>.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

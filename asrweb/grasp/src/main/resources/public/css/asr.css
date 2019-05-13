@@ -91,6 +91,14 @@ h6 {
     height: 0;
     padding-top: 10%;
 }
+#workshop_tps-nwk-img-div {
+    background: url(../images/tree_howtoroot.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 40%;
+    height: 0;
+    padding-top: 10%;
+}
 #GRASP-MSA-img-div {
     background: url(../images/GRASP_MSA.png);
     background-size: contain;

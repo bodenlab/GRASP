@@ -674,6 +674,21 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
+     * Show workshop tutorial
+     *
+     * @return guide html
+     */
+    @RequestMapping(value = "/tutorialtps", method = RequestMethod.GET)
+    public ModelAndView showTutorialTps(Model model) {
+        ModelAndView mav = new ModelAndView("tutorial_tps");
+        mav.addObject("results", asr.getLabel() != "");
+        mav.addObject("user", loggedInUser);
+        mav.addObject("username", loggedInUser.getUsername());
+        return mav;
+    }
+
+
+    /**
      * Show feature log
      *
      * @return feature log html

@@ -4,7 +4,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 </head>
 <body>
-<div th:fragment="workshop" class="panel panel-default" aria-expanded="false" id="workshop">
+<div th:fragment="workshop_tps" class="panel panel-default" aria-expanded="false" id="workshop_tps">
     <div class="content-section-b" id="workshop-div">
         <div class="container">
             <div class="row">
@@ -12,12 +12,12 @@
                     <h2 id="Getting-Started" class="section-heading">Reconstructing Terpene synthases: an illustrative example of using GRASP and associated programs</h2>
                     <h3>Required software</h3>
                     <p>
-                    <ul>
-                    <li>Clustal Omega - Multiple Sequence Alignment (MSA) tool that is based on profile hidden Markov models and scales well to many thousands of protein sequences. See Sievers and Higgins (2018).</li>
-                    <li>FastTree - Phylogenetic tree inference tool that processes very large numbers of sequences. See Price et al. (2010).</li>
-                    <li>Archaeopteryx - Phylogenetic tree visualisation tool that manages to display very large trees. See Han and Zmasek (2009).</li>
-                    <li>AliView - Alignment inspection tool. See Larsson (2014).</li>
-                    </ul>
+                        <ul>
+                        <li>Clustal Omega - Multiple Sequence Alignment (MSA) tool that is based on profile hidden Markov models and scales well to many thousands of protein sequences. See Sievers and Higgins (2018).</li>
+                        <li>FastTree - Phylogenetic tree inference tool that processes very large numbers of sequences. See Price et al. (2010).</li>
+                        <li>Archaeopteryx - Phylogenetic tree visualisation tool that manages to display very large trees. See Han and Zmasek (2009).</li>
+                        <li>AliView - Alignment inspection tool. See Larsson (2014).</li>
+                        </ul>
                     </p>
                     <h3>Pre-requisites</h3>
                     <div class="step">
@@ -31,7 +31,8 @@
                         <h4>Prepare the use of Python</h4>
                         <p>
                             binfpy is a Python library we have developed for doing simple bioinformatics tasks; we are using it below to automate some of the data processing and data analysis.
-                            Before trying to install and use it, you need to have Python and git installed on your system. You may have them already, but if not, here's what you need to do</p>
+                            Before trying to install and use it, you need to have Python and git installed on your system. You may have them already, but if not, here's what you need to do
+                        </p>
                         <ul>
                             <li>Install Python 3 or later, with standard data science libraries (NumPy, SciPy and Matplotlib); we recommend <a href="https://www.anaconda.com">the Anaconda distribution</a> which has everything you need and will work with most operating systems</li>
                             <li>Install git; check out <a href="https://www.atlassian.com/git/tutorials/install-git">this guide</a></li>
@@ -77,7 +78,8 @@
                     <div class="step">
                         <h4>Annotate extant sequences</h4>
                         <p>While this step is optional, it may help interpreting some of the outputs below.
-                            We will be dealing with hundreds (or even thousands) of sequences, so it is useful to have access to additional information about them when available when looking at them collectively.</p>
+                            We will be dealing with hundreds (or even thousands) of sequences, so it is useful to have access to additional information about them when available when looking at them collectively.
+                        </p>
                         <p>We have developed a simple-to-use web tool <a href="http://bioinf.scmb.uq.edu.au/seqscrub">SeqScrub</a> that can enrich any FASTA file with taxonomic information available from NCBI.
                             <a href="http://bioinf.scmb.uq.edu.au/seqscrub">SeqScrub</a> can also check if your data set has sequences that are out-of-date or contain invalid characters;
                             this latter functionality is especially useful if you are scraping data from older databases.
@@ -89,39 +91,66 @@
                         <p>Start your Python interpreter, or (optionally) open a Jupyter Notebook</p>
                         <p class="code-style"><pre><code>python</code></pre></p>
                         <p>Here's some code</p>
-                        <p class="code-style"><pre><code>
-    import sequence # import the binfpy sequence package
-    # here we load all reviewed sequences and create a dictionary which will allow us to recall each by its name
-    findmyseq = {}
-    seqs = sequence.readFastaFile('tps_reviewed.fa', sequence.Protein_Alphabet, parse_defline=False)
-    print('Loaded', len(seqs), 'sequences')
-    for s in seqs:
-        findmyseq[s.name] = s
-    # next we load each of the sub-family specific FASTA files to collect the names of each sub-family
-    subfamily = ['a','b','c','d','e','f'] # all sub-families
-    subfnames = {} # a dictionary with names of members of each sub-family
-    for f in subfamily:
-        fseqs = sequence.readFastaFile('tps' + f + '.fa', sequence.Protein_Alphabet, parse_defline=False)
-        subfnames[f] = []
-        for s in fseqs:
-            subfnames[f].append(s.name)
-        print('Loaded', len(fseqs), 'sequences for sub-family tps' + f)
-    # finally we revisit the original sequence data to amend the name of those entries which belong to a sub-family
-    for s in seqs:
-        for f in subfamily:
-            if s.name in subfnames[f]:
-                s.info = s.info + ' SF=' + f # add another field to the header-line
-                s.name = s.name + '|Tps' + f # extend the sequence name (which is used later)
-                break
-    # save the sequences as a new FASTA file
-    sequence.writeFastaFile('tps_reviewed_v1.fa', seqs)
-                        </code></pre></p>
+                        <p class="code-style"> <!-- HTML generated using hilite.me --><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">sequence</span> <span style="color: #008800; font-style: italic"># import the binfpy sequence package</span>
+<span style="color: #008800; font-style: italic"># here we load all reviewed sequences and create a dictionary which will allow us to recall each by its name</span>
+findmyseq <span style="color: #666666">=</span> {}
+seqs <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tps_reviewed.fa&#39;</span>, sequence<span style="color: #666666">.</span>Protein_Alphabet, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>)
+<span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Loaded&#39;</span>, <span style="color: #AA22FF">len</span>(seqs), <span style="color: #BB4444">&#39;sequences&#39;</span>)
+<span style="color: #AA22FF; font-weight: bold">for</span> s <span style="color: #AA22FF; font-weight: bold">in</span> seqs:
+    findmyseq[s<span style="color: #666666">.</span>name] <span style="color: #666666">=</span> s
+<span style="color: #008800; font-style: italic"># next we load each of the sub-family specific FASTA files to collect the names of each sub-family</span>
+subfamily <span style="color: #666666">=</span> [<span style="color: #BB4444">&#39;a&#39;</span>,<span style="color: #BB4444">&#39;b&#39;</span>,<span style="color: #BB4444">&#39;c&#39;</span>,<span style="color: #BB4444">&#39;d&#39;</span>,<span style="color: #BB4444">&#39;e&#39;</span>,<span style="color: #BB4444">&#39;f&#39;</span>] <span style="color: #008800; font-style: italic"># all sub-families</span>
+subfnames <span style="color: #666666">=</span> {} <span style="color: #008800; font-style: italic"># a dictionary with names of members of each sub-family</span>
+<span style="color: #AA22FF; font-weight: bold">for</span> f <span style="color: #AA22FF; font-weight: bold">in</span> subfamily:
+    fseqs <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tps&#39;</span> <span style="color: #666666">+</span> f <span style="color: #666666">+</span> <span style="color: #BB4444">&#39;.fa&#39;</span>, sequence<span style="color: #666666">.</span>Protein_Alphabet, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>)
+    subfnames[f] <span style="color: #666666">=</span> []
+    <span style="color: #AA22FF; font-weight: bold">for</span> s <span style="color: #AA22FF; font-weight: bold">in</span> fseqs:
+        subfnames[f]<span style="color: #666666">.</span>append(s<span style="color: #666666">.</span>name)
+    <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Loaded&#39;</span>, <span style="color: #AA22FF">len</span>(fseqs), <span style="color: #BB4444">&#39;sequences for sub-family tps&#39;</span> <span style="color: #666666">+</span> f)
+<span style="color: #008800; font-style: italic"># finally we revisit the original sequence data to amend the name of those entries which belong to a sub-family</span>
+<span style="color: #AA22FF; font-weight: bold">for</span> s <span style="color: #AA22FF; font-weight: bold">in</span> seqs:
+    <span style="color: #AA22FF; font-weight: bold">for</span> f <span style="color: #AA22FF; font-weight: bold">in</span> subfamily:
+        <span style="color: #AA22FF; font-weight: bold">if</span> s<span style="color: #666666">.</span>name <span style="color: #AA22FF; font-weight: bold">in</span> subfnames[f]:
+            s<span style="color: #666666">.</span>info <span style="color: #666666">=</span> s<span style="color: #666666">.</span>info <span style="color: #666666">+</span> <span style="color: #BB4444">&#39; SF=&#39;</span> <span style="color: #666666">+</span> f <span style="color: #008800; font-style: italic"># add another field to the header-line</span>
+            s<span style="color: #666666">.</span>name <span style="color: #666666">=</span> s<span style="color: #666666">.</span>name <span style="color: #666666">+</span> <span style="color: #BB4444">&#39;|Tps&#39;</span> <span style="color: #666666">+</span> f <span style="color: #008800; font-style: italic"># extend the sequence name (which is used later)</span>
+            <span style="color: #AA22FF; font-weight: bold">break</span>
+<span style="color: #008800; font-style: italic"># save the sequences as a new FASTA file</span>
+sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: #BB4444">&#39;tps_reviewed_v1.fa&#39;</span>, seqs)
+</pre>
+                       </p>
+
+                        <!--import sequence # import the binfpy sequence package-->
+    <!--# here we load all reviewed sequences and create a dictionary which will allow us to recall each by its name-->
+    <!--findmyseq = {}-->
+    <!--seqs = sequence.readFastaFile('tps_reviewed.fa', sequence.Protein_Alphabet, parse_defline=False)-->
+    <!--print('Loaded', len(seqs), 'sequences')-->
+    <!--for s in seqs:-->
+        <!--findmyseq[s.name] = s-->
+    <!--# next we load each of the sub-family specific FASTA files to collect the names of each sub-family-->
+    <!--subfamily = ['a','b','c','d','e','f'] # all sub-families-->
+    <!--subfnames = {} # a dictionary with names of members of each sub-family-->
+    <!--for f in subfamily:-->
+        <!--fseqs = sequence.readFastaFile('tps' + f + '.fa', sequence.Protein_Alphabet, parse_defline=False)-->
+        <!--subfnames[f] = []-->
+        <!--for s in fseqs:-->
+            <!--subfnames[f].append(s.name)-->
+        <!--print('Loaded', len(fseqs), 'sequences for sub-family tps' + f)-->
+    <!--# finally we revisit the original sequence data to amend the name of those entries which belong to a sub-family-->
+    <!--for s in seqs:-->
+        <!--for f in subfamily:-->
+            <!--if s.name in subfnames[f]:-->
+                <!--s.info = s.info + ' SF=' + f # add another field to the header-line-->
+                <!--s.name = s.name + '|Tps' + f # extend the sequence name (which is used later)-->
+                <!--break-->
+    <!--# save the sequences as a new FASTA file-->
+    <!--sequence.writeFastaFile('tps_reviewed_v1.fa', seqs)-->
+
                         <p>Now we have a new FASTA file tps_reviewed_v1.fa that we will use going forward.
                             Since we amended the actual name, it will appear in the alignment file and the tree file that are generated from it.</p>
                     </div>
                     <div class="step">
                         <h4>Align extant sequences</h4>
-                        <p></p>
+                        <p>ss</p>
                         <p class="code-style"><pre><code>clustalo -i tps_reviewed_v1.fa -o tps_reviewed_v1.aln --output-order=tree-order</code></pre></p>
                         <p>This will perform the multiple sequence alignment and save it to "tps_reviewed_v1.aln" in the same directory.
                             By default, Clustal Omega uses the FASTA format, with an additional "gap" character.
@@ -129,7 +158,8 @@
                     </div>
                     <div class="step">
                         <h4>Review alignment</h4>
-                        <p>Start AliView and load the alignment file.
+                        <p>
+                            Start AliView and load the alignment file.
                             Look at it and ask if it successfully captures homologous regions amongst members.
                             Conversely, consider it the alignment accurately separates sections that are not homologous.
                             It is not unusual to see fragmentation at the termini, especially in light of selective presence of protein translocation signals.
@@ -146,28 +176,53 @@
                             That way, we evaluate the extent to which they are outliers in a broader sense than if we were to look at them only in the context of the smaller, reviewed-only alignment.
                         </p>
                         <p>To carry out this initial filtering, align the complete set of terpene synthases (save as all.aln); then run the following code.</p>
-                        <p class="code-style"><pre><code>
-    import sequence
-    import numpy as np
-    aln = sequence.Alignment(sequence.readFastaFile('tps_all.aln', alphabet=sequence.Protein_Alphabet, gappy=True, ignore=True, parse_defline=False))
-    y, g, ins = aln.outliers()
-    ys = np.argsort(y)
-    keep = []
-    for i in ys: # go through each entry in the bigger alignment in ascending order of an aggregated
-        if aln[i].name in findmyseq:
-            if y[i] < 425:
-                print('Keep\t', findmyseq[aln[i].name].name, '\t', y[i])
-                keep.append(aln[i].name)
-            else:
-                print('Bin\t', findmyseq[aln[i].name].name, '\t', y[i])
-                print('Total kept:', len(keep))
-    filtered = []
-    for sname in findmyseq:
-        s = findmyseq[sname]
-        if sname in keep:
-            filtered.append(s)
-    sequence.writeFastaFile('tps_reviewed_v2.fa', filtered)
-                        </code></pre></p>
+                        <p class="code-style">
+<!-- HTML generated using hilite.me -->
+                        <pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">sequence</span>
+<span style="color: #AA22FF; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span> <span style="color: #AA22FF; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">np</span>
+aln <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>Alignment(sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tps_all.aln&#39;</span>, alphabet<span style="color: #666666">=</span>sequence<span style="color: #666666">.</span>Protein_Alphabet, gappy<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">True</span>, ignore<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">True</span>, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>))
+y, g, ins <span style="color: #666666">=</span> aln<span style="color: #666666">.</span>outliers()
+ys <span style="color: #666666">=</span> np<span style="color: #666666">.</span>argsort(y)
+keep <span style="color: #666666">=</span> []
+<span style="color: #AA22FF; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> ys: <span style="color: #008800; font-style: italic"># go through each entry in the bigger alignment in ascending order of an aggregated</span>
+    <span style="color: #AA22FF; font-weight: bold">if</span> aln[i]<span style="color: #666666">.</span>name <span style="color: #AA22FF; font-weight: bold">in</span> findmyseq:
+        <span style="color: #AA22FF; font-weight: bold">if</span> y[i] <span style="color: #BB4444">&quot;less than&quot;</span> <span style="color: #666666">425</span>:
+            <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Keep</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, findmyseq[aln[i]<span style="color: #666666">.</span>name]<span style="color: #666666">.</span>name, <span style="color: #BB4444">&#39;</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, y[i])
+            keep<span style="color: #666666">.</span>append(aln[i]<span style="color: #666666">.</span>name)
+        <span style="color: #AA22FF; font-weight: bold">else</span>:
+            <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Bin</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, findmyseq[aln[i]<span style="color: #666666">.</span>name]<span style="color: #666666">.</span>name, <span style="color: #BB4444">&#39;</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, y[i])
+            <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Total kept:&#39;</span>, <span style="color: #AA22FF">len</span>(keep))
+filtered <span style="color: #666666">=</span> []
+<span style="color: #AA22FF; font-weight: bold">for</span> sname <span style="color: #AA22FF; font-weight: bold">in</span> findmyseq:
+    s <span style="color: #666666">=</span> findmyseq[sname]
+    <span style="color: #AA22FF; font-weight: bold">if</span> sname <span style="color: #AA22FF; font-weight: bold">in</span> keep:
+        filtered<span style="color: #666666">.</span>append(s)
+sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: #BB4444">&#39;tps_reviewed_v2.fa&#39;</span>, filtered)
+</pre>
+
+                        </p>
+
+
+    <!--import sequence-->
+    <!--import numpy as np-->
+    <!--aln = sequence.Alignment(sequence.readFastaFile('tps_all.aln', alphabet=sequence.Protein_Alphabet, gappy=True, ignore=True, parse_defline=False))-->
+    <!--y, g, ins = aln.outliers()-->
+    <!--ys = np.argsort(y)-->
+    <!--keep = []-->
+    <!--for i in ys: # go through each entry in the bigger alignment in ascending order of an aggregated-->
+        <!--if aln[i].name in findmyseq:-->
+            <!--if y[i] "less than" 425:-->
+                <!--print('Keep\t', findmyseq[aln[i].name].name, '\t', y[i])-->
+                <!--keep.append(aln[i].name)-->
+            <!--else:-->
+                <!--print('Bin\t', findmyseq[aln[i].name].name, '\t', y[i])-->
+                <!--print('Total kept:', len(keep))-->
+    <!--filtered = []-->
+    <!--for sname in findmyseq:-->
+        <!--s = findmyseq[sname]-->
+        <!--if sname in keep:-->
+            <!--filtered.append(s)-->
+    <!--sequence.writeFastaFile('tps_reviewed_v2.fa', filtered)-->
                         <p>Note that we used a threshold "425" at which a sequence would be binned as an outlier.
                             This value could be changed to be more or less sensitive to your expert taste;
                             keep an eye on what the sequences that you filter out look like in the original alignment.
@@ -182,7 +237,7 @@
                         <h4>Review phylogenetic tree</h4>
                         <p>Start Archaeopteryx and load the alignment file using the menu that appears.</p>
                         <p class="code-style"><pre><code>Archaeopteryx</code></pre></p>
-                        <p>The first issue we need to resolve is to place the root of the tree correctly.
+                        <p>The first issue we need to resolve is to place the root of the tree correctly.</p>
                         <p>The basic tutorial used a outgroup, i.e. an additional homologous sequence (or set of sequences) that most probably would have diverged prior to the other family members.
                         From prior expertise, we are thus able to identify the branch on which the ancestor of that earlier evolutionary event would be placed.
                             As a consequence, we would know what branch point represents the ancestor of the members of interest. </p>
@@ -191,8 +246,8 @@
                             Fortunately, Archaeopteryx provides a SEARCH function (see Figure 1).
                         Once you have placed the root where it identifies an ancestor from which the sub-classes originate in a reasonable manner, save it to a new file, tps_reviewed_v2r.nwk.</p>
                         <a id="tree_howtoroot-img"></a>
-                        <div class="col-xs-12">
-                            <div class="img" id="workshop_tps-nwk-img-div"></div>
+                        <div class="col-xs-12" style="height: 400px;">
+                            <div class="img" style="height: 400px;" id="workshop_tps-nwk-img-div"></div>
                         </div>
                         <figcaption class="figure-caption">Figure 1.
                             Archaeopteryx offers dual search fields (1), type "Tpsa" and "Tpsb" to search for entries with those two words, to be highlighted in two colours.
@@ -212,7 +267,7 @@
                     <div class="step">
                         <h3>Infer ancestral sequences</h3>
                         <div class="step">
-                            <p>If you skipped the practical data curation steps, or had had issues them, download an <a href="/download-tutorial-files-aln">alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
+                            <p>If you skipped the practical data curation steps, or had had issues them, download an alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
                         </div>
                         <div class="step">
                             <h4>6. Perform the reconstruction using GRASP</h4>

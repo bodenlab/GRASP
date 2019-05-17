@@ -5,6 +5,11 @@ import com.asr.grasp.objects.EmailObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.TimeUnit;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -125,6 +130,7 @@ public class SaveController implements Runnable {
      */
     @Override
     public void run() {
+        long startTime = System.currentTimeMillis();
         try {
             if (runRecon) {
                 asr.runReconstruction();
@@ -180,16 +186,26 @@ public class SaveController implements Runnable {
                 // Now we want to send an email notifying the user that their reconstruction is complete
                 EmailObject email = new EmailObject(user.getUsername(), user.getEmail(),
                         Defines.RECONSTRUCTION);
-                email.setContentError(currRecon.getLabel(), e.getMessage());
+                email.setContentError(currRecon.getLabel(), e.getMessage() + " " + e.getLocalizedMessage());
                 emailController.sendEmail(email);
             } catch (Exception e2) {
-                System.out.println("Couldn't send the error email: " + e2);
+                System.out.println("Couldn't send the error email: " + e2.getStackTrace());
             }
-            System.out.println("Couldn't run the saving thread: " + e);
+            System.out.println("Couldn't run the saving thread: " + e.getStackTrace());
             isSaving = false;
         }
 
-        // Set asr & all other variables to null so that GC knows to clean this up.
+        long endTime = System.currentTimeMillis();
+
+        long timeElapsed = endTime - startTime;
+        try {
+            Files.write(Paths.get("/Users/ariane/Documents/boden/apps/ASR/asrweb/grasp/time_full_saving_log_17052019.csv"), (currRecon.getLabel() + "," +timeElapsed + "," + asr.getNumberSequences() + "," + asr.getNumberAlnCols() + "," + asr.getNumberBases() + "," + asr.getNumberDeletedNodes() + "," + asr.getNumberThreads() + "\n").getBytes(), StandardOpenOption.APPEND);
+        }catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+//        String filename = "/home/dev/grasp_runables/data/full-time_" +  + "_" + currRecon.getLabel() + ".csv";
+
+                // Set asr & all other variables to null so that GC knows to clean this up.
         asr = null;
         reconController = null;
         seqController = null;
@@ -199,6 +215,7 @@ public class SaveController implements Runnable {
         currRecon = null;
         inference = null;
         isSaving = false;
+
     }
 
     /**

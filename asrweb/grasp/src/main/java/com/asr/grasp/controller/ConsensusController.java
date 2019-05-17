@@ -48,7 +48,17 @@ public class ConsensusController {
     public TreeNodeObject getEdgeMappingForNode(int reconId, int userId, String nodeLabel) {
         // Get the reconstructed tree from the database
         TreeObject tree = treeController.getById(reconId, userId);
-        TreeNodeObject node = tree.getNodeByLabel(nodeLabel.split("_")[0]);
+        TreeNodeObject node = null;
+        try {
+            node = tree.getNodeByLabel(nodeLabel.split("_")[0]);
+        } catch (Exception e) {
+            try {
+                node = tree.getNodeByLabel(nodeLabel);
+            } catch (Exception e1) {
+                System.out.print(e.getStackTrace() + "" + e1.getStackTrace());
+                return null;
+            }
+        }
         // Now we want to build the edge count map up recursively.
         node.buildEdgeCountMap(seqController, reconId);
 

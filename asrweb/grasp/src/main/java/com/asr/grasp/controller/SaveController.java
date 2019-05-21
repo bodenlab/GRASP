@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -26,6 +27,9 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 public class SaveController implements Runnable {
+
+    @Value("${logging.dir}")
+    public String loggingDir;
 
     ReconstructionController reconController;
     SeqController seqController;
@@ -197,13 +201,14 @@ public class SaveController implements Runnable {
 
         long endTime = System.currentTimeMillis();
 
-        long timeElapsed = endTime - startTime;
+        long timeElapsed = ((endTime - startTime)/1000);
         try {
-            Files.write(Paths.get("/Users/ariane/Documents/boden/apps/ASR/asrweb/grasp/time_full_saving_log_17052019.csv"), (currRecon.getLabel() + "," +timeElapsed + "," + asr.getNumberSequences() + "," + asr.getNumberAlnCols() + "," + asr.getNumberBases() + "," + asr.getNumberDeletedNodes() + "," + asr.getNumberThreads() + "\n").getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get("/home/dev/grasp_runables/data/time_full_saving_log_17052019.csv"), (currRecon.getLabel() + "," +timeElapsed + "," + asr.getNumberSequences() + "," + asr.getNumberAlnCols() + "," + asr.getNumberBases() + "," + asr.getNumberDeletedNodes() + "," + asr.getNumberThreads() + "\n").getBytes(), StandardOpenOption.APPEND);
+
         }catch (IOException e) {
+            System.out.println("Unable to print to stats file: time_full_saving_log_17052019.csv");
             //exception handling left as an exercise for the reader
         }
-//        String filename = "/home/dev/grasp_runables/data/full-time_" +  + "_" + currRecon.getLabel() + ".csv";
 
                 // Set asr & all other variables to null so that GC knows to clean this up.
         asr = null;

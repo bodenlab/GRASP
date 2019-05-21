@@ -49,14 +49,18 @@ public class EmailObject {
 
     public void setContentError(String reconName, String errorMessage) {
         this.content = "Dear " + username + ", \n "
-                + " Unfortunately your reconstruction " + reconName + " wasn't able to complete!\n"
+                + " Unfortunately your reconstruction " + reconName + " wasn't able to completed!\n"
+                + " Some common errors include:\n"
+                + " 1. Not being logged in;\n"
+                + " 2. Running a marginal reconstruction before your joint reconstruction has completed (this means we haven't saved all the exent sequences yet); and\n"
+                + " 3. Having an odd labelling format for your internal tree nodes.\n"
                 + " Please try again, if you have this issue again, please send the GRASP team an email and "
                 + "forward on the following error: \n"
                 + "\t" + errorMessage + "\n"
                 + " Also please attach your files you were trying to run as this will help us to diagnose the issue.\n"
                 + " Note: there are a number of common errors that occur, for these, please visit: http://grasp.scmb.uq.edu.au/guide#errors-nav\n"
                 + " Cheers, \n The grasp team :) ";
-        this.subject = "Reconstruction complete at GRASP";
+        this.subject = "Reconstruction not complete at GRASP";
     }
 
     public void setContent(String reconName) {

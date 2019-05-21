@@ -1185,13 +1185,16 @@ public class GraspApplication extends SpringBootServletInitializer {
                 mav.addObject("error", true);
                 return mav;
             }
-            isSaving = saveController.getIsSaving();
-            if (isSaving) {
-                ModelAndView mav = new ModelAndView("index");
-                mav.addObject("errorMessage", "You can only save one reconstruction at a time, sorry! We're working on batching this :) ");
-                mav.addObject("user", loggedInUser);
-                mav.addObject("error", true);
-                return mav;
+            if (saveController != null) {
+                isSaving = saveController.getIsSaving();
+                if (isSaving) {
+                    ModelAndView mav = new ModelAndView("index");
+                    mav.addObject("errorMessage",
+                            "You can only save one reconstruction at a time, sorry! We're working on batching this :) ");
+                    mav.addObject("user", loggedInUser);
+                    mav.addObject("error", true);
+                    return mav;
+                }
             }
             // Set the loggedin users email temp
             loggedInUser.setEmail(asr.getEmail());

@@ -1493,7 +1493,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
                     return "0,0";
                 }
             })
-            .attr("opacity", edge[E_WEIGHT]/100) //edge_opt.opacity)
+            .attr("opacity", (1 - Math.log2(edge[E_WEIGHT]/100))/(Math.log2(0.0001))) //edge_opt.opacity)
             .attr("fill", "none")
             .attr("marker-mid", "url(#triangle-end)")
 

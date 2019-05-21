@@ -316,7 +316,7 @@ public class ConsensusObject {
     private String reconstructPath(HashMap< Node,  Path> cameFrom,  Node current, boolean gappy) {
         Stack<Character> sequence = new Stack<>();
         // Add the initial Base that we decided on during the pre-processing stage
-        String sequenceString = "" + bestInitialNode.getBase();
+        String sequenceString = "";
         // Set the initial and final edges
         initialAndFinalEdges.get(bestInitialNode.getId()).setConsensus(true);
         initialAndFinalEdges.get(bestFinalNode.getId()).setConsensus(true);
@@ -352,6 +352,7 @@ public class ConsensusObject {
             sequenceString += '-';
         }
 
+        sequenceString += bestInitialNode.getBase();
         // Reverse and create a string
         while (!sequence.empty()) {
             sequenceString += sequence.pop();

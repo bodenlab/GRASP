@@ -1081,13 +1081,17 @@ public class GraspApplication extends SpringBootServletInitializer {
             HttpServletRequest request) {
 
         String graphs;
-
+        String err;
         if (runningMarginal) {
             marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
             runningMarginal = false;
             // int reconId, String label, ASRPOG asrInstance, boolean gappy
             // Set to be gappy
-            seqController.insertSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
+            err = seqController.insertSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
+            if (err != null) {
+                System.out.println(err);
+                return err;
+            }
             // Saves this Marginal reconstruction to the DB so the user can access it later.
             graphs = marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
         } else {
@@ -1181,13 +1185,16 @@ public class GraspApplication extends SpringBootServletInitializer {
                 mav.addObject("error", true);
                 return mav;
             }
-            isSaving = saveController.getIsSaving();
-            if (isSaving) {
-                ModelAndView mav = new ModelAndView("index");
-                mav.addObject("errorMessage", "You can only save one reconstruction at a time, sorry! We're working on batching this :) ");
-                mav.addObject("user", loggedInUser);
-                mav.addObject("error", true);
-                return mav;
+            if (saveController != null) {
+                isSaving = saveController.getIsSaving();
+                if (isSaving) {
+                    ModelAndView mav = new ModelAndView("index");
+                    mav.addObject("errorMessage",
+                            "You can only save one reconstruction at a time, sorry! We're working on batching this :) ");
+                    mav.addObject("user", loggedInUser);
+                    mav.addObject("error", true);
+                    return mav;
+                }
             }
             // Set the loggedin users email temp
             loggedInUser.setEmail(asr.getEmail());

@@ -246,6 +246,9 @@ public class SeqController {
      */
     public String insertSeqIntoDb(int reconId, String label, ASRPOG asrInstance, int userId, int reconType, boolean gappy) {
         TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
+        if (node == null) {
+            return "The labels on your tree were not as we expected! Please send an example of your tree to us so we can update how we process it.";
+        }
         PartialOrderGraph ancestor = asrInstance.getGraph(label);
         // Insert it into the database
         // What we want to do here is perform two inserts -> one for the sequence so we can do

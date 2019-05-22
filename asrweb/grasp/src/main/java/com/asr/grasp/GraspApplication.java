@@ -23,6 +23,7 @@ import java.util.Collections;
 import json.JSONArray;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -49,6 +50,9 @@ import java.util.logging.Logger;
 public class GraspApplication extends SpringBootServletInitializer {
 
     private final static Logger logger = Logger.getLogger(GraspApplication.class.getName());
+
+    @Value("${project.loggingdir}")
+    private String loggingDir;
 
     private ASRThread recon = null;
 
@@ -606,7 +610,11 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     public void saveCurrReconStartThread() {
         saveController = new SaveController(reconController, currRecon, userController, loggedInUser, emailController, seqController, treeController, saveGappySeq, true);
+
+        saveController.setLoggingDir(loggingDir);
+
         saveController.initialiseForReconstruction(asr);
+
         saveController.start();
 
         // Remove the reference to the thread otherwise GC won't be able to clean it up.

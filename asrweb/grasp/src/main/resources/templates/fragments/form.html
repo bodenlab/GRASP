@@ -229,26 +229,26 @@
                       /*]]>*/
                     </script>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-6">
-                    <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Save all your ancestors or just the N0. This will increase the time for your reconstruction to run. If you only are
-                        interested in a small number of nodes then it is recomended you select these nodes to reconstruct from the visualisation." >
-                        <input id="run-all" type="checkbox" data-size="small" data-label-text="Ancestors to reconstruct" data-label-width="300" data-handle-width="200" data-off-text="Reconstruct N0" data-on-color="default" data-on-text="Reconstruct All" />
-                    </div>
-                    <input type="hidden" th:value="runall" th:field="*{runAll}" class="inferenceType" />
-                    <script type="text/javascript">
-                      /*<![CDATA[*/
-                      $("[id='run-all']").bootstrapSwitch();
-                      $('input[id="run-all"]').on('switchChange.bootstrapSwitch', function(event, state) {
-                        if (state == true) {
-                          $('#runAll').val(true);
-                        } else {
-                          $('#runAll').val(false);
-                        }
-                      });
-                      /*]]>*/
-                    </script>
+                <!--<div class="form-group row col-sm-offset-1 col-sm-6">-->
+                    <!--<div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Save all your ancestors or just the N0. This will increase the time for your reconstruction to run. If you only are-->
+                        <!--interested in a small number of nodes then it is recomended you select these nodes to reconstruct from the visualisation." >-->
+                        <!--<input id="run-all" type="checkbox" data-size="small" data-label-text="Ancestors to reconstruct" data-label-width="300" data-handle-width="200" data-off-text="Reconstruct N0" data-on-color="default" data-on-text="Reconstruct All" />-->
+                    <!--</div>-->
+                    <!--<input type="hidden" th:value="runall" th:field="*{runAll}" class="inferenceType" />-->
+                    <!--<script type="text/javascript">-->
+                      <!--/*<![CDATA[*/-->
+                      <!--$("[id='run-all']").bootstrapSwitch();-->
+                      <!--$('input[id="run-all"]').on('switchChange.bootstrapSwitch', function(event, state) {-->
+                        <!--if (state == true) {-->
+                          <!--$('#runAll').val(true);-->
+                        <!--} else {-->
+                          <!--$('#runAll').val(false);-->
+                        <!--}-->
+                      <!--});-->
+                      <!--/*]]>*/-->
+                    <!--</script>-->
 
-                </div>
+                <!--</div>-->
                 <div class="form-group row col-sm-offset-2 col-sm-12 pad-top-bottom">
                     <input type="text" class="form-input col-xs-6"
                            placeholder="Email for saving your reconstruction..."

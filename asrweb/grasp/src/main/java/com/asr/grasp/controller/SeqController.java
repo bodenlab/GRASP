@@ -10,8 +10,6 @@ import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.TreeNodeObject;
 import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
-import com.sun.java.swing.plaf.motif.resources.motif;
-import dat.POGraph;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,6 +19,7 @@ import java.util.List;
 import json.JSONArray;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
 import vis.POAGJson;
@@ -40,6 +39,8 @@ import vis.POAGJson;
 @Service
 public class SeqController {
 
+    @Value("${project.loggingdir}")
+    private String loggingDir;
 
     @Autowired
     private InferenceModel infModel;
@@ -118,49 +119,58 @@ public class SeqController {
      */
     public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave, int userId, String reconLabel) {
         List<String> insertedLabels = new ArrayList<>();
+        BufferedWriter bw = null;
         try {
-//            BufferedWriter bw = new BufferedWriter(
-//                    new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving_consensus.csv", false));
-//            bw.write("Label,Time (ms), Num Children\n");
-            for (String label : toSave) {
-                long startTime = System.nanoTime();
-                System.out.println("Running " + label);
-                PartialOrderGraph ancestor = asrInstance.getGraph(label);
-                // Insert it into the database
-                // What we want to do here is perform two inserts -> one for the sequence so we can do
-                // motif searching
-                POAGJson ancsJson = new POAGJson(ancestor, gappy);
-                String ancsStr = ancsJson.toJSON().toString();
-
-                boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
-                if (!inserted) {
-                    return null;
-                }
-                TreeNodeObject node = consensusController
-                        .getEdgeMappingForNode(reconId, userId, label);
-                ConsensusObject c = new ConsensusObject(node.getSeqCountList(),
-                        node.getNumSeqsUnderNode());
-                c.setJsonObject(new JSONObject(ancsStr));
-                // ToDO:
-                String supportedSeq = c.getSupportedSequence(true);
-                System.out.println(supportedSeq);
-
-                String infUpdated = c.getAsJson().toString();
-                updateDBInference(reconId, label, infUpdated);
-                // Also want to update the Joint sequence
-                inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
-                        gappy);
-                long endTime = System.nanoTime();
-                long duration = (endTime - startTime)/100000;
-//                bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
-            }
-            System.out.println("\n Finished Inserting Joint recons.");
-//            bw.close();
-            return insertedLabels;
+            bw = new BufferedWriter(
+                    new FileWriter(loggingDir + reconLabel + "_" + reconId
+                            + "_rid_stats_saving_consensus.csv", false));
+            bw.write("Label,Time (ms), Num Children\n");
         } catch (Exception e) {
-            System.out.println("\n UNABLE TO INSERT RECONS IO EXCEPTION.");
+            System.out.println("Unable to open logging file:" + loggingDir + reconLabel + "_" + reconId
+                    + "_rid_stats_saving_consensus.csv" );
+
         }
-        return null;
+        for (String label : toSave) {
+            long startTime = System.currentTimeMillis();
+            System.out.println("Running " + label);
+            PartialOrderGraph ancestor = asrInstance.getGraph(label);
+            // Insert it into the database
+            // What we want to do here is perform two inserts -> one for the sequence so we can do
+            // motif searching
+            POAGJson ancsJson = new POAGJson(ancestor, gappy);
+            String ancsStr = ancsJson.toJSON().toString();
+
+            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+            if (!inserted) {
+                return null;
+            }
+            TreeNodeObject node = consensusController
+                    .getEdgeMappingForNode(reconId, userId, label);
+            ConsensusObject c = new ConsensusObject(node.getSeqCountList(),
+                    node.getNumSeqsUnderNode());
+            c.setJsonObject(new JSONObject(ancsStr));
+            // ToDO:
+            String supportedSeq = c.getSupportedSequence(true);
+            System.out.println(supportedSeq);
+
+            String infUpdated = c.getAsJson().toString();
+            updateDBInference(reconId, label, infUpdated);
+            // Also want to update the Joint sequence
+            inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
+                    gappy);
+            long endTime = System.currentTimeMillis();
+            long duration = (endTime - startTime);
+            if (bw != null) {
+                try {
+                    bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
+                } catch (Exception e) {
+                    System.out.println("Unable to write to logging file.");
+                }
+            }
+        }
+        System.out.println("\n Finished Inserting Joint recons.");
+//            bw.close();
+        return insertedLabels;
     }
 
     /**
@@ -176,8 +186,23 @@ public class SeqController {
         List<String> insertedLabels = new ArrayList<>();
         List<String> labels = asrInstance.getAncestralSeqLabels();
         TreeObject tree = consensusController.getEdgeMapping(reconId, userId);
+        BufferedWriter bw = null;
+
+        try {
+            bw = new BufferedWriter(
+                    new FileWriter(loggingDir +  "ALL_" + reconId
+                            + "_rid_stats_saving_consensus.csv", false));
+            bw.write("Label,Time (ms), Num Children\n");
+        } catch (Exception e) {
+            System.out.println("Unable to open logging file:" + loggingDir  + "ALL_" + reconId
+                    + "_rid_stats_saving_consensus.csv" );
+
+        }
+        TreeNodeObject node;
 
         for (String label: labels) {
+            long startTime = System.currentTimeMillis();
+
             System.out.println("Running " +  label );
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
             // Insert it into the database
@@ -187,7 +212,8 @@ public class SeqController {
             String ancsStr = ancsJson.toJSON().toString();
 
             // ToDo: remove once the speedy method has been implemented
-            boolean inserted = updateForConsensus(reconId, label, tree.getNodeByOriginalLabel(label), ancsStr, Defines.JOINT, gappy);
+            node = tree.getNodeByOriginalLabel(label);
+            boolean inserted = updateForConsensus(reconId, label, node, ancsStr, Defines.JOINT, gappy);
 
             if (!inserted) {
                 return null;
@@ -201,6 +227,15 @@ public class SeqController {
                 }
                 inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
             */
+            long endTime = System.currentTimeMillis();
+            long duration = (endTime - startTime);
+            if (bw != null) {
+                try {
+                    bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
+                } catch (Exception e) {
+                    System.out.println("Unable to write to logging file.");
+                }
+            }
         }
         System.out.println("\n Finished Inserting Joint recons.");
         return insertedLabels;

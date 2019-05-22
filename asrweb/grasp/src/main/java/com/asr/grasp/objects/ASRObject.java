@@ -31,6 +31,7 @@ public class ASRObject {
     private ASRController asrController;
 
     private String email = "";
+    private boolean runAll = false;
     private boolean save = true;
 
     private String dataPath = "data/app/";
@@ -101,6 +102,10 @@ public class ASRObject {
      */
     public String getEmail() { return this.email; }
     public void setEmail(String email) { this.email = email; }
+
+    public boolean getRunAll() { return this.runAll; }
+    public void setRunAll(boolean runAll) { this.runAll = runAll;}
+
     public boolean getSave() { return this.save; }
     public void setSave(boolean save) { this.save = save;}
 

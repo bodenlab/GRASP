@@ -99,8 +99,10 @@ public class TreeControllerTest extends BaseTest {
         System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
         System.out.println("------------------------------------");
         // ToDO: UPDATE THESE AND CONFIRM WE ARE GETTING THE RESULTS WE EXPECT
-        //assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N2_1.000,-2.0, N0,N0,-10.0"));
-
+        assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N2_1.000,-2.0, N0,N0,-10.0"));
+        for (String s: result) {
+            System.out.println(s);
+        }
 
         // Should print out eq. nodes
         result = treeController.getSimilarNodes(sml, mid, false);
@@ -108,14 +110,18 @@ public class TreeControllerTest extends BaseTest {
         System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
         System.out.println("------------------------------------");
         //assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N2_1.000,N1_1.000,-2.0, N0,N0,-10.0"));
-
+        for (String s: result) {
+            System.out.println(s);
+        }
 
         result = treeController.getSimilarNodes(mid, lrg, false);
         System.out.println("------------------------------------");
         System.out.println(result.get(0) + ", " + result.get(result.size() - 1));
         System.out.println("------------------------------------");
         //assertThat(result.get(0) + ", " + result.get(result.size() - 1), equalTo("N5_0.968,N20_0.959,-2.0, N0,N0,-20.0"));
-
+        for (String s: result) {
+            System.out.println(s);
+        }
         result = treeController.getSimilarNodes(sml, lrg, false);
         System.out.println("-----------------------------");
         for (String s: result) {

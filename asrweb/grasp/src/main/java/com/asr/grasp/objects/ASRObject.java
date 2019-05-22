@@ -103,7 +103,7 @@ public class ASRObject {
     public String getEmail() { return this.email; }
     public void setEmail(String email) { this.email = email; }
 
-    public boolean getRunAll() { return this.runAll; }
+    public boolean getRunAll() { return true;}// ToDo: ADD THIS BACK IN, have temporarily disabled. this.runAll; }
     public void setRunAll(boolean runAll) { this.runAll = runAll;}
 
     public boolean getSave() { return this.save; }

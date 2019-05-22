@@ -9,14 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.concurrent.TimeUnit;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
-import reconstruction.ASRPOG;
+import org.springframework.stereotype.Service;
 
 /**
  * A class that is out of the @session and @beans to allow saving when the connection
@@ -26,11 +22,10 @@ import reconstruction.ASRPOG;
  * complete.
  *
  */
-@Controller
+@Service
 public class SaveController implements Runnable {
 
-    @Value("${logging.dir}")
-    public String loggingDir;
+    private String loggingDir;
 
     ReconstructionController reconController;
     SeqController seqController;
@@ -131,6 +126,16 @@ public class SaveController implements Runnable {
 
 
     /**
+     * Since this isn't autowired --> for cleaning up purposes, we need to actually set the
+     * parameters e.g. the logging dir.
+     * @param loggingDir
+     */
+    public void setLoggingDir(String loggingDir) {
+        this.loggingDir = loggingDir;
+    }
+
+    /**
+     *
      * The run method of the thread saves the Joint Reconstructions to the database.
      * Optionally it also performs the reconstruction.
      *
@@ -214,10 +219,10 @@ public class SaveController implements Runnable {
 
         long timeElapsed = ((endTime - startTime)/1000);
         try {
-            Files.write(Paths.get("/home/dev/grasp_runables/data/time_full_saving_log_17052019.csv"), (currRecon.getLabel() + "," +timeElapsed + "," + asr.getNumberSequences() + "," + asr.getNumberAlnCols() + "," + asr.getNumberBases() + "," + asr.getNumberDeletedNodes() + "," + asr.getNumberThreads() + "\n").getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get(loggingDir + "/time_full_saving_log_17052019.csv"), (currRecon.getLabel() + "," + timeElapsed + "," + asr.getNumberSequences() + "," + asr.getNumberAlnCols() + "," + asr.getNumberBases() + "," + asr.getNumberDeletedNodes() + "," + asr.getNumberThreads() + "\n").getBytes(), StandardOpenOption.APPEND);
 
-        }catch (IOException e) {
-            System.out.println("Unable to print to stats file: time_full_saving_log_17052019.csv");
+        } catch (IOException e) {
+            System.out.println("Unable to print to stats file: time_full_saving_log_17052019.csv" + loggingDir);
             //exception handling left as an exercise for the reader
         }
 

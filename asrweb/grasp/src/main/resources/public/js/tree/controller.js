@@ -136,7 +136,7 @@ function decreaseDepth() {
  */
 function addExpandedChildrenNodes(node, allChildren, isCollapsed, depth) {
   if (node[T_EXTANT]) {
-    allChildren.push(node);
+    allChildren.add(node);
     node[T_COLLAPSED] = isCollapsed;
     node[T_IS_SET] = true;
     return;
@@ -145,14 +145,14 @@ function addExpandedChildrenNodes(node, allChildren, isCollapsed, depth) {
     node[T_COLLAPSED] = isCollapsed;
     node[T_TERMINATED] = true;
     node[T_IS_SET] = true;
-    allChildren.push(node);
+    allChildren.add(node);
     return;
   }
   if (node[T_DEPTH] < depth + 3) {
     node[T_CHILDREN].forEach(child => addExpandedChildrenNodes(child, allChildren, isCollapsed, depth));
     node[T_COLLAPSED] = isCollapsed;
     node[T_IS_SET] = true;
-    allChildren.push(node);
+    allChildren.add(node);
 
   }
 
@@ -184,7 +184,7 @@ function addExpandedParentNodes(node, allParents) {
     return;
   }
   node[T_COLLAPSED] = false;
-  allParents.push(node[T_PARENT]);
+  allParents.add(node[T_PARENT]);
   addExpandedParentNodes(node[T_PARENT], allParents);
 }
 
@@ -195,11 +195,11 @@ function addExpandedParentNodes(node, allParents) {
 function drawPhyloTree() {
   var nodes = getNodeLessThanDepth(phylo_options.tree.depth);
 
-  let expandedNodes = [];
+  let expandedNodes = new Set();
 
   nodes.sort(function(a, b){return a[T_DEPTH] - b[T_DEPTH]});
 
-  let intermediateNodes = [];
+  let intermediateNodes = new Set();
 
   // Reset parameters.
   for (let n in phylo_options.tree.node_dict) {
@@ -208,6 +208,7 @@ function drawPhyloTree() {
     node[T_TERMINATED] = undefined;
     node[T_IS_SET] = undefined;
   }
+
   // Here we always need to iterate through and work out if there are any nodes
   // that should have their children added.
   nodes.forEach(function(node) {
@@ -248,17 +249,16 @@ function drawPhyloTree() {
     }
 
     if (nodeStored[T_COLLAPSED] !== true) {
-      intermediateNodes.push(nodeStored);
+      intermediateNodes.add(nodeStored);
     }
 
   });
 
   // Add any expanded nodes
+  for (let n in expandedNodes) {
+    intermediateNodes.add(expandedNodes[n]);
+  }
 
-  intermediateNodes = intermediateNodes.concat(expandedNodes);
-
-  // Add any expanded nodes
-  intermediateNodes = intermediateNodes.concat(expandedNodes);
   let nodeIdsForBranches = [];
   let visibleNodes = [];
 

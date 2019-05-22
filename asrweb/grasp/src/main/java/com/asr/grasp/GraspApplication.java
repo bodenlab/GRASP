@@ -868,9 +868,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
-            JSONObject ancestor = asr.getAncestralGraphJSON(dataJson.getString("nodeLabel"));
-            reconstructedNodes.add(ancestor);
-            return ancestor.toString();
+            // If this recon has an ID i.e. the user has saved it before then save this recon.
+            if (currRecon.getId() != Defines.UNINIT) {
+                seqController.insertSeqIntoDb(currRecon.getId(), nodeLabel, asr.getASRPOG(Defines.JOINT), loggedInUser.getId(), Defines.JOINT, true);
+
+            }
+            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
+
+            return reconstructedAnsc;
         }
 
         // Here we want to update the one in the database so that we don't have to re-do this do for

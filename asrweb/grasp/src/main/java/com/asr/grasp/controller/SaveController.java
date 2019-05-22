@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import reconstruction.ASRPOG;
 
 /**
  * A class that is out of the @session and @beans to allow saving when the connection
@@ -48,6 +49,7 @@ public class SaveController implements Runnable {
     private boolean runRecon; // Lets us know whether we need to run the reconstruction
     private boolean saveGappySeq;
     private boolean isSaving;
+    private boolean runAll;
 
     /**
      * To allow us to have a saveController object in the main App.
@@ -102,6 +104,7 @@ public class SaveController implements Runnable {
         this.asr.setInferenceType(inference);
         this.asr.setWorkingNodeLabel(node);
         this.asr.setNodeLabel(node);
+        this.runAll = asr.getRunAll();
         this.owner = user;
         this.runRecon = true;
     }
@@ -177,8 +180,16 @@ public class SaveController implements Runnable {
                 seqController.insertSpecificJointsToDB(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
                         saveGappySeq, nodeLabels, user.getId(), currRecon.getLabel());
             } else {
-                seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
-                        saveGappySeq, user.getId());
+                // Check if we want to save all of the reconstructions or just N0
+                if (runAll) {
+                    seqController
+                            .insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
+                                    saveGappySeq, user.getId());
+                } else {
+
+                    // Otherwise just do N0
+                    seqController.insertSeqIntoDb(currRecon.getId(), asr.getWorkingNodeLabel(), asr.getASRPOG(Defines.JOINT), user.getId(), Defines.JOINT, true);
+                }
             }
             // Now we want to send an email notifying the user that their reconstruction is complete
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);

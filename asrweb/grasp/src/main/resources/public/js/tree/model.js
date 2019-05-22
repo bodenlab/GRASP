@@ -408,9 +408,8 @@ function makeChild(node, left, depth) {
  * @returns {*|string}
  */
 function formatTreeNodeId(nodeLabel) {
-  let h = nodeLabel.split(/[._-|]+/);
-  let k = h.join('');
-  return k;
+  nodeLabel = nodeLabel.replace(/[^a-zA-Z0-9]/g, '');
+  return nodeLabel;
 }
 
 /**

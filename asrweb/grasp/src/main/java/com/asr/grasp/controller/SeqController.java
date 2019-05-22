@@ -119,9 +119,9 @@ public class SeqController {
     public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave, int userId, String reconLabel) {
         List<String> insertedLabels = new ArrayList<>();
         try {
-            BufferedWriter bw = new BufferedWriter(
-                    new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving_consensus.csv", false));
-            bw.write("Label,Time (ms), Num Children\n");
+//            BufferedWriter bw = new BufferedWriter(
+//                    new FileWriter("/home/dev/grasp_runables/data/" + reconLabel + "_" + reconId + "_rid_stats_saving_consensus.csv", false));
+//            bw.write("Label,Time (ms), Num Children\n");
             for (String label : toSave) {
                 long startTime = System.nanoTime();
                 System.out.println("Running " + label);
@@ -152,10 +152,10 @@ public class SeqController {
                         gappy);
                 long endTime = System.nanoTime();
                 long duration = (endTime - startTime)/100000;
-                bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
+//                bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
             }
             System.out.println("\n Finished Inserting Joint recons.");
-            bw.close();
+//            bw.close();
             return insertedLabels;
         } catch (Exception e) {
             System.out.println("\n UNABLE TO INSERT RECONS IO EXCEPTION.");

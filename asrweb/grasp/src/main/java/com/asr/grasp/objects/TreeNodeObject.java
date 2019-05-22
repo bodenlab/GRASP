@@ -331,7 +331,7 @@ public class TreeNodeObject {
             } else {
                 this.label = splitOnPipe[0];
             }
-        } else if (rawLabel.split("_").length > 1) {
+        } else if (!extent && rawLabel.split("_").length > 1) {
             this.label = rawLabel.split("_")[0];
         } else if (extent || rawLabel.equals("N0") || !isNumber) {
             this.label = rawLabel;

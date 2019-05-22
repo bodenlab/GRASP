@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import reconstruction.ASRPOG;
 
 /**
  * A class that is out of the @session and @beans to allow saving when the connection
@@ -187,10 +188,7 @@ public class SaveController implements Runnable {
                 } else {
 
                     // Otherwise just do N0
-                    ArrayList<String> nodesToReconstruct = new ArrayList<>();
-                    nodesToReconstruct.add(asr.getWorkingNodeLabel());
-                    seqController.insertSpecificJointsToDB(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
-                            saveGappySeq, nodesToReconstruct, user.getId(), currRecon.getLabel());
+                    seqController.insertSeqIntoDb(currRecon.getId(), asr.getWorkingNodeLabel(), asr.getASRPOG(Defines.JOINT), user.getId(), Defines.JOINT, true);
                 }
             }
             // Now we want to send an email notifying the user that their reconstruction is complete

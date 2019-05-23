@@ -186,7 +186,7 @@ ys <span style="color: #666666">=</span> np<span style="color: #666666">.</span>
 keep <span style="color: #666666">=</span> []
 <span style="color: #AA22FF; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> ys: <span style="color: #008800; font-style: italic"># go through each entry in the bigger alignment in ascending order of an aggregated outlier score</span>
     <span style="color: #AA22FF; font-weight: bold">if</span> aln[i]<span style="color: #666666">.</span>name <span style="color: #AA22FF; font-weight: bold">in</span> findmyseq:
-        <span style="color: #AA22FF; font-weight: bold">if</span> y[i] <span style="color: #BB4444">&quot;less than&quot;</span> <span style="color: #666666">425</span>:
+        <span style="color: #AA22FF; font-weight: bold">if</span> y[i] <span style="color: #BB4444">&lt;</span> <span style="color: #666666">425</span>:
             <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Keep</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, findmyseq[aln[i]<span style="color: #666666">.</span>name]<span style="color: #666666">.</span>name, <span style="color: #BB4444">&#39;</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, y[i])
             keep<span style="color: #666666">.</span>append(aln[i]<span style="color: #666666">.</span>name)
         <span style="color: #AA22FF; font-weight: bold">else</span>:

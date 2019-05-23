@@ -188,7 +188,7 @@ const T_EXPANDED = 'expanded';
 const T_CONTAINS_SEARCH = 'has_search';
 const T_IS_SET = 'is_set';
 const T_TEXT = 'taxa_text';
-
+const T_TAXA_ARR = 'taxa_arr';
 // This gets removed before we save the tree to crossfilter.
 const T_INFO = [T_DIST_FROM_ROOT, T_MAX_CHILDREN, T_BRANCH_LEN, T_LEFT, T_RAW_X, T_IS_ROOT];
 

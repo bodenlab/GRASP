@@ -58,10 +58,10 @@ let searchTree = function (search, clear, exact) {
             let tax = node[T_TEXT];
             if (tax === undefined) {
               if (node[T_EXTANT]) {
-                tax = getTaxaAsText(node[T_TAXA], "NONE", node[T_EXTANT], node[T_NAME]);
+                tax = getTaxaAsText(node[T_TAXA], "NONE", node[T_EXTANT], node[T_NAME], node);
               } else {
                 tax = getTaxaAsText(node[T_TAXA], node[T_COMMON_TAXA][T_DIFFER_RANK],
-                    node[T_EXTANT], node[T_NAME]);
+                    node[T_EXTANT], node[T_NAME], node);
               }
               node[T_TEXT] = tax;
             }

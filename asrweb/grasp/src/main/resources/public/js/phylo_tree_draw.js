@@ -454,16 +454,16 @@ var draw_phylo_circle = function (group, node, n) {
     } else {
       options.modal_width = options.modal_min_width;
     }
-    var modal_container = d3.select("#modalTree")
-    .append("svg")
-    .attr("id", "usedTreeModal")
-    .attr("width", options.modal_width)
-    .attr("height", options.modal_height)
-    .style("display", "block")
-    .style("margin", "auto");
+    // var modal_container = d3.select("#modalTree")
+    // .append("svg")
+    // .attr("id", "usedTreeModal")
+    // .attr("width", options.modal_width)
+    // .attr("height", options.modal_height)
+    // .style("display", "block")
+    // .style("margin", "auto");
 
-    var modal_group = modal_container.append("g")
-    .attr("opacity", 1);
+    // var modal_group = modal_container.append("g")
+    // .attr("opacity", 1);
     //.attr("transform", "translate(100, 50)scale(1.5)");
 
     add_taxonomy_modal_info(node, modal_group, options);

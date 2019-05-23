@@ -794,10 +794,10 @@ function drawPhyloText(group, d) {
     } else {
       // Check if we've already assigned the taxanomic text to this
       if (d[T_EXTANT]) {
-        text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME]);
+        text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME], d);
       } else {
         text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
-            d[T_EXTANT], d[T_NAME]);
+            d[T_EXTANT], d[T_NAME], d);
       }
       d[T_TEXT] = text;
     }

@@ -428,14 +428,22 @@ var set_common_tax_node = function (node, taxonomy) {
  * Return the taxa information as a text for tooltip hover.
  * @param taxa
  */
-function getTaxaAsText(taxa, commonTaxa, extant, name) {
+function getTaxaAsText(taxa, commonTaxa, extant, name, node) {
   if (taxa === undefined) {
     return "";
   }
+
+  /* Check if we've already calculated it. */
+  if (node[T_TEXT] !== undefined) {
+    return node[T_TEXT];
+  }
+
   var ranks =  ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"]
   var rankDisplay =  {"t_domain": "Domain", "t_superkingdom": "Super Kingdom", "t_kingdom": "Kingdom", "t_phylum": "Phylum", "t_class_t": "Class", "t_order_t": "Order", "t_family": "Family", "t_genus": "Genus", "t_species": "Species"};
 
   let textDisplay = "<strong>" + name + "</strong></br>";
+
+  let taxaArr = {};
 
   ranks.forEach(function(rank) {
     if (taxa[rank] !== "" && taxa[rank] !== undefined) {
@@ -448,7 +456,8 @@ function getTaxaAsText(taxa, commonTaxa, extant, name) {
             textDisplay += "<strong>"
           }
           textDisplay += rankDisplay[rank] + ': ';
-          textDisplay += taxa[rank] + "</br>"
+          textDisplay += taxa[rank] + "</br>";
+          taxaArr[rank] = [{'x': taxa[rank], 'y': 1}];
           drawnStart = true;
         }
       } else {
@@ -461,15 +470,18 @@ function getTaxaAsText(taxa, commonTaxa, extant, name) {
               textDisplay += "<strong>"
             }
             textDisplay += rankDisplay[rank] + ': ';
+            taxaArr[rank] = [];
             drawnStart = true;
           }
           if (tIdx != "undefined" && /\S/.test(tIdx)) {
-            textDisplay += tIdx + "(" + taxaValue + ") "
+            if (count < 5) {
+              textDisplay += tIdx + "(" + taxaValue + ") "
+            }
+            taxaArr[rank].push({'x': tIdx, 'y': taxaValue});
           }
           count += 1;
-          if (count > 5) {
+          if (count == 5) {
             textDisplay += " ...";
-            break;
           }
         }
         if (drawnStart) {
@@ -481,6 +493,8 @@ function getTaxaAsText(taxa, commonTaxa, extant, name) {
       }
     }
   });
+
+  node[T_TAXA_ARR] = taxaArr;
   return textDisplay;
 }
 
@@ -534,96 +548,217 @@ var div = d3.select("body").append("div")
 
 function draw_histogram_taxonomy(node, group) {
   let color = d3.scale.category20b();
+  d3.selectAll("#usedTreeModal").remove();
+  d3.selectAll(".modalgraphs").remove();
 
-  var treemap = d3.layout.treemap()
-  .padding(20)
-  .size([phylo_options.style.modal_width * 0.8, phylo_options.style.modal_height * 0.8])
-  .value(function (d) {
-    return d[T_NUM_EXTANTS];
-  });
+  // var treemap = d3.layout.treemap()
+  // .padding(20)
+  // .size([phylo_options.style.modal_width * 0.8, phylo_options.style.modal_height])
+  // .value(function (d) {
+  //   return d[T_NUM_EXTANTS];
+  // });
 
   let text = "";
   if (node[T_TEXT] !== undefined) {
     text = node[T_TEXT];
   } else {
     if (node[T_EXTANT]) {
-      text = getTaxaAsText(node[T_TAXA], "NONE", node[T_EXTANT], node[T_NAME]);
+      text = getTaxaAsText(node[T_TAXA], "NONE", node[T_EXTANT], node[T_NAME], node);
     } else {
       text = getTaxaAsText(node[T_TAXA], node[T_COMMON_TAXA][T_DIFFER_RANK],
-          node[T_EXTANT], node[T_NAME]);
+          node[T_EXTANT], node[T_NAME], node);
     }
   }
-  let svgGroup = group.append("g")
-  .attr("transform", "translate(20,20)");
+  // let svgGroup = group.append("g")
+  // .attr("transform", "translate(50,10)");
+
+  var rankDisplay =  {"t_domain": "Domain", "t_superkingdom": "Super Kingdom", "t_kingdom": "Kingdom", "t_phylum": "Phylum", "t_class_t": "Class", "t_order_t": "Order", "t_family": "Family", "t_genus": "Genus", "t_species": "Species"};
 
   document.getElementById("modal-text").innerHTML = text;
+  var x = d3.scale.ordinal().rangeRoundBands([0, phylo_options.style.modal_width * 0.8], .05);
 
+  var y = d3.scale.linear().range([phylo_options.style.modal_height * 0.8, 0]);
 
-  var cell = svgGroup.data([node]).selectAll("g")
-  .data(treemap.nodes)
-  .enter().append("g")
-  .attr("class", "cell")
-  .attr("transform", function (d) {
-    return "translate(" + d.x + "," + d.y + ")";
-  });
+  var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom")
 
-  cell.append("rect")
-  .attr("width", function (d) {
-    return d.dx;
-  })
-  .attr("height", function (d) {
-    return d.dy;
-  })
-  // .style("margin", "5px")
-  .attr("stroke", d => d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_DIFFER_RANK]]) : color(d[T_TAXA]['t_order']))
-  .attr("stroke-width",  d =>d[T_CHILDREN] ? "2px": "2px")
-  .style("fill", function (d) {
-    return d[T_CHILDREN] ? getTaxaColour(d, color) : getFillForNode(d);
-  })
-  .on("mouseover", function(d) {
-    //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 1);
-    let text = "";
-    if (d[T_TEXT] !== undefined) {
-      text = d[T_TEXT];
-    } else {
-      // Check if we've already assigned the taxanomic text to this
-      if (d[T_EXTANT]) {
-        text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME]);
-      } else {
-        text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
-            d[T_EXTANT], d[T_NAME]);
+  var yAxis = d3.svg.axis()
+  .scale(y)
+  .orient("left")
+  .ticks(10);
+  let colouridxs = {"t_domain": "#ca5959", "t_superkingdom":"#ffb380",
+    "t_kingdom":"#d4ff80",
+    "t_phylum": "#52ff86",
+    "t_class_t": "#5aecff",
+    "t_order_t": "#645fff",
+    "t_family":"#cba5ff",
+    "t_genus":"#77ffbe",
+    "t_species":"#88cdff"};
+
+  for (let r in rankDisplay) {
+
+    let rank = rankDisplay[r];
+    // let rank = node[T_COMMON_TAXA][T_DIFFER_RANK];
+    let dataAll = node[T_TAXA_ARR][r];
+    // only show top 10
+    if (dataAll != undefined && dataAll.length > 1) {
+      var modal_container = d3.select("#modalTree")
+      .append("svg")
+      .attr("class", 'modalgraphs')
+      .attr("width", phylo_options.style.modal_width )
+      .attr("height", phylo_options.style.height )
+      .style("display", "block")
+      .style("margin", "auto");
+      let svgGroup = modal_container.append("g")
+      .attr("transform", "translate(50,30)");
+
+      svgGroup.append("text")
+      .attr("x", (phylo_options.style.modal_width/2) - 10)
+      .attr("y", -5)
+      .attr("text-anchor", "middle")
+      .style("font-size", "14px")
+      .text(rank);
+
+      dataAll.sort((a, b) => (a['y'] < b['y']) ? 1 : -1);
+      let data = [];
+      for (let i = 0; i < 10; i++) {
+        if (i > dataAll.length) {
+          break;
+        }
+        if (dataAll[i] !== undefined) {
+          data.push(dataAll[i]);
+        }
       }
-      d[T_TEXT] = text;
+      x.domain(data.map(function (d) {
+        return d['x'];
+      }));
+      y.domain([0, d3.max(data, function (d) {
+        return d['y'];
+      })]);
+
+      let height = phylo_options.style.modal_height * 0.8;
+      svgGroup.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      .selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", "-.55em")
+      .attr("transform", "rotate(-45)");
+
+      svgGroup.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "middle")
+      .text("");
+
+      svgGroup.selectAll("bar")
+      .data(data)
+      .enter().append("rect")
+      .style("fill", colouridxs[r])
+      .attr("x", function (d) {
+        return x(d['x']);
+      })
+      .attr("width", x.rangeBand())
+      .attr("y", function (d) {
+        return y(d['y']);
+      })
+      .attr("height", function (d) {
+        return height - y(d['y']);
+      })
+      .on("mouseover", function (d) {
+        //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 1);
+
+        div.transition()
+        .duration(200)
+        .style("opacity", .9);
+
+        div.html(d['x'] + "<br/>")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function (d) {
+        div.transition()
+        .duration(500)
+        .style("opacity", 0);
+      });
     }
-
-    div.transition()
-    .duration(200)
-    .style("opacity", .9);
-
-    div.html(text + "<br/>")
-    .style("left", (d3.event.pageX) + "px")
-    .style("top", (d3.event.pageY - 28) + "px");
-  })
-  .on("mouseout", function(d) {
-    //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 0);
-    div.transition()
-    .duration(500)
-    .style("opacity", 0);
-  });
+  }
 
 
-  cell.append("text")
-  .attr("id", d => "taxa-text-" + d[T_ID])
-  .attr("x", function (d) {
-    return d.dx / 2;
-  })
-  .attr("y", function (d) {
-    return d.dy / 2;
-  })
-  .attr("dy", ".35em")
-  .attr("text-anchor", "middle")
-  .text(function (d) {
-    return d[T_CHILDREN] ? "" : d.dx < 20 ? "" : d[T_TAXA]['t_species'].substr(0, 5) + "...";//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
-  });
+
+  //
+  // var cell = svgGroup.data([node]).selectAll("g")
+  // .data(treemap.nodes)
+  // .enter().append("g")
+  // .attr("class", "cell")
+  // .attr("transform", function (d) {
+  //   return "translate(" + d.x + "," + d.y + ")";
+  // });
+  //
+  // cell.append("rect")
+  // .attr("width", function (d) {
+  //   return d.dx;
+  // })
+  // .attr("height", function (d) {
+  //   return d.dy;
+  // })
+  // // .style("margin", "5px")
+  // .attr("stroke", d => d[T_CHILDREN] ? color(d[T_TAXA][d[T_COMMON_TAXA][T_DIFFER_RANK]]) : color(d[T_TAXA]['t_order']))
+  // .attr("stroke-width",  d =>d[T_CHILDREN] ? "2px": "2px")
+  // .style("fill", function (d) {
+  //   return d[T_CHILDREN] ? getTaxaColour(d, color) : getFillForNode(d);
+  // })
+  // .on("mouseover", function(d) {
+  //   //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 1);
+  //   let text = "";
+  //   if (d[T_TEXT] !== undefined) {
+  //     text = d[T_TEXT];
+  //   } else {
+  //     // Check if we've already assigned the taxanomic text to this
+  //     if (d[T_EXTANT]) {
+  //       text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME]);
+  //     } else {
+  //       text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
+  //           d[T_EXTANT], d[T_NAME]);
+  //     }
+  //     d[T_TEXT] = text;
+  //   }
+  //
+  //   div.transition()
+  //   .duration(200)
+  //   .style("opacity", .9);
+  //
+  //   div.html(text + "<br/>")
+  //   .style("left", (d3.event.pageX) + "px")
+  //   .style("top", (d3.event.pageY - 28) + "px");
+  // })
+  // .on("mouseout", function(d) {
+  //   //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 0);
+  //   div.transition()
+  //   .duration(500)
+  //   .style("opacity", 0);
+  // });
+  //
+  //
+  // cell.append("text")
+  // .attr("id", d => "taxa-text-" + d[T_ID])
+  // .attr("x", function (d) {
+  //   return d.dx / 2;
+  // })
+  // .attr("y", function (d) {
+  //   return d.dy / 2;
+  // })
+  // .attr("dy", ".35em")
+  // .attr("text-anchor", "middle")
+  // .text(function (d) {
+  //   return d[T_CHILDREN] ? "" : d.dx < 20 ? "" : d[T_TAXA]['t_species'].substr(0, 5) + "...";//[d[T_PARENT][T_COMMON_TAXA][T_DIFFER_RANK]];
+  // });
 
 }

@@ -265,7 +265,7 @@ sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: 
                             This may need to be done repeatedly, until you are happy that the alignment and tree only reflect actual evolutionary relationships.</p>
                     </div>
                     <div class="step">
-                        <h3>Infer ancestral sequences</h3>
+                        <h3>Infer and explore ancestors</h3>
                         <p>
                             The TPSa family consists of angiosperm terpene synthases,
                             the TPSb family contains angiosperm monoterpene synthases,
@@ -278,80 +278,74 @@ sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: 
                             <p>If you skipped the practical data curation steps, or had had issues them, download an alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
                         </div>
                         <div class="step">
-                            <h4>6. Perform the reconstruction using GRASP</h4>
+                            <h4>Perform the reconstruction using GRASP</h4>
                             <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
-                            <p>GRASP may indicate that some of the sequences are obsolete.</p>
-                            <p>Note down any obsolete sequences and optionally remove these from the original extant sequence file.
-                                Perform the alignment and tree inference steps with the modified file (Steps 1-2).
-                                Repeat Step 6 with the new alignment and tree files. </p>
+                            <p>
+
+
+                            </p>
                         </div>
                         <div class="step">
-                            <h4>7. Inspect the reconstructed sequences</h4>
-                            <p>Explore GRASP:</p>
-
+                            <h4>Inspect the reconstructed ancestors</h4>
+                            <p>Explore GRASP</p>
                             <p class="col-xs-4"> Click Annotate
                                 Taxonomy at the top of the tree </p>
                             <p class="col-xs-8">
                                 This will get the taxonomic information
                                 for the sequences.
-
                                 <em>Note:
                                     taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em>
                             </p>
-
+                            <p>We will now focus on a protein of interest. This can be changed as you wish, but let's say we are interested in the terpene eudesmol, and we would want to find which enzymes that are somehow related to its production; so we use Uniprot again:.</p>
+                            <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family" eudesmol</code></pre></p>
+                            <p>This should return at least one protein which is in our data set, namely "B1B1U4"; search for it in GRASP (click "Tree search options") and it will be highlighted in the tree.</p>
                             <p class="col-xs-4">Left-click on tree nodes</p>
                             <p class="col-xs-8">This will show any taxonomic information (if available) of the selected ancestor.
                                 At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
                                 Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
                                 nodes in the tree) show the full available taxonomic information for that extant.
                             </p>
+                            <p>Do this for the immediate ancestor of B1B1U4, consider the taxonomic information and make a note of the node name.
+                                Continue to do this for each ancestor until you reach N0. (On my recon they are N20, N19, N18, N4, N3, N2, N1 and N0.)</p>
                             <p class="col-xs-4">Right-click on tree nodes</p>
                             <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
                                 From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
                                 reconstruction graph that will be displayed below the current joint reconstruction. See <a href="http://grasp.scmb.uq.edu.au/guide#results-phylo-nav">the guide</a> for more details.</p>
-                            <p class="col-xs-4">Inspect the reconstructed ancestral POG</p>
-                            <p class="col-xs-8">At the bottom of the page you will see at least two partial order graphs. The top graph is the alignment graph (POAG; also referred to as MSA as it derives directly
+                            <p class="col-xs-4">Inspect the reconstructed ancestral partial-order graph (POG)</p>
+                            <p class="col-xs-8">At the bottom of the page you will see at least two POGs. The top graph is the alignment graph (also referred to as MSA as it derives directly
                                 from the input multiple sequence alignment), and the bottom
-                                graph/s are the reconstructed ancestor graphs (POGs). Hovering over the graph nodes will display a popup showing a histogram of the characters in the
-                                alignment POAG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
-                                <br></br><br></br>
+                                graph/s are the reconstructed ancestor graphs. You will see N0 by default. Hovering over the graph nodes will display a popup showing a histogram of the characters in the
+                                alignment POG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
                                 We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
-                            <p>Explore the other display options on the page.</p>
+                            <p>Optionally, go through each of the nodes from N1 to the protein of interest (e.g. B1B1U4), now right-click and "Add joint reconstruction" for each node, in order. Each time, a new ancestor POG will appear below. Eventually you will need to scroll down to see them.</p>
                         </div>
                         <div class="step">
-                            <h4>8. Explore insertions and deletions</h4>
-                            <p>Identify the node that represents the ancestor of <em>only</em> the CYP2U1 sequences and infer the ancestor here.</p>
-                            <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both the CYP2U1 and CYP2R1 sequences.</em></p>
-                            <p class="question">What do the red circles in the navigation bar indicate?</p>
-                            <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
-                            <p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>
-                            <p class="question">Which sequences contribute to the edge in the (MSA) POAG that jumps the node that is missing from the CYP2U1 ancestor? Does this explain why this node isn't inferred in this ancestor?</p>
-                            <p>Take note of the node ID (i.e. the grey number under the node) of the first red circle.</p>
-                            <p>Infer the CYP2R1 ancestor and navigate to the node ID you took note of.</p>
-                            <p class="question">Is the node missing as well in the CYP2R1 ancestor? Similar to the CYP2U1 ancestor, does considering the sequences that contribute to the different edges explain why this node is inferred in this ancestor?</p>
-                            <p>Insertion or deletion events are also indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
-                                This means that groups of characters have been inferred to be parsimonious. The darker paths find greater support than the lighter paths; however, both could be considered.</p>
+                            <h4>Investigate changes from N0 to a protein of interest</h4>
+                            <p>Now let's use GRASP to explore differences between a set of ancestors, i.e. trace the predicted evolutionary events.
+                                We're first taking a short-cut but note that if you followed the above (optional) instruction, you could use GRASP's interface to get a lot more detail.</p>
+                            <p>Press the 'Download Results...' button underneath the reconstructed graphs, select 'Consensus sequence of joint reconstructions' and press the 'Download' button. (There may be a brief delay until the file ends up on your computer.)
+                                Consensus sequences only follow a single path so rather than a graph the results you just downloaded is presented as a conventional multiple alignment.
+                                Load the file into AliView or other alignment viewer.
+                                With AliView, you next highlight the sequences that you noted earlier (N0 to N20 probably, out of more than 200 others), "Copy selection as FASTA", and create a "New" alignment;
+                                in that new alignment, "Paste as FASTA sequences". Now your new alignment will only have the ancestors of B1B1U4.
+                                Again in AliView, load the alignment file that contains the sequences that were input to GRASP (tps_reviewed_v2_edit3.aln);
+                                search for B1B1U4 and also include its neighbour in the phylogenetic tree Q0VHD6; copy and paste into your own alignment file, move them so they all are presented in chronological order N0 to your two extant sequences.
+                            </p>
+                            <p>You should now be able to follow all (predicted) substitutions from the ultimate terpene synthase ancestor, to the extant eudesmol synthase B1B1U4.
+                                Now, ask questions about functional (or structural) sites of relevance. Do you know where in the sequence the catalytic site is? Do you know of other relevant motifs?
+                                While a sequence alignment can highlight regions of conservation, you now have access to the actual changes that led to the specific sequence, not only one site at a time, but across the whole protein.
+                                Given that Nature may have already tested the ancestors out, imagine how you can use this to probe alternative constructs.
+                            </p>
                         </div>
                         <div class="step">
-                            <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
-                            <p>Now let's use GRASP to explore differences between a set of ancestors. Identify just the CYP2U1 sequences that have come from ray-finned fish.</p>
-                            <p><em>Note: the taxonomic name for the ray-finned fish is <a href="https://en.wikipedia.org/wiki/Actinopterygii">Actinopterygii</a> and because GRASP mapped the taxonomy successfully we should be able to search on the term "Actinopteri" which is the major class of ray-finned fish. </em></p>
-                            <p>We want to identify differences between the CYP2U1 ancestor, the CYP2U1 fish ancestor, and the CYP2U1 ancestor of the non-fish sequences.</p>
-                            <p>Set up your data so you are displaying the (MSA) POAG, the CYP2U1 ancestor, the CYP2U1 fish ancestor and CYP2U1 non-fish ancestor simultaneously.</p>
-                            <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
-                            <p class="question">Can you identify differences between these inferred ancestors?</p>
-                            <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
-                            <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
-                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>
-                            <p> Look at the second grey box in the navigation bar and note the differences between the ancestors. </p>
-                            <p>Remember that GRASP indicates a more supported path (based on <a href="http://grasp.scmb.uq.edu.au/guide#bi-pars-nav">edge parsimony</a>) as a darker edge.</p>
-                            <p class="question"> Why does GRASP suggest two paths with greater support for the CYP2U1 ancestor? Why might it be useful to consider both paths when reconstructing an ancestor?</p>
-                        </div>
                         <div class="step">
-                            <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>
-                            <p>Reconstruct the CYP2U1 ancestor.</p>
-                            <p>Press the 'Download Results...' button underneath the reconstructed graph, select 'Consensus sequence of...' and press the 'Download' button.
-                                Consensus sequences only follow a single path, so you can use your alignment viewer to look at the downloaded results.</p>
+                            <h4>Explore insertions and deletions</h4>
+                            <p>Above we converted each ancestor POG into a consensus sequence, but there may have been other histories of insertions and deletions that are possible. They are only available by looking in the POGs themselves.</p>
+                            <p>If you have not already, try the sliding bar to navigate across positions along the POGs that are shown. You can change the size of the slider so that you see a larger (or smaller) part of all positions.
+                            Solid edges are preferred (they are "bi-directionally" optimal), as are the darker ones (occupied by "more" extant sequences).
+                            Refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a> for more.</p>
+                        </div>
+                            <h4>Download the consensus sequence of the ancestors</h4>
                             <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction
                                 (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
                                 at the top left corner and following the prompts for creating an account with GRASP.

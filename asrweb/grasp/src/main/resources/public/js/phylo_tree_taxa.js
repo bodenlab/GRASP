@@ -577,7 +577,7 @@ function draw_histogram_taxonomy(node, group) {
   document.getElementById("modal-text").innerHTML = text;
   var x = d3.scale.ordinal().rangeRoundBands([0, phylo_options.style.modal_width * 0.8], .05);
 
-  var y = d3.scale.linear().range([phylo_options.style.modal_height * 0.8, 0]);
+  var y = d3.scale.linear().range([(phylo_options.style.modal_height * 0.8)/6, 0]);
 
   var xAxis = d3.svg.axis()
   .scale(x)
@@ -586,7 +586,8 @@ function draw_histogram_taxonomy(node, group) {
   var yAxis = d3.svg.axis()
   .scale(y)
   .orient("left")
-  .ticks(10);
+  .ticks(3);
+
   let colouridxs = {"t_domain": "#ca5959", "t_superkingdom":"#ffb380",
     "t_kingdom":"#d4ff80",
     "t_phylum": "#52ff86",
@@ -631,13 +632,13 @@ function draw_histogram_taxonomy(node, group) {
         }
       }
       x.domain(data.map(function (d) {
-        return d['x'];
+        return d['x'].substring(0,8) + "...";
       }));
       y.domain([0, d3.max(data, function (d) {
         return d['y'];
       })]);
 
-      let height = phylo_options.style.modal_height * 0.8;
+      let height = (phylo_options.style.modal_height * 0.8) / 6;
       svgGroup.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
@@ -663,7 +664,7 @@ function draw_histogram_taxonomy(node, group) {
       .enter().append("rect")
       .style("fill", colouridxs[r])
       .attr("x", function (d) {
-        return x(d['x']);
+        return x(d['x'].substring(0,8) + "...");
       })
       .attr("width", x.rangeBand())
       .attr("y", function (d) {

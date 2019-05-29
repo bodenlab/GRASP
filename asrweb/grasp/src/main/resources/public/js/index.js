@@ -1469,7 +1469,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
     if (edge[E_CONSENSUS] && poags.options.display.draw_consensus) {
         stroke_width = edge_opt.consensus_stroke_width;
         stroke = "#0008F8";
-      drawCon = true;
+        drawCon = true;
 
     }
 
@@ -1493,7 +1493,15 @@ var draw_edges = function (poags, edge, group, scale_y) {
                     return "0,0";
                 }
             })
-            .attr("opacity", edge[E_WEIGHT]/100)//(1 - Math.log2(edge[E_WEIGHT]/100))/(Math.log2(0.0001))) //edge_opt.opacity)
+            .attr("opacity", function(d) {
+                if(drawCon) {
+                  return 1;
+                }
+                let v1 = Math.log2((edge[E_WEIGHT] + 1)/100);
+                let v2 = (Math.log2(0.01));
+                return (1 - (v1/ v2)) + 0.1;//(edge[E_WEIGHT]/100)//(1 - Math.log2(edge[E_WEIGHT]/100))/(Math.log2(0.0001))) //edge_opt.opacity)
+
+                })
             .attr("fill", "none")
             .attr("marker-mid", "url(#triangle-end)")
 

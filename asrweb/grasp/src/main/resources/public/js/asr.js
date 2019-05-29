@@ -61,7 +61,7 @@ var set_mutant = function(numMutants) {
     if (isNaN(numMutants)) {
         poags.options.mutants.count = 0;
     } else {
-        poags.options.mutants.count = numMutants + 1;
+        poags.options.mutants.count = (+numMutants) + 1;
     }
 };
 

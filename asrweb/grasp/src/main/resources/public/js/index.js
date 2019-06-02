@@ -519,6 +519,14 @@ var setup_brush = function (poags) {
             .selectAll("rect") //select all the just-created rectangles
             .attr("y", -(poags.options.mini.height/2 + 5))
             .attr("fill", poags.options.mini.fill)
+            .attr("width", function() {
+                let w = this.width;
+                if (w < 20) {
+                    return "20px";
+                } else {
+                    return this.width;
+                }
+            })
             .attr("opacity", poags.options.mini.opacity)
             .attr("height", poags.options.mini.height + 10); //set their height
 

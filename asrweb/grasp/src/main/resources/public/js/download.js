@@ -14,6 +14,13 @@ let downloadData = function(btnId) {
 
 let downloadGet = function(url, dataPost) {
   document.getElementById("download-error-div").style.display = "none";
+  // Open the modal modal from https://codepen.io/luv2code/pen/evaBXm
+  $("#loadMe").modal({
+    backdrop: "static", //remove ability to close modal with click
+    keyboard: false, //remove option to close with keyboard
+    show: true //Display loader!
+  });
+
   let req = {
     url: url,
     type: 'GET',
@@ -21,12 +28,14 @@ let downloadGet = function(url, dataPost) {
     dataType: 'json',
     success: function (data) {
       if (data.error !== undefined) {
+        $("#loadMe").modal("hide");
         window.alert(data.error);
       } else {
         // Now we want to download the data as a file.
         let filename = data.filename;
         let fileType = data.filetype;
         let fileContent = data.filecontent;
+        $("#loadMe").modal("hide");
         if (fileContent === "") {
           if (dataPost === "marginal") {
             let err = "No marginal reconstructions have been saved, please save some marginal reconstructions and try again :)";
@@ -49,6 +58,7 @@ let downloadGet = function(url, dataPost) {
 
       }
     }, error: function (err) {
+      $("#loadMe").modal("hide");
       console.log(err);
       document.getElementById("download-error").innerText = "Error downloading, check whether your popups are blocked.";
       document.getElementById("download-error-div").style.display = "block";

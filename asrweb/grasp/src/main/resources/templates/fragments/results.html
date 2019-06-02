@@ -5,6 +5,19 @@
 
 <div id="results-container" th:fragment="results" th:if="${results == true}">
   <!-- Modal -->
+  <div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <div class="loader"></div>
+          <div class="loader-txt">
+            <p>Downloading.... </p><p><small>Please wait your download should be finished shortly :-) </small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal -->
   <div class="modal fade" id="save-modal" tabindex="-1" role="dialog" aria-labelledby="saveModal" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -117,16 +130,16 @@
                   onclick="annotateTaxonomy()">Annotate taxonomy
           </button>
           <button type="button" id="extant-text-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_extant_text()">View extant labels | ON
+                  onclick="toggle_extant_text()">Extant labels | ON
           </button>
           <button type="button" id="node-text-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_node_text()">View node labels | OFF
+                  onclick="toggle_node_text()">Node labels | OFF
           </button>
           <button type="button" id="branch-text-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_branch_text()">View branch length | OFF
+                  onclick="toggle_branch_text()">Branch length | OFF
           </button>
           <button type="button" id="additive-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_additive()">View tree type | Additive
+                  onclick="toggle_additive()">Tree type | Additive
           </button>
           <button type="button" id="expand-all-nodes" class="btn btn-default col-xs-2"
                   onclick="expandAllNodes()">Expand all nodes
@@ -286,7 +299,7 @@
           <button type="button" id="consensus-button" class="btn btn-default"
                   onclick="view_consensus();" data-toggle="popover" data-placement="top"
                   data-content="Display the consensus traversal of the graph as a thick line, giving preference to (a) bi-directional edge-parsimony support and (b) greater number of extant sequences following.">
-            View consensus | OFF
+            Consensus | OFF
           </button>
         </div>
         <div id="poag-mini" class="col-sm-12">

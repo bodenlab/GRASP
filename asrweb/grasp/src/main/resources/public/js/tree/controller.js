@@ -282,6 +282,10 @@ function drawPhyloTree() {
   drawTree(visibleNodes, branches);
 
   resizePhyloHeight();
+
+  if (phylo_options.tree.current_search_value !== undefined || null) {
+    searchTree(phylo_options.tree.current_search_value, true, false);
+  }
 }
 
 

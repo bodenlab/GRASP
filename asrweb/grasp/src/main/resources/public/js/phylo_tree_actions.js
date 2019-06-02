@@ -37,6 +37,7 @@ var expandAllNodes = function () {
 };
 
 let searchTree = function (search, clear, exact) {
+  phylo_options.tree.current_search_value = search;
   let terms = search.split("*"); // wildcard '*'
   let nodes = phylo_options.tree.node_dict;
 

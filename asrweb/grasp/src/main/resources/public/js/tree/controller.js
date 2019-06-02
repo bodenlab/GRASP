@@ -195,8 +195,6 @@ function addExpandedParentNodes(node, allParents) {
 function drawPhyloTree() {
   var nodes = getNodeLessThanDepth(phylo_options.tree.depth);
 
-  let expandedNodes = new Set();
-
   nodes.sort(function(a, b){return a[T_DEPTH] - b[T_DEPTH]});
 
   let intermediateNodes = new Set();
@@ -217,12 +215,12 @@ function drawPhyloTree() {
     if (nodeStored[T_EXPANDED] === true && nodeStored[T_COLLAPSED] !== true) {
 
       // We want to add each of the children to the nodes object
-      addExpandedChildrenNodes(nodeStored, expandedNodes, false,
+      addExpandedChildrenNodes(nodeStored, intermediateNodes, false,
           nodeStored[T_DEPTH]);
 
       // Check if we also need to add the parents of this node
       if (nodeStored[T_DEPTH] > phylo_options.tree.depth) {
-        addExpandedParentNodes(nodeStored, expandedNodes);
+        addExpandedParentNodes(nodeStored, intermediateNodes);
       }
       nodeStored[T_TERMINATED] = false;
 
@@ -253,11 +251,6 @@ function drawPhyloTree() {
     }
 
   });
-
-  // Add any expanded nodes
-  for (let n in expandedNodes) {
-    intermediateNodes.add(expandedNodes[n]);
-  }
 
   let nodeIdsForBranches = [];
   let visibleNodes = [];

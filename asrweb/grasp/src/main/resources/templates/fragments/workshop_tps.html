@@ -23,7 +23,7 @@
                     <h3>Pre-requisites</h3>
                     <div class="step">
                         <h4>Install required software</h4>
-                        <p><p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and FastTree (<a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
+                        <p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and FastTree (<a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
                             If you do not have these already, install the software on your machine using the instructions found on the websites for your operating system. There are many alternative programs that can be used for the same purpose. See <a href="http://grasp.scmb.uq.edu.au/guide">the guide</a> for some suggestions.</p>
                         <p>Archaeopteryx can be found here: <a href="https://sites.google.com/site/cmzmasek/home/software/archaeopteryx">https://sites.google.com/site/cmzmasek/home/software/archaeopteryx</a>. <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a> is a capable alternative for visualising phylogenetic trees.</p>
                         <p>AliView can be found here: <a href="http://ormbunkar.se/aliview/">http://ormbunkar.se/aliview/</a>.</p>
@@ -215,7 +215,8 @@ sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: 
                         The criteria is that, for each sequence in the alignment, at least one (of three) motif needs to match the most commonly occupied column for it.
                         We have provided some Python code to identify the sequences that do not conform to that criteria below.
                     </p>
-                    <!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #888888"># Read in the alignment file</span>
+                    <div>
+                    <!-- HTML generated using hilite.me --><pre style="margin: 0; line-height: 125%"><span style="color: #888888"># Read in the alignment file</span>
 aln <span style="color: #333333">=</span> sequence<span style="color: #333333">.</span>readFastaFile(<span style="background-color: #fff0f0">&#39;tpswb_v3.aln&#39;</span>, alphabet<span style="color: #333333">=</span>sequence<span style="color: #333333">.</span>Protein_Alphabet, gappy<span style="color: #333333">=</span><span style="color: #007020">True</span>, ignore<span style="color: #333333">=</span><span style="color: #007020">True</span>, parse_defline<span style="color: #333333">=</span><span style="color: #007020">False</span>)
 ali <span style="color: #333333">=</span> sequence<span style="color: #333333">.</span>Alignment(aln)
 <span style="color: #888888"># Define motifs, here taken from Driller et al. (2018) and Schrepfer et al. (2016)</span>
@@ -414,7 +415,7 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                         </div>
                     </div>
                 </div>
-            </div>
+
             <div class="cell border-box-sizing text_cell rendered">
                 <div class="inner_cell">
                     <div class="text_cell_render border-box-sizing rendered_html">
@@ -433,7 +434,9 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
             </div>
         </div>
     </div>
-</div>
+    </div>
+
 
 </body>
+
 </html>

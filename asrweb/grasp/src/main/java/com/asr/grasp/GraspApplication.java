@@ -1328,6 +1328,32 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
 
     }
+    /**
+     * Download files from reconstruction
+     *
+     * @param request HTTP request (form request specifying parameters)
+     * @param response HTTP response to send data to client
+     */
+    @RequestMapping(value = "/download-workshop_tps-files", method = RequestMethod.GET, produces = "application/zip")
+    public void downloadWorkshop_TPS(HttpServletRequest request, HttpServletResponse response) {
+
+        // Don't copy to an actual folder on the server just serve the files immidiately
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setHeader("Content-Disposition", "attachment; filename=\"GRASP_Workshop_TPS.zip\"");
+
+        try {
+            // get your file as InputStream
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(
+                    "data/app/tutorial/tpswb_v5.zip");
+            // copy it to response's OutputStream
+            FileCopyUtils.copy(is, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            System.out.println("Error writing file to output stream. Filename was" + ex.toString());
+            throw new RuntimeException("IOError writing file to output stream");
+        }
+
+    }
 
     /**
      * Download either the marginal or the joint reconstruction.

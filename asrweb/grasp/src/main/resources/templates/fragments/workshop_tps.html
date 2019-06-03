@@ -326,7 +326,8 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                             <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
                             <p>
                             On the main page,
-                                you can create a user account (if you have not already).
+                                you can create a user account (if you have not done this already).</p>
+                            <p>
                                 To perform a reconstruction, input a name for it (needs to be unique),
                                 the name of the alignment file (either FASTA or Clustal format)
                                 and the phylogenetic tree file (in Newick format).
@@ -349,7 +350,7 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                                 The search function in GRASP will pick up words that are used in identifiers, and taxonomic annotations for sequences at the leaves of the tree.
                             </p>
                             <p>We will now focus on a protein of interest. This can be changed as you wish, but let's say we are interested in the terpene eudesmol,
-                                and we would want to find which enzymes that are somehow related to its production; so we use Uniprot again:.</p>
+                                and we would want to find which enzymes that are somehow related to its production; so we use Uniprot again:</p>
                             <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family" eudesmol</code></pre></p>
                             <p>This should return at least one protein which is in our data set, namely "B1B1U4";
                                 search for it in GRASP (click "Tree search options") and it will be highlighted in the tree.</p>
@@ -365,13 +366,15 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                             <p class="col-xs-4">Right-click on tree nodes</p>
                             <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
                                 From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
-                                reconstruction graph that will be displayed below the current joint reconstruction. See <a href="http://grasp.scmb.uq.edu.au/guide#results-phylo-nav">the guide</a> for more details.</p>
+                                reconstruction graph that will be displayed below the current joint reconstruction.
+                                See <a href="http://grasp.scmb.uq.edu.au/guide#results-phylo-nav">the guide</a> for more details.</p>
                             <p class="col-xs-4">Inspect the reconstructed ancestral partial-order graph (POG)</p>
                             <p class="col-xs-8">At the bottom of the page you will see at least two POGs. The top graph is the alignment graph (also referred to as MSA as it derives directly
                                 from the input multiple sequence alignment), and the bottom
-                                graph/s are the reconstructed ancestor graphs. You will see N0 by default. Hovering over the graph nodes will display a popup showing a histogram of the characters in the
-                                alignment POG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
-                                We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
+                                graph/s are the reconstructed ancestor graphs. You will see N0 by default. </p>
+                                <p>Hovering over the graph nodes will display a popup showing a histogram of the characters in the
+                                    alignment POG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.</p>
+                                <p>We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
                             <p>Optionally, go through each of the nodes from N47 to the protein of interest (e.g. Q41594), now right-click and "Add joint reconstruction" for each node, in order of evolutionary time.
                                 Each time, a new ancestor POG will appear below. Eventually you will need to scroll down to see them.</p>
                         </div>
@@ -380,18 +383,18 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                             <p>Now let's use GRASP to explore differences between a set of ancestors, i.e. trace the predicted evolutionary events.
                                 We are first taking a short-cut but note that if you followed the above (optional) instruction, you could use GRASP's interface to get a lot more detail.</p>
                             <p>Press the 'Download Results...' button underneath the reconstructed graphs, select 'Consensus sequence of joint reconstructions' and press the 'Download' button.
-                                (There may be a brief delay until the file ends up on your computer.)
-                                Consensus sequences only follow a single path so rather than a graph, the results you just downloaded is presented as a conventional multiple sequence alignment.
+                                (There may be a brief delay until the file ends up on your computer.)</p>
+                                <p>Consensus sequences only follow a single path so rather than a graph, the results you just downloaded is presented as a conventional multiple sequence alignment.
                                 Load the file into AliView or other alignment viewer.
                                 With AliView, you next highlight the sequences that you noted earlier (N0, N47 and so on to N70 for Q41594), "Copy selection as FASTA", and create a "New" alignment;
-                                in that new alignment, "Paste as FASTA sequences". Now your new alignment will only have the ancestors of Q41594.
-                                Again in AliView, load the alignment file that contains the sequences that were input to GRASP (tpswb_v5.aln);
+                                    in that new alignment, "Paste as FASTA sequences". Now your new alignment will only have the ancestors of Q41594.</p>
+                                <p>Again in AliView, load the alignment file that contains the sequences that were input to GRASP (tpswb_v5.aln);
                                 search for Q41594 and also include its neighbours in the phylogenetic tree. (Q93YA3 and Q9FT37 are both Taxadiene synthase for <i>Taxus baccata</i> and <i>wallichiana</i>, respectively.)                                Q0VHD6; copy and paste into your own alignment file, move them so they all are presented in chronological order N0 to your two extant sequences.
                             </p>
                             <p>You should now be able to follow all (predicted) substitutions from the ultimate terpene synthase ancestor, to the extant Taxadiene synthase Q41594 or the eudesmol synthase B1B1U4.
-                                Now, ask questions about functional (or structural) sites of relevance. Do you know where the catalytic site is, in terms of sequence positions?
-                                In our alignment, the three motifs we used above start at columns 976, 1174 and 1330, respectively. Check them out. Do you know of other relevant motifs?
-                                While a sequence alignment can highlight regions of conservation, you now have access to the actual changes that led to the specific sequence, not only one site at a time, but across the whole protein.
+                                Now, ask questions about functional (or structural) sites of relevance. Do you know where the catalytic site is, in terms of sequence positions?</p>
+                            <p>In our alignment, the three motifs we used above start at columns 976, 1174 and 1330, respectively. Check them out. Do you know of other relevant motifs?</p>
+                                <p>While a sequence alignment can highlight regions of conservation, you now have access to the actual changes that led to the specific sequence, not only one site at a time, but across the whole protein.
                                 Given that Nature may have already tested the ancestors out, imagine how you can use this to probe alternative constructs.
                             </p>
                         </div>
@@ -404,10 +407,10 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                             Refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a> for more.</p>
                         </div>
                             <h4>Download the consensus sequence of the ancestors</h4>
-                            <p><em>Note: there are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction
+                            <p>There are a few things that can be downloaded from your reconstruction, mostly more complex representations of the reconstruction
                                 (refer to the <a href="http://grasp.scmb.uq.edu.au/guide">GRASP Guide</a>). Alternatively, you can save your reconstruction for later by pressing the blue disk
                                 at the top left corner and following the prompts for creating an account with GRASP.
-                                You can access the list of previously saved reconstructions by clicking your account name which will appear in the menu at the top right corner.</em></p>
+                                You can access the list of previously saved reconstructions by clicking your account name which will appear in the menu at the top right corner.</p>
                         </div>
                     </div>
                 </div>
@@ -422,6 +425,8 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                             <li>Han MV and Zmasek CM (2009) phyloXML: XML for evolutionary biology and comparative genomics. <i>BMC Bioinformatics</i>. 10:356. <a href="https://doi.org/10.1186/1471-2105-10-356">DOI</a>.</li>
                             <li>Larsson A (2014) AliView: a fast and lightweight alignment viewer and editor for large data sets. <i>Bioinformatics</i>. 30(22): 3276-3278. <a href="http://dx.doi.org/10.1093/bioinformatics/btu531">DOI</a>.</li>
                             <li>Bohlmann et al. (1998) Plant terpenoid synthases: Molecular biology and phylogenetic analysis. <i>PNAS</i>. Vol. 95, pp. 4126–4133.<a href="https://dx.doi.org/10.1073/pnas.95.8.4126">DOI</a>.</li>
+                            <li>Schrepfer et al. (2016) Identification of amino acid networks governing catalysis in the closed complex of class I terpene synthases. <i>PNAS</i>. 113(8):E958-67.<a href="https://dx.doi.org/10.1073/pnas.1519680113">DOI</a>.</li>
+                            <li>Driller et al. (2018) Towards a comprehensive understanding of the structural dynamics of a bacterial diterpene synthase during catalysis. <i>Nat Commun.</i>.  28;9(1):3971.<a href="https://dx.doi.org/10.1038/s41467-018-06325-8">DOI</a>.</li>
                         </ol>
                     </div>
                 </div>

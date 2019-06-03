@@ -136,7 +136,7 @@ public class UserController {
             return err;
         }
         EmailObject email = new EmailObject(user.getUsername(), getEmail(user), Defines.FORGOT_PASSWORD);
-        email.setContent("http://127.0.0.1:8080/reset-password-confirmation", user.getConfirmationToken());
+        email.setContent("http://grasp.scmb.uq.edu.au/reset-password-confirmation", user.getConfirmationToken());
         emailController.sendEmail(email);
         user.setConfirmationToken(null);
         return null;
@@ -150,7 +150,7 @@ public class UserController {
      */
     public void sendRegistrationEmail(UserObject user) {
         EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.REGISTRATION);
-        email.setContent("http://127.0.0.1:8080/confirm-registration", user.getConfirmationToken());
+        email.setContent("http://grasp.scmb.uq.edu.au/confirm-registration", user.getConfirmationToken());
         emailController.sendEmail(email);
         user.setConfirmationToken(null);
         // We remove the password

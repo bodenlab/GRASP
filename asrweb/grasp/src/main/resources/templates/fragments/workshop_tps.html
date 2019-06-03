@@ -10,10 +10,11 @@
             <div class="row">
                 <div class="col-xs-12">
                     <h2 id="Getting-Started" class="section-heading">Reconstructing Terpene synthases: an illustrative example of using GRASP and associated programs</h2>
-                    <h3>Required software</h3>
+                    <h3>Recommended software</h3>
                     <p>
                         <ul>
-                        <li>Clustal Omega - Multiple Sequence Alignment (MSA) tool that is based on profile hidden Markov models and scales well to many thousands of protein sequences. See Sievers and Higgins (2018).</li>
+                        <li>MAFFT - Multiple sequence Alignment (MSA) based on the Fast Fourier Transform (FFT). See Katoh and Standley (2013).</li>
+                        <li>Clustal Omega - Multiple Sequence Alignment (tool that is based on profile hidden Markov models and scales well to many thousands of protein sequences. See Sievers and Higgins (2018). We are <i>not</i> using Clustal Omega below.</li>
                         <li>FastTree - Phylogenetic tree inference tool that processes very large numbers of sequences. See Price et al. (2010).</li>
                         <li>Archaeopteryx - Phylogenetic tree visualisation tool that manages to display very large trees. See Han and Zmasek (2009).</li>
                         <li>AliView - Alignment inspection tool. See Larsson (2014).</li>
@@ -22,7 +23,7 @@
                     <h3>Pre-requisites</h3>
                     <div class="step">
                         <h4>Install required software</h4>
-                        <p>Clustal Omega (<a href="http://www.clustal.org/omega/">http://www.clustal.org/omega/</a>) and FastTree (<a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
+                        <p><p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and FastTree (<a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
                             If you do not have these already, install the software on your machine using the instructions found on the websites for your operating system. There are many alternative programs that can be used for the same purpose. See <a href="http://grasp.scmb.uq.edu.au/guide">the guide</a> for some suggestions.</p>
                         <p>Archaeopteryx can be found here: <a href="https://sites.google.com/site/cmzmasek/home/software/archaeopteryx">https://sites.google.com/site/cmzmasek/home/software/archaeopteryx</a>. <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a> is a capable alternative for visualising phylogenetic trees.</p>
                         <p>AliView can be found here: <a href="http://ormbunkar.se/aliview/">http://ormbunkar.se/aliview/</a>.</p>
@@ -60,20 +61,24 @@
                                 when viewed jointly, the sequence composition of ancestor terpenes synthases may highlight what parts are important and which can be tinkered with.
                                 At the outset, it needs to be noted that determining homology between terpene synthases is non-trivial with sequence alone.
                             </p>
-                            <p>The Uniprot web interface can be used to extract all reviewed, eukaryotic terpene synthases, using the following query</p>
-                            <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family"</code></pre></p>
-                            <p>As at 2 May 2019, there are 294 reviewed, and 6082 unreviewed proteins that are deemed members of this family.
+                            <p>The Uniprot web interface can be used to extract all reviewed, terpene synthases, using the following query</p>
+                            <p class="code-style"><pre><code>family:"terpene synthase family"</code></pre></p>
+                            <p>As at 3 June 2019, there are 340 reviewed, and 6168 unreviewed proteins that are deemed members of this family.
                                 To limit the time required for data processing, we will primarily analyse the reviewed members. (They are typically of good quality, after having passed Uniprot's review processes.)
-                                It is important to consider the value of using unreviewed data, to increase coverage and biological variation.
+                                In general, it is important to consider the value of using unreviewed data, to increase coverage and biological variation.
+                                Also of note is that we include bacterial members, including CotB2 (Uniprot ID <a href="https://www.uniprot.org/uniprot/C9K1X5">C9K1X5</a>).
+                                If you wanted to only include eukaryotic members, amend the query above to say:
                             </p>
+                            <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" AND family:"terpene synthase family"</code></pre></p>
                             <p>The next couple of instructions are optional and meant to illustrate what you can do if you wanted to complete the whole process yourself; the final set of files are provided later.
-                                If you decide to download them yourself, save them as FASTA files and call them tps_reviewed.fa and tps_unreviewed.fa, respectively.
+                                If you decide to download them yourself, save them as FASTA files and call them tpswb_reviewed.fa and tpswb_unreviewed.fa, respectively. (wb means "with bacterial".)
                                 In fact, using the Uniprot web page, you can edit the query to your liking.
+                                While we are at it, also save a file with all TPSs, regardless of review status, as tpswb_all.fa.
                             </p>
-                            <p>Bohlmann et al. (1998) identifies six sub-families of terpene synthases: tpsa, tpsb, tpsc, tpsd, tpse and tpsf.
+                            <p>Bohlmann et al. (1998) identifies six sub-families of plant terpene synthases: tpsa, tpsb, tpsc, tpsd, tpse and tpsf.
                                 We will use these to inform our approach so you can download a few more files from querying Uniprot about them; for example
                             </p>
-                            <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family tpsa subfamily" AND reviewed:yes</code></pre></p>
+                            <p class="code-style"><pre><code>family:"terpene synthase family tpsa subfamily" AND reviewed:yes</code></pre></p>
                             <p>Download it as a FASTA file; for now call it tpsa.fa. Repeat this process for each subfamily.</p>
                         </div>
                     </div>
@@ -92,11 +97,11 @@
                         </p>
                         <p>Start your Python interpreter, or (optionally) open a Jupyter Notebook</p>
                         <p class="code-style"><pre><code>python</code></pre></p>
-                        <p>Here's some code</p>
+                        <p>Here's some code that you can copy-and-paste into your Python interpreter</p>
                         <p class="code-style"> <!-- HTML generated using hilite.me --><pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">sequence</span> <span style="color: #008800; font-style: italic"># import the binfpy sequence package</span>
 <span style="color: #008800; font-style: italic"># here we load all reviewed sequences and create a dictionary which will allow us to recall each by its name</span>
 findmyseq <span style="color: #666666">=</span> {}
-seqs <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tps_reviewed.fa&#39;</span>, sequence<span style="color: #666666">.</span>Protein_Alphabet, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>)
+seqs <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tpswb_reviewed.fa&#39;</span>, sequence<span style="color: #666666">.</span>Protein_Alphabet, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>)
 <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Loaded&#39;</span>, <span style="color: #AA22FF">len</span>(seqs), <span style="color: #BB4444">&#39;sequences&#39;</span>)
 <span style="color: #AA22FF; font-weight: bold">for</span> s <span style="color: #AA22FF; font-weight: bold">in</span> seqs:
     findmyseq[s<span style="color: #666666">.</span>name] <span style="color: #666666">=</span> s
@@ -117,51 +122,27 @@ subfnames <span style="color: #666666">=</span> {} <span style="color: #008800; 
             s<span style="color: #666666">.</span>name <span style="color: #666666">=</span> s<span style="color: #666666">.</span>name <span style="color: #666666">+</span> <span style="color: #BB4444">&#39;|Tps&#39;</span> <span style="color: #666666">+</span> f <span style="color: #008800; font-style: italic"># extend the sequence name (which is used later)</span>
             <span style="color: #AA22FF; font-weight: bold">break</span>
 <span style="color: #008800; font-style: italic"># save the sequences as a new FASTA file</span>
-sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: #BB4444">&#39;tps_reviewed_v1.fa&#39;</span>, seqs)
+sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: #BB4444">&#39;tpswb_v1.fa&#39;</span>, seqs)
 </pre>
                        </p>
 
-                        <!--import sequence # import the binfpy sequence package-->
-    <!--# here we load all reviewed sequences and create a dictionary which will allow us to recall each by its name-->
-    <!--findmyseq = {}-->
-    <!--seqs = sequence.readFastaFile('tps_reviewed.fa', sequence.Protein_Alphabet, parse_defline=False)-->
-    <!--print('Loaded', len(seqs), 'sequences')-->
-    <!--for s in seqs:-->
-        <!--findmyseq[s.name] = s-->
-    <!--# next we load each of the sub-family specific FASTA files to collect the names of each sub-family-->
-    <!--subfamily = ['a','b','c','d','e','f'] # all sub-families-->
-    <!--subfnames = {} # a dictionary with names of members of each sub-family-->
-    <!--for f in subfamily:-->
-        <!--fseqs = sequence.readFastaFile('tps' + f + '.fa', sequence.Protein_Alphabet, parse_defline=False)-->
-        <!--subfnames[f] = []-->
-        <!--for s in fseqs:-->
-            <!--subfnames[f].append(s.name)-->
-        <!--print('Loaded', len(fseqs), 'sequences for sub-family tps' + f)-->
-    <!--# finally we revisit the original sequence data to amend the name of those entries which belong to a sub-family-->
-    <!--for s in seqs:-->
-        <!--for f in subfamily:-->
-            <!--if s.name in subfnames[f]:-->
-                <!--s.info = s.info + ' SF=' + f # add another field to the header-line-->
-                <!--s.name = s.name + '|Tps' + f # extend the sequence name (which is used later)-->
-                <!--break-->
-    <!--# save the sequences as a new FASTA file-->
-    <!--sequence.writeFastaFile('tps_reviewed_v1.fa', seqs)-->
-
-                        <p>Now we have a new FASTA file tps_reviewed_v1.fa that we will use going forward.
+                        <p>Now we have a new FASTA file tpswb_v1.fa that we will use going forward.
                             Since we amended the actual name, it will appear in the alignment file and the tree file that are generated from it.</p>
                     </div>
                     <div class="step">
                         <h4>Align extant sequences</h4>
-                        <p>ss</p>
-                        <p class="code-style"><pre><code>clustalo -i tps_reviewed_v1.fa -o tps_reviewed_v1.aln --output-order=tree-order</code></pre></p>
-                        <p>This will perform the multiple sequence alignment and save it to "tps_reviewed_v1.aln" in the same directory.
-                            By default, Clustal Omega uses the FASTA format, with an additional "gap" character.
+                        <p>Let's perform the alignment, here with MAFFT:</p>
+                        <p class="code-style"><pre><code>mafft --genafpair --maxiterate 1000 --reorder tpswb_v1.fa > tpswb_v1.aln</code></pre></p>
+                        <p>We found that MAFFT performed best, but if you are curious here is the command you would use with Clustal Omega:</p>
+                        <p class="code-style"><pre><code>clustalo -i tpswd_v1.fa -o tpswb_v1.aln --output-order=tree-order</code></pre></p>
+                        <p>Either tool will perform the multiple sequence alignment and save it to "tpswb_v1.aln" in the same directory.
+                            By default, both tools use the FASTA format, with an additional "gap" character.
                             The switch "--output-order=tree-order" ensures that sequences are ordered so that they agree with how they are likely grouped in a phylogenetic analysis.</p>
                     </div>
                     <div class="step">
                         <h4>Review alignment</h4>
                         <p>
-                            Start AliView and load the alignment file.
+                            Start AliView and load the alignment file (tpswb_v1.aln).
                             Look at it and ask if it successfully captures homologous regions amongst members.
                             Conversely, consider it the alignment accurately separates sections that are not homologous.
                             It is not unusual to see fragmentation at the termini, especially in light of selective presence of protein translocation signals.
@@ -177,18 +158,18 @@ sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: 
                             One possibility is to use this score to evaluate each reviewed sequence when aligned against all of the other sequences, including the unreviewed ones.
                             That way, we evaluate the extent to which they are outliers in a broader sense than if we were to look at them only in the context of the smaller, reviewed-only alignment.
                         </p>
-                        <p>To carry out this initial filtering, align the complete set of terpene synthases (save as all.aln); then run the following code.</p>
+                        <p>To carry out this initial filtering, align the complete set of terpene synthases (tpswb_all.fa); then run the following code.</p>
                         <p class="code-style">
 <!-- HTML generated using hilite.me -->
                         <pre style="margin: 0; line-height: 125%"><span style="color: #AA22FF; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">sequence</span>
 <span style="color: #AA22FF; font-weight: bold">import</span> <span style="color: #0000FF; font-weight: bold">numpy</span> <span style="color: #AA22FF; font-weight: bold">as</span> <span style="color: #0000FF; font-weight: bold">np</span>
-aln <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>Alignment(sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tps_all.aln&#39;</span>, alphabet<span style="color: #666666">=</span>sequence<span style="color: #666666">.</span>Protein_Alphabet, gappy<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">True</span>, ignore<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">True</span>, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>))
+aln <span style="color: #666666">=</span> sequence<span style="color: #666666">.</span>Alignment(sequence<span style="color: #666666">.</span>readFastaFile(<span style="color: #BB4444">&#39;tpswb_all.aln&#39;</span>, alphabet<span style="color: #666666">=</span>sequence<span style="color: #666666">.</span>Protein_Alphabet, gappy<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">True</span>, ignore<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">True</span>, parse_defline<span style="color: #666666">=</span><span style="color: #AA22FF; font-weight: bold">False</span>))
 y, g, ins <span style="color: #666666">=</span> aln<span style="color: #666666">.</span>outliers()
 ys <span style="color: #666666">=</span> np<span style="color: #666666">.</span>argsort(y)
 keep <span style="color: #666666">=</span> []
 <span style="color: #AA22FF; font-weight: bold">for</span> i <span style="color: #AA22FF; font-weight: bold">in</span> ys: <span style="color: #008800; font-style: italic"># go through each entry in the bigger alignment in ascending order of an aggregated outlier score</span>
     <span style="color: #AA22FF; font-weight: bold">if</span> aln[i]<span style="color: #666666">.</span>name <span style="color: #AA22FF; font-weight: bold">in</span> findmyseq:
-        <span style="color: #AA22FF; font-weight: bold">if</span> y[i] <span style="color: #BB4444">&lt;</span> <span style="color: #666666">425</span>:
+        <span style="color: #AA22FF; font-weight: bold">if</span> y[i] <span style="color: #BB4444">&lt;</span> <span style="color: #666666">268</span>:
             <span style="color: #AA22FF">print</span>(<span style="color: #BB4444">&#39;Keep</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, findmyseq[aln[i]<span style="color: #666666">.</span>name]<span style="color: #666666">.</span>name, <span style="color: #BB4444">&#39;</span><span style="color: #BB6622; font-weight: bold">\t</span><span style="color: #BB4444">&#39;</span>, y[i])
             keep<span style="color: #666666">.</span>append(aln[i]<span style="color: #666666">.</span>name)
         <span style="color: #AA22FF; font-weight: bold">else</span>:
@@ -199,54 +180,111 @@ filtered <span style="color: #666666">=</span> []
     s <span style="color: #666666">=</span> findmyseq[sname]
     <span style="color: #AA22FF; font-weight: bold">if</span> sname <span style="color: #AA22FF; font-weight: bold">in</span> keep:
         filtered<span style="color: #666666">.</span>append(s)
-sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: #BB4444">&#39;tps_reviewed_v2.fa&#39;</span>, filtered)
+sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: #BB4444">&#39;tpswb_v2.fa&#39;</span>, filtered)
 </pre>
-
                         </p>
-
-
-    <!--import sequence-->
-    <!--import numpy as np-->
-    <!--aln = sequence.Alignment(sequence.readFastaFile('tps_all.aln', alphabet=sequence.Protein_Alphabet, gappy=True, ignore=True, parse_defline=False))-->
-    <!--y, g, ins = aln.outliers()-->
-    <!--ys = np.argsort(y)-->
-    <!--keep = []-->
-    <!--for i in ys: # go through each entry in the bigger alignment in ascending order of an aggregated-->
-        <!--if aln[i].name in findmyseq:-->
-            <!--if y[i] "less than" 425:-->
-                <!--print('Keep\t', findmyseq[aln[i].name].name, '\t', y[i])-->
-                <!--keep.append(aln[i].name)-->
-            <!--else:-->
-                <!--print('Bin\t', findmyseq[aln[i].name].name, '\t', y[i])-->
-                <!--print('Total kept:', len(keep))-->
-    <!--filtered = []-->
-    <!--for sname in findmyseq:-->
-        <!--s = findmyseq[sname]-->
-        <!--if sname in keep:-->
-            <!--filtered.append(s)-->
-    <!--sequence.writeFastaFile('tps_reviewed_v2.fa', filtered)-->
-                        <p>Note that we used a threshold "425" at which a sequence would be binned as an outlier.
+                        <p>Note that we used a threshold "268" at which a sequence would be binned as an outlier.
                             This value could be changed to be more or less sensitive to your expert taste;
-                            keep an eye on what the sequences that you filter out look like in the original alignment.
+                            keep an eye on what the sequences that you filter out look like in the original alignment (tpswb_v1.aln).
                         </p>
                     </div>
+                        <h4>Re-align extant sequences</h4>
+                        <p>Perform the alignment again, here with MAFFT as before:</p>
+                        <p class="code-style"><pre><code>mafft --genafpair --maxiterate 1000 --reorder tpswb_v2.fa > tpswb_v2.aln</code></pre></p>
+                        <p>
+                        At this stage, we recommend that you use AliView to inspect and edit the alignment.
+                        From this, it may be clear that sequences are placed poorly in the tree, suggesting that they are not aligned properly.
+                        It is also possible that some sequences cannot be adequately analysed, due to limitations in evolutionary models etc.
+                        For instance, larger re-arrangements can cause major problems, and in many instances it may be better to manually edit the alignment and/or exclude sequences entirely.
+                        Needless to say, make sure to record changes you make, and re-run alignment.
+                            In our case, we saved the alignment after removing a few sequences with long insertions, and little overlap with other sequences;
+                            from within AliView we saved the new alignment as tpswb_v2_edited.aln and re-ran MAFFT on it to create tpswb_v3.aln.
+                        </p>
+                    <p class="code-style"><pre><code>mafft --genafpair --maxiterate 1000 --reorder tpswb_v2_edited.aln > tpswb_v3.aln</code></pre></p>
+
+                    <p>
+                        This may need to be done repeatedly, until you are happy that the alignment.
+                            The inference of a phylogenetic tree later will shed further light on evolutionary relationships, so you may need to come back here again.
+                        </p>
+                </div>
+                <div class="step">
+                    <h4>Filtering your sequences in light of alignment</h4>
+                    <p>
+                        Another useful trick to make sure that your alignment is of good quality is to ensure your sequences contain previously known motifs, and that they are aligned.
+                        We found a couple in Driller et al. (2018) and Schrepfer et al. (2016) that we filter for below.
+                        The criteria is that, for each sequence in the alignment, at least one (of three) motif needs to match the most commonly occupied column for it.
+                        We have provided some Python code to identify the sequences that do not conform to that criteria below.
+                    </p>
+                    <!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #888888"># Read in the alignment file</span>
+aln <span style="color: #333333">=</span> sequence<span style="color: #333333">.</span>readFastaFile(<span style="background-color: #fff0f0">&#39;tpswb_v3.aln&#39;</span>, alphabet<span style="color: #333333">=</span>sequence<span style="color: #333333">.</span>Protein_Alphabet, gappy<span style="color: #333333">=</span><span style="color: #007020">True</span>, ignore<span style="color: #333333">=</span><span style="color: #007020">True</span>, parse_defline<span style="color: #333333">=</span><span style="color: #007020">False</span>)
+ali <span style="color: #333333">=</span> sequence<span style="color: #333333">.</span>Alignment(aln)
+<span style="color: #888888"># Define motifs, here taken from Driller et al. (2018) and Schrepfer et al. (2016)</span>
+motifs <span style="color: #333333">=</span> [sequence<span style="color: #333333">.</span>Regexp(<span style="background-color: #fff0f0">&quot;[D][DGE].{1,3}[DE]&quot;</span>),
+          sequence<span style="color: #333333">.</span>Regexp(<span style="background-color: #fff0f0">&quot;[ND]D..[ST]...[ED]&quot;</span>),
+          sequence<span style="color: #333333">.</span>Regexp(<span style="background-color: #fff0f0">&quot;W.{5,7}RY&quot;</span>)]
+<span style="color: #888888"># Create a dictionary for each motif, </span>
+<span style="color: #888888"># which associates columns with a match to the number of sequences with that match</span>
+hits <span style="color: #333333">=</span> <span style="color: #007020">dict</span>()
+best_hits <span style="color: #333333">=</span> <span style="color: #007020">dict</span>()
+<span style="color: #008800; font-weight: bold">for</span> m <span style="color: #000000; font-weight: bold">in</span> motifs:
+    hits[m] <span style="color: #333333">=</span> <span style="color: #007020">dict</span>() <span style="color: #888888"># key: column in alignment, value: count</span>
+<span style="color: #008800; font-weight: bold">for</span> a <span style="color: #000000; font-weight: bold">in</span> ali:
+    <span style="color: #008800; font-weight: bold">for</span> m <span style="color: #000000; font-weight: bold">in</span> motifs:
+        result <span style="color: #333333">=</span> m<span style="color: #333333">.</span>search(a, gappy<span style="color: #333333">=</span><span style="color: #007020">True</span>)
+        <span style="color: #008800; font-weight: bold">for</span> r <span style="color: #000000; font-weight: bold">in</span> result:
+            <span style="color: #008800; font-weight: bold">if</span> <span style="color: #000000; font-weight: bold">not</span> r[<span style="color: #0000DD; font-weight: bold">0</span>] <span style="color: #000000; font-weight: bold">in</span> hits[m]:
+                hits[m][r[<span style="color: #0000DD; font-weight: bold">0</span>]] <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span>
+            hits[m][r[<span style="color: #0000DD; font-weight: bold">0</span>]] <span style="color: #333333">=</span> hits[m][r[<span style="color: #0000DD; font-weight: bold">0</span>]] <span style="color: #333333">+</span> <span style="color: #0000DD; font-weight: bold">1</span>
+<span style="color: #888888"># Sort the columns by value (higher count first) and </span>
+<span style="color: #888888"># save the top ranked column for each motif</span>
+sorted_hits <span style="color: #333333">=</span> <span style="color: #007020">dict</span>()
+<span style="color: #008800; font-weight: bold">for</span> m <span style="color: #000000; font-weight: bold">in</span> hits:
+    sorted_hits[m] <span style="color: #333333">=</span> <span style="color: #007020">sorted</span>(hits[m]<span style="color: #333333">.</span>items(), key<span style="color: #333333">=</span><span style="color: #008800; font-weight: bold">lambda</span> kv: kv[<span style="color: #0000DD; font-weight: bold">1</span>], reverse<span style="color: #333333">=</span><span style="color: #007020">True</span>)
+    best_hits[m] <span style="color: #333333">=</span> sorted_hits[m][<span style="color: #0000DD; font-weight: bold">0</span>][<span style="color: #0000DD; font-weight: bold">0</span>]
+<span style="color: #888888"># Go through the alignment and &quot;keep&quot; sequences that fulfil the criteria below</span>
+keep <span style="color: #333333">=</span> []
+<span style="color: #008800; font-weight: bold">for</span> a <span style="color: #000000; font-weight: bold">in</span> ali:
+    count_matches <span style="color: #333333">=</span> <span style="color: #0000DD; font-weight: bold">0</span>
+    <span style="color: #008800; font-weight: bold">for</span> m <span style="color: #000000; font-weight: bold">in</span> motifs:
+        match <span style="color: #333333">=</span> <span style="color: #007020">False</span>
+        result <span style="color: #333333">=</span> m<span style="color: #333333">.</span>search(a, gappy<span style="color: #333333">=</span><span style="color: #007020">True</span>)
+        <span style="color: #008800; font-weight: bold">for</span> r <span style="color: #000000; font-weight: bold">in</span> result:
+            <span style="color: #008800; font-weight: bold">if</span> r[<span style="color: #0000DD; font-weight: bold">0</span>] <span style="color: #333333">==</span> best_hits[m]:
+                match <span style="color: #333333">=</span> <span style="color: #007020">True</span>
+        <span style="color: #008800; font-weight: bold">if</span> match:
+            count_matches <span style="color: #333333">+=</span> <span style="color: #0000DD; font-weight: bold">1</span>
+    <span style="color: #008800; font-weight: bold">if</span> count_matches <span style="color: #333333">&lt;</span> <span style="color: #0000DD; font-weight: bold">1</span>: <span style="color: #888888"># criteria: at least one motif needs to be in place</span>
+        <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&#39;Failed:&#39;</span>, a<span style="color: #333333">.</span>name)
+    <span style="color: #008800; font-weight: bold">else</span>:
+        keep<span style="color: #333333">.</span>append(a)
+<span style="color: #888888"># Save the new alignment, which needs to be re-aligned</span>
+sequence<span style="color: #333333">.</span>writeFastaFile(<span style="background-color: #fff0f0">&#39;tpswb_v4.aln&#39;</span>, keep)
+</pre></div>
+                    <p>
+                        Now re-align this alignment since we took out some sequences.
+                    </p>
+                    <p class="code-style"><pre><code>mafft --genafpair --maxiterate 1000 --reorder tpswb_v4.aln > tpswb_v5.aln</code></pre></p>
+                </div>
                     <div class="step">
                         <h4>Infer phylogenetic tree</h4>
-                        <p>Run a phylogenetic tree inference program on the alignment to generate a tree. This usually takes a few minutes, if not hours, depending on size of data set, and type of program. FastTree will infer a tree for 200+ terpene synthases in less than a minute though.</p>
-                        <p class="code-style"><pre><code>FastTree -out tps_reviewed_v2.nwk tps_reviewed_v2.aln</code></pre></p>
+                        <p>Run a phylogenetic tree inference program on the alignment to generate a tree. This usually takes a few minutes, if not hours, depending on size of data set, and type of program.
+                            FastTree will infer a tree for almost 300 terpene synthases in less than a minute though. RaxML will take an hour or so.</p>
+                        <p class="code-style"><pre><code>FastTree -out tpswb_v5.nwk tpswb_v5.aln</code></pre></p>
                     </div>
                     <div class="step">
                         <h4>Review phylogenetic tree</h4>
                         <p>Start Archaeopteryx and load the alignment file using the menu that appears.</p>
                         <p class="code-style"><pre><code>Archaeopteryx</code></pre></p>
                         <p>The first issue we need to resolve is to place the root of the tree correctly.</p>
-                        <p>The basic tutorial used a outgroup, i.e. an additional homologous sequence (or set of sequences) that most probably would have diverged prior to the other family members.
+                        <p>The basic tutorial used an outgroup, i.e. an additional homologous sequence (or set of sequences) that most probably would have diverged prior to the other family members.
                         From prior expertise, we are thus able to identify the branch on which the ancestor of that earlier evolutionary event would be placed.
-                            As a consequence, we would know what branch point represents the ancestor of the members of interest. </p>
+                            As a consequence, we would know what branch point represents the ancestor of the members of interest. In our case, we expect bacterial members to be an outgroup.
+                            </p>
                         <p>For the terpene synthases, we refer to a previous phylogenetic analysis, which identified the relationship between six sub-families (Tpsa-Tpsf; Bohlmann et al. 1998).
                         Since we extended sequence names with that information in the original FASTA file, this info is now available for searching in our tree.
                             Fortunately, Archaeopteryx provides a SEARCH function (see Figure 1).
-                        Once you have placed the root where it identifies an ancestor from which the sub-classes originate in a reasonable manner, save it to a new file, tps_reviewed_v2r.nwk.</p>
+                        Once you have placed the root where it identifies an ancestor from which the sub-classes originate, in a reasonable manner, save it to a new file, tpswb_v5r.nwk.
+                        Before you save, also make sure that the bacterial sequences are separated at the root or close to it. (Tip: SEARCH for "_STR" will pick up identifiers for bacterial species.)</p>
                         <a id="tree_howtoroot-img"></a>
                         <div class="col-xs-12" style="height: 400px;">
                             <div class="img" style="height: 400px;" id="workshop_tps-nwk-img-div"></div>
@@ -254,28 +292,32 @@ sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: 
                         <figcaption class="figure-caption">Figure 1.
                             Archaeopteryx offers dual search fields (1), type "Tpsa" and "Tpsb" to search for entries with those two words, to be highlighted in two colours.
                             Note that the inferred tree has an arbitrary root set, and may therefore show entries from the two sub-families ina disjointed manner (2).
+                            (The tree here does <i>not</i> include bacterial sequences; you expect them to be an outgroup to the eukaryotic members.)
                             Find the point where the root should be for the sub-families to separate correctly,
                             by first consulting with Bohlmann et al. (1998) then activating the "Root/Reroot" function, and clicking on a branch point (3).
                         </figcaption>
                     </div>
                     <div class="step">
                         <h4>Consider filtering the sequence set, re-aligning and inferring a new tree</h4>
-                        <p>At this stage it may be clear that sequences are placed poorly in the tree, suggesting that they are not aligned properly.
-                            It is also possible that some sequences cannot be adequately analysed, due to limitations in evolutionary models etc.
-                            For instance, larger re-arrangements can cause major problems, and in many instances it may be better to manually edit the alignment and/or exclude sequences entirely.
-                            Needless to say, make sure to record changes you make, and re-run alignment and tree inference.
-                            This may need to be done repeatedly, until you are happy that the alignment and tree only reflect actual evolutionary relationships.</p>
+
                     </div>
                     <div class="step">
                         <h3>Infer and explore ancestors</h3>
                         <p>
                             The TPSa family consists of angiosperm terpene synthases,
                             the TPSb family contains angiosperm monoterpene synthases,
-                            TPSd of gymnosperm monoterpene synthases and
-                            TPSg Antirrhinum majus monoterpene synthases also share a common evolutionary origin (Bohlmann et al. 1998).
-
-                            The gymnosperm terpene synthases have been subdivided into three distinct clades— TPS-d1 to TPS-d3
+                            TPSd of gymnosperm monoterpene synthases and TPSg Antirrhinum majus monoterpene synthases also share a common evolutionary origin (Bohlmann et al. 1998).
+                            The gymnosperm terpene synthases have been subdivided into three distinct clades— TPS-d1 to TPS-d3.
                         </p>
+                        <p>Here are some enzymes of interest:</p>
+                        <p>Taxadiene synthase TDC1 from <i>Taxus brevifolia</i> is <a href="https://www.uniprot.org/uniprot/Q41594">Q41594</a>.
+                        </p>
+                        <p>Beta-eudesmol synthase ZSS2 from <i>Zingiber zerumbet</i> is <a href="https://www.uniprot.org/uniprot/B1B1U4">B1B1U4</a>.
+                        </p>
+                        <p>Cyclooctat-9-en-7-ol synthase CotB2
+                            from <i>Streptomyces melanosporofaciens</i> is <a href="https://www.uniprot.org/uniprot/C9K1X5">C9K1X5</a>.
+                        </p>
+
                         <div class="step">
                             <p>If you skipped the practical data curation steps, or had had issues them, download an alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
                         </div>
@@ -283,8 +325,9 @@ sequence<span style="color: #666666">.</span>writeFastaFile(<span style="color: 
                             <h4>Perform the reconstruction using GRASP</h4>
                             <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
                             <p>
-
-
+                            On the main page, input a name for the reconstruction (needs to be unique),
+                                the name of the alignment file (either FASTA or Clustal format)
+                                and the phylogenetic tree file (in Newick format). It is also best to
                             </p>
                         </div>
                         <div class="step">

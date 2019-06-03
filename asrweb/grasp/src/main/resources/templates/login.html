@@ -13,7 +13,11 @@
 <div class="content-section-b">
   <div class="container">
     <div class="form-group">&nbsp;</div>
+
     <form class="col-xs-6 col-xs-offset-3" name="registerForm" th:action="@{/login}" th:object="${user}" method="POST" enctype="utf8">
+      <div class="form-group row">
+        <h2>Login</h2>
+      </div>
       <div class="form-group row">
         <label for="username">Username</label>
         <input id="username" class="form-control" placeholder="Username (not email...)" th:field="*{username}"/>

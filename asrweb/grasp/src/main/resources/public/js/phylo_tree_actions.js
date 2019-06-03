@@ -26,7 +26,6 @@ var expandAllNodes = function () {
     // Change expanded to true for all nodes
     for (let n in phylo_options.tree.node_dict) {
       let node = phylo_options.tree.node_dict[n];
-      node[T_EXPANDED] = true;
       node[T_COLLAPSED] = false;
     }
     phylo_options.tree.depth = phylo_options.tree.max_depth;

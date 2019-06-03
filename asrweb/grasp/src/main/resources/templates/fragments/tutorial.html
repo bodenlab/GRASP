@@ -257,6 +257,60 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
+                            <h3 id="motif-searching-nav">Motif Searching</h3>
+                            <p> You are able to search for motifs in saved joint reconstructions. </p>
+
+                            <p><h4>Example searches:</h4>
+                            <ul>
+                                <li>
+                                <code> %A%</code>: Highlight nodes with an <code> A </code> in any position, you can also use just an <code> A </code> however the <code>%</code> signs are recommended.
+                                </li>
+                            <li>
+                                <code> %A-*M%</code>: Highlight nodes with an <code> A </code> followed by any number of gaps and then an <code> M </code>.
+                            </li>
+                            <li>
+                                <code> %AM(P|R)%</code>:  Highlight nodes with an <code> A </code> followed by an <code> M </code>, followed by either a <code> P </code> or an <code> R </code>.
+                            </li>
+
+                            <li>
+                                <code> %A_M%</code>:  Highlight nodes with an <code> A </code> followed by any other character (e.g. a gap, <code> K </code>, <code> P </code> etc) followed by an <code> M </code>.
+                            </li>
+                            </ul>
+                            </p>
+                            <p><h4>Syntax guide:</h4>
+                            <ul>
+                                <li>
+                                    <code> _ </code>: Wildcard character.
+                                </li>
+                                <li>
+                                    <code> | </code>:  denotes one of the two options.
+                                </li>
+                                <li>
+                                    <code> *</code>: repetition of preceding amino acid 0 or more times.
+                                </li>
+
+                                <li>
+                                    <code> {n}</code>: repetition of the preceding amino acid <code>n</code> times.
+                                </li>
+
+                                <li>
+                                    <code> {m, n}</code>: repetition of the preceding amino acid more than <code>m</code> times and less than <code>n</code> times.
+                                </li>
+                            </ul>
+                            </p>
+                            <p>
+                                <strong>Note 1:</strong> Since the gap patterns from the original alignment are preserved, unless you specify gaps or use (<code>-*</code>) between your search elements, only those sequences without gaps between the search terms will be highlighted.
+                            </p>
+                            <p>
+                                <strong>Note 2:</strong> The searching looks for a match <em>anywhere</em> in the sequence, this means that even though two sequences are highlighted, they might not have the motif in the same position! So it is recommended you confirm your findings by downloading the joint reconstructions and checking the alignment.
+                            </p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="cell border-box-sizing text_cell rendered">
+                    <div class="inner_cell">
+                        <div class="text_cell_render border-box-sizing rendered_html">
                             <h3 id="taxonomy-annotation-nav">Taxonomy annotation</h3>
                             <p> GRASP can automatically retrieve taxonomic information from the NCBI and UniProt databases and append this information to the nodes of the phylogenetic tree. Nodes in the tree are assigned the highest shared taxonomic rank of the sequences beneath them. Once nodes
                                 are annotated by clicking on the <strong>Annotate taxonomy</strong> button, the highest shared rank will be visible at collapsed nodes. Clicking on a node will report the highest shared taxonomic rank as well as presenting a histogram of the distribution within the

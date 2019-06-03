@@ -131,20 +131,13 @@ let phylo_options = {
 
 
 var refresh_tree = function () {
-  if (document.getElementById("additive-toggle").innerHTML.split(" | ")[1] === "Additive") {
-    phylo_options.tree.additive = true;
+  phylo_options.tree.additive = false;
 
-    // For this we need to change the whole setup.
-    setupPhyloSvg(phylo_options);
-    // Redraw the tree
-    drawPhyloTree();
-  } else {
-    phylo_options.tree.additive = false;
-    // For this we need to change the whole setup.
-    setupPhyloSvg(phylo_options);
-    // We also want to reset the scale
-    drawPhyloTree();
-  }
+  // For this we need to change the whole setup.
+  setupPhyloSvg(phylo_options);
+  // Redraw the tree
+  drawPhyloTree();
+
   if (document.getElementById('branch-text-toggle').innerHTML.split(" | ")[1]
       === "ON") {
     phylo_options.svg.selectAll('text.branch-text').attr("opacity", 1);
@@ -172,6 +165,8 @@ var refresh_tree = function () {
       $(this).attr("opacity", 1);
     });
   }
+
+
 };
 
 /**
@@ -756,66 +751,72 @@ function drawPhyloCircle(group, nodes) {
  *              characters.
  */
 function drawPhyloText(group, d) {
-  let options = phylo_options.style;
+    let options = phylo_options.style;
 
-  group.append("text")
-  .attr("id", "text-" + d[T_ID])
-  .attr("class", d[T_EXTANT] ? 'extent' : 'node')
-  .attr("name", d[T_NAME])
-  .attr("font-family", options.font_family)
-  .style("font-size", options.font_size)
-  .style("fill", "#2b2b2b") //node[COLOUR])
-  .attr("text-anchor", d[T_EXTANT] ? 'start' : 'middle')
-  .attr("opacity", function () {
-    if (d[T_EXTANT] || (phylo_options.tree.collapsed_selection != null
-            && d[T_ID] === phylo_options.tree.collapsed_selection[T_ID])) {
-      return 1;
-    } else {
-      return 0;
-    }
-  })
-  .attr("transform", function () {
-    let deg = d[T_EXTANT] ? 90 : 0;
-    let x = phylo_options.x_scale(d[T_X]);
-    let y = scaleYValNode(d);
-    if (!d[T_EXTANT]) {
-      y += 10;
-    }
-    return  "translate(" + x + "," + y + ") rotate(" + deg
-    + ") translate(2,2)";
-  })
-  .text(d[T_NAME])
-  .on("mouseover", function() {
-    let id = d3.select(this).attr("id").split("text-")[1];
-    d = phylo_options.tree.node_dict[id];
-    let text = "";
-    if (d[T_TEXT] !== undefined) {
-      text = d[T_TEXT];
-    } else {
-      // Check if we've already assigned the taxanomic text to this
-      if (d[T_EXTANT]) {
-        text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME], d);
+    group.append("text")
+    .attr("id", "text-" + d[T_ID])
+    .attr("class", d[T_EXTANT] ? 'extent' : 'node')
+    .attr("name", d[T_NAME])
+    .attr("font-family", options.font_family)
+    .style("font-size", options.font_size)
+    .style("fill", "#2b2b2b") //node[COLOUR])
+    .attr("text-anchor", d[T_EXTANT] ? 'start' : 'middle')
+    .attr("opacity", function () {
+      if (d[T_EXTANT] || (phylo_options.tree.collapsed_selection != null
+              && d[T_ID] === phylo_options.tree.collapsed_selection[T_ID])) {
+        return 1;
       } else {
-        text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
-            d[T_EXTANT], d[T_NAME], d);
+        return 0;
       }
-      d[T_TEXT] = text;
-    }
+    })
+    .attr("transform", function () {
+      let deg = d[T_EXTANT] ? 90 : 0;
+      let x = phylo_options.x_scale(d[T_X]);
+      let y = scaleYValNode(d);
+      if (!d[T_EXTANT]) {
+        y += 10;
+      }
+      return  "translate(" + x + "," + y + ") rotate(" + deg
+          + ") translate(2,2)";
+    })
+    .text(d[T_NAME])
+    .on("mouseover", function() {
+      if (phylo_options.taxonomyOn === true) {
 
-    div.transition()
-    .duration(200)
-    .style("opacity", .9);
+        let id = d3.select(this).attr("id").split("text-")[1];
+        d = phylo_options.tree.node_dict[id];
+        let text = "";
+        if (d[T_TEXT] !== undefined) {
+          text = d[T_TEXT];
+        } else {
+          // Check if we've already assigned the taxanomic text to this
+          if (d[T_EXTANT]) {
+            text = getTaxaAsText(d[T_TAXA], "NONE", d[T_EXTANT], d[T_NAME], d);
+          } else {
+            text = getTaxaAsText(d[T_TAXA], d[T_COMMON_TAXA][T_DIFFER_RANK],
+                d[T_EXTANT], d[T_NAME], d);
+          }
+          d[T_TEXT] = text;
+        }
 
-    div.html(text + "<br/>")
-    .style("left", (d3.event.pageX) + "px")
-    .style("top", (d3.event.pageY - 28) + "px");
-  })
-  .on("mouseout", function(d) {
-    //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 0);
-    div.transition()
-    .duration(500)
-    .style("opacity", 0);
-  });
+        div.transition()
+        .duration(200)
+        .style("opacity", .9);
+
+        div.html(text + "<br/>")
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+      }
+    })
+    .on("mouseout", function(d) {
+      if (phylo_options.taxonomyOn === true) {
+        //d3.select("#" + "taxa-text-" + d[T_ID]).style("opacity", 0);
+        div.transition()
+        .duration(500)
+        .style("opacity", 0);
+      }
+    });
+
 }
 
 

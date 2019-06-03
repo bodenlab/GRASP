@@ -202,8 +202,10 @@ public class SeqController {
 
         for (String label: labels) {
             long startTime = System.currentTimeMillis();
-
+            System.out.println("***********************************************");
             System.out.println("Running " +  label );
+            System.out.println("***********************************************");
+
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
             // Insert it into the database
             // What we want to do here is perform two inserts -> one for the sequence so we can do
@@ -236,8 +238,12 @@ public class SeqController {
                     System.out.println("Unable to write to logging file.");
                 }
             }
+
         }
-        System.out.println("\n Finished Inserting Joint recons.");
+        System.out.println("***********************************************");
+
+        System.out.println("\n Finished Inserting Joint recons: ALL HAVE BEEN INSERTED.");
+        System.out.println("***********************************************");
         return insertedLabels;
     }
 
@@ -255,6 +261,7 @@ public class SeqController {
         System.out.println(supportedSeq);
 
         String infUpdated = c.getAsJson().toString();
+
         boolean inserted = infModel.insertIntoDb(reconId, nodeName, infUpdated);
         if (!inserted) {
             return false;
@@ -266,6 +273,29 @@ public class SeqController {
             inserted = reconstructionsModel.updateInference(reconId, infUpdated);
         }
         return inserted;
+    }
+
+    /**
+     * A temporary method to allow us to use an alternate consensus method generation technique.
+     * @param gappy
+     */
+    public JSONObject updateMarginalForConsensus(int reconId, String nodeName, TreeNodeObject node, String reconstructedAnsc, int reconType, boolean gappy) {
+        ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+        c.setJsonObject(new JSONObject(reconstructedAnsc));
+
+        System.out.println("***********************\nMARGINAL LOOKING AT: " + nodeName);
+        String supportedSeq = c.getSupportedSequence(true);
+        System.out.println(supportedSeq);
+
+        JSONObject infUpdated = c.getAsJson();
+
+        boolean inserted;
+
+        // Also want to update the Joint sequence
+        inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, reconType, gappy);
+        // Check if this is the root node, if so also update the consensus in the reconstruction
+
+        return infUpdated;
     }
 
 
@@ -294,6 +324,33 @@ public class SeqController {
         // Need to be able to take a null for the marginal
         boolean inserted = updateForConsensus(reconId, label, node, ancsStr, reconType, gappy);
         return null;
+    }
+
+    /**
+     * Insert a single joint instance into the database.
+     *
+     * This is primarily used for saving the marginal reconstruction.
+     *
+     * @param reconId
+     * @param label
+     * @param asrInstance
+     * @return
+     */
+    public JSONObject insertMarginalSeqIntoDb(int reconId, String label, ASRPOG asrInstance, int userId, int reconType, boolean gappy) {
+        TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
+        if (node == null) {
+            return new JSONObject("The labels on your tree were not as we expected! Please send an example of your tree to us so we can update how we process it.");
+        }
+        PartialOrderGraph ancestor = asrInstance.getGraph(label);
+        // Insert it into the database
+        // What we want to do here is perform two inserts -> one for the sequence so we can do
+        // motif searching
+        POAGJson ancsJson = new POAGJson(ancestor, gappy);
+        String ancsStr = ancsJson.toJSON().toString();
+
+        // Need to be able to take a null for the marginal
+        return  updateMarginalForConsensus(reconId, label, node, ancsStr, reconType, gappy);
+
     }
 
     /**

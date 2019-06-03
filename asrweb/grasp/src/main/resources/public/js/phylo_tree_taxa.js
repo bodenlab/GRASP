@@ -19,9 +19,13 @@ let serverVars = {};
  * Called when the user presses the annoate taxonomy button.
  */
 function annotateTaxonomy() {
-  $('#taxonomy-info-alert').removeClass("hidden");
-  queryTaxonIds(serverVars.ncbiList, serverVars.uniprotList, serverVars.ncbiMapping, serverVars.uniprotMapping);
-}
+  if (phylo_options.taxonomyOn !== true) {
+    phylo_options.taxonomyOn = true;
+    $('#taxonomy-info-alert').removeClass("hidden");
+    queryTaxonIds(serverVars.ncbiList, serverVars.uniprotList, serverVars.ncbiMapping, serverVars.uniprotMapping);
+
+  }
+ }
 
 /**
  * Used to store the variables from the server so we don't need to re-query these

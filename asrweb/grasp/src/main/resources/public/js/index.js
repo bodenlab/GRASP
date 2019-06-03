@@ -1412,7 +1412,7 @@ var draw_mini_msa = function (poags) {
         if (node_inferred != null && poags.options.mutants.draw == true && node_inferred[N_MUTANT] == true) {
             var tri = group.append("path")
                     .attr("class", "poag")
-                    .attr('transform', 'translate(' + (line_x - mini_opt.x_padding) + ',' + (y_scale(0) - 10) + ')')
+                    .attr('transform', 'translate(' + (line_x - mini_opt.x_padding) + ',' + (y_scale(0) - 20) + ')')
                     .attr("d", d3.svg.symbol().type("triangle-down"))
                     .attr("opacity", 0.7)
                     .attr("fill", "black");

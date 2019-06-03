@@ -1096,17 +1096,12 @@ public class GraspApplication extends SpringBootServletInitializer {
         String graphs;
         String err;
         if (runningMarginal) {
-            marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
             runningMarginal = false;
             // int reconId, String label, ASRPOG asrInstance, boolean gappy
             // Set to be gappy
-            err = seqController.insertSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
-            if (err != null) {
-                System.out.println(err);
-                return err;
-            }
+            JSONObject marginalGraphs = seqController.insertMarginalSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
+            return  asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), marginalGraphs);
             // Saves this Marginal reconstruction to the DB so the user can access it later.
-            graphs = marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalAsr.getAncestralGraphJSON(marginalAsr.getWorkingNodeLabel()));
         } else {
             // add msa and inferred ancestral graph
             graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));

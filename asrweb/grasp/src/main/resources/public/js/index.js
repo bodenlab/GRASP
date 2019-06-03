@@ -309,7 +309,7 @@ var sort_added_poags = function () {
     }
     // Need to reset where the POAG should be drawn
     poag = setup_poag_svg(poags);
-    redraw_poags();
+    redrawpoags();
 
 }
 
@@ -425,7 +425,8 @@ var redraw_poags = function () {
         }
     }
     poags.brush.extent([poags.cur_x_min, poags.cur_x_max]);
-    poags = update_x_scale(poags);
+
+  poags = update_x_scale(poags);
     var group = poags.groups.mini;
     group.selectAll("g.graph").remove();
     group.selectAll("path.poag").remove();
@@ -455,6 +456,9 @@ var redraw_poags = function () {
     group.selectAll("rect").remove();
     group.selectAll("defs.poag").remove();
     poags = draw_all_poags(poags);
+
+    drawBrushHandles();
+
 }
 
 
@@ -469,7 +473,9 @@ function moveBrush() {
     var halfExtent = (poags.brush.extent()[1] - poags.brush.extent()[0]) / 2;
     var start = point - halfExtent;
     var end = point + halfExtent;
-    if (extent[0] == extent[1]) {
+  poags.setMinBrushWidth = false;
+
+  if (Math.abs(extent[0] - extent[1]) < 20) {
         var diff = poags.cur_x_max - poags.cur_x_min;
         if ((extent[0] + diff/2) > poags.max_x) {
             end = poags.max_x;
@@ -480,7 +486,7 @@ function moveBrush() {
         } else {
             end = extent[0] + diff/2;
             start = extent[0] - diff/2;
-        };
+        }
     }
     poags.brush.extent([start, end]);
     poags.retain_previous_position = true;
@@ -505,34 +511,28 @@ var setup_brush = function (poags) {
             .extent([init_x, end_x])
             .on("brush", redraw_poags);
 
-    poags.groups.mini.append('rect')
+  let gBrush = poags.groups.mini.append('rect')
             .attr("class", "mini")
             .attr('pointer-events', 'painted')
             .attr('width', poags.options.style.width)
             .attr('height', poags.options.mini.height)
             .attr('visibility', 'hidden')
             .on('mouseup', moveBrush);
-
     poags.groups.mini.append("g")
             .attr("class", "x brush")
             .call(brush)  //call the brush function, causing it to create the rectangles
             .selectAll("rect") //select all the just-created rectangles
             .attr("y", -(poags.options.mini.height/2 + 5))
             .attr("fill", poags.options.mini.fill)
-            .attr("width", function() {
-                let w = this.width;
-                if (w < 20) {
-                    return "20px";
-                } else {
-                    return this.width;
-                }
-            })
             .attr("opacity", poags.options.mini.opacity)
             .attr("height", poags.options.mini.height + 10); //set their height
 
-    poags.brush = brush;
+
+  poags.brush = brush;
+  poags.handle = gBrush;
     return poags;
 }
+
 
 /**
  * Draws POAG.
@@ -1282,7 +1282,49 @@ var draw_nodes = function (poags, node, group, node_cx, node_cy) {
     return radius;
 }
 
+let drawBrushHandles = function() {
+  let y_scale = poags.scale.mini_y;
+  let group = poags.groups.mini;
+  let mini_opt = poags.options.mini;
+  let options = poags.options.display;
+  let extent = poags.brush.extent();
+  var x_scale = poags.scale.mini_x;
 
+  let rect = group.append("rect")
+  .attr("class", "poag")
+  .attr('x', x_scale(extent[0]))
+  .attr('y', -(poags.options.mini.height/2 + 5))
+  .attr('width', x_scale(extent[1]) - x_scale(extent[0]))
+  .attr("height", poags.options.mini.height + 10) //set their height
+  .attr("opacity", 0.3)
+  .attr("fill", "#6d7cff");
+  rect.moveToBack();
+  rect = group.append("rect")
+      .attr("class", "poag")
+      .attr('x', x_scale(extent[0]))
+      .attr('y', -(poags.options.mini.height/2 + 5))
+      .attr('width', 10)
+      .attr("height", poags.options.mini.height + 10) //set their height
+      .attr("stroke-width", "4px")
+      .attr("stroke", "#6d7cff")
+      .attr("opacity", 1)
+      .attr("fill", "none");
+  rect.moveToBack();
+
+
+  rect = group.append("rect")
+  .attr("class", "poag")
+  .attr('x', x_scale(extent[1]) - 10)
+  .attr('y', -(poags.options.mini.height/2 + 5))
+  .attr('width', 10)
+  .attr("height", poags.options.mini.height + 10) //set their height
+  .attr("stroke-width", "4px")
+  .attr("stroke", "#6d7cff")
+  .attr("opacity", 1)
+  .attr("fill", "none");
+  rect.moveToBack();
+
+}
 /**
  * Draws the mini line so the user has a high level overview of the
  * msa poag.
@@ -1388,7 +1430,6 @@ var draw_mini_msa = function (poags) {
             .attr("fill", "none")
 
     path.moveToBack();
-
 }
 
 /**

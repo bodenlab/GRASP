@@ -18,6 +18,7 @@
                         <ul>
                             <li>MAFFT - Multiple sequence Alignment (MA) based on the Fast Fourier Transform (FFT). See Katoh and Standley (2013).</li>
                             <li>RAxML - Randomized Accelerated (RAx) Maximum Likelihood (ML) to infer evolutionary relationships. See Stamatakis (2014).</li>
+                            <li><em>Alternative to RAxML:</em> FastTree. See Price, Dehal, and Arkin (2010)</li>
                         </ul>
                         We also recommend using an alignment viewer, such as <a href="http://ormbunkar.se/aliview/">Aliview</a> or <a href="http://www.jalview.org/Download">Jalview</a> and a tree viewer such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">Figtree</a>.
                     </p>
@@ -27,7 +28,7 @@
                     <h3>Pre-requisites</h3>
                         <div class="step">
                             <h4>Install required software</h4>
-                            <p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and RAxML (<a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">https://sco.h-its.org/exelixis/web/software/raxml/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree.
+                            <p>MAFFT (<a href="https://mafft.cbrc.jp/alignment/software/">https://mafft.cbrc.jp/alignment/software/</a>) and RAxML (<a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">https://sco.h-its.org/exelixis/web/software/raxml/</a>) are command-line programs for aligning sequences and inferring a phylogenetic tree. Instead of RAxML you may also wish to install FastTree (<a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>).
                                 If you do not have these already, install the software on your machine using the instructions found on the websites for your operating system.</p>
                             <ul>
                                 <li>
@@ -47,6 +48,10 @@
                                 <li>
                                     <h5>RAxML for Windows</h5>
                                     <p>There is a user interface available to download <a href="https://sourceforge.net/projects/raxmlgui/">here</a>. See Silvestro and Michalak (2012). </p>
+                                </li>
+                                <li>
+                                    <h5>FastTree</h5>
+                                    <p>Detailed install instructions for all operating systems can be found at <a href="http://www.microbesonline.org/fasttree/">http://www.microbesonline.org/fasttree/</a>. See Price, Dehal, and Arkin (2010). </p>
                                 </li>
                             </ul>
                         </div>
@@ -84,6 +89,14 @@
                         <p>When finished (approximately 1 minute, depending on your machine) you will see some summary information output to the console.
                         This will also tell you where the output file has been saved.</p>
                     </div>
+                        <div class="step">
+                            <h4>Or 2. Infer a tree using FastTree</h4>
+                            <p>We will be using FastTree to infer by maximum likelihood a phylogenetic tree.</p>
+                            <p>Type the following command in terminal</p>
+\                            <p><pre><code>FastTree GraspTutorial.aln > GraspTutorial.nwk</code></pre></p>
+
+                            <p>This will compute a phylogenetic tree based on GraspTutorial.aln and save it as a Newick file in GraspTutorial.nwk</p>
+                        </div>
                     <div class="step">
                         <h4>3. Inspect the alignment and phylogenetic tree</h4>
                         <p>Use an alignment viewer (such as <a href="http://ormbunkar.se/aliview/">Aliview</a> or <a href="http://www.jalview.org/Download">Jalview</a>) and a
@@ -112,7 +125,7 @@
                     <div class="step">
                         <h3>Infer ancestral sequences</h3>
                         <div class="step">
-                            <p>If you have had issues curating the alignment for the example data set, or want to jump ahead to exploring GRASP, download the curated alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
+                            <p>If you have had issues curating the alignment for the example data set, or want to jump ahead to exploring GRASP, download the curated alignment and tree from <a href="/download-tutorial-files">here</a>.</p>
                         </div>
                         <div class="step">
                             <h4>6. Perform the reconstruction using GRASP</h4>
@@ -161,14 +174,16 @@
                             <p>Identify the node that represents the ancestor of <em>only</em> the CYP2U1 sequences and infer the ancestor here.</p>
                             <p><em>Note: we re-rooted the tree in Step 5 on the ancestor of the CYP2U1 and CYP2R1 ancestors, i.e. the root node is the ancestor of both the CYP2U1 and CYP2R1 sequences.</em></p>
                             <p class="question">What do the red circles in the navigation bar indicate?</p>
-                            <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question.</em></p>
+                            <p><em>Note: you may need to visually compare the ancestral POG to the (MSA) POAG and inspect the regions where there are red circles on the navigation line to help answer this question. It may also help to look at the ancestor of just the CYP2R1 sequences </em></p>
                             <!--<p>By hovering your mouse over the edges in the MSA graph we can highlight the extant sequences that contribute to that particular sequence path.</p>-->
                             <p class="question">Which sequences contribute to the edge in the (MSA) POAG that jumps the node that is missing from the CYP2U1 ancestor? Does this explain why this node isn't inferred in this ancestor?</p>
-                            <p>Take note of the node ID (i.e. the grey number under the node) of the first red circle.</p>
+                            <p>Take note of the node ID (i.e. the grey number under the node) of the red circle.</p>
                             <p>Infer the CYP2R1 ancestor and navigate to the node ID you took note of.</p>
                             <!--<p class="question">Is the node missing as well in the CYP2R1 ancestor? Similar to the CYP2U1 ancestor, does considering the sequences that contribute to the different edges explain why this node is inferred in this ancestor?</p>-->
                             <p>Insertion or deletion events are also indicated by grey boxes in the navigation bar. When we look at the ancestral POG, we will see multiple paths between nodes.
                                 This means that groups of characters have been inferred to be parsimonious. The darker paths find greater support than the lighter paths; however, both could be considered.</p>
+                            <p>If you are </p>
+
                         </div>
                         <div class="step">
                             <h4>9. Investigate differences between the CYP2U1 ancestor and the CYP2U1 fish ancestor</h4>
@@ -179,11 +194,11 @@
                             <p><em>Note: investigate the difference between using the 'Add joint reconstruction' and 'View joint reconstruction' commands to achieve this.</em></p>
                             <p class="question">Can you identify differences between these inferred ancestors?</p>
                             <p> Look at the first grey box in the navigation bar and note the differences between the ancestors. </p>
-                            <p> A dashed edge indicates that only a single extant sequence is contributing to a particular path.</p>
-                            <p class="question"> Which single sequence is contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>
+                            <p class="question"> Which sequences are contributing to the alternative pathway found in this first grey box? Does this explain the differences between the fish and non-fish CYP2U1 ancestors at this spot?</p>
                             <p> Look at the second grey box in the navigation bar and note the differences between the ancestors. </p>
-                            <p>Remember that GRASP indicates a more supported path (based on <a href="http://grasp.scmb.uq.edu.au/guide#bi-pars-nav">edge parsimony</a>) as a darker edge.</p>
-                            <p class="question"> Why does GRASP suggest two paths with greater support for the CYP2U1 ancestor? Why might it be useful to consider both paths when reconstructing an ancestor?</p>
+                            <p>Remember that GRASP indicates a more supported path (based on <a href="http://grasp.scmb.uq.edu.au/guide#bi-pars-nav">edge parsimony</a>) as a darker edge. </p>
+                            <p>Also, now that we're adding POGs to look in tandem, it's important to realise that the red circles that indicated deletions are only shown in relation to the last added ancestral POG, while grey boxes will summarise the alternative pathways across all added ancestral POGs</p>
+                            <p class="question">Why might it be useful to consider both paths when reconstructing an ancestor?</p>
                         </div>
                         <div class="step">
                             <h4>10. Download the consensus sequence of the CYP2U1 ancestor or Save your session</h4>

@@ -319,39 +319,49 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                         </p>
 
                         <div class="step">
-                            <p>If you skipped the practical data curation steps, or had had issues them, download an alignment and tree from <a href="/download-tutorial-files-aln">here</a>.</p>
+                            <p>If you skipped the practical data curation steps, or had had issues them, download the alignment and tree from <a href="/download-workshop_tps-files">here</a>.</p>
                         </div>
                         <div class="step">
                             <h4>Perform the reconstruction using GRASP</h4>
                             <p>Run the final alignment and tree through <a href="http://grasp.scmb.uq.edu.au/">GRASP</a>.</p>
                             <p>
-                            On the main page, input a name for the reconstruction (needs to be unique),
+                            On the main page,
+                                you can create a user account (if you have not already).
+                                To perform a reconstruction, input a name for it (needs to be unique),
                                 the name of the alignment file (either FASTA or Clustal format)
-                                and the phylogenetic tree file (in Newick format). It is also best to
+                                and the phylogenetic tree file (in Newick format).
+                                It is also best to switch "Save or Run" to "Save with email"; that way all the functionality will be available to you as soon as an
+                                email alerts you to that the reconstruction is complete.
+                                (If you don't select this option before you click "Perform reconstruction", you can just wait for it to complete in front of you, and then click save once finished.)
                             </p>
                         </div>
                         <div class="step">
                             <h4>Inspect the reconstructed ancestors</h4>
                             <p>Explore GRASP</p>
-                            <p class="col-xs-4"> Click Annotate
-                                Taxonomy at the top of the tree </p>
+                            <p class="col-xs-4"> Under Tree Vis Options, click Annotate Taxonomy.</p>
                             <p class="col-xs-8">
-                                This will get the taxonomic information
-                                for the sequences.
+                                This will get the taxonomic information for the sequences.
                                 <em>Note:
                                     taxonomic information will only be displayed if the input sequences are labelled with the NCBI or Uniprot identifier (as in this tutorial).</em>
                             </p>
-                            <p>We will now focus on a protein of interest. This can be changed as you wish, but let's say we are interested in the terpene eudesmol, and we would want to find which enzymes that are somehow related to its production; so we use Uniprot again:.</p>
+                            <p>
+                                Under Tree Search Options, type in "bacteria" in the first text-field, and a fairly significant part of the tree will be highlighted.
+                                The search function in GRASP will pick up words that are used in identifiers, and taxonomic annotations for sequences at the leaves of the tree.
+                            </p>
+                            <p>We will now focus on a protein of interest. This can be changed as you wish, but let's say we are interested in the terpene eudesmol,
+                                and we would want to find which enzymes that are somehow related to its production; so we use Uniprot again:.</p>
                             <p class="code-style"><pre><code>taxonomy:"Eukaryota [2759]" family:"terpene synthase family" eudesmol</code></pre></p>
-                            <p>This should return at least one protein which is in our data set, namely "B1B1U4"; search for it in GRASP (click "Tree search options") and it will be highlighted in the tree.</p>
+                            <p>This should return at least one protein which is in our data set, namely "B1B1U4";
+                                search for it in GRASP (click "Tree search options") and it will be highlighted in the tree.</p>
+                            <p>Now try another protein, Taxadiene synthase also mentioned above, "Q41594".</p>
                             <p class="col-xs-4">Left-click on tree nodes</p>
                             <p class="col-xs-8">This will show any taxonomic information (if available) of the selected ancestor.
                                 At ancestral nodes, this displays a summary of the taxonomic information for all child extant sequences.
                                 Common ranks are listed, and a histogram is displayed for differing taxonomic information. Extant sequences (or leaf
                                 nodes in the tree) show the full available taxonomic information for that extant.
                             </p>
-                            <p>Do this for the immediate ancestor of B1B1U4, consider the taxonomic information and make a note of the node name.
-                                Continue to do this for each ancestor until you reach N0. (On my recon they are N20, N19, N18, N4, N3, N2, N1 and N0.)</p>
+                            <p>Do this for the immediate ancestor of Q41594, consider the taxonomic information and make a note of the node name.
+                                Continue to do this for each ancestor until you reach N0. (In my recon they are N70, N69, N68, N66, N65, N47 and N0.)</p>
                             <p class="col-xs-4">Right-click on tree nodes</p>
                             <p class="col-xs-8">This will show a menu listing options for displaying the tree and performing further reconstructions.
                                 From this menu, we can collapse and expand the tree nodes, perform a joint or marginal reconstruction, or add a joint
@@ -362,22 +372,25 @@ sequence<span style="color: #333333">.</span>writeFastaFile(<span style="backgro
                                 graph/s are the reconstructed ancestor graphs. You will see N0 by default. Hovering over the graph nodes will display a popup showing a histogram of the characters in the
                                 alignment POG and in a marginal reconstruction POG. More information about these nodes can be found <a href="http://grasp.scmb.uq.edu.au/guide#po-graph-nav">in the guide</a>.
                                 We can navigate across the reconstructed graph/s by sliding the purple rectangle along the navigation line above the (MSA) POAG.</p>
-                            <p>Optionally, go through each of the nodes from N1 to the protein of interest (e.g. B1B1U4), now right-click and "Add joint reconstruction" for each node, in order. Each time, a new ancestor POG will appear below. Eventually you will need to scroll down to see them.</p>
+                            <p>Optionally, go through each of the nodes from N47 to the protein of interest (e.g. Q41594), now right-click and "Add joint reconstruction" for each node, in order of evolutionary time.
+                                Each time, a new ancestor POG will appear below. Eventually you will need to scroll down to see them.</p>
                         </div>
                         <div class="step">
                             <h4>Investigate changes from N0 to a protein of interest</h4>
                             <p>Now let's use GRASP to explore differences between a set of ancestors, i.e. trace the predicted evolutionary events.
-                                We're first taking a short-cut but note that if you followed the above (optional) instruction, you could use GRASP's interface to get a lot more detail.</p>
-                            <p>Press the 'Download Results...' button underneath the reconstructed graphs, select 'Consensus sequence of joint reconstructions' and press the 'Download' button. (There may be a brief delay until the file ends up on your computer.)
-                                Consensus sequences only follow a single path so rather than a graph the results you just downloaded is presented as a conventional multiple alignment.
+                                We are first taking a short-cut but note that if you followed the above (optional) instruction, you could use GRASP's interface to get a lot more detail.</p>
+                            <p>Press the 'Download Results...' button underneath the reconstructed graphs, select 'Consensus sequence of joint reconstructions' and press the 'Download' button.
+                                (There may be a brief delay until the file ends up on your computer.)
+                                Consensus sequences only follow a single path so rather than a graph, the results you just downloaded is presented as a conventional multiple sequence alignment.
                                 Load the file into AliView or other alignment viewer.
-                                With AliView, you next highlight the sequences that you noted earlier (N0 to N20 probably, out of more than 200 others), "Copy selection as FASTA", and create a "New" alignment;
-                                in that new alignment, "Paste as FASTA sequences". Now your new alignment will only have the ancestors of B1B1U4.
-                                Again in AliView, load the alignment file that contains the sequences that were input to GRASP (tps_reviewed_v2_edit3.aln);
-                                search for B1B1U4 and also include its neighbour in the phylogenetic tree Q0VHD6; copy and paste into your own alignment file, move them so they all are presented in chronological order N0 to your two extant sequences.
+                                With AliView, you next highlight the sequences that you noted earlier (N0, N47 and so on to N70 for Q41594), "Copy selection as FASTA", and create a "New" alignment;
+                                in that new alignment, "Paste as FASTA sequences". Now your new alignment will only have the ancestors of Q41594.
+                                Again in AliView, load the alignment file that contains the sequences that were input to GRASP (tpswb_v5.aln);
+                                search for Q41594 and also include its neighbours in the phylogenetic tree. (Q93YA3 and Q9FT37 are both Taxadiene synthase for <i>Taxus baccata</i> and <i>wallichiana</i>, respectively.)                                Q0VHD6; copy and paste into your own alignment file, move them so they all are presented in chronological order N0 to your two extant sequences.
                             </p>
-                            <p>You should now be able to follow all (predicted) substitutions from the ultimate terpene synthase ancestor, to the extant eudesmol synthase B1B1U4.
-                                Now, ask questions about functional (or structural) sites of relevance. Do you know where in the sequence the catalytic site is? Do you know of other relevant motifs?
+                            <p>You should now be able to follow all (predicted) substitutions from the ultimate terpene synthase ancestor, to the extant Taxadiene synthase Q41594 or the eudesmol synthase B1B1U4.
+                                Now, ask questions about functional (or structural) sites of relevance. Do you know where the catalytic site is, in terms of sequence positions?
+                                In our alignment, the three motifs we used above start at columns 976, 1174 and 1330, respectively. Check them out. Do you know of other relevant motifs?
                                 While a sequence alignment can highlight regions of conservation, you now have access to the actual changes that led to the specific sequence, not only one site at a time, but across the whole protein.
                                 Given that Nature may have already tested the ancestors out, imagine how you can use this to probe alternative constructs.
                             </p>

@@ -205,6 +205,12 @@ function drawPhyloTree() {
     node[T_COLLAPSED] = undefined;
     node[T_TERMINATED] = undefined;
     node[T_IS_SET] = undefined;
+
+    // If we have a node that has been expanded we also want to include this so
+    // we iterate through the children.
+    if (node[T_EXPANDED] === true){
+      nodes.push(node);
+    }
   }
 
   // Here we always need to iterate through and work out if there are any nodes

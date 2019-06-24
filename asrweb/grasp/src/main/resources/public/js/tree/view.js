@@ -1191,10 +1191,10 @@ function contextMenuAction(call, nodeId) {
     displayJointGraph(call.attr("id"), nodeFill, false);
 
   } else if (call_type === "Expand subtree") {
-
+     phylo_options.tree.node_dict[nodeId][T_COLLAPSED] = false;
      phylo_options.tree.node_dict[nodeId][T_EXPANDED] = true;
-
-    drawPhyloTree();
+     phylo_options.tree.node_dict[nodeId][T_IS_SET] = undefined;
+     drawPhyloTree();
 
   } else if (call_type === "Collapse subtree") {
 
@@ -1202,8 +1202,9 @@ function contextMenuAction(call, nodeId) {
     drawPhyloTree();
 
   } else if (call_type === "Expand subtree and collapse others") {
-
+    phylo_options.tree.node_dict[nodeId][T_COLLAPSED] = false;
     phylo_options.tree.node_dict[nodeId][T_EXPANDED] = true;
+    node[T_IS_SET] = undefined;
 
     phylo_options.tree.depth = 1;
 

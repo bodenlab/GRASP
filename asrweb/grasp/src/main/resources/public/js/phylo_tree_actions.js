@@ -18,9 +18,6 @@ let rotatePhyloTree = function() {
   }
 }
 
-
-
-
 var expandAllNodes = function () {
   if (Object.keys(phylo_options.tree.node_dict).length < 2000) {
     // Change expanded to true for all nodes

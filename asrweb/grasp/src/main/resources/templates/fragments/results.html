@@ -122,7 +122,7 @@
       <div>
 
       <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-4" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-3" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Tree Vis Options
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -150,7 +150,7 @@
         </div>
       </div>
         <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-4" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-3" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Tree Search Options
           </button>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -181,6 +181,9 @@
                  placeholder="Choose a node label..." id="node-label" name="node-label-value"/>
           <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
                  placeholder="Choose how many (num)" id="node-num" name="node-num-value"/>
+            <!-- Example single danger button -->
+
+
           <!--<button type="button" id="phylo-tree-rotate" class="btn btn-default col-xs-2"-->
                   <!--onclick="rotatePhyloTree()">Rotate Tree-->
           <!--</button>-->
@@ -207,6 +210,20 @@
         <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="minus-depth" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="decreaseDepth()">
            -
         </button>
+      </div>
+      <input type="text" class="form-input col-xs-2 no-padding" style="height: 2.1em;"
+             placeholder="Type in the node identifier..." id="node-recon-id" name="node-recon-id-value"/>
+        <div class="btn-group ">
+          <button type="button" class="btn btn-secondary dropdown-toggle btn-default" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Node Actions
+          </button>
+          <div class="dropdown-menu">
+            <button type="button" class="btn btn-secondary dropdown-item" onclick="viewMarginal()">View marginal reconstruction</button>
+            <button type="button" class="btn btn-secondary dropdown-item" onclick="viewJoint()">View joint reconstruction</button>
+            <button type="button" class="btn btn-secondary dropdown-item" onclick="addJoint()">Add joint reconstruction</button>
+          </div>
+
+
         <!--<button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-1" type="button" id="hosizontal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="makeHorizontalTree()">-->
           <!--Horizontal-->
         <!--</button>-->

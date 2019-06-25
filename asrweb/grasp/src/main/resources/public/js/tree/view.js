@@ -1158,9 +1158,12 @@ function unhightlightAllNodes() {
  *  4. collapse subtree
  *  5. expand subtree
  */
-function contextMenuAction(call, nodeId) {
+function contextMenuAction(call, nodeId, useCallAsName) {
+  let call_type = call;
 
-  let call_type = call.attr("name");
+  if (useCallAsName === undefined) {
+    call_type = call.attr("name");
+  }
 
   let node = phylo_options.tree.node_dict[nodeId];
 
@@ -1229,6 +1232,76 @@ function contextMenuAction(call, nodeId) {
      */
   }
 }
+
+/**
+ * Run the marginal reonstruction.
+ * */
+function viewMarginal() {
+  let nodeId = document.getElementById('node-recon-id').value;
+  let node = phylo_options.tree.node_dict[formatTreeNodeId(nodeId)];
+
+  if (node === undefined) {
+    console.log("node id incorrect.");
+    return;
+  }
+  unhightlightAllNodes();
+
+  highlightSelectedNode(node);
+
+  perform_marginal(node[T_ID]);
+
+  reset_poag_stack();
+}
+
+/**
+ * View the joint reconstruction.
+ * */
+function viewJoint() {
+  let nodeId = document.getElementById('node-recon-id').value;
+
+  let node = phylo_options.tree.node_dict[formatTreeNodeId(nodeId)];
+
+  if (node === undefined) {
+    console.log("node id incorrect.");
+    return;
+  }
+
+  let nodeFill = getFillForNode(node);
+
+  unhightlightAllNodes();
+
+  highlightSelectedNode(node);
+
+  displayJointGraph(node[T_ID], nodeFill, true);
+
+  reset_poag_stack();
+}
+
+/**
+ * Add the joint reconstruction to the
+ * */
+function addJoint() {
+  let nodeId = document.getElementById('node-recon-id').value;
+  let node = phylo_options.tree.node_dict[formatTreeNodeId(nodeId)];
+
+  if (node === undefined) {
+    console.log("node id incorrect.");
+    return;
+  }
+
+  let nodeFill = getFillForNode(node);
+
+  highlightSelectedNode(node);
+
+  document.getElementById('reset-button').disabled = false;
+
+  document.getElementById('reset-button').disabled = false;
+
+  displayJointGraph(call.attr("id"), nodeFill, false);
+}
+
+
+
 
 /**
  * The context menu, has the names for the events that a user can perform.

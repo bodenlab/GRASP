@@ -18,6 +18,7 @@ import com.asr.grasp.validator.UserValidator;
 import com.asr.grasp.view.AccountView;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import json.JSONArray;
@@ -1355,6 +1356,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     }
 
+
     /**
      * Download either the marginal or the joint reconstruction.
      *
@@ -1365,7 +1367,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     public @ResponseBody String downloadJoint(@RequestBody String type) {
         String err = verify();
         JSONObject data = new JSONObject();
-
+        ArrayList<String> ancs;
         // Check if we have an error.
         if (err != null) {
             data.put("error", err);
@@ -1375,10 +1377,24 @@ public class GraspApplication extends SpringBootServletInitializer {
         int ancsType = Defines.JOINT;
 
         if (type != null && !type.equals("joint")) {
-            ancsType = Defines.MARGINAL;
+            if (type.equals("marginal")) {
+                ancsType = Defines.MARGINAL;
+
+                ancs = seqController.getAllSeqLabels(currRecon.getId(),ancsType);
+
+            } else {
+                // Now we know we have  a list of ancestors to download
+                ancs =  new ArrayList<String>(Arrays.asList(type.split(",")));
+                // If we have no elements in the array return that
+                if (ancs.size() < 1) {
+                    data.put("error", "You need to input at least one node ID.");
+                    return data.toString();
+                }
+            }
+        } else {
+            ancs = seqController.getAllSeqLabels(currRecon.getId(),ancsType);
         }
 
-        ArrayList<String> ancs = seqController.getAllSeqLabels(currRecon.getId(),ancsType);
         Collections.sort(ancs, new NaturalOrderComparator());
 
         String fastaFileString = "";

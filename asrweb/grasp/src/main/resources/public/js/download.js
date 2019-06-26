@@ -9,6 +9,9 @@ let downloadData = function(btnId) {
     downloadGet('/download-tree');
   } else if (btnId === 'download-marginal') {
     downloadGet('/download-ancs', 'marginal');
+  } else if (btnId === 'download-select-joint') {
+    let commaSepList = document.getElementById("download-select-joint-list").value;
+    downloadGet('/download-ancs', commaSepList);
   }
 };
 

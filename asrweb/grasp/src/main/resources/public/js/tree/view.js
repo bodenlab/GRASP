@@ -1297,7 +1297,7 @@ function addJoint() {
 
   document.getElementById('reset-button').disabled = false;
 
-  displayJointGraph(call.attr("id"), nodeFill, false);
+  displayJointGraph(node[T_ID], nodeFill, false);
 }
 
 

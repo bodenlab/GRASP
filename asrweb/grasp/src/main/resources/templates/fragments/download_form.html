@@ -12,7 +12,7 @@
                                     Phylogenetic Tree
                                 </legend>
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Phylogenetic tree annotated with ancestral labels.">
-                                    <button id="download-tree" name="check-recon-tree" class="dlopt" type="button" onclick="downloadData(this.id)">Download</button>
+                                    <button id="download-tree" name="check-recon-tree" class="dlopt  btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
                                     <label for="download-tree">
                                         Phylogenetic tree (.nwk)
                                     </label>
@@ -24,26 +24,26 @@
                                 <legend>
                                     Ancestral Graphs - <strong>Temporarily Disabled</strong>
                                 </legend>
-                                <div class="checkbox disabled" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
-                                    <button id="check-pog-msa" name="disabled check-pog-msa" class="dlopt" disabled="true" type="button">X</button>
+                                <div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
+                                    <button id="check-pog-msa" name="check-pog-msa" class="btn btn-default" disabled="true" type="button">X</button>
                                     <label for="check-pog-msa">
                                         Sequence alignment POAG (*.dot)
                                     </label>
                                 </div>
                                 <div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">
-                                    <button id="check-pog-marg" class="disabled margopt dlopt" disabled="true" name="check-pog-marg" type="button">X</button>
+                                    <button id="check-pog-marg" class="btn btn-default" name="check-pog-marg" disabled="true" type="button">X</button>
                                     <label for="check-pog-marg">
                                         Marginal reconstruction POG of <span class="node-label">Root</span> (*.dot)
                                     </label>
                                 </div>
                                 <div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
-                                    <button id="check-pog-joint" class="disabled styled dlopt disabled" disabled="true" name="check-pog-joint" type="button">X</button>
+                                    <button id="check-pog-joint" class="btn btn-default" name="check-pog-joint" disabled="true" type="button">X</button>
                                     <label for="check-pog-joint">
                                         Joint reconstruction POG of added ancestors (*.dot)
                                     </label>
                                 </div>
                                 <div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
-                                    <button id="check-pog-joint-single" class=" disabled styled dlopt" disabled="true" name="check-pog-joint-single" type="button">X</button>
+                                    <button id="check-pog-joint-single" class="btn btn-default" name="check-pog-joint-single" disabled="true" type="button">X</button>
                                     <label for="check-pog-joint-single">
                                         Joint reconstruction POG of <span class="node-label">Root</span> (*.dot)
                                     </label>
@@ -55,25 +55,44 @@
                                 <legend>
                                     Sequence Information
                                 </legend>
-                                <div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the inferred ancestral sequence graph.">
-                                    <button id="check-marg-dist" name="check-marg-dist" disabled="true" class="disabled margopt dlopt" type="button">X</button>
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the inferred ancestral sequence graph.">
+                                    <button id="check-marg-dist" name="check-marg-dist" class="btn btn-default disabled" type="button">X</button>
                                     <label for="check-marg-dist">
                                         Distribution of characters in <span class="node-label disabled margopt">Root</span> marginal (.tsv)
                                     </label>
                                 </div>
-                                <div class="checkbox " data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                    <button id="download-marginal" class="dlopt" name="download-marginal" type="button" onclick="downloadData(this.id)">Download</button>
+                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                    <button id="download-marginal" class="btn btn-default" name="download-marginal" type="button" onclick="downloadData(this.id)">Download</button>
                                     <label for="download-marginal">
                                         Consensus sequence of reconstructed (if any) marginal Nodes (.fasta)
                                     </label>
                                 </div>
 
                                 <div id="check-joint">
-                                    <div class="checkbox disabled margopt" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                        <button id="download-joint" name="check-seq-joint" class="dlopt" type="button" onclick="downloadData(this.id)">Download</button>
+                                    <div  class="checkbox" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                        <button id="download-joint" name="check-seq-joint" class=" btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
                                         <label>
                                             Consensus sequences of Joint Reconstructions (.fasta)
                                         </label>
+                                    </div>
+                                </div>
+
+                                <div id="check-select-joint">
+                                    <div class="checkbox" data-toggle="popover" data-placement="bottom">
+                                    <input id="download-select-joint-list" type="text" class="form-input col-xs-12 no-padding " style="height: 2.1em;"
+                                           placeholder="Node id (s)..." name="download-select-joint-list-value"/>
+                                        <label>
+                                            Type in the node identifier(s) using a comma separated list.
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="checkbox" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of a selection of inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                        <button id="download-select-joint" name="check-select-seq-joint" class=" btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
+                                        <label>
+                                            Consensus sequences of a list of nodes for the Joint Reconstructions (.fasta)
+                                        </label>
+
                                     </div>
                                 </div>
                             </fieldset>

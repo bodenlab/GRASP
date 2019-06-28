@@ -5,6 +5,30 @@
 
 <div id="results-container" th:fragment="results" th:if="${results == true}">
   <!-- Modal -->
+  <div class="modal fade" id="upload-annot-modal" tabindex="-1" role="dialog" aria-labelledby="upload-annot-modal">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <div class="loader-txt">
+            <h3>Annotation uploader</h3>
+            <div class="form-group">
+            <p>Please paste your <strong> comma separated values </strong> with the header in the text box below.</p><p><small>This feature is not meant to be robust, it is up to users to format the files correctly. If you are unsure about formatting, please look at our help page.</small></p>
+            </div>
+              <div class="form-group">
+              <label for="annot-text-area">CSV Annotation data</label>
+              <textarea class="form-control" id="annot-text-area" rows="10"></textarea>
+            </div>
+            <button type="button" id="upload-annot-btn" class="btn btn-default col-xs-2" data-dismiss="modal"
+                    onclick="uploadAnnotFile()">Upload
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal -->
   <div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
     <div class="modal-dialog modal-sm" role="document">
       <div class="modal-content">
@@ -119,38 +143,63 @@
         <p>You can only expand all nodes for reconstructions with less than 1000 sequences.</p>
       </div>
 
+
       <div>
 
-      <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-3" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Tree Vis Options
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2"
-                  onclick="annotateTaxonomy()">Annotate taxonomy
-          </button>
-          <button type="button" id="extant-text-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_extant_text()">Extant labels | ON
-          </button>
-          <button type="button" id="node-text-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_node_text()">Node labels | OFF
-          </button>
-          <button type="button" id="branch-text-toggle" class="btn btn-default col-xs-2"
-                  onclick="toggle_branch_text()">Branch length | OFF
-          </button>
-          <!--<button type="button" id="additive-toggle" class="btn btn-default col-xs-2"-->
-                  <!--onclick="toggle_additive()">Tree type | Additive-->
-          <!--</button>-->
-          <button type="button" id="expand-all-nodes" class="btn btn-default col-xs-2"
-                  onclick="expandAllNodes()">Expand all nodes
-          </button>
-          <button type="button" id="saveButton" class="btn btn-default col-xs-2"
-                  onclick="save_phylo_svg_to_png()">Save tree
-          </button>
-        </div>
-      </div>
+
         <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-3" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-2" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Annotation
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+
+                  <input type="text" class="form-input col-xs-6 no-padding" style="height: 2.1em;"
+                         placeholder="Column label..." id="annot-key-value" name="search"
+                         />
+
+                <input type="text" class="form-input col-xs-6 no-padding" style="height: 2.1em;"
+                       placeholder="Search term..." id="search-annot" name="search"
+                       oninput="searchAnnot(this.value);"/>
+
+                <button type="button" id="upload-anoot-btn" class="btn btn-default col-xs-6"
+                        data-toggle="modal" data-target="#upload-annot-modal">Upload file
+                </button>
+
+          </div>
+        </div>
+
+
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-2" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Tree Vis Options
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <button type="button" id="annotate-taxonomy" class="btn btn-default col-xs-2"
+                    onclick="annotateTaxonomy()">Annotate taxonomy
+            </button>
+            <button type="button" id="extant-text-toggle" class="btn btn-default col-xs-2"
+                    onclick="toggle_extant_text()">Extant labels | ON
+            </button>
+            <button type="button" id="node-text-toggle" class="btn btn-default col-xs-2"
+                    onclick="toggle_node_text()">Node labels | OFF
+            </button>
+            <button type="button" id="branch-text-toggle" class="btn btn-default col-xs-2"
+                    onclick="toggle_branch_text()">Branch length | OFF
+            </button>
+            <!--<button type="button" id="additive-toggle" class="btn btn-default col-xs-2"-->
+            <!--onclick="toggle_additive()">Tree type | Additive-->
+            <!--</button>-->
+            <button type="button" id="expand-all-nodes" class="btn btn-default col-xs-2"
+                    onclick="expandAllNodes()">Expand all nodes
+            </button>
+            <button type="button" id="saveButton" class="btn btn-default col-xs-2"
+                    onclick="save_phylo_svg_to_png()">Save tree
+            </button>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle btn btn-default col-xs-2" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Tree Search Options
           </button>
           <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">

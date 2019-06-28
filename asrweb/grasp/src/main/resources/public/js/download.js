@@ -10,7 +10,7 @@ let downloadData = function(btnId) {
   } else if (btnId === 'download-marginal') {
     downloadGet('/download-ancs', 'marginal');
   } else if (btnId === 'download-select-joint') {
-    let commaSepList = document.getElementById("download-select-joint-list").value;
+    let commaSepList = document.getElementById("download-select-joint-list").value.replace(/\s/g,'');
     downloadGet('/download-ancs', commaSepList);
   }
 };

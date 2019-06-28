@@ -209,3 +209,4 @@ const STROKE_WIDTH = 'stroke_w';
 var ranks = ["domain", "kingdom", "phylum", "class", "order",
   "family", "genus", "species"]
 var RANKS = ["t_domain", "t_superkingdom", "t_kingdom", "t_phylum", "t_class_t", "t_order_t", "t_family", "t_genus", "t_species"]
+const ANNOT = 'annot-';

@@ -1,7 +1,7 @@
 /**
  * Rotate the phylo tree by 180 degrees
  */
-currentRotation = 0;
+let currentRotation = 0;
 let rotatePhyloTree = function() {
   let rotations = ['rotate(90deg)', 'rotate(180deg)', 'rotate(270deg)', 'rotate(0deg)'];
   $('#phylo-tree-svg').css('transform', rotations[currentRotation]);

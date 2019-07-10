@@ -651,14 +651,15 @@ function drawCollapsedSymbol(group, node) {
   .attr("class", "collapsed-node")
   .attr("d", d3.svg.symbol().type(options.collapsed_symbol).size(70))
   .attr("transform", "translate(" + x + "," + scaleYValNode(node) + ")")
-  .style("fill", options.collapsed_colour)
+  .style("fill", node[T_CONTAINS_SEARCH] ? phylo_options.style.hover_fill : options.font_colour)
 
   group.append("text")
   .attr("id", "text-coll-" + node[T_ID])
   .attr("name", node[T_NAME])
   .attr("font-family", options.font_family)
   .style("font-size", options.font_size)
-  .attr("fill", node[T_CONTAINS_SEARCH] ? options.search_colour : options.font_colour)
+  .style("font-weight", node[T_CONTAINS_SEARCH] ? 800 : 400)
+  .attr("fill", node[T_CONTAINS_SEARCH] ? phylo_options.style.hover_fill : options.font_colour)
   .attr("text-anchor", "middle")
   .attr("transform", "translate(" + x + "," + y + ")")
   .text("(" + node[T_NUM_EXTANTS] + ")");
@@ -669,7 +670,8 @@ function drawCollapsedSymbol(group, node) {
   .attr("font-family", options.font_family)
   .style("font-size", options.font_size)
   .attr("font-style", "italic")
-  .attr("fill", node[T_CONTAINS_SEARCH] ? options.search_colour : options.font_colour)
+  .attr("font-weight", node[T_CONTAINS_SEARCH] ? 800 : 400)
+  .attr("fill", node[T_CONTAINS_SEARCH] ? phylo_options.style.hover_fill : options.font_colour)
   .attr("text-anchor", "start")
   .attr("transform", "translate(" + x + "," +  (y + 10) + ") rotate(" + 90
       + ") translate(2,2)")
@@ -759,7 +761,8 @@ function drawPhyloText(group, d) {
     .attr("name", d[T_NAME])
     .attr("font-family", options.font_family)
     .style("font-size", options.font_size)
-    .style("fill", "#2b2b2b") //node[COLOUR])
+    // Give it a different fill colour if it was present in the last search.
+    .style("fill", d[T_CONTAINS_SEARCH] ? phylo_options.style.hover_fill : "#2b2b2b") //node[COLOUR])
     .attr("text-anchor", d[T_EXTANT] ? 'start' : 'middle')
     .attr("opacity", function () {
       if (d[T_EXTANT] || (phylo_options.tree.collapsed_selection != null
@@ -769,6 +772,7 @@ function drawPhyloText(group, d) {
         return 0;
       }
     })
+    .style("font-weight", d[T_ANNOT] ? 800 : 400) // Have a bold font if we have an annotation present
     .attr("transform", function () {
       let deg = d[T_EXTANT] ? 90 : 0;
       let x = phylo_options.x_scale(d[T_X]);
@@ -1073,8 +1077,6 @@ function onMouseover(node, d) {
   let options = phylo_options.style;
   let id = node.attr("id").split("fill-")[1];
 
-  //let view_extant_labels = document.getElementById('extant-text-toggle').innerHTML.split(" | ")[1] === "ON";
-
   node.attr("r", options.hover_radius);
 
   if (phylo_options.tree.selected_nodes.includes(node)) {
@@ -1197,6 +1199,8 @@ function contextMenuAction(call, nodeId, useCallAsName) {
      phylo_options.tree.node_dict[nodeId][T_COLLAPSED] = false;
      phylo_options.tree.node_dict[nodeId][T_EXPANDED] = true;
      phylo_options.tree.node_dict[nodeId][T_IS_SET] = undefined;
+     // Refresh that it contained a search
+     phylo_options.tree.node_dict[nodeId][T_CONTAINS_SEARCH] = false;
      drawPhyloTree();
 
   } else if (call_type === "Collapse subtree") {
@@ -1301,7 +1305,20 @@ function addJoint() {
 }
 
 
-
+function searchNodeId() {
+  let nodeId = document.getElementById('node-recon-id').value;
+  let node = phylo_options.tree.node_dict[formatTreeNodeId(nodeId)];
+  let prevNodeHighlight = phylo_options.tree['prev_highlighted_node'];
+  if (prevNodeHighlight !== undefined) {
+    unhighlightNode(prevNodeHighlight);
+  }
+  if (node === undefined) {
+    console.log("node id incorrect.");
+    return;
+  }
+  phylo_options.tree['prev_highlighted_node'] = node;
+  highlightNode(node);
+}
 
 /**
  * The context menu, has the names for the events that a user can perform.

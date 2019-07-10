@@ -412,6 +412,7 @@ var save_poag_svg_to_png = function () {
         saveAs(dataBlob, document.querySelector("#recon-label").textContent.slice(2) + '_graph.png');
     } // FileSaver.js function    }
 };
+
 // Set-up the export button
 var save_phylo_svg_to_png = function () {
     var width = $("#phylo-tree").width();
@@ -424,6 +425,7 @@ var save_phylo_svg_to_png = function () {
         saveAs(dataBlob, document.querySelector("#recon-label").textContent.slice(2) + '_tree.png');
     }
 };
+
 // Below are the functions that handle actual exporting:
 // getSVGString ( svgNode ) and svgString2Image( svgString, width, height, format, callback )
 function getSVGString(svgNode) {
@@ -475,12 +477,10 @@ function getSVGString(svgNode) {
             }
         }
 
-
         return extractedCSSText;
         function contains(str, arr) {
             return arr.indexOf(str) === -1 ? false : true;
         }
-
     }
 
     function appendCSS(cssText, element) {

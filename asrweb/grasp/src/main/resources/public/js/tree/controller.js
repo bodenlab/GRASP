@@ -273,7 +273,6 @@ function drawPhyloTree() {
       }
     }
     node[T_IS_SET] = false;
-    node[T_COLLAPSED] = undefined;
   });
 
   let branches = getBranchesWithNodeID(nodeIdsForBranches);

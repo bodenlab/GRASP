@@ -287,3 +287,7 @@ b {
 }
 }
 }
+
+.modal-body {
+    padding: 50px;
+}

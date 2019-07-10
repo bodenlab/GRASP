@@ -18,9 +18,11 @@
               <label for="annot-text-area">CSV Annotation data</label>
               <textarea class="form-control" id="annot-text-area" rows="10"></textarea>
             </div>
-            <button type="button" id="upload-annot-btn" class="btn btn-default col-xs-2" data-dismiss="modal"
-                    onclick="uploadAnnotFile()">Upload
-            </button>
+            <div class="form-group">
+              <button type="button" id="upload-annot-btn" class="btn btn-default col-xs-2" data-dismiss="modal"
+                      onclick="uploadAnnotFile()">Upload
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -270,6 +272,8 @@
             <button type="button" class="btn btn-secondary dropdown-item" onclick="viewMarginal()">View marginal reconstruction</button>
             <button type="button" class="btn btn-secondary dropdown-item" onclick="viewJoint()">View joint reconstruction</button>
             <button type="button" class="btn btn-secondary dropdown-item" onclick="addJoint()">Add joint reconstruction</button>
+            <button type="button" class="btn btn-secondary dropdown-item" onclick="searchNodeId()">Highlight Node</button>
+
           </div>
 
 

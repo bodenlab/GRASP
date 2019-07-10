@@ -91,18 +91,12 @@ let searchTree = function (search, clear, exact) {
   for (let n in phylo_options.tree.node_dict) {
     let e = phylo_options.tree.node_dict[n];
     if (e[T_CONTAINS_SEARCH]) {
-      if (e[T_EXTANT]) {
-        d3.select("#text-" + e[T_ID]).style('fill', phylo_options.style.hover_fill);
-      } else {
-        d3.select("#fill-" + e[T_ID]).attr("stroke-width", "10px");
-        d3.select("#fill-" + e[T_ID]).attr("stroke", phylo_options.style.hover_fill);
-      }
+      // Check if it is collapsed
+
+      highlightNode(e);
     } else {
-      if (e[T_EXTANT]) {
-        d3.select("#text-" + e[T_ID]).style('fill', 'black');
-      } else {
-        d3.select("#fill-" + e[T_ID]).attr("stroke-width", 0)
-      }
+
+      unhighlightNode(e);
     }
   }
 

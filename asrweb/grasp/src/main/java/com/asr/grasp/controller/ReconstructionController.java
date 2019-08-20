@@ -149,7 +149,7 @@ public class ReconstructionController {
             getId(recon, user.getId());
             if (err == null) {
                 user.addToOwnerdReconIds(recon.getId(), recon.getLabel(),
-                        "Not Available", "today");
+                        "Not Available", "Today");
                 // We want to reduce the memory overhead, so we can remove the ancestor graph amd
                 // the MSA of the reconstrcuction
                 recon.clearLargeStrings();

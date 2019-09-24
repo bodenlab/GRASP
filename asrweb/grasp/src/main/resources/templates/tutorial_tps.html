@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head_include :: head_include">
+  <!-- metas, link and scripts -->
+</head>
+<body class="container-fluid">./run-
+<div th:replace="fragments/nav :: nav"></div>
+
+<!-- Header -->
+<div th:replace="fragments/header :: header"></div>
+
+<!-- Page Content -->
+
+<!-- Tutorial Section  -->
+<div class="col-xs-12 page-header">
+  <!--<button id="tutorial-toggle" class="btn btn-default col-sm-12" data-target="#tutorial" data-toggle="collapse">-->
+  <!--</button>-->
+  <div th:replace="fragments/workshop_tps :: workshop_tps"></div>
+</div>
+
+<!-- About Section -->
+<div th:replace="fragments/about :: about"></div>
+
+<!-- Footer -->
+<div th:replace="fragments/footer :: footer"></div>
+
+</body>
+
+</html>

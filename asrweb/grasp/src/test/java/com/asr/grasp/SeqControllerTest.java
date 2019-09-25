@@ -112,11 +112,11 @@ public class SeqControllerTest extends BaseTest {
         HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
 
         System.out.println(seqMap.get("N22_68"));
-        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFG------f"));
+        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFG------"));
         //"SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
         System.out.println(seqMap.get("N22_68"));
         // old
-        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFS------f"));
+        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFS------"));
         //"ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
         System.out.println(seqMap.get("N4_98"));
         // Delete the user to clean up the database will automatically delete
@@ -243,7 +243,7 @@ public class SeqControllerTest extends BaseTest {
         /**
          * Test that the counts are correct
          */
-        String label = "N1";
+        String label = "N0";
         PartialOrderGraph ancestor = joint.getGraph(label);
         // Insert it into the database
         // What we want to do here is perform two inserts -> one for the sequence so we can do
@@ -256,20 +256,23 @@ public class SeqControllerTest extends BaseTest {
         // ToDO:
         String supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);
+        HashMap<Integer, HashMap<Integer, Integer>> k = node.getEdgeCounts();
 
-//        weightArr = c.getEdgeMapping();
-//        // Check that they are as we would expect
-//        assertThat(weightArr[0], equalTo(1.0));
-//        assertThat(weightArr[1], equalTo(0.8));
-//        assertThat(weightArr[2], equalTo(0.8));
-//        assertThat(weightArr[3], equalTo(0.0));
-//        assertThat(weightArr[4], equalTo(0.0));
-//        assertThat(weightArr[5], equalTo(0.0));
-//        assertThat(weightArr[6], equalTo(1.0));
-
-
-        assertThat("MGG---Df", equalTo(supportedSeq));
-
+        assertThat("MGG---D", equalTo(supportedSeq));
+        for (Integer from: k.keySet()) {
+            for (Integer to: k.get(from).keySet()) {
+                System.out.println("F: " + from.toString() + " T: " + to.toString() + " c:" + k.get(from).get(to).toString());
+                if (from == -1) {
+                    assertThat(to, equalTo(0));
+                    assertThat(k.get(from).get(to), equalTo(10));
+                }
+                if (from == 1) {
+                    assertThat(to, equalTo( 2));
+                    assertThat(k.get(from).get(to), equalTo(4));
+                }
+            }
+        }
+        System.out.println();
         label = "N3";
         ancestor = joint.getGraph(label);
         // Insert it into the database
@@ -281,27 +284,30 @@ public class SeqControllerTest extends BaseTest {
         c = new ConsensusObject(node.getEdgeCounts(), node.getNumSeqsUnderNode());
         c.setJsonObject(new JSONObject(ancsStr));
 
-        HashMap<Integer, HashMap<Integer, Integer>> k = node.getEdgeCounts();
+        k = node.getEdgeCounts();
+        // N3 has seq_03, seq_04  seq_05 under it
+        // 5: 0 --> 6
+        // 3 & 4: 0 --> 1 --> 2 --> 6
         for (Integer from: k.keySet()) {
             for (Integer to: k.get(from).keySet()) {
                 System.out.println("F: " + from.toString() + " T: " + to.toString() + " c:" + k.get(from).get(to).toString());
+                if (from == 1) {
+                    assertThat(to, equalTo(2));
+                    assertThat(k.get(from).get(to), equalTo(2));
+                }
+                if (from == 2) {
+                    assertThat(to, equalTo( 6));
+                    assertThat(k.get(from).get(to), equalTo(2));
+                }
+                if (from == -1) {
+                    assertThat(to, equalTo( 0));
+                    assertThat(k.get(from).get(to), equalTo(3));
+                }
             }
         }
-//        weightArr = c.getWeightArray();
-//        // ToDO:
-        supportedSeq = c.getSupportedSequence(true);
-        // Check that they are as we would expect
-//        assertThat(weightArr[0], equalTo(1.0));
-//        assertThat(weightArr[1], equalTo(0.6666666666666666));
-//        assertThat(weightArr[2], equalTo(0.6666666666666666));
-//        assertThat(weightArr[3], equalTo(0.0));
-//        assertThat(weightArr[4], equalTo(0.0));
-//        assertThat(weightArr[5], equalTo(0.0));
-//        assertThat(weightArr[6], equalTo(1.0));
-
         supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);
-        assertThat("MGG---Df", equalTo(supportedSeq));
+        assertThat("MGG---D", equalTo(supportedSeq));
 
         userModel.deleteUser(userController.getId(user));
     }

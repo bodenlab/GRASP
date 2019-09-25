@@ -5,10 +5,7 @@ import com.asr.grasp.model.InferenceModel;
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.SeqModel;
 import com.asr.grasp.objects.ASRObject;
-import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
-import com.asr.grasp.objects.TreeNodeObject;
-import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.utils.Defines;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -22,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reconstruction.ASRPOG;
+import reconstruction.ConsensusObject;
+import reconstruction.TreeNodeObject;
+import reconstruction.TreeObject;
 import vis.POAGJson;
 
 
@@ -144,10 +144,8 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
-            TreeNodeObject node = consensusController
-                    .getEdgeMappingForNode(reconId, userId, label);
-            ConsensusObject c = new ConsensusObject(node.getSeqCountList(),
-                    node.getNumSeqsUnderNode());
+            TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label, asrInstance.getPogAlignment());
+            ConsensusObject c = new ConsensusObject(node.getEdgeCounts(), node.getNumSeqsUnderNode());
             c.setJsonObject(new JSONObject(ancsStr));
             // ToDO:
             String supportedSeq = c.getSupportedSequence(true);
@@ -185,7 +183,7 @@ public class SeqController {
     public List<String> insertAllJointsToDb (int reconId, ASRPOG asrInstance, boolean gappy, int userId) {
         List<String> insertedLabels = new ArrayList<>();
         List<String> labels = asrInstance.getAncestralSeqLabels();
-        TreeObject tree = consensusController.getEdgeMapping(reconId, userId);
+        TreeObject tree = consensusController.getEdgeMapping(reconId, userId, asrInstance.getPogAlignment());
         BufferedWriter bw = null;
 
         try {
@@ -241,7 +239,6 @@ public class SeqController {
 
         }
         System.out.println("***********************************************");
-
         System.out.println("\n Finished Inserting Joint recons: ALL HAVE BEEN INSERTED.");
         System.out.println("***********************************************");
         return insertedLabels;
@@ -253,7 +250,7 @@ public class SeqController {
      * @param gappy
      */
     public boolean updateForConsensus(int reconId, String nodeName, TreeNodeObject node, String reconstructedAnsc, int reconType, boolean gappy) {
-        ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+        ConsensusObject c = new ConsensusObject(node.getEdgeCounts(), node.getNumSeqsUnderNode());
         c.setJsonObject(new JSONObject(reconstructedAnsc));
 
         System.out.println("LOOKING AT: " + nodeName);
@@ -280,7 +277,7 @@ public class SeqController {
      * @param gappy
      */
     public JSONObject updateMarginalForConsensus(int reconId, String nodeName, TreeNodeObject node, String reconstructedAnsc, int reconType, boolean gappy) {
-        ConsensusObject c = new ConsensusObject(node.getSeqCountList(), node.getNumSeqsUnderNode());
+        ConsensusObject c = new ConsensusObject(node.getEdgeCounts(), node.getNumSeqsUnderNode());
         c.setJsonObject(new JSONObject(reconstructedAnsc));
 
         System.out.println("***********************\nMARGINAL LOOKING AT: " + nodeName);
@@ -310,7 +307,7 @@ public class SeqController {
      * @return
      */
     public String insertSeqIntoDb(int reconId, String label, ASRPOG asrInstance, int userId, int reconType, boolean gappy) {
-        TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
+        TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label, asrInstance.getPogAlignment());
         if (node == null) {
             return "The labels on your tree were not as we expected! Please send an example of your tree to us so we can update how we process it.";
         }
@@ -337,7 +334,7 @@ public class SeqController {
      * @return
      */
     public JSONObject insertMarginalSeqIntoDb(int reconId, String label, ASRPOG asrInstance, int userId, int reconType, boolean gappy) {
-        TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label);
+        TreeNodeObject node = consensusController.getEdgeMappingForNode(reconId, userId, label, asrInstance.getPogAlignment());
         if (node == null) {
             return new JSONObject("The labels on your tree were not as we expected! Please send an example of your tree to us so we can update how we process it.");
         }

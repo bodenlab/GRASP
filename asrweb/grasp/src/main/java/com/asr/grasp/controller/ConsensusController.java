@@ -1,9 +1,12 @@
 package com.asr.grasp.controller;
 
-import com.asr.grasp.objects.TreeNodeObject;
-import com.asr.grasp.objects.TreeObject;
+import dat.POGraph;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reconstruction.TreeNodeObject;
+import reconstruction.TreeObject;
 
 /**
  * This controller helps identify the consensus sequence for a particular inference.
@@ -21,22 +24,6 @@ public class ConsensusController {
     @Autowired
     TreeController treeController;
 
-    /**
-     * Build the mapping of the edges.
-     *
-     * @param reconId
-     * @param userId
-     * @return
-     */
-    public TreeObject getEdgeMapping(int reconId, int userId) {
-        // Get the reconstructed tree from the database
-        TreeObject tree = treeController.getById(reconId, userId);
-        TreeNodeObject root = tree.getRoot();
-        // Now we want to build the edge count map up recursively.
-        root.buildEdgeCountMap(seqController, reconId);
-        // Return the tree containing the mapping (i.e. the counts).
-        return tree;
-    }
 
     /**
      * Build the mapping of the edges.
@@ -45,9 +32,33 @@ public class ConsensusController {
      * @param userId
      * @return
      */
-    public TreeNodeObject getEdgeMappingForNode(int reconId, int userId, String nodeLabel) {
+    public TreeObject getEdgeMapping(int reconId, int userId, POGraph pogAlignment) {
         // Get the reconstructed tree from the database
         TreeObject tree = treeController.getById(reconId, userId);
+        TreeNodeObject root = tree.getRoot();
+        tree.assignSeqIds((HashMap)pogAlignment.getSequences());
+        // Now we want to build the edge count map up recursively.
+        root.buildEdgeCountMap(pogAlignment.getEdgeCounts(), tree.getSeqIdMap());
+        // Return the tree containing the mapping (i.e. the counts).
+        return tree;
+    }
+
+
+    /**
+     * Build the mapping of the edges.
+     *
+     * @param reconId
+     * @param userId
+     * @return
+     */
+    public TreeNodeObject getEdgeMappingForNode(int reconId, int userId, String nodeLabel, POGraph pogAlignment) {
+        // Get the reconstructed tree from the database
+        TreeObject tree = treeController.getById(reconId, userId);
+        TreeNodeObject root = tree.getRoot();
+        // Now we want to build the edge count map up recursively.
+        tree.assignSeqIds((HashMap)pogAlignment.getSequences());
+        // Now we want to build the edge count map up recursively.
+        root.buildEdgeCountMap(pogAlignment.getEdgeCounts(), tree.getSeqIdMap());
         TreeNodeObject node = null;
         try {
             node = tree.getNodeByLabel(nodeLabel.split("_")[0]);
@@ -59,8 +70,6 @@ public class ConsensusController {
                 return null;
             }
         }
-        // Now we want to build the edge count map up recursively.
-        node.buildEdgeCountMap(seqController, reconId);
 
         // Return the tree containing the mapping (i.e. the counts).
         return node;

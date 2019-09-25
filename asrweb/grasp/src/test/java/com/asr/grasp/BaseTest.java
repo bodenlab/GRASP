@@ -13,11 +13,11 @@ import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.TaxaModel;
 import com.asr.grasp.model.UsersModel;
 import com.asr.grasp.objects.ASRObject;
-import com.asr.grasp.objects.ConsensusObject;
 import com.asr.grasp.objects.ReconstructionObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.model.TreeModel;
 import com.asr.grasp.utils.Defines;
+import reconstruction.ConsensusObject;
 
 public class BaseTest {
     /**

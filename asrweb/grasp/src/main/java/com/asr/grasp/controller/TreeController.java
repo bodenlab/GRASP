@@ -2,8 +2,6 @@ package com.asr.grasp.controller;
 
 import com.asr.grasp.model.ReconstructionsModel;
 import com.asr.grasp.model.TreeModel;
-import com.asr.grasp.objects.TreeNodeObject;
-import com.asr.grasp.objects.TreeObject;
 import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import java.io.IOException;
@@ -16,6 +14,8 @@ import java.util.PriorityQueue;
 import json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reconstruction.TreeNodeObject;
+import reconstruction.TreeObject;
 
 /**
  * The tree controller handles the higher level functions to do with logic associated with the
@@ -74,7 +74,6 @@ public class TreeController {
         }
         return null;
     }
-
 
     /**
      * This method takes two file paths and finds the similar nodes between the two.

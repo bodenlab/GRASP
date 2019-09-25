@@ -251,14 +251,14 @@ fieldset {
 }
 
 .loader-txt {
-p {
-    font-size: 13px;
-    color: #666;
-small {
-    font-size: 11.5px;
-    color: #999;
-}
-}
+        p {
+            font-size: 13px;
+            color: #666;
+        small {
+            font-size: 11.5px;
+            color: #999;
+        }
+    }
 }
 
 #output {

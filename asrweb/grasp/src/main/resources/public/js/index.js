@@ -982,6 +982,7 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
     }
 
     for (var e in edges) {
+      try{
         var edge = edges[e];
         var reduced_edge = {};
         reduced_edge[E_ID] = e;
@@ -997,12 +998,16 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
         reduced_edge[E_SEQS] = edge[E_SEQS];
 
         if (inferred) {
-            poags.single.edges[name].push(reduced_edge);
+          poags.single.edges[name].push(reduced_edge);
         } else if (merged) {
-            poags.merged.edges.push(reduced_edge);
+          poags.merged.edges.push(reduced_edge);
         } else {
-            poags.multi.edges[name].push(reduced_edge);
+          poags.multi.edges[name].push(reduced_edge);
         }
+      } catch {
+        console.log(edges[e]);
+      }
+
     }
 
     return poags;

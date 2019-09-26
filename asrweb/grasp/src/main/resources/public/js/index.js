@@ -1580,7 +1580,7 @@ var draw_edges = function (poags, edge, group, scale_y) {
                   tooltipdiv.transition()
                   .duration(200)
                   .style("opacity", .9);
-                  tooltipdiv.html("Seqs: " + edge[E_WEIGHT] + "%")
+                  tooltipdiv.html("Seqs: " + edge[E_WEIGHT].toFixed(2) + "%")
                   .style("left", (d3.event.pageX) + "px")
                   .style("top", (d3.event.pageY - 28) + "px");
                 })

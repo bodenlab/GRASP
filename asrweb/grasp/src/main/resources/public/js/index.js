@@ -982,7 +982,7 @@ var process_edges = function (poags, raw_poag, name, inferred, merged) {
     }
 
     for (var e in edges) {
-      try{
+      try {
         var edge = edges[e];
         var reduced_edge = {};
         reduced_edge[E_ID] = e;

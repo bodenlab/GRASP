@@ -480,7 +480,7 @@ public class TreeController {
         double value = 1;
 
         double score = 0.0;
-        if (node.isExtent()) {
+        if (node.isExtant()) {
             if (!node.isInIntersection()) {
                 return 0.0;
             }
@@ -526,7 +526,7 @@ public class TreeController {
      */
     public double scoreNodes(ArrayList<String> extentList, ArrayList<String> extentNotIncludedList, TreeNodeObject node, Double distance) {
         int value = 1;
-        if (node.isExtent()) {
+        if (node.isExtant()) {
             if (!node.isInIntersection()) {
                 return  0.0;
             }
@@ -637,7 +637,7 @@ public class TreeController {
      */
     public TreeNodeObject updateNode(ArrayList<TreeNodeObject> extentList, TreeNodeObject node) {
         ArrayList<TreeNodeObject> extentChildren = new ArrayList<>();
-        if (node.isExtent()) {
+        if (node.isExtant()) {
             if (extentList.contains(node)) {
                 return node;
             } else {

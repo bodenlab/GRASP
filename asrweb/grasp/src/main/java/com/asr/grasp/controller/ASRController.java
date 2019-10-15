@@ -121,7 +121,7 @@ public class ASRController {
         if (asrJoint == null)
             asrJoint = new ASRPOG(model, NUM_THREADS);
         if (asrJoint.getAncestralInferences() == null || asrJoint.getAncestralInferences().isEmpty())
-            asrJoint.runReconstruction(treeNwk, seqs, true, (msa == null ? null : msa.getMSAGraph()), logFileName);
+            asrJoint.runReconstruction(treeNwk, seqs, true, (msa == null ? null : msa.getMSAGraph()));
         return true;
     }
 

@@ -201,7 +201,7 @@ public class SeqController {
         for (String label: labels) {
             long startTime = System.currentTimeMillis();
             System.out.println("***********************************************");
-            System.out.println("Running " +  label );
+            System.out.println("Running " +  label + "\tat time\t" + startTime);
             System.out.println("***********************************************");
 
             PartialOrderGraph ancestor = asrInstance.getGraph(label);
@@ -517,26 +517,6 @@ public class SeqController {
      */
     public String getInfAsJson(int reconId, String label) {
         return infModel.getInferenceForLabel(reconId, label);
-    }
-
-    /**
-     * Here we also want to use the inference to determine which is the number of sequences that
-     * flow through that particular position.
-     */
-    public void updateConsusensForNodes(ReconstructionObject recon, ArrayList<String> labels, ASRObject asrInstance) {
-        JSONObject inferences = new JSONObject();
-        inferences.put("meta", new JSONObject().put("type", true));
-        JSONArray nodes = new JSONArray();
-        nodes.put(0, "meta");
-        for (String label: labels) {
-            String jsonArr = infModel.getInferenceForLabel(recon.getId(), label);
-            nodes.put(new JSONObject(jsonArr));
-        }
-        asrInstance.loadSequences(recon.getSequences());
-        inferences.put("inferences", nodes);
-       	ASRPOG asr = new ASRPOG(asrInstance.getModel(), asrInstance.getNumberThreads(), inferences, asrInstance.getSeqsAsEnum(), asrInstance.getTree());
-        insertSpecificJointsToDB(recon.getId(), asr, true, labels, 000000, null);
-
     }
 
     /**

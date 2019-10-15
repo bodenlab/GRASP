@@ -11,6 +11,8 @@ import com.asr.grasp.objects.UserObject;
 import com.asr.grasp.utils.Defines;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+
 import json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -256,7 +258,7 @@ public class SeqControllerTest extends BaseTest {
         // ToDO:
         String supportedSeq = c.getSupportedSequence(true);
         System.out.println(supportedSeq);
-        HashMap<Integer, HashMap<Integer, Integer>> k = node.getEdgeCounts();
+        Map<Integer, Map<Integer, Integer>> k = node.getEdgeCounts();
 
         assertThat("MGG---D", equalTo(supportedSeq));
         for (Integer from: k.keySet()) {

@@ -34,8 +34,7 @@ public class EmailObject {
     public void setContent(String appUrl, String confirmationToken) {
         this.content = "Dear " + username + ", \n "
                 + " Please confirm your email by clicking the following link: \n"
-                + appUrl + " and adding in your confirmation token: " + confirmationToken + " \n"
-                + " Cheers, \n The grasp team :) ";
+                + appUrl + " and adding in your confirmation token: " + confirmationToken + " \n";
         this.subject = "Email confirmation at GRASP";
     }
 
@@ -43,32 +42,30 @@ public class EmailObject {
         this.content = "Dear " + username + ", \n "
                 + " Please reset your password clicking the following link: \n"
                 + appUrl + " and adding in your confirmation token: " + confirmationToken + " \n"
-                + " Cheers, \n The grasp team :) \n If this wasn't you, please get in contact with the people at GRASP.";
+                + " If this wasn't you, please get in contact with the people at GRASP.";
         this.subject = "Reset password at GRASP";
     }
 
     public void setContentError(String reconName, String errorMessage) {
         this.content = "Dear " + username + ", \n "
-                + " Unfortunately your reconstruction " + reconName + " wasn't able to completed!\n"
-                + " Some common errors include:\n"
-                + " 1. Not being logged in;\n"
-                + " 2. Running a marginal reconstruction before your joint reconstruction has completed (this means we haven't saved all the exent sequences yet); and\n"
+                + " Unfortunately your reconstruction " + reconName + " wasn't able to complete.\n"
+                + " Common errors include:\n"
+                + " 1. Not being logged in (you need to be logged in for a reconstruction to save);\n"
+                + " 2. Running a marginal reconstruction before your joint reconstruction has completed (this means all the extant sequences are not saved yet); and\n"
                 + " 3. Having an odd labelling format for your internal tree nodes.\n"
-                + " Please try again, if you have this issue again, please send the GRASP team an email and "
+                + " Please try again, if you have this issue again, please use the contact details on the website and "
                 + "forward on the following error: \n"
                 + "\t" + errorMessage + "\n"
                 + " Also please attach your files you were trying to run as this will help us to diagnose the issue.\n"
-                + " Note: there are a number of common errors that occur, for these, please visit: http://grasp.scmb.uq.edu.au/guide#errors-nav\n"
-                + " Cheers, \n The grasp team :) ";
+                + " Note: there are a number of common errors that occur, for these, please visit: http://grasp.scmb.uq.edu.au/guide#errors-nav\n";
         this.subject = "Reconstruction not complete at GRASP";
     }
 
     public void setContent(String reconName) {
         this.content = "Dear " + username + ", \n "
-                + " Yay your reconstruction " + reconName + " is now complete!\n"
-                + " Go to your login page to access it. \n"
-                + " Cheers, \n The grasp team :) ";
-        this.subject = "Reconstruction complete at GRASP";
+                + " Your reconstruction " + reconName + " is now complete.\n"
+                + " Login using your username to access it. \n";
+        this.subject = "Reconstruction " + reconName + " is complete";
     }
 
     public String getContent() {

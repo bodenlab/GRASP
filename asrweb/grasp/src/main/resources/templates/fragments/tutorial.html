@@ -382,7 +382,7 @@
                             <p>A node simply represents the character state of a position in a sequence. The position is not defined in an absolute sense, rather in a relative sense when there is evidence of an order. For practical reasons, there is still a positional index to assist navigation in GRASP.</p>
                             <p>The node displays either a single character state or a distribution over possible character states. The states of ancestral nodes are inferred by <a href="/ml">maximum likelihood</a>.</p>
 
-                            <h4>Edges in a partial-order graph and consensus paths</h4>
+                            <h4>Edges in a partial-order graph and preferred paths</h4>
                             <p><a id='edge_cons_paths'></a></p>
                             <p>An edge represents a valid path to create a full-length sequence. Ultimately, once homologous sections have been determined by alignment,
                                 the set of extant sequences express the space of possible paths that can be taken. Of them, by enumerating them at each node,
@@ -411,8 +411,8 @@
                                     <p>Dashed edges have only a single representative in the set of extant sequences; these should almost always be disregarded and are often the result of out-groups that have been used to build the phylogenetic tree.</p>
                                 </li>
                                 <li>
-                                    <p>GRASP provides the option of displaying one <em>consensus</em> sequence. If this option is turned on,
-                                        thick/bold edges represent a single, consensus traversal of the graph, giving (greedy) preference to
+                                    <p>GRASP provides the option of displaying one <em>preferred path</em> through a sequence. If this option is turned on,
+                                        thick/bold edges represent a single, preferred traversal of the graph, giving (greedy) preference to
                                         (a) bi-directional edge-parsimony support (edge is drawn dark) and (b) greater number of extant sequences following, irrespective of their phylogenetic relationship.
                                         (All alternative paths are drawn with a thin outline.)</p>
                                 </li>
@@ -514,7 +514,7 @@
                             <div class="col-xs-12">
                                 <div class="img" id="download-pane-img-div"></div>
                             </div>
-                            <figcaption class="figure-caption">Figure 9. The download results section, with a form to (1) show download specific file options, and what those files may be including (2) the annotated phylogenetic tree, (3) reconstructions, and (4) probability distributions and consensus sequences.</figcaption>
+                            <figcaption class="figure-caption">Figure 9. The download results section, with a form to (1) show download specific file options, and what those files may be including (2) the annotated phylogenetic tree, (3) reconstructions, and (4) probability distributions and preferred sequences.</figcaption>
                             <p>To download results, tick the boxes for each file you wish to download and then click the download button at the bottom of the pane.</p>
                             <p>On the left hand side of the download pane ('<strong>Phylogenetic Tree</strong>', see <a href="#download-pane-img">(2)</a> in <a href="#download-pane-img">Figure 9</a>) there is a single option to download the phylogenetic tree. The corresponding downloaded file will simply be the tree you provided but with internal/ancestral nodes labelled (N0, N1..etc.).</p>
                             <p>In the middle section ('<strong>Ancestral Graphs</strong>', see <a href="#download-pane-img">(3)</a> in <a href="#download-pane-img">Figure 9</a>) you will find options to download partial-order graph representations of the following:</p>
@@ -528,9 +528,9 @@
                             <p>Finally, on the right hand side of the download pane ('<strong>Sequence Information</strong>', see <a href="#download-pane-img">(4)</a> in <a href="#download-pane-img">Figure 9</a>) you will find options to download information for the following:</p>
                             <ul>
                                 <li>distibution of characters in the marginal reconstruction for the primary node. This is in a 'tab separated value' (.tsv) format;</li>
-                                <li><a href="#edge_cons_paths">consensus sequence</a> for the marginal reconstruction of the currently selected primary node (.fasta format);</li>
-                                <li><a href="#edge_cons_paths">consensus sequence</a> for the joint reconstruction of the currently selected primary node (.fasta format);</li>
-                                <li><a href="#edge_cons_paths">consensus sequence</a> for all joint reconstructions (.fasta format);</li>
+                                <li><a href="#edge_cons_paths">preferred sequence</a> for the marginal reconstruction of the currently selected primary node (.fasta format);</li>
+                                <li><a href="#edge_cons_paths">preferred sequence</a> for the joint reconstruction of the currently selected primary node (.fasta format);</li>
+                                <li><a href="#edge_cons_paths">preferred sequence</a> for all joint reconstructions (.fasta format);</li>
                                 <li>distribution of characters in the multiple sequence alignment provided by the user or generated by GRASP (.tsv format); and</li>
                                 <li>multiple sequence alignment.</li>
                             </ul>

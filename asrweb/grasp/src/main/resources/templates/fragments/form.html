@@ -43,14 +43,9 @@
                                         $('#data').val(data);
                                         if (data == "none") {
                                             // enable sequence alignment and library inputs
-                                            $("[id='check-align']").bootstrapSwitch('disabled',false);
-                                            if ($("[id='check-align']").bootstrapSwitch('state') == false) {
                                                 $('#lbl-filealn').removeAttr('disabled');
                                                 $('#filealn').removeAttr('disabled');
-                                            } else {
-                                                $('#lbl-fileseq').removeAttr('disabled');
-                                                $('#fileseq').removeAttr('disabled');
-                                            }
+
                                             $('#lbl-filetree').removeAttr('disabled');
                                             $('#filetree').removeAttr('disabled');
                                             $('#label').removeAttr('disabled');
@@ -61,11 +56,8 @@
                                             set_recon_label(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
                                             $('#label').focus();
                                             // disable sequence alignment and library inputs
-                                            $("[id='check-align']").bootstrapSwitch('disabled',true);
                                             $('#lbl-filealn').attr('disabled', true);
                                             $('#filealn').attr('disabled', true);
-                                            $('#lbl-fileseq').attr('disabled', true);
-                                            $('#fileseq').attr('disabled', true);
                                             $('#lbl-filetree').attr('disabled', true);
                                             $('#filetree').attr('disabled', true);
                                             $('#label').attr('disabled', true);
@@ -80,55 +72,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-6">
-                    <div id="check-align-div" class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction." >
-                        <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200" data-on-color="default" data-off-text="No" data-on-text="Yes" />
-                    </div>
-                </div>
-                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom" style="padding-bottom:0px;">
-                    <div class="form-group row col-xs-12">
-                        <div class="input-group col-xs-12" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
-                            <label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">
-                                <span class="glyphicon glyphicon-align-left col-xs-1"></span>
-                                Select sequence library file...
-                                <input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="update_info($('#upload-seq-info'),document.forms['asrForm']['fileseq'].files[0]);" hidden="hidden" th:field="*{seqFile}"></input>
-                            </label>
-                            <span class="label label-default upload-file-info col-xs-12" id="upload-seq-info"></span>
-                        </div>
-                        <script type="text/javascript">
-                            // $('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name)
-                            var update_info = function(el, file) {
-                                el.html(file.name);
-                                if (file.size > 200000000) {
-                                    $("#warning").css({'display':'block'});
-                                    $("#warning-text").text("File size cannot exceed 20MB.");
-                                    $("#submit-btn").prop('disabled', true);
-                                } else {
-                                    $("#warning").css({'display':'none'});
-                                    $("#submit-btn").prop('disabled', false);
-                                }
-                            };
 
-                            $("[id='check-align']").bootstrapSwitch();
-                            $('input[id="check-align"]').on('switchChange.bootstrapSwitch', function(event, state) {
-                                if (state === true) {
-                                    // enable sequence library inputs
-                                    $('#lbl-fileseq').removeAttr('disabled');
-                                    $('#fileseq').removeAttr('disabled');
-                                    // disable sequence alignment inputs
-                                    $('#lbl-filealn').attr('disabled', true);
-                                    $('#filealn').attr('disabled', true);
-                                } else {
-                                    // enable sequence alignment inputs
-                                    $('#lbl-filealn').removeAttr('disabled');
-                                    $('#filealn').removeAttr('disabled');
-                                    // disable sequence library inputs
-                                    $('#lbl-fileseq').attr('disabled', true);
-                                    $('#fileseq').attr('disabled', true);
-                                }
-                            });
-                        </script>
-                    </div>
+                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom" style="padding-bottom:0px;">
                     <div class="form-group row col-xs-12">
                         <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
                             <label id="lbl-filealn" class="btn btn-default col-xs-12" for="filealn">

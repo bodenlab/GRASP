@@ -468,7 +468,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("message", "Unable to delete the reconstruction, error: " + err);
         } else {
             mav.addObject("warning", "delete");
-            mav.addObject("type", "shared");
             mav.addObject("message", "Successfully deleted reconstruction.");
         }
 

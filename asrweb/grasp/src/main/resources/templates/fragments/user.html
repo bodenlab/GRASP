@@ -6,13 +6,33 @@
         <div class="container">
             <h2
                     class=""><span
-                    th:text="*{user.username}"></span></h2>
+                    th:text="*{user.username}"> username</span></h2>
+            <h2
+                    class=""><span
+                    th:text="*{user.email}"> email </span></h2>
+
+            hopped out
+
+            <h2
+                    class=""><span
+                    th:text="*{user.password}"> email </span></h2>
+
         </div>
+
+        <script>
+            console.log('returning')
+            console.log(user)
+            console.log(user.username)
+            console.log(user.email)
+            console.log(user.password)
+
+
+        </script>
     </div>
     <div class="content-section-b ">
         <div class="container">
             <div id="recon-success" class="alert alert-success hidden" role="alert">
-                Successfully <span id="recon-edit-type"></span> reconstruction. You need to (1) wait for action to finish, and (2) refresh this page to see the changes.
+                Successfully <span id="recon-edit-type"></span> reconstruction!
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -37,21 +57,23 @@
                     <th scope="col">Last Updated</th>
                     <!--<th scope="col">Inference Type</th>-->
                     <!--<th scope="col">Ancestral Node</th>-->
-                    <th scope="col"></th>
-                    <th scope="col"></th>
+                    <th scope="col">Delete</th>
+                    <th scope="col">Load</th>
+                    <th scope="col">Share</th>
+
                 </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="recon : *{ownerAccessRecons}">
-                        <td th:text="${recon.label}"></td>
-                        <td th:text="${recon.size}"></td>
-                        <td th:text="${{recon.updatedAt}}"></td>
-                        <!--<td th:text="${recon.inferenceType}"></td>-->
-                        <!--<td th:text="${recon.node}"></td>-->
-                        <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
-                        <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
-                        <td><a th:onclick="${'updateReconId(' + recon.id + ');'}" href="" data-toggle="modal" data-target="#share-user-modal" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
-                    </tr>
+                <tr th:each="recon : *{ownerAccessRecons}">
+                    <td th:text="${recon.label}"></td>
+                    <td th:text="${recon.size}"></td>
+                    <td th:text="${{recon.updatedAt}}"></td>
+                    <!--<td th:text="${recon.inferenceType}"></td>-->
+                    <!--<td th:text="${recon.node}"></td>-->
+                    <td><a th:href="@{/(delete='t',id=${recon.id})}" title="Delete"><span class="glyphicon glyphicon-trash text-primary glyph-lg"></span></a></td>
+                    <td><a th:href="@{/(load='t',id=${recon.id})}" title="Load"><span class="glyphicon glyphicon-open-file text-primary glyph-lg"></span></a></td>
+                    <td><a th:onclick="${'updateReconId(' + recon.id + ');'}" href="" data-toggle="modal" data-target="#share-user-modal" title="Share"><span class="glyphicon glyphicon-share text-primary glyph-lg"></span></a></td>
+                </tr>
                 </tbody>
             </table>
             <h3 class="pad-top-bottom">Shared Reconstructions</h3>
@@ -63,8 +85,11 @@
                     <th scope="col">Last Updated</th>
                     <!--<th scope="col">Inference Type</th>-->
                     <!--<th scope="col">Ancestral Node</th>-->
+                    <th scope="col">Delete</th>
+                    <th scope="col">Load</th>
                     <th scope="col"></th>
-                    <th scope="col"></th>
+
+
                 </tr>
                 </thead>
                 <tbody>
@@ -113,39 +138,43 @@
     </div>
     <script type="text/javascript" th:inline="javascript">
 
-                                /*<![CDATA[*/
+        /*<![CDATA[*/
 
-				$(document).ready(function () {
-				        username = /*[[${user.username}]]*/;
-                        $('#account-link').text(username);
-                        $('#account-link').css("color", "#333");
-                        $('#account-link').css("font-weight", "bold");
-                        $('#login-link').text("Logout");
-                        $('#account-link').removeClass("hidden");
-                        var warning = /*[[${warning}]]*/;
-                        var type = /*[[${type}]]*/;
-                        var error = /*[[${error}]]*/;
-                        if (type != null) {
-                            $('#recon-edit-type').text(type);
-                            $('#recon-success').removeClass("hidden");
-                        }
-                        if (warning != null){
-                            $('#num-recons').text(warning);
-                            $('#recon-warning').removeClass("hidden");
-                        }
-                        if (error != null){
-                            $('#share-user').text(error);
-                            $('#recon-error').removeClass("hidden");
-                        }
-				});
+        $(document).ready(function () {
+            username = /*[[${user.username}]]*/;
+            $('#account-link').text(username);
+            $('#account-link').css("color", "#333");
+            $('#account-link').css("font-weight", "bold");
+            $('#login-link').text("Logout");
+            $('#account-link').removeClass("hidden");
+            var warning = /*[[${warning}]]*/;
+            var type = /*[[${type}]]*/;
+            var error = /*[[${error}]]*/;
+            if (type != null) {
+                $('#recon-edit-type').text(type);
+                $('#recon-success').removeClass("hidden");
+            }
+            if (warning != null){
+                $('#num-recons').text(warning);
+                $('#recon-warning').removeClass("hidden");
+            }
+            if (error != null){
+                $('#share-user').text(error);
+                $('#recon-error').removeClass("hidden");
+            }
+        });
 
-				var updateReconId = function(id) {
-				    $('#recon-share-id').val(id);
-				};
+        var updateReconId = function(id) {
+            $('#recon-share-id').val(id);
+        };
 
 
-                                /*]]>*/
+        /*]]>*/
     </script>
 </div>
 </body>
 </html>
+
+
+
+

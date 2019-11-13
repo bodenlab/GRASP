@@ -1,6 +1,7 @@
 package com.asr.grasp.controller;
 
 import com.asr.grasp.objects.EmailObject;
+import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
@@ -50,19 +52,23 @@ public class EmailController {
     @Value("${project.emailname}")
     private String emailname;
 
+    @Value("{project.bcc}")
+    private String bcc;
+
     @Autowired
     JavaMailSender mailSender;
 
     /**
      * The sender mail class allows us to inject the passwords and configurations of the
      * web app to create the sending object.
-     *
+     * <p>
      * Currently this could just be done once - however as we have the saving running on a separate
      * thread it is created each time (adding overhead). ToDo: review this.
+     *
      * @return
      */
     @Bean
-    public JavaMailSender getMailSender(){
+    public JavaMailSender getMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
         mailSender.setHost(host);
@@ -85,7 +91,7 @@ public class EmailController {
      *
      * @param email
      */
-    public void sendEmail(EmailObject email) {
+    public void sendEmail(EmailObject email) throws AddressException {
 
         MimeMessagePreparator preparator = getMessagePreparator(email);
         mailSender = getMailSender();
@@ -99,25 +105,48 @@ public class EmailController {
 
     /**
      * Prepares the email, we add in the email content and what not here.
-     *
+     * <p>
      * This takes the email object, if we want to add anything else to the email, this is where
      * it would be done (that isn't simple text). E.g. files.
+     *
      * @param email
      * @return
      */
-    private MimeMessagePreparator getMessagePreparator(EmailObject email) {
+    private MimeMessagePreparator getMessagePreparator(EmailObject email) throws AddressException {
 
-        MimeMessagePreparator preparator = new MimeMessagePreparator() {
+        try {
+            // Add in an administrator email address to send a BCC of the email to
+            InternetAddress bccAddress = new InternetAddress(bcc);
 
-            public void prepare(MimeMessage mimeMessage) throws Exception {
-                mimeMessage.setFrom(emailname);
-                mimeMessage.setRecipient(Message.RecipientType.TO,
-                        new InternetAddress(email.getEmail()));
-                mimeMessage.setText(email.getContent());
-                mimeMessage.setSubject(email.getSubject());
-            }
-        };
-        return preparator;
+
+            MimeMessagePreparator preparator = new MimeMessagePreparator() {
+
+                public void prepare(MimeMessage mimeMessage) throws Exception {
+                    mimeMessage.setFrom(emailname);
+                    mimeMessage.setRecipient(Message.RecipientType.TO,
+                            new InternetAddress(email.getEmail()));
+
+                    mimeMessage.setText(email.getContent());
+                    mimeMessage.setSubject(email.getSubject());
+
+//                    // Only send BCC email on certain jobs
+//                    if (email.getType() == Defines.RECONSTRUCTION) {
+//                        mimeMessage.addRecipient(Message.RecipientType.BCC, bccAddress);
+//                    }
+
+                    mimeMessage.addRecipient(Message.RecipientType.BCC, bccAddress);
+
+
+                }
+            };
+            return preparator;
+
+        } catch (AddressException ex) {
+            throw new AddressException(ex.getMessage());
+
+        }
+
     }
-}
 
+
+}

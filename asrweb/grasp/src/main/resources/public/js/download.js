@@ -40,13 +40,13 @@ let downloadGet = function(url, dataPost) {
         $("#loadMe").modal("hide");
         if (fileContent === "") {
           if (dataPost === "marginal") {
-            let err = "No marginal reconstructions have been saved, please save some marginal reconstructions and try again :)";
+            let err = "No marginal reconstructions have been saved, please save some marginal reconstructions and try again.";
             document.getElementById("download-error").innerText = err;
             document.getElementById("download-error-div").style.display = "block";
 
             window.alert(err);
           } else {
-            let err = "Looks like you need to save your reconstruction, click the save button in the top left corner :)";
+            let err = "Looks like you need to save your reconstruction, click the save button in the top left corner.";
             document.getElementById("download-error").innerText = err;
             document.getElementById("download-error-div").style.display = "block";
 

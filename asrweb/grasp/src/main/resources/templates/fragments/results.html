@@ -519,25 +519,25 @@
        */
       window.onbeforeunload = function(){
         if (!saved) {
-          alert("Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ");
+            alert("Final reminder - you haven't saved your reconstruction");
         }
         if (!saved) {
-          return "Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ";
+          return "Final reminder - you haven't saved your reconstruction";
         }
       };
 
       window.onunload = function() {
         if (!saved) {
-          alert("Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ");
+          alert("Final reminder - you haven't saved your reconstruction");
         }
       }
 
       $(window).bind("beforeunload", function(event) {
         if (!saved) {
-          alert("Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ");
+            alert("Final reminder - you haven't saved your reconstruction");
         }
         if (!saved) {
-          return "Just a reminder you haven't saved your reconstruction and this is your last chance too... :) ";
+            return "Final reminder - you haven't saved your reconstruction";
         }
       });
 

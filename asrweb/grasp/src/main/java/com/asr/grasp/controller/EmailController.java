@@ -52,7 +52,7 @@ public class EmailController {
     @Value("${project.emailname}")
     private String emailname;
 
-    @Value("{project.bcc}")
+    @Value("${project.bcc}")
     private String bcc;
 
     @Autowired

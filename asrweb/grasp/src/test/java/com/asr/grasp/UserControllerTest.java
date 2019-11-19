@@ -105,6 +105,9 @@ public class UserControllerTest extends BaseTest {
         System.out.println(user.getId());
         //assertThat(user.getId(), not(equalTo(Defines.UNINIT)));
 
+        // check the email has been set
+        System.out.println(user.getEmail());
+
         // Check that we can get the confirm the registration and set the password
         err = userController.confirmRegistration(user);
 

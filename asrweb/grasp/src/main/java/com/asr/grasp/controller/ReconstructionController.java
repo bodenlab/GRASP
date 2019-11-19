@@ -180,11 +180,16 @@ public class ReconstructionController {
         // Get the userId of the user we want to save that reconstruction with
         int userId = usersModel.getUserId(username);
         if (userId == Defines.FALSE) {
-            return "user.username.nonexist";
+            return Defines.USER_NONEXIST;
         }
+
+        if (userId == loggedInUser.getId()){
+            return Defines.SHARE_SELF;
+        }
+
         // Check if the user already has access that we're trying to share with
         if (reconModel.getUsersAccess(reconId, userId) != Defines.NO_ACCESS) {
-            return "recon.share.exists";
+            return Defines.SHARE_EXISTS;
         }
         // ShareObject the reconstruction with the user
         return reconModel.shareWithUser(reconId, userId);

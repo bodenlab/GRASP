@@ -111,4 +111,22 @@ public class Defines {
 
     public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList("tawfik", "hudson", "clifton", "cyp2u1");
 
+
+    /**
+     * Error messages
+     */
+
+    public static final String SHARE_SELF = "You can't share a reconstruction with yourself.";
+    public static final String SHARE_EXISTS = "This user already has access to that reconstruction.";
+    public static final String SHARE_NOTOWNER = "Only the user who owns a reconstruction can share it.";
+    public static final String DELETE_NOTOWNER = "You can only delete this reconstruction if you are the owner.";
+
+    public static final String USER_NONEXIST = "This username does not exist.";
+
+
+
+
+
+
+
 }

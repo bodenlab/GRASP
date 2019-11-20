@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.asr</groupId>
-	<artifactId>grasp_app</artifactId>
+	<artifactId>grasp_release_20191121</artifactId>
 	<version>2</version>
 	<packaging>jar</packaging>
 
@@ -28,9 +28,9 @@
 
 	<profiles>
 		<profile>
-			<id>dev</id>
+			<id>docker</id>
 			<properties>
-				<activatedProperties>dev-override</activatedProperties>
+				<activatedProperties>release-override</activatedProperties>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -46,7 +46,6 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
@@ -115,17 +114,8 @@
 		</dependency>
 
 	</dependencies>
-
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<!-- this will get rid of version info from war file name -->
-					<finalName>${project.artifactId}</finalName>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -166,6 +156,7 @@
 		</plugins>
 
 	</build>
+
 	<repositories>
 		<repository>
 			<id>grasp-repo</id>

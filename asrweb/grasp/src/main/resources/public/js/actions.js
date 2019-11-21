@@ -4,7 +4,9 @@
  * notified once it is complete.
  */
 let saveRecon = function() {
+    // Get the email
     let email = document.getElementById("email").value;
+
     $.ajax({
       url: "/saveRecon",
       type: "POST",
@@ -17,7 +19,9 @@ let saveRecon = function() {
         if (data.value === "login") {
           window.alert("You need to login to perform this action. When you login the saving will automatically start ");
         } else if (data.value  === "isSaving") {
-          window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
+            window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
+        } else if (data.value === 'exists') {
+            window.alert("This reconstruction is already saved");
         } else {
           window.alert("Saving reconstruction, check your emails ");
         }

@@ -101,7 +101,6 @@ public class ASRController {
      */
     public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs, String logFileName) throws InterruptedException {
 
-        System.out.println("Running recon");
 
         NUM_THREADS = numThreads;
         if (type.equalsIgnoreCase("marginal"))
@@ -132,8 +131,6 @@ public class ASRController {
      * Run marginal reconstruction using saved data and specified options
      */
     private boolean runReconstructionMarginal(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String nodeLabel) throws InterruptedException {
-        System.out.println("Running marginal");
-
 
 
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))

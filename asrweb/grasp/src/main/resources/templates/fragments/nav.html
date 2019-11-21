@@ -13,7 +13,7 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand topnav" href="#">GRASP<span id="recon-label"></span> <span class="node-label"></span> <small><span class="infer-label" th:text="*{inferenceType}"></span> reconstruction </small></a>
-                <button class="navbar-brand hidden save-modal-btn" id="save-link"   onclick="saveRecon()" >
+                <button class="navbar-brand hidden save-modal-btn" id="save-link" >
                     <span class="glyphicon glyphicon-floppy-disk text-primary glyph-lg"></span>
                 </button>
 
@@ -54,6 +54,25 @@
                             $('#login-link').text("Logout");
                             $('#account-link').removeClass("hidden");
                         }
+
+                        // Check for user email to pass through to saveRecon
+
+
+                        document.getElementById ("save-link").addEventListener ("click", checkEmail, false);
+
+                        function checkEmail(){
+                            var email = /*[[${email}]]*/ ;
+
+                            // If user doesn't have an email or they're not logged in
+                            if (!email){
+                                email = ""
+                            }
+
+
+                            saveRecon(email)
+                        }
+
+
                      });
                 /*]]>*/
             </script>

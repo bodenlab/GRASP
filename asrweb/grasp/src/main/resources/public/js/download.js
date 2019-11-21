@@ -12,10 +12,6 @@ let downloadData = function (btnId) {
     } else if (btnId === 'download-select-joint') {
         let commaSepList = document.getElementById("download-select-joint-list").value.replace(/\s/g, '');
 
-        console.log('poplop');
-        console.log(commaSepList);
-
-
         // If user hasn't entered any node IDs to download, let them know
         if (!commaSepList){
 

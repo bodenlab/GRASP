@@ -44,32 +44,6 @@
     </div>
   </div>
   <!-- Modal -->
-  <div class="modal fade" id="save-modal" tabindex="-1" role="dialog" aria-labelledby="saveModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Save</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body email-modal">
-          <div class="form-group row col-sm-offset-2 col-sm-12 pad-top-bottom">
-            <label> Enter email to save your reconstruction: </label>
-          </div>
-          <div class="form-group row col-sm-offset-2 col-sm-12 pad-top-bottom">
-            <input type="text" class="form-input col-xs-6"
-                   placeholder="Email for saving your reconstruction..."
-                   id="email" name="email" required="true"/>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="saveRecon()" data-dismiss="modal">Save</button>
-        </div>
-      </div>
-    </div>
-  </div>
   <a id="results-nav"></a>
   <div class="content-section-b">
     <div class="row">
@@ -495,8 +469,7 @@
 
       $("#download-form").click(function () {
         if (!saved) {
-          alert(
-              "Sorry you can't download results when you haven't saved a reconstruction, please click the save in the top left corner and re-open this reconstruction once it has completely saved!");
+
           $('#check-seq-marg').prop("disabled", true);
           $('#check-seq-joint').prop("disabled", true);
           $('#download-btn').prop("disabled", true);

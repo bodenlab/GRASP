@@ -270,6 +270,7 @@ public class ASRObject {
     public void loadExtants() throws IOException {
         if (extants != null || alnFile == null)
             return;
+
         InputStream is = alnFile.getInputStream();
         // We open the file once to have a look at what the first line is
         BufferedReader bufferedAlnFile = new BufferedReader(new InputStreamReader(is));
@@ -292,6 +293,8 @@ public class ASRObject {
         numExtantSequences = extants.size();
     }
 
+
+
     /**
      * Method used in the tests.
      *
@@ -311,8 +314,12 @@ public class ASRObject {
     }
 
     private void loadTree() throws IOException {
-        if (tree != null || treeFile == null)
+        if (tree != null || treeFile == null) {
             return;
+
+        }
+
+
         InputStream is = treeFile.getInputStream();
         BufferedReader tree_file = new BufferedReader(new InputStreamReader(is));
         String line = tree_file.readLine();
@@ -320,6 +327,10 @@ public class ASRObject {
         while ((line = tree_file.readLine()) != null)
             tree += line;
         tree_file.close();
+
+        if (tree == null){
+            throw new RuntimeException("No tree file specified.");
+        }
 
     }
 
@@ -566,6 +577,8 @@ public class ASRObject {
     public Exception runForSession() {
         try {
             loadExtants();
+            loadTree();
+
         } catch (Exception e) {
             System.out.println("" + e.getMessage());
             return e;

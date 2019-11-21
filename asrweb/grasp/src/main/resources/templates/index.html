@@ -57,8 +57,6 @@
 
 <!-- Page Content -->
 
-<!-- Alert box Section -->
-
 <!-- Error Section -->
 <div th:replace="fragments/errors :: errors"></div>
 
@@ -71,9 +69,6 @@
 <!-- Results Modal -->
 <div th:replace="fragments/results_modal :: results_modal"></div>
 
-<!-- Login Modal -->
-<div th:replace="fragments/login_modal :: login_modal"></div>
-
 <!-- Progress Modal -->
 <!-- <div th:replace="fragments/progress :: progress"></div>-->
 
@@ -84,19 +79,19 @@
 <div th:replace="fragments/footer :: footer"></div>
 
 
-<!-- Modal -->
-<div class="modal fade" id="loadMe" tabindex="-1" role="dialog" aria-labelledby="loadMeLabel">
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-body text-center">
-                <div class="loader"></div>
-                <div class="loader-txt">
-                    <p>Downloading.... </p><p><small>Please wait your download should be finished shortly :-) </small></p>
-                </div>
+                <div th:replace="fragments/login_modal :: login_modal"></div>
             </div>
         </div>
     </div>
 </div>
+
+
+
 
 
 

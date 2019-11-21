@@ -30,7 +30,6 @@ public class Defines {
     public static final int OWNER_ACCESS = 220;
     public static final int NO_ACCESS = -111;
     public static final int PUBLIC_USER = -23;
-
     public static final String PUBLIC_USERNAME = "public_user"; // Owns the default reconstructions
 
 
@@ -116,9 +115,10 @@ public class Defines {
      * Error messages
      */
 
-    public static final String SHARE_SELF = "You can't share a reconstruction with yourself.";
+    public static final String SHARE_SELF = "You cannot share a reconstruction with yourself.";
     public static final String SHARE_EXISTS = "This user already has access to that reconstruction.";
     public static final String SHARE_NOTOWNER = "Only the user who owns a reconstruction can share it.";
+    public static final String DELETE_NOACCESS = "This user doesn't have access to his reconstruction.";
     public static final String DELETE_NOTOWNER = "You can only delete this reconstruction if you are the owner.";
 
     public static final String USER_NONEXIST = "This username does not exist.";

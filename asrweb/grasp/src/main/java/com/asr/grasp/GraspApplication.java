@@ -963,7 +963,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // If they don't have a saved reconstruction return that they need to save the reconstruction
         if (currRecon.getId() == Defines.FALSE) {
-            return new JSONObject().put("error", "You need to save your reconstruction before performing this action.").toString();
+
+            return "You need to save your reconstruction before performing this action." ;
         }
         // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
         if (!seqController.hasReconsAncestorsBeenSaved(currRecon.getId())) {

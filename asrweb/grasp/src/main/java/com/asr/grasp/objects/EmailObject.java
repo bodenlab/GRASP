@@ -62,9 +62,10 @@ public class EmailObject {
     }
 
     public void setContent(String reconName) {
-        this.content = "Dear " + username + ", \n "
-                + " Your reconstruction " + reconName + " is now complete.\n"
-                + " Login using your username to access it. \n";
+        this.content = "Dear " + username + ", \n"
+                + "Your reconstruction " + reconName + " is now complete at http://grasp.scmb.uq.edu.au\n"
+                + "Login using your username to access it. \n"
+                + "GRASP \n";
         this.subject = "Reconstruction " + reconName + " is complete";
     }
 

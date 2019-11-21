@@ -9,23 +9,11 @@
                     th:text="*{user.username}"> username</span></h2>
             <h2
                     class=""><span
-                    th:text="*{user.email}"> email </span></h2>
-
-            hopped out
-
-            <h2
-                    class=""><span
-                    th:text="*{user.password}"> email </span></h2>
+                    th:text="*{email}"> email </span></h2>
 
         </div>
 
         <script>
-            console.log('returning')
-            console.log(user)
-            console.log(user.username)
-            console.log(user.email)
-            console.log(user.password)
-
 
         </script>
     </div>
@@ -142,6 +130,9 @@
 
         $(document).ready(function () {
             username = /*[[${user.username}]]*/;
+            email = /*[[${user.email}]]*/;
+
+
             $('#account-link').text(username);
             $('#account-link').css("color", "#333");
             $('#account-link').css("font-weight", "bold");

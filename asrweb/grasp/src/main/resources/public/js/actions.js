@@ -3,10 +3,8 @@
  * Saves the current reconstruction, the user inputs an email and they get
  * notified once it is complete.
  */
-let saveRecon = function() {
+let saveRecon = function(email) {
     // Get the email
-    let email = document.getElementById("email").value;
-
     $.ajax({
       url: "/saveRecon",
       type: "POST",

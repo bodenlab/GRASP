@@ -100,6 +100,8 @@ public class ASRController {
      * Run reconstruction using saved data and specified options
      */
     public void runReconstruction(String type, int numThreads, String model, String node, String tree, List<EnumSeq.Gappy<Enumerable>> seqs, String logFileName) throws InterruptedException {
+
+
         NUM_THREADS = numThreads;
         if (type.equalsIgnoreCase("marginal"))
             performedMarginal = runReconstructionMarginal(tree, seqs, model, node);
@@ -129,6 +131,8 @@ public class ASRController {
      * Run marginal reconstruction using saved data and specified options
      */
     private boolean runReconstructionMarginal(String treeNwk, List<EnumSeq.Gappy<Enumerable>> seqs, String model, String nodeLabel) throws InterruptedException {
+
+
         if (nodeLabel != null && !nodeLabel.equalsIgnoreCase("root"))
             asrMarginal = new ASRPOG(model, NUM_THREADS, nodeLabel);
         else

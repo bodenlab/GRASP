@@ -414,6 +414,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("asrForm", this.asr);
         model.addAttribute("user", loggedInUser);
         model.addAttribute("username", loggedInUser.getUsername());
+        model.addAttribute("email", loggedInUser.getEmail());
 
         return new ModelAndView("index");
     }
@@ -446,6 +447,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("asrForm", this.asr);
         model.addAttribute("user", loggedInUser);
         model.addAttribute("username", loggedInUser.getUsername());
+        model.addAttribute("email", loggedInUser.getEmail());
+
 
         return new ModelAndView("index");
     }
@@ -548,6 +551,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     private ModelAndView loadRecon() {
 
+
         // Otherwise we want to set this for the user.
         userController.setCurrRecon(currRecon, loggedInUser);
 
@@ -572,6 +576,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         mav.addObject("user", loggedInUser);
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
         // ToDo: add in the IDs
@@ -957,7 +963,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // If they don't have a saved reconstruction return that they need to save the reconstruction
         if (currRecon.getId() == Defines.FALSE) {
-            return new JSONObject().put("error", "You need to save your reconstruction before performing this action.").toString();
+
+            return "You need to save your reconstruction before performing this action." ;
         }
         // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
         if (!seqController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
@@ -1126,6 +1133,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("results", true);
         mav.addObject("node", asr.getNodeLabel());
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
         JSONObject ids = new JSONObject();
@@ -1194,6 +1203,8 @@ public class GraspApplication extends SpringBootServletInitializer {
                 mav.addObject("errorMessage", "Issue loading default reconstruction. Please try again.");
                 mav.addObject("user", loggedInUser);
                 mav.addObject("username", loggedInUser.getUsername());
+                mav.addObject("email", loggedInUser.getEmail());
+
                 return mav;
             }
             return mav;
@@ -1213,6 +1224,8 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("errorMessage", err);
             mav.addObject("user", loggedInUser);
             mav.addObject("username", loggedInUser.getUsername());
+            mav.addObject("email", loggedInUser.getEmail());
+
             return mav;
         }
 
@@ -1235,6 +1248,8 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("errorMessage", message);
             mav.addObject("user", loggedInUser);
             mav.addObject("username", loggedInUser.getUsername());
+            mav.addObject("email", loggedInUser.getEmail());
+
 
             return mav;
         }
@@ -1276,6 +1291,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = new ModelAndView("processing");
         mav.addObject("user", loggedInUser);
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
 
         return mav;
     }
@@ -1350,6 +1367,8 @@ public class GraspApplication extends SpringBootServletInitializer {
                     reconController);
         }
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
         return mav;
     }
 

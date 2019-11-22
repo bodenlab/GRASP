@@ -24,6 +24,7 @@
 		<java.version>1.8</java.version>
 	</properties>
 
+
 	<profiles>
 		<profile>
 			<id>dev</id>
@@ -66,7 +67,11 @@
 			<groupId>com.asr</groupId>
 			<artifactId>bnkit</artifactId>
 			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/grasp-repo/com/asr/bnkit/1.0/bnkit-1.0.jar</systemPath>
+
 		</dependency>
+
 
 		<dependency>
 			<groupId>postgresql</groupId>
@@ -120,6 +125,8 @@
 			<id>grasp-repo</id>
 			<url>file:///${project.basedir}/src/main/resources/grasp-repo</url>
 		</repository>
+
+
 	</repositories>
 	<distributionManagement>
 		<repository>

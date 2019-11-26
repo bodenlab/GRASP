@@ -231,43 +231,43 @@
                 </div>
 
 
-                <div class="form-group row col-sm-offset-4 col-sm-6">
-                    <div class="col-xs-12 no-padding" title="Select initial inference type"
-                         data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction.">
-                        <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType"/>
-                        Select inference type
+                <!--<div class="form-group row col-sm-offset-4 col-sm-6">-->
+                    <!--<div class="col-xs-12 no-padding" title="Select initial inference type"-->
+                         <!--data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction.">-->
+                        <!--<input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType"/>-->
+                        <!--Select inference type-->
 
 
-                        <div class="custom-control custom-radio">
+                        <!--<div class="custom-control custom-radio">-->
 
 
-                            <label ml-1="20px" class="radio-inline"><input id="infer-joint" type="radio" checked="True" name="inferenceButton"/>Joint</label>
-                            <label class="radio-inline"><input id="infer-marginal" type="radio" name="inferenceButton" />Marginal (root node)</label>
+                            <!--<label ml-1="20px" class="radio-inline"><input id="infer-joint" type="radio" checked="True" name="inferenceButton"/>Joint</label>-->
+                            <!--<label class="radio-inline"><input id="infer-marginal" type="radio" name="inferenceButton" />Marginal (root node)</label>-->
 
-                    </div>
+                    <!--</div>-->
 
-                    </div>
-                </div>
+                    <!--</div>-->
+                <!--</div>-->
 
-                <script type="text/javascript">
+                <!--<script type="text/javascript">-->
 
-                    $('input#infer-joint').change(function () {
-                        if ($('input#infer-joint').is(':checked')) {
-                            $('input#infer-joint').addClass('checked');
-                            $('#inferenceType').val("joint");
-                        }
-                    });
+                    <!--$('input#infer-joint').change(function () {-->
+                        <!--if ($('input#infer-joint').is(':checked')) {-->
+                            <!--$('input#infer-joint').addClass('checked');-->
+                            <!--$('#inferenceType').val("joint");-->
+                        <!--}-->
+                    <!--});-->
 
-                    $('input#infer-marginal').change(function () {
-                        if ($('input#infer-marginal').is(':checked')) {
-                            $('input#infer-joint').removeClass('checked');
-                            $('#inferenceType').val("marginal");
+                    <!--$('input#infer-marginal').change(function () {-->
+                        <!--if ($('input#infer-marginal').is(':checked')) {-->
+                            <!--$('input#infer-joint').removeClass('checked');-->
+                            <!--$('#inferenceType').val("marginal");-->
 
-                        }
-                    });
+                        <!--}-->
+                    <!--});-->
 
 
-                </script>
+                <!--</script>-->
 
 
 

@@ -346,7 +346,7 @@ var draw_all_poags = function (poags) {
         var edges = poags.single.edges[poag_name];
         var group = poags.groups.single[poag_name];
         var scale_y = poags.scale['single_y'];
-        var poagPi = true;
+        var poagPi = false;
         if (p !== 'MSA') {
           // Now we want to find out if we have an inferred marginal or joint
           if (poags.single.raw.inferred.metadata.type !== 'marginal') {

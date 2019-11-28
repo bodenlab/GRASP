@@ -5,263 +5,389 @@
     <a name="reconstruct"></a>
     <div class="content-section-b" th:if="${results == null}">
         <div class="container-fluid">
-            <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}" th:object="${asrForm}" method="post" enctype="multipart/form-data">
+            <form id="asr-form" class="col-sm-offset-2 col-sm-10" action="#" name="asrForm" th:action="@{/}"
+                  th:object="${asrForm}" method="post" enctype="multipart/form-data">
                 <div class="form-group row col-sm-10 pad-top-bottom">
-                    <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Reconstruction label" data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
+                    <div class="input-group col-xs-12" data-toggle="popover" data-placement="left"
+                         title="Reconstruction label"
+                         data-content="Label for the reconstruction. This will be used as an identifier in any saved output data.">
                         <input type="text" class="form-input col-xs-7"
                                placeholder="Label your reconstruction..."
                                id="label" name="label" th:field="*{label}"
                                required="true"
-                               onchange="set_recon_label($('#label').val())" />
+                               onchange="set_recon_label($('#label').val())"/>
                         <div class="form-group col-xs-5 no-padding">
                             <div class="input-group col-xs-12 no-padding">
-                                <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Run joint reconstruction on the selected test dataset.">
-                                    <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <small><span id="selected-example">...</span></small> | <small>Example datasets...</small> <span class="caret"></span>
+                                <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top"
+                                     data-content="Run joint reconstruction on the selected test dataset.">
+                                    <button type="button"
+                                            class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <small><span id="selected-example">...</span></small>
+                                        |
+                                        <small>Example datasets...</small>
+                                        <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 (139) <span id="cyp2u1-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                        <li><a id="tawfik" onclick="update_test('tawfik')">Afriat-Jurnou et al. (29) <span id="tawfik-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                        <li><a id="hudson" onclick="update_test('hudson')">Hudson et al. (234) <span id="hudson-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                        <li><a id="clifton" onclick="update_test('clifton')">Clifton and Jackson (340) <span id="clifton-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                        <li><a id="none" onclick="update_test('none')">None <span id="none-selected" class="disable ex-glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                        <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 (139) <span
+                                                id="cyp2u1-selected"
+                                                class="disable ex-glyph-selected glyphicon glyphicon-ok"
+                                                aria-hidden="true"></span></a></li>
+                                        <li><a id="tawfik" onclick="update_test('tawfik')">Afriat-Jurnou et al. (29)
+                                            <span id="tawfik-selected"
+                                                  class="disable ex-glyph-selected glyphicon glyphicon-ok"
+                                                  aria-hidden="true"></span></a></li>
+                                        <li><a id="hudson" onclick="update_test('hudson')">Hudson et al. (234) <span
+                                                id="hudson-selected"
+                                                class="disable ex-glyph-selected glyphicon glyphicon-ok"
+                                                aria-hidden="true"></span></a></li>
+                                        <li><a id="clifton" onclick="update_test('clifton')">Clifton and Jackson (340)
+                                            <span id="clifton-selected"
+                                                  class="disable ex-glyph-selected glyphicon glyphicon-ok"
+                                                  aria-hidden="true"></span></a></li>
+                                        <li><a id="none" onclick="update_test('none')">None <span id="none-selected"
+                                                                                                  class="disable ex-glyph-selected glyphicon glyphicon-ok"
+                                                                                                  aria-hidden="true"></span></a>
+                                        </li>
                                     </ul>
-                                    <input type="hidden" th:value="null" th:field="*{data}" class="data" />
+                                    <input type="hidden" th:value="null" th:field="*{data}" class="data"/>
                                     <script type="text/javascript">
-                                    /*<![CDATA[*/
-                                    var update_test = function(data) {
-                                        var glyphs = document.querySelectorAll(".ex-glyph-selected");
-                                        for (var i = 0; i < glyphs.length; i++) {
-                                            if (!glyphs[i].classList.contains('disable')) {
-                                                glyphs[i].classList.add('disable');
+                                        /*<![CDATA[*/
+                                        var update_test = function (data) {
+                                            var glyphs = document.querySelectorAll(".ex-glyph-selected");
+                                            for (var i = 0; i < glyphs.length; i++) {
+                                                if (!glyphs[i].classList.contains('disable')) {
+                                                    glyphs[i].classList.add('disable');
+                                                }
                                             }
-                                        }
-                                        document.querySelector("#" + data + "-selected").classList.remove('disable');
-                                        document.getElementById("selected-example").textContent = document.getElementById(data).textContent;
-                                        $('#label').val("");
-                                        set_recon_label("");
-                                        $('#data').val(data);
-                                        if (data == "none") {
-                                            // enable sequence alignment and library inputs
-                                            $("[id='check-align']").bootstrapSwitch('disabled',false);
-                                            if ($("[id='check-align']").bootstrapSwitch('state') == false) {
+                                            document.querySelector("#" + data + "-selected").classList.remove('disable');
+                                            document.getElementById("selected-example").textContent = document.getElementById(data).textContent;
+                                            $('#label').val("");
+                                            set_recon_label("");
+                                            $('#data').val(data);
+                                            if (data == "none") {
+                                                // enable sequence alignment and library inputs
+                                                // $("[id='check-align']").bootstrapSwitch('disabled',false);
+                                                // if ($("[id='check-align']").bootstrapSwitch('state') == false) {
                                                 $('#lbl-filealn').removeAttr('disabled');
                                                 $('#filealn').removeAttr('disabled');
+                                                // } else {
+                                                //     $('#lbl-fileseq').removeAttr('disabled');
+                                                //     $('#fileseq').removeAttr('disabled');
+                                                // }
+                                                $('#lbl-filetree').removeAttr('disabled');
+                                                $('#filetree').removeAttr('disabled');
+                                                $('#label').removeAttr('disabled');
+                                                $('#email').removeAttr('disabled');
+                                                $('#label').focus();
                                             } else {
-                                                $('#lbl-fileseq').removeAttr('disabled');
-                                                $('#fileseq').removeAttr('disabled');
+                                                $("#label").val(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
+                                                set_recon_label(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
+                                                $('#label').focus();
+                                                // disable sequence alignment and library inputs
+                                                // $("[id='check-align']").bootstrapSwitch('disabled',true);
+                                                $('#lbl-filealn').attr('disabled', true);
+                                                $('#filealn').attr('disabled', true);
+                                                // $('#lbl-fileseq').attr('disabled', true);
+                                                // $('#fileseq').attr('disabled', true);
+                                                $('#lbl-filetree').attr('disabled', true);
+                                                $('#filetree').attr('disabled', true);
+                                                $('#label').attr('disabled', true);
+                                                $('#email').attr('disabled', true);
+                                                $('#submit-btn').focus();
                                             }
-                                            $('#lbl-filetree').removeAttr('disabled');
-                                            $('#filetree').removeAttr('disabled');
-                                            $('#label').removeAttr('disabled');
-                                            $('#email').removeAttr('disabled');
-                                            $('#label').focus();
-                                        } else {
-                                            $("#label").val(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
-                                            set_recon_label(document.getElementById(data).textContent.split(" (")[0].split(" et al.")[0]);
-                                            $('#label').focus();
-                                            // disable sequence alignment and library inputs
-                                            $("[id='check-align']").bootstrapSwitch('disabled',true);
-                                            $('#lbl-filealn').attr('disabled', true);
-                                            $('#filealn').attr('disabled', true);
-                                            $('#lbl-fileseq').attr('disabled', true);
-                                            $('#fileseq').attr('disabled', true);
-                                            $('#lbl-filetree').attr('disabled', true);
-                                            $('#filetree').attr('disabled', true);
-                                            $('#label').attr('disabled', true);
-                                            $('#email').attr('disabled', true);
-                                            $('#submit-btn').focus();
-                                        }
-                                    };
-                                    /*]]>*/
+                                        };
+                                        /*]]>*/
                                     </script>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-6">
-                    <div id="check-align-div" class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction." >
-                        <input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200" data-on-color="default" data-off-text="No" data-on-text="Yes" />
-                    </div>
-                </div>
-                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom" style="padding-bottom:0px;">
-                    <div class="form-group row col-xs-12">
-                        <div class="input-group col-xs-12" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">
-                            <label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">
-                                <span class="glyphicon glyphicon-align-left col-xs-1"></span>
-                                Select sequence library file...
-                                <input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="update_info($('#upload-seq-info'),document.forms['asrForm']['fileseq'].files[0]);" hidden="hidden" th:field="*{seqFile}"></input>
-                            </label>
-                            <span class="label label-default upload-file-info col-xs-12" id="upload-seq-info"></span>
-                        </div>
-                        <script type="text/javascript">
-                            // $('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name)
-                            var update_info = function(el, file) {
-                                el.html(file.name);
-                                if (file.size > 200000000) {
-                                    $("#warning").css({'display':'block'});
-                                    $("#warning-text").text("File size cannot exceed 20MB.");
-                                    $("#submit-btn").prop('disabled', true);
-                                } else {
-                                    $("#warning").css({'display':'none'});
-                                    $("#submit-btn").prop('disabled', false);
-                                }
-                            };
+                <!--<div class="form-group row col-sm-offset-1 col-sm-6">-->
+                <!--<div id="check-align-div" class="pull-right" data-toggle="popover" data-placement="left" title="Perform Alignment" data-content="Perform sequence alignment on unaligned extant sequences prior to performing reconstruction." >-->
+                <!--<input id="check-align" type="checkbox" data-size="small" data-label-text="Align extant sequences"  data-label-width="300" data-handle-width="200" data-on-color="default" data-off-text="No" data-on-text="Yes" />-->
+                <!--</div>-->
+                <!--</div>-->
+                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6 pad-top-bottom"
+                     style="padding-bottom:0px;">
+                    <!--<div class="form-group row col-xs-12">-->
+                    <!--<div class="input-group col-xs-12" id="seq-input" data-toggle="popover" data-placement="left" title="Select sequence library" data-content="Select the library of unaligned extant sequences. These will be aligned prior to ancestral reconstruction.">-->
+                    <!--<label id="lbl-fileseq" class="btn btn-default col-xs-12" disabled="true" for="fileseq">-->
+                    <!--<span class="glyphicon glyphicon-align-left col-xs-1"></span>-->
+                    <!--Select sequence library file...-->
+                    <!--<input type="file" class="col-xs-11" name="fileseq" id="fileseq" disabled="true" style="display:none;" onchange="update_info($('#upload-seq-info'),document.forms['asrForm']['fileseq'].files[0]);" hidden="hidden" th:field="*{seqFile}"></input>-->
+                    <!--</label>-->
+                    <!--<span class="label label-default upload-file-info col-xs-12" id="upload-seq-info"></span>-->
+                    <!--</div>-->
+                    <script type="text/javascript">
+                        // $('#upload-seq-info').html(document.forms['asrForm']['fileseq'].files[0].name)
+                        var update_info = function(el, file) {
+                            el.html(file.name);
+                            if (file.size > 200000000) {
+                                $("#warning").css({'display':'block'});
+                                $("#warning-text").text("File size cannot exceed 20MB.");
+                                $("#submit-btn").prop('disabled', true);
+                            } else {
+                                $("#warning").css({'display':'none'});
+                                $("#submit-btn").prop('disabled', false);
+                            }
+                        };
 
-                            $("[id='check-align']").bootstrapSwitch();
-                            $('input[id="check-align"]').on('switchChange.bootstrapSwitch', function(event, state) {
-                                if (state === true) {
-                                    // enable sequence library inputs
-                                    $('#lbl-fileseq').removeAttr('disabled');
-                                    $('#fileseq').removeAttr('disabled');
-                                    // disable sequence alignment inputs
-                                    $('#lbl-filealn').attr('disabled', true);
-                                    $('#filealn').attr('disabled', true);
-                                } else {
-                                    // enable sequence alignment inputs
-                                    $('#lbl-filealn').removeAttr('disabled');
-                                    $('#filealn').removeAttr('disabled');
-                                    // disable sequence library inputs
-                                    $('#lbl-fileseq').attr('disabled', true);
-                                    $('#fileseq').attr('disabled', true);
-                                }
-                            });
-                        </script>
-                    </div>
+                        // $("[id='check-align']").bootstrapSwitch();
+                        // $('input[id="check-align"]').on('switchChange.bootstrapSwitch', function(event, state) {
+                        //     if (state === true) {
+                        //         // enable sequence library inputs
+                        //         $('#lbl-fileseq').removeAttr('disabled');
+                        //         $('#fileseq').removeAttr('disabled');
+                        //         // disable sequence alignment inputs
+                        //         $('#lbl-filealn').attr('disabled', true);
+                        //         $('#filealn').attr('disabled', true);
+                        //     } else {
+                        //         // enable sequence alignment inputs
+                        //         $('#lbl-filealn').removeAttr('disabled');
+                        //         $('#filealn').removeAttr('disabled');
+                        //         // disable sequence library inputs
+                        //         $('#lbl-fileseq').attr('disabled', true);
+                        //         $('#fileseq').attr('disabled', true);
+                        //     }
+                        // });
+                    </script>
+                    <!--</div>-->
                     <div class="form-group row col-xs-12">
-                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select sequence alignment" data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
+                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left"
+                             title="Select sequence alignment"
+                             data-content="Select the aligned extant sequences (.aln). The reconstruction will assume characters within a column of the alignment are at the same position in all sequences (inferred ancestors and extants).">
                             <label id="lbl-filealn" class="btn btn-default col-xs-12" for="filealn">
                                 <span class="glyphicon glyphicon-align-justify col-xs-1" aria-hidden="true"></span>
                                 Select sequence alignment file...
-                                <input type="file" class="col-xs-11" name="alnFile" id="filealn" style="display:none;" onchange="update_info($('#upload-aln-info'),document.forms['asrForm']['alnFile'].files[0]);" hidden="hidden" th:field="*{alnFile}"></input>
+                                <input type="file" class="col-xs-11" name="alnFile" id="filealn" style="display:none;"
+                                       onchange="update_info($('#upload-aln-info'),document.forms['asrForm']['alnFile'].files[0]);"
+                                       hidden="hidden" th:field="*{alnFile}"></input>
                             </label>
                             <span class="label label-default upload-file-info col-xs-12" id="upload-aln-info"></span>
                         </div>
                     </div>
                     <div class="form-group row col-xs-12">
-                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left" title="Select phylogenetic tree" data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
+                        <div class="input-group col-xs-12" data-toggle="popover" data-placement="left"
+                             title="Select phylogenetic tree"
+                             data-content="Select the phylogenetic tree (.nwk). The reconstruction will use this tree structure to infer the sequences at the ancestral positions. Note: all extant labels must match the input extant sequence labels.">
                             <label id="lbl-filetree" class="btn btn-default col-xs-12" for="filetree">
                                 <span class="glyphicon glyphicon-tree-conifer col-xs-1" aria-hidden="true"></span>
                                 Select phylogenetic tree file...
-                                <input type="file" class="col-xs-11" name="filetree" id="filetree" style="display:none;" onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);" hidden="hidden" th:field="*{treeFile}"></input>
+                                <input type="file" class="col-xs-11" name="filetree" id="filetree" style="display:none;"
+                                       onchange="$('#upload-tree-info').html(document.forms['asrForm']['filetree'].files[0].name);"
+                                       hidden="hidden" th:field="*{treeFile}"></input>
                             </label>
                             <span class="label label-default upload-file-info col-xs-12" id="upload-tree-info"></span>
                         </div>
                     </div>
                 </div>
-                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6" style="padding-left: 0px; padding-right:25px; ">
+                <div class="form-group row col-xs-12 col-sm-offset-2 col-sm-6"
+                     style="padding-left: 0px; padding-right:25px; ">
                     <div class="input-group col-xs-12 no-padding">
-                        <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top" data-content="Select the evolutionary model for inferring amino acid characters.">
-                            <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span id="selected-model">JTT</span> | <small>Select other evolutionary model...</small> <span class="caret"></span>
+                        <div class="btn-group col-xs-12 no-padding" data-toggle="popover" data-placement="top"
+                             data-content="Select the evolutionary model for inferring amino acid characters.">
+                            <button type="button" class="btn btn-default dropdown-toggle dropdown col-xs-12 no-padding"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span id="selected-model">JTT</span> |
+                                <small>Select other evolutionary model...</small>
+                                <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a id="jtt" onclick="update_model('jtt')">JTT <span id="jtt-selected" class="glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="dayhoff" onclick="update_model('dayhoff')">Dayhoff <span id="dayhoff-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="lg" onclick="update_model('lg')">LG <span id="lg-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
-                                <li><a id="wag" onclick="update_model('wag')">WAG <span id="wag-selected" class="disable glyph-selected glyphicon glyphicon-ok" aria-hidden="true"></span></a></li>
+                                <li><a id="jtt" onclick="update_model('jtt')">JTT <span id="jtt-selected"
+                                                                                        class="glyph-selected glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"></span></a>
+                                </li>
+                                <li><a id="dayhoff" onclick="update_model('dayhoff')">Dayhoff <span
+                                        id="dayhoff-selected" class="disable glyph-selected glyphicon glyphicon-ok"
+                                        aria-hidden="true"></span></a></li>
+                                <li><a id="lg" onclick="update_model('lg')">LG <span id="lg-selected"
+                                                                                     class="disable glyph-selected glyphicon glyphicon-ok"
+                                                                                     aria-hidden="true"></span></a></li>
+                                <li><a id="wag" onclick="update_model('wag')">WAG <span id="wag-selected"
+                                                                                        class="disable glyph-selected glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"></span></a>
+                                </li>
                             </ul>
-                            <input type="hidden" th:value="jtt" th:field="*{model}" class="model" />
+                            <input type="hidden" th:value="jtt" th:field="*{model}" class="model"/>
                             <script type="text/javascript">
-                                    /*<![CDATA[*/
-                                    var update_model = function(model) {
-                                        var glyphs = document.querySelectorAll(".glyph-selected");
-                                        for (var i = 0; i < glyphs.length; i++) {
-                                            if (!glyphs[i].classList.contains('disable')) {
-                                                glyphs[i].classList.add('disable');
-                                            }
+                                /*<![CDATA[*/
+                                var update_model = function (model) {
+                                    var glyphs = document.querySelectorAll(".glyph-selected");
+                                    for (var i = 0; i < glyphs.length; i++) {
+                                        if (!glyphs[i].classList.contains('disable')) {
+                                            glyphs[i].classList.add('disable');
                                         }
-                                        document.querySelector("#" + model + "-selected").classList.remove('disable');
-                                        document.getElementById("selected-model").textContent = document.getElementById(model).textContent;
-                                        $('#model').val(model);
-                                    };
-                                    /*]]>*/
+                                    }
+                                    document.querySelector("#" + model + "-selected").classList.remove('disable');
+                                    document.getElementById("selected-model").textContent = document.getElementById(model).textContent;
+                                    $('#model').val(model);
+                                };
+                                /*]]>*/
                             </script>
                         </div>
                     </div>
                 </div>
-                <div class="form-group row col-sm-offset-1 col-sm-6">
-                    <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction." >
-                        <input id="check-infer" type="checkbox" data-size="small" data-label-text="Initial reconstruction" data-label-width="300" data-handle-width="200" data-off-text="Joint" data-on-color="default" data-on-text="Marginal (root)" />
+
+
+                <!--<div class="form-group row col-sm-offset-4 col-sm-6">-->
+                    <!--<div class="col-xs-12 no-padding" title="Select initial inference type"-->
+                         <!--data-content="Select the initial inference procedure for the reconstruction. If 'Marginal' is selected, marginal reconstruction will be performed on the root node. Default: joint reconstruction.">-->
+                        <!--<input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType"/>-->
+                        <!--Select inference type-->
+
+
+                        <!--<div class="custom-control custom-radio">-->
+
+
+                            <!--<label ml-1="20px" class="radio-inline"><input id="infer-joint" type="radio" checked="True" name="inferenceButton"/>Joint</label>-->
+                            <!--<label class="radio-inline"><input id="infer-marginal" type="radio" name="inferenceButton" />Marginal (root node)</label>-->
+
+                    <!--</div>-->
+
+                    <!--</div>-->
+                <!--</div>-->
+
+                <!--<script type="text/javascript">-->
+
+                    <!--$('input#infer-joint').change(function () {-->
+                        <!--if ($('input#infer-joint').is(':checked')) {-->
+                            <!--$('input#infer-joint').addClass('checked');-->
+                            <!--$('#inferenceType').val("joint");-->
+                        <!--}-->
+                    <!--});-->
+
+                    <!--$('input#infer-marginal').change(function () {-->
+                        <!--if ($('input#infer-marginal').is(':checked')) {-->
+                            <!--$('input#infer-joint').removeClass('checked');-->
+                            <!--$('#inferenceType').val("marginal");-->
+
+                        <!--}-->
+                    <!--});-->
+
+
+                <!--</script>-->
+
+
+
+
+                <div class="form-group row col-sm-offset-4 col-sm-6">
+
+
+
+
+                    <div data-toggle="popover" data-placement="left"
+                         title="Select initial inference type" data-content="If you select to save your reconstruction you will recieve an email about it once it
+                        has complete. Otherwise you'll need to keep your connection open to get the reconstruction back. It is recomended that you choose save for reconstructions > 500 sequences. Saving will also
+                        allow cool things like motif searching :) ">
+
                     </div>
-                    <input type="hidden" th:value="joint" th:field="*{inferenceType}" class="inferenceType" />
-                    <script type="text/javascript">
-                        /*<![CDATA[*/
-                        $("[id='check-infer']").bootstrapSwitch();
-                        $('input[id="check-infer"]').on('switchChange.bootstrapSwitch', function(event, state) {
-                            if (state == true) {
-                                $('#inferenceType').val("marginal");
-                            } else {
-                                $('#inferenceType').val("joint");
+
+                    <input type="hidden" th:value="save" th:field="*{save}" class="saveReconstruction"/>
+                    Save reconstruction (requires login)
+
+                    <div class="custom-control custom-radio">
+
+
+                    <label ml-1="20px" class="radio-inline"><input id="save_true" type="radio" name="saveButton"/>Yes</label>
+                    <label class="radio-inline"><input id="save_false" type="radio" checked="True" name="saveButton"/>No</label>
+
+                    </div>
+
+                <input type="hidden" id="usernameCheck" th:value="${username}"/>
+                </div>
+
+
+
+                <div class="form-group row col-sm-offset-4 col-sm-6">
+
+                    <div class="pull-right" data-toggle="popover" data-placement="left"
+                         title="Select initial inference type" data-content="Change this">
+
+                    </div>
+
+
+
+                <div class="email-check hidden">
+                    <label class="email-check-label" for="email">Send an email when reconstruction is finished?</label>
+                    <input type="checkbox" class="email-check-input" id="email" />
+
+                </div>
+
+                </div>
+
+
+
+                <script type="text/javascript">
+                    /*<![CDATA[*/
+                    user = /*[[${user}]]*/
+
+                        username = /*[[${user.username}]]*/
+
+                    $(document).ready(function () {
+
+                        // Default value is not to save a reconstruction
+
+                        $('#save').val(false)
+
+
+
+                        $('input#save_true').change(function () {
+                            if ($('input#save_true').is(':checked')) {
+                                $('#save').val(true)
+                                $('.email-check').show();
+                                if ($("#usernameCheck").val() == "") {
+
+                                    $('#loginModal').modal('show')
+                                }
+
+
+
                             }
                         });
 
-                        $(document).ready(function () {
-                            $('#results-nav-link').addClass("disable-link");
-                            $('#results-nav-link').css("color", "#b3b3b3");
-                        });
-                        /*]]>*/
-                    </script>
-                </div>
-                <div class="form-group row col-sm-offset-1 col-sm-6">
-                    <div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="If you select to save your reconstruction you will recieve an email about it once it
-                        has complete. Otherwise you'll need to keep your connection open to get the reconstruction back. It is recomended that you choose save for reconstructions > 500 sequences. Saving will also
-                        allow cool things like motif searching :) " >
-                        <input id="save-run" type="checkbox" data-size="small" data-label-text="Save or Run" data-label-width="300" data-handle-width="200" data-off-text="Run without saving" data-on-color="default" data-on-text="Save with email" />
-                    </div>
-                    <input type="hidden" th:value="save" th:field="*{save}" class="inferenceType" />
-                    <script type="text/javascript">
-                      /*<![CDATA[*/
-                      $("[id='save-run']").bootstrapSwitch();
-                      $('input[id="save-run"]').on('switchChange.bootstrapSwitch', function(event, state) {
-                        if (state === true) {
-                          $('#save').val(false);
-                          document.getElementById("email").required = false;
-                        } else {
-                          $('#save').val(true);
-                          document.getElementById("email").required = true;
+                        $('input#save_false').change(function () {
+                            if ($('input#save_false').is(':checked')) {
+                                $('#save').val(false)
 
-                        }
-                      });
-                      document.getElementById("email").required = false;
-                      $('#save').val(false)
-                      /*]]>*/
-                    </script>
-                </div>
-                <!--<div class="form-group row col-sm-offset-1 col-sm-6">-->
-                    <!--<div class="pull-right"  data-toggle="popover" data-placement="left" title="Select initial inference type" data-content="Save all your ancestors or just the N0. This will increase the time for your reconstruction to run. If you only are-->
-                        <!--interested in a small number of nodes then it is recomended you select these nodes to reconstruct from the visualisation." >-->
-                        <!--<input id="run-all" type="checkbox" data-size="small" data-label-text="Ancestors to reconstruct" data-label-width="300" data-handle-width="200" data-off-text="Reconstruct N0" data-on-color="default" data-on-text="Reconstruct All" />-->
-                    <!--</div>-->
-                    <!--<input type="hidden" th:value="runall" th:field="*{runAll}" class="inferenceType" />-->
-                    <!--<script type="text/javascript">-->
-                      <!--/*<![CDATA[*/-->
-                      <!--$("[id='run-all']").bootstrapSwitch();-->
-                      <!--$('input[id="run-all"]').on('switchChange.bootstrapSwitch', function(event, state) {-->
-                        <!--if (state == true) {-->
-                          <!--$('#runAll').val(true);-->
-                        <!--} else {-->
-                          <!--$('#runAll').val(false);-->
-                        <!--}-->
-                      <!--});-->
-                      <!--/*]]>*/-->
-                    <!--</script>-->
+                            }
+
+                        });
+
+                    });
+
+                    /*]]>*/
+                </script>
+
+
+                <!--If user dismisses the login modal, make save reconstruction set to No-->
+                <script>
+
+                    $(document).on('hidden.bs.modal', '#loginModal', function (event) {
+                        $('input#save_false').prop( "checked", true );
+                    });
+
+
+
+                </script>
+
+
 
                 <!--</div>-->
-                <div class="form-group row col-sm-offset-2 col-sm-12 pad-top-bottom">
-                    <input type="text" class="form-input col-xs-6"
-                           placeholder="Email for saving your reconstruction..."
-                           id="email" name="email" th:field="*{email}"/>
-                </div>
 
-                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;"><button type="submit" name="submitAsr" class="btn btn-default col-xs-12" style="background-color: #C8D3BB;" id="submit-btn" onclick="javascript:displayLoad();">Perform reconstruction</button>
+
+                <div class="form-group row col-sm-offset-1 col-sm-8 pad-top-bottom" style="padding-top:30px;">
+                    <button type="submit" name="submitAsr" class="btn btn-default col-xs-12"
+                            style="background-color: #C8D3BB;" id="submit-btn" onclick="javascript:displayLoad();">
+                        Perform reconstruction
+                    </button>
                     <a class="btn col-xs-12  pad-top-bottom" href="/guide"> Read the GRASP guide</a>
 
                 </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
+</div>
 </body>
 </html>

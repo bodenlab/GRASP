@@ -3,8 +3,8 @@
  * Saves the current reconstruction, the user inputs an email and they get
  * notified once it is complete.
  */
-let saveRecon = function() {
-    let email = document.getElementById("email").value;
+let saveRecon = function(email) {
+    // Get the email
     $.ajax({
       url: "/saveRecon",
       type: "POST",
@@ -15,11 +15,13 @@ let saveRecon = function() {
           saved = true;
         // CHeck if we have an error message
         if (data.value === "login") {
-          window.alert("You need to login to perform this action. When you login the saving will automatically start :) ");
+          window.alert("You need to login to perform this action. When you login the saving will automatically start ");
         } else if (data.value  === "isSaving") {
-          window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
+            window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
+        } else if (data.value === 'exists') {
+            window.alert("This reconstruction is already saved");
         } else {
-          window.alert("Saving reconstruction, check your emails :) ");
+          window.alert("Saving reconstruction, check your emails ");
         }
       }, error: function (err) {
         console.log(err);

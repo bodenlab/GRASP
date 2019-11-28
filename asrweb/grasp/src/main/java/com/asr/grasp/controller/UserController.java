@@ -10,6 +10,7 @@ import com.asr.grasp.utils.Defines;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.mail.internet.AddressException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -49,8 +50,13 @@ public class UserController {
         user.setPassword(null);
         user.setPasswordMatch(null);
 
+
         // Set the user's ID
         getId(user);
+        if (user.getId() != Defines.UNINIT){
+            // Set the user's email
+            user.setEmail(getEmail(user));
+        }
         return err;
     }
 
@@ -129,7 +135,7 @@ public class UserController {
      *
      * @param user
      */
-    public String sendForgotPasswordEmail(UserObject user) {
+    public String sendForgotPasswordEmail(UserObject user) throws AddressException {
         user.setConfirmationToken(usersModel.generateId().toString());
         String err = usersModel.resetPassword(user.getId(), user.getConfirmationToken());
         if (err != null) {
@@ -148,13 +154,14 @@ public class UserController {
      *
      * @param user
      */
-    public void sendRegistrationEmail(UserObject user) {
+    public void sendRegistrationEmail(UserObject user) throws AddressException {
         EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.REGISTRATION);
         email.setContent("http://grasp.scmb.uq.edu.au/confirm-registration", user.getConfirmationToken());
         emailController.sendEmail(email);
         user.setConfirmationToken(null);
+
         // We remove the password
-        user.setEmail(null);
+//        user.setEmail(null);
     }
 
     /**

@@ -346,12 +346,21 @@ var draw_all_poags = function (poags) {
         var edges = poags.single.edges[poag_name];
         var group = poags.groups.single[poag_name];
         var scale_y = poags.scale['single_y'];
+        var poagPi = true;
+        if (p !== 'MSA') {
+          // Now we want to find out if we have an inferred marginal or joint
+          if (poags.single.raw.inferred.metadata.type !== 'marginal') {
+            poagPi = false;
+          }
+        }
+
         // Setup the graph overlay features
         var graph_group = setup_graph_overlay(poag_options.graph, group);
 
         if (nodes != undefined) {
             var height = poags.single.height - poags.single.margin.top / 2;
-            draw_poag(poags, poag_name, nodes, edges, scale_y, group, false, height, graph_group);
+            // Arguments: poags, poag_name, nodes, edges, scale_y, group, poagPi, height
+            draw_poag(poags, poag_name, nodes, edges, scale_y, group, poagPi, height, graph_group);
         }
     }
 

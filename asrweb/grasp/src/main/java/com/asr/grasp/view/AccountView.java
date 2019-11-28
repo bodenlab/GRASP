@@ -15,6 +15,8 @@ public class AccountView {
     public ModelAndView get(UserObject loggedInUser, UserController userController) {
         ModelAndView mav = new ModelAndView("account");
         mav.addObject("user", loggedInUser);
+        mav.addObject("email", loggedInUser.getEmail());
+
         mav.addObject("share", new ShareObject());
         mav.addObject("ownerAccessRecons", userController
                 .getOwnerAccessReconIds(loggedInUser));

@@ -180,11 +180,16 @@ public class ReconstructionController {
         // Get the userId of the user we want to save that reconstruction with
         int userId = usersModel.getUserId(username);
         if (userId == Defines.FALSE) {
-            return "user.username.nonexist";
+            return Defines.USER_NONEXIST;
         }
+
+        if (userId == loggedInUser.getId()){
+            return Defines.SHARE_SELF;
+        }
+
         // Check if the user already has access that we're trying to share with
         if (reconModel.getUsersAccess(reconId, userId) != Defines.NO_ACCESS) {
-            return "recon.share.exists";
+            return Defines.SHARE_EXISTS;
         }
         // ShareObject the reconstruction with the user
         return reconModel.shareWithUser(reconId, userId);
@@ -201,12 +206,16 @@ public class ReconstructionController {
      * @return
      */
     public String removeSharedRecon(int reconId, UserObject loggedInUser) {
-        // Check if this is the currect reonstruction. If it is we can just
+        // Check if this is the current reconstruction. If it is we can just
         // get the owner ID from currentRecon
         int access = getUsersAccess(reconId, loggedInUser);
         if (access == Defines.MEMBER_ACCESS) {
             return reconModel.removeUsersAccess(reconId,
                     loggedInUser.getId());
+        }
+
+        if (access == Defines.NO_ACCESS){
+            return Defines.DELETE_NOACCESS;
         }
         return "fail";
     }
@@ -243,13 +252,16 @@ public class ReconstructionController {
         // get the owner ID from currentRecon
         ReconstructionObject currRecon = user.getCurrRecon();
         int userId = user.getId();
+
+
         if (currRecon != null && reconId == currRecon.getId() && reconId !=
                 Defines.UNINIT) {
              if (userId == currRecon.getOwnerId() &&
                  userId != Defines.UNINIT) {
-                return Defines.OWNER_ACCESS;
+                 return Defines.OWNER_ACCESS;
              }
-             return Defines.MEMBER_ACCESS;
+
+            return Defines.MEMBER_ACCESS;
         }
         // Otherwise we need to check if this user has owner access from the DB.
         return reconModel.getUsersAccess(reconId, userId);
@@ -267,7 +279,7 @@ public class ReconstructionController {
         if (access == Defines.OWNER_ACCESS) {
             return reconModel.delete(reconId);
         }
-        return "recon.delete.notowner";
+        return Defines.DELETE_NOTOWNER;
     }
 
     /**
@@ -305,7 +317,7 @@ public class ReconstructionController {
     }
 
     /**
-     * Creates the reconstrcution object using the values returned from BNkit.
+     * Creates the reconstruction object using the values returned from BNkit.
      * @param asrRecon
      * @return
      */

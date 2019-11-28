@@ -1,0 +1,8 @@
+language: java
+
+install:
+./mvnw test
+
+# After success, send the coverage report to Coveralls
+after_success:
+  - coveralls

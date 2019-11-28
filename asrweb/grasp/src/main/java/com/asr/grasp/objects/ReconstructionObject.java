@@ -114,6 +114,18 @@ public class ReconstructionObject {
         return this.inferenceType;
     }
 
+    public int getInferenceTypeInt(){
+        if (this.inferenceType.equalsIgnoreCase("joint")) {
+            return Defines.JOINT;
+
+        }
+        else if (this.inferenceType.equalsIgnoreCase( "marginal")) {
+            return Defines.MARGINAL;
+        }
+
+        return -1;
+    }
+
     public void clearLargeStrings() {
         this.msa = null;
         this.reconTree = null;

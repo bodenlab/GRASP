@@ -416,7 +416,7 @@ public class SeqModel extends BaseModel {
             con.commit();
             result = true;
         } catch (Exception e) {
-            System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
+            System.out.println("UNABLE TO INSERT: " + nodeLabel + e.getMessage());
         }
         closeCon(con);
         return result;

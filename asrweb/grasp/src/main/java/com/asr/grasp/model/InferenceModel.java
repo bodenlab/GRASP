@@ -42,6 +42,9 @@ public class InferenceModel extends BaseModel {
     final ColumnEntry infEntry = new ColumnEntry(4, "inference", Defines
             .STRING);
 
+    final ColumnEntry infType = new ColumnEntry(5, "i_type", Defines
+            .INT);
+
     /**
      * Saves a consensus sequence
      * @param reconId
@@ -74,8 +77,8 @@ public class InferenceModel extends BaseModel {
 //    }
 
 
-    public boolean updateInference(int reconId, String nodeLabel, String inference) {
-        String query = "UPDATE web.inferences SET inference=? WHERE r_id=? AND node_label=?;";
+    public boolean updateInference(int reconId, String nodeLabel, String inference, int inferenceType) {
+        String query = "UPDATE web.inferences SET inference=? WHERE r_id=? AND node_label=? AND r_type=?;";
         Connection con = null;
         try {
             con = DriverManager.getConnection(dbUrl, dbUsername,
@@ -84,6 +87,8 @@ public class InferenceModel extends BaseModel {
             statement.setInt(2, reconId);
             statement.setString(3, nodeLabel);
             statement.setString(1, inference);
+            statement.setInt(4, inferenceType);
+
             statement.executeUpdate();
             closeCon(con);
             return true;
@@ -101,8 +106,8 @@ public class InferenceModel extends BaseModel {
      * @param inference
      * @return
      */
-    public boolean insertIntoDb (int reconId, String nodeLabel, String inference) {
-        String query = "INSERT INTO web.inferences(r_id, node_label, inference) VALUES(?,?,?);";
+    public boolean insertIntoDb (int reconId, String nodeLabel, String inference, int inferenceType) {
+        String query = "INSERT INTO web.inferences(r_id, node_label, inference, i_type) VALUES(?,?,?,?);";
         Connection con = null;
         boolean result = false;
         try {
@@ -112,10 +117,12 @@ public class InferenceModel extends BaseModel {
             statement.setInt(1, reconId);
             statement.setString(2, nodeLabel);
             statement.setString(3, inference);
+            statement.setInt(4, inferenceType);
+
             statement.executeUpdate();
             result = true;
         } catch (Exception e) {
-            System.out.println("UNABLE TO INSTERT: " + nodeLabel + e.getMessage());
+            System.out.println("UNABLE TO INSERT: " + nodeLabel + e.getMessage());
         }
         closeCon(con);
         return result;
@@ -143,8 +150,8 @@ public class InferenceModel extends BaseModel {
      * @param reconId
      * @return
      */
-    public String getInferenceForLabel(int reconId, String nodeLabel) {
-        String query = "SELECT inference FROM web.inferences WHERE r_id=? AND node_label=?;";
+    public String getInferenceForLabel(int reconId, String nodeLabel, Integer infMethod) {
+        String query = "SELECT inference FROM web.inferences WHERE r_id=? AND node_label=? AND ;";
         Connection con = null;
         String result = null;
         try {

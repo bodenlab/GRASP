@@ -37,6 +37,7 @@ import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.util.FileCopyUtils;
+import javax.mail.internet.AddressException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -139,9 +140,10 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ModelAndView registerUser(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
+            BindingResult bindingResult, Model model, HttpServletRequest request) throws AddressException {
 
         userValidator.validate(user, bindingResult);
+
 
         if (bindingResult.hasErrors()) {
             return new ModelAndView("register");
@@ -150,9 +152,13 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Register the user
         String err = userController.register(user, userController.getAConfirmationToken());
         if (err != null) {
-            model.addAttribute("warning", err);
-            return new ModelAndView("login");
+            bindingResult.rejectValue("username", "user.username.duplicate");
+
+            return new ModelAndView("register");
         }
+
+
+
 
         // Send the confirmation email
         userController.sendRegistrationEmail(user);
@@ -160,7 +166,13 @@ public class GraspApplication extends SpringBootServletInitializer {
             // ToDo: Probably should add an error here
             return new ModelAndView("register");
         }
+
+
+
         loggedInUser = user;
+
+
+
         return new ModelAndView("confirm_registration");
     }
 
@@ -351,7 +363,7 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/forgot-password", method = RequestMethod.POST)
     public ModelAndView sendPasswordLink(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
+            BindingResult bindingResult, Model model, HttpServletRequest request) throws AddressException {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
         loggedInUser = user;
@@ -400,7 +412,10 @@ public class GraspApplication extends SpringBootServletInitializer {
     public ModelAndView showForm(Model model) {
         this.asr = new ASRObject();
         model.addAttribute("asrForm", this.asr);
+        model.addAttribute("user", loggedInUser);
         model.addAttribute("username", loggedInUser.getUsername());
+        model.addAttribute("email", loggedInUser.getEmail());
+
         return new ModelAndView("index");
     }
 
@@ -421,6 +436,28 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     }
 
+    /**
+     * Redirect to the inital form after user logs in via the login modal
+     *
+     * @return index html
+     */
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    public ModelAndView afterModalLogin(Model model) {
+        this.asr = new ASRObject();
+        model.addAttribute("asrForm", this.asr);
+        model.addAttribute("user", loggedInUser);
+        model.addAttribute("username", loggedInUser.getUsername());
+        model.addAttribute("email", loggedInUser.getEmail());
+
+
+        return new ModelAndView("index");
+    }
+
+
+
+
+
+
     /***
      * Removes a users access to a reconstruction so it no longer shows on their page.
      *
@@ -437,10 +474,14 @@ public class GraspApplication extends SpringBootServletInitializer {
         String err = reconController.removeSharedRecon(reconId, loggedInUser);
 
         if (err != null) {
+            // This check is needed so as to not trigger an error when the page is reloaded after deletion
+            if (err == Defines.DELETE_NOACCESS){
+                return mav;
+            }
             mav.addObject("warning", err);
             mav.addObject("message", "Unable to remove your access to the reconstruction, error: " + err);
         } else {
-            mav.addObject("type", "remove");
+            mav.addObject("type", "removed");
             mav.addObject("warning", null);
             mav.addObject("message", "Successfully removed your access to the reconstruction.");
         }
@@ -464,12 +505,15 @@ public class GraspApplication extends SpringBootServletInitializer {
         String err = reconController.delete(reconId, loggedInUser);
 
         if (err != null) {
+            // This check is needed so as to not trigger an error when the page is reloaded after deletion
+            if (err == Defines.DELETE_NOTOWNER){
+                return mav;
+            }
             mav.addObject("warning", err);
             mav.addObject("message", "Unable to delete the reconstruction, error: " + err);
         } else {
             mav.addObject("warning", "delete");
-            mav.addObject("type", "shared");
-            mav.addObject("message", "Successfully deleted reconstruction.");
+            mav.addObject("message", "Successfully deleted reconstruction. Refresh to see changes.");
         }
 
         return mav;
@@ -485,13 +529,17 @@ public class GraspApplication extends SpringBootServletInitializer {
             @ModelAttribute("share") ShareObject shareObject,
             BindingResult bindingResult, Model model, HttpServletRequest request) {
         ModelAndView mav = accountView.get(loggedInUser, userController);
+
+
+
         // ShareObject it with the user
         String err = reconController.shareWithUser(shareObject.getReconID(),
                 shareObject.getUsername(), loggedInUser);
 
         if (err != null) {
             mav.addObject("warning", err);
-            mav.addObject("error", err);
+            mav.addObject("message", "Cannot share reconstruction - " + err.toString());
+
         } else {
             mav.addObject("type", "shared");
             mav.addObject("warning", null);
@@ -502,6 +550,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 
     private ModelAndView loadRecon() {
+
 
         // Otherwise we want to set this for the user.
         userController.setCurrRecon(currRecon, loggedInUser);
@@ -527,6 +576,8 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         mav.addObject("user", loggedInUser);
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
         // ToDo: add in the IDs
@@ -535,7 +586,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("ids", ids.toString());
         mav.addObject("saved", true);
 
-        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), Defines.JOINT));
+        mav.addObject("jointLabels", seqController.getAllSeqLabels(currRecon.getId(), currRecon.getInferenceTypeInt()));
         // Add the ancestor to the list we don't need to check here for duplicates as this will be
         // the initial iteration.
         reconstructedNodes = new ArrayList<>();
@@ -641,8 +692,10 @@ public class GraspApplication extends SpringBootServletInitializer {
             // Save the reconstruction
             err = reconController.save(loggedInUser, currRecon);
 
-            // We also want to save all joint recons
-            seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(Defines.JOINT),
+            int infType = currRecon.getInferenceTypeInt();
+
+            // We also want to save all recons
+            seqController.insertAllJointsToDb(currRecon.getId(), asr.getASRPOG(infType),
                     saveGappySeq, loggedInUser.getId());
 
             // Also want to save all the extents into the db
@@ -734,6 +787,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/save", method = RequestMethod.GET)
     public ModelAndView saveRecon(WebRequest request, Model model) throws IOException {
         // Saves the current reconstruction
+
 
         // if a user is not logged in, prompt to Login
         if (loggedInUser.getUsername() == null || loggedInUser.getUsername() == "") {
@@ -873,16 +927,16 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
         String nodeLabel = dataJson.getString("nodeLabel");
-        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
 
         if (reconstructedAnsc == null) {
             // This means we weren't able to find it in the DB so we need to run the recon as usual
             // If this recon has an ID i.e. the user has saved it before then save this recon.
             if (currRecon.getId() != Defines.UNINIT) {
-                seqController.insertSeqIntoDb(currRecon.getId(), nodeLabel, asr.getASRPOG(Defines.JOINT), loggedInUser.getId(), Defines.JOINT, true);
+                seqController.insertSeqIntoDb(currRecon.getId(), nodeLabel, asr.getASRPOG(reconMethod), loggedInUser.getId(), reconMethod, true);
 
             }
-            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel);
+            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
 
             return reconstructedAnsc;
         }
@@ -909,7 +963,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // If they don't have a saved reconstruction return that they need to save the reconstruction
         if (currRecon.getId() == Defines.FALSE) {
-            return new JSONObject().put("error", "You need to save your reconstruction before performing this action.").toString();
+
+            return "You need to save your reconstruction before performing this action." ;
         }
         // If their reconstruction is of old format then we want to tell them to re-perform the reconstruction
         if (!seqController.hasReconsAncestorsBeenSaved(currRecon.getId())) {
@@ -952,6 +1007,16 @@ public class GraspApplication extends SpringBootServletInitializer {
             needToSave = true;
             return returnVal.put("value", "login").toString();
         }
+
+        boolean reconstructedAnc = seqController.hasReconsAncestorsBeenSaved(currRecon.getId());
+
+        if (reconstructedAnc){
+
+            return returnVal.put("value", "exists").toString();
+
+        }
+
+
 
         loggedInUser.setEmail(email);
         saveCurrReconStartThread();
@@ -1068,6 +1133,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("results", true);
         mav.addObject("node", asr.getNodeLabel());
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
         // Run reconstruction but first get the extent names so we can asynronously do a lookup with
         // NCBI to get the taxonomic iDs.
         JSONObject ids = new JSONObject();
@@ -1101,7 +1168,8 @@ public class GraspApplication extends SpringBootServletInitializer {
             // int reconId, String label, ASRPOG asrInstance, boolean gappy
             // Set to be gappy
             JSONObject marginalGraphs = seqController.insertMarginalSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
-            return  marginalAsr.catGraphJSONBuilder(asr.getMSAGraphJSON(), marginalGraphs);
+
+            return  marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalGraphs);
             // Saves this Marginal reconstruction to the DB so the user can access it later.
         } else {
             // add msa and inferred ancestral graph
@@ -1135,6 +1203,8 @@ public class GraspApplication extends SpringBootServletInitializer {
                 mav.addObject("errorMessage", "Issue loading default reconstruction. Please try again.");
                 mav.addObject("user", loggedInUser);
                 mav.addObject("username", loggedInUser.getUsername());
+                mav.addObject("email", loggedInUser.getEmail());
+
                 return mav;
             }
             return mav;
@@ -1154,6 +1224,8 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("errorMessage", err);
             mav.addObject("user", loggedInUser);
             mav.addObject("username", loggedInUser.getUsername());
+            mav.addObject("email", loggedInUser.getEmail());
+
             return mav;
         }
 
@@ -1176,16 +1248,17 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("errorMessage", message);
             mav.addObject("user", loggedInUser);
             mav.addObject("username", loggedInUser.getUsername());
+            mav.addObject("email", loggedInUser.getEmail());
+
 
             return mav;
         }
+
         /**
          * Here if they are aiming to save it we just save and send an email
          */
 
-        // ToDo: I have been horrible and just inverted this, if you are reading this I am sorry
-        // I will fix this up when i get back from the US - for now accept by deepest appologies :'(
-        if (!asr.getSave()) {
+         if (asr.getSave()) {
             // check if a user is logged in
             if (loggedInUser.getId() == Defines.FALSE) {
                 ModelAndView mav = new ModelAndView("index");
@@ -1206,7 +1279,7 @@ public class GraspApplication extends SpringBootServletInitializer {
                 }
             }
             // Set the loggedin users email temp
-            loggedInUser.setEmail(asr.getEmail());
+//            loggedInUser.setEmail(asr.getEmail());
             saveCurrReconStartThread();
             ModelAndView mav = accountView.get(loggedInUser, userController);
             mav.addObject("type", "saving");
@@ -1218,6 +1291,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = new ModelAndView("processing");
         mav.addObject("user", loggedInUser);
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
 
         return mav;
     }
@@ -1292,6 +1367,8 @@ public class GraspApplication extends SpringBootServletInitializer {
                     reconController);
         }
         mav.addObject("username", loggedInUser.getUsername());
+        mav.addObject("email", loggedInUser.getEmail());
+
         return mav;
     }
 
@@ -1366,8 +1443,10 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/download-ancs" , method = RequestMethod.POST)
     public @ResponseBody String downloadJoint(@RequestBody String type) {
         String err = verify();
+
         JSONObject data = new JSONObject();
         ArrayList<String> ancs;
+
         // Check if we have an error.
         if (err != null) {
             data.put("error", err);
@@ -1438,6 +1517,7 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 
     private String checkErrors(ASRObject asr) {
+
         String message = null;
         if (!asr.getLoaded()) {
             if ((asr.getData() == null || asr.getData().equalsIgnoreCase("") || asr.getData()

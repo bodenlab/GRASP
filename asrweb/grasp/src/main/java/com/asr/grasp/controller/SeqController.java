@@ -89,24 +89,24 @@ public class SeqController {
      * @param label
      * @param ancsStr
      */
-    public void updateDBInference(int reconId, String label, String ancsStr) {
-        boolean updated = infModel.updateInference(reconId, label, ancsStr);
+    public void updateDBInference(int reconId, String label, String ancsStr, int infType) {
+        boolean updated = infModel.updateInference(reconId, label, ancsStr, infType);
         // Check whether this was updated sucessfully.
     }
 
 
-    /**
-     * Update the sequence in the database.
-     *
-     * @param reconId
-     * @param label
-     * @param seq
-     * @param gappy
-     */
-    public void updateDBSequence(int reconId, String label, String seq, boolean gappy) {
-        boolean updated = seqModel.updateConsensusSeq(reconId, label, seq, gappy, Defines.JOINT);
-        // Do something here and choose whether this has been updated correctly.
-    }
+//    /**
+//     * Update the sequence in the database.
+//     *
+//     * @param reconId
+//     * @param label
+//     * @param seq
+//     * @param gappy
+//     */
+//    public void updateDBSequence(int reconId, String label, String seq, boolean gappy) {
+//        boolean updated = seqModel.updateConsensusSeq(reconId, label, seq, gappy, Defines.JOINT);
+//        // Do something here and choose whether this has been updated correctly.
+//    }
 
     /**
      * Inserts all the joint reconstructions into the database.
@@ -140,7 +140,8 @@ public class SeqController {
             POAGJson ancsJson = new POAGJson(ancestor, gappy);
             String ancsStr = ancsJson.toJSON().toString();
 
-            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
+
+            boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr, Defines.JOINT);
             if (!inserted) {
                 return null;
             }
@@ -152,7 +153,7 @@ public class SeqController {
             System.out.println(supportedSeq);
 
             String infUpdated = c.getAsJson().toString();
-            updateDBInference(reconId, label, infUpdated);
+            updateDBInference(reconId, label, infUpdated, Defines.JOINT);
             // Also want to update the Joint sequence
             inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
                     gappy);
@@ -259,7 +260,7 @@ public class SeqController {
 
         String infUpdated = c.getAsJson().toString();
 
-        boolean inserted = infModel.insertIntoDb(reconId, nodeName, infUpdated);
+        boolean inserted = infModel.insertIntoDb(reconId, nodeName, infUpdated, reconType);
         if (!inserted) {
             return false;
         }
@@ -286,7 +287,8 @@ public class SeqController {
 
         JSONObject infUpdated = c.getAsJson();
 
-        boolean inserted;
+        boolean inserted = infModel.insertIntoDb(reconId, nodeName, infUpdated.toString(), reconType);
+
 
         // Also want to update the Joint sequence
         inserted = seqModel.insertIntoDb(reconId, nodeName, supportedSeq, reconType, gappy);
@@ -344,6 +346,8 @@ public class SeqController {
         // motif searching
         POAGJson ancsJson = new POAGJson(ancestor, gappy);
         String ancsStr = ancsJson.toJSON().toString();
+
+
 
         // Need to be able to take a null for the marginal
         return  updateMarginalForConsensus(reconId, label, node, ancsStr, reconType, gappy);
@@ -515,8 +519,8 @@ public class SeqController {
      * @param reconId
      * @param label
      */
-    public String getInfAsJson(int reconId, String label) {
-        return infModel.getInferenceForLabel(reconId, label);
+    public String getInfAsJson(int reconId, String label, Integer reconMethod) {
+        return infModel.getInferenceForLabel(reconId, label, reconMethod);
     }
 
     /**

@@ -262,7 +262,7 @@ public class ReconstructionControllerTest extends BaseTest {
          * Test that a user with member access can't delete a reconstruction
          */
         assertThat(reconController.delete(recon.getId(), userMember), is(equalTo
-                ("recon.delete.notowner")));
+                ("You can only delete this reconstruction if you are the owner.")));
 
         // Now we want to unshare the recon.
         err = reconController.removeUsersAccess(recon.getId(),userMember
@@ -275,7 +275,7 @@ public class ReconstructionControllerTest extends BaseTest {
          * Test that a user with No access can't delete a reconstruction
          */
         assertThat(reconController.delete(recon.getId(), userMember), is(equalTo
-                ("recon.delete.notowner")));
+                ("You can only delete this reconstruction if you are the owner.")));
 
         /**
          * Test that the owner can delete a reconstruction

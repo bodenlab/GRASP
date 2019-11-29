@@ -356,8 +356,15 @@ public class GraspApplication extends SpringBootServletInitializer {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
         loggedInUser = user;
+        ModelAndView mav =  new ModelAndView("forgot_password");
+        // ToDo
+        mav.addObject("user", loggedInUser);
+        mav.addObject("email", null);
+        // Check they didn't set a null username
+        if (user.getUsername().equals(null)) {
+            mav.addObject("warning", "Username can't be null.");
+        }
         String err = userController.sendForgotPasswordEmail(user);
-        ModelAndView mav = new ModelAndView("forgot_password");
         if (err != null) {
             mav.addObject("warning", err);
             return mav;

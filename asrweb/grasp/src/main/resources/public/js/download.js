@@ -14,16 +14,13 @@ let downloadData = function (btnId) {
 
         // If user hasn't entered any node IDs to download, let them know
         if (!commaSepList){
-
             window.alert("Please enter a list of node IDs you wish to download");
             return;
 
         }
-
-
-
-
         downloadGet('/download-ancs', commaSepList);
+    } else if (btnId === 'download-marg-dist') {
+      downloadMarginalTsv();
     }
 };
 
@@ -78,5 +75,56 @@ let downloadGet = function (url, dataPost) {
     }
 
     $.ajax(req)
+
+};
+
+/**
+ * Here we want to allow the user to download the marginal reconstruction of the
+ * node that they have in the visualisation. If there are no nodes in the vis,
+ * we display an error saying to please choose a marginal node.
+ *
+ * The tsv file is as follows:
+ * node ID A	C	D	E	F	G	H	I	K	L	M	N	P	Q	R	S	T	V	W	Y
+ * 1
+ * 2
+ * 3 ... etc
+ */
+let downloadMarginalTsv = function () {
+    let headerLine = ['A','C','D','E','F','G','H','I','K','L','M','N','P','Q',
+      'R','S','T','V','W','Y'];
+    let headerDict = {};
+    // Create a dictionary of the header information so that if we are missing
+    // amino acids we can fill it in with 0
+    for (let h in headerLine) {
+        headerDict[h] = headerLine[h];
+    }
+    // Check if we have a marginal ancestor in our history
+    let tsvFileStr = "";
+      for (let p in poags.single.names) {
+        let poag_name = poags.single.names[p];
+        let nodes = poags.single.nodes[poag_name];
+        if (p !== 'MSA') {
+          // Now we want to find out if we have an inferred marginal or joint
+          if (poags.single.raw.inferred.metadata.type === 'marginal') {
+            for (let n in nodes) {
+                for (let h in headerLine) {
+                    // i.e. it's not in our current node graph
+                    if (nodes[n][G_GRAPH][h] === undefined) {
+                        tsvFileStr += '0' + '\t'
+                    } else {
+                       tsvFileStr += nodes[n][G_GRAPH][h] + '\t'
+                    }
+                }
+                tsvFileStr += '\n'
+            }
+            // Now we want it to automatically download
+            window.location.href = "data:text/tab-separated-values," + encodeURIComponent(tsvFileStr);
+          } else {
+              // i.e. the current is a joint.
+            console.log("Error no marginal recon.");
+          }
+        }
+
+    } 
 
 };

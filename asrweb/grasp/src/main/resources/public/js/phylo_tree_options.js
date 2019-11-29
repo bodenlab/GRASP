@@ -8,66 +8,52 @@ var perform_marginal = function (node_name) {
   selectedNode = node_name;
   set_inf_type("marginal");
   $.ajax({
-    url: window.location.pathname.split("?")[0],
+    url: '/getmarginalrecon',
     type: 'POST',
-    data: {infer: inferType, node: selectedNode, addgraph: false},
+    dataType: 'json',
+    contentType: "application/json",
+    data: JSON.stringify({'infer': inferType, 'nodeLabel': selectedNode, 'addgraph': false}),
     success: function (data) {
-      var inter = setInterval(function () {
-        $.ajax({
-          url: window.location.pathname.split("?")[0],
-          type: 'GET',
-          data: {request: "status"},
-          success: function (data) {
-            // redirect to results if finished.. otherwise, update user...
-            if (data == "done") {
-              $("#status").text(" finishing up...");
-              $.ajax({
-                url: window.location.pathname.split("?")[0],
-                type: 'POST',
-                data: {getrecongraph: node_name},
-                success: function (data) {
-                  var json_str = data;
-                  graph_array = [];
-                  // if mutant library is selected, display mutant library with the selected number of mutants, else just
-                  // display the marginal distribution in the nodes
-                  graph_array.push(JSON.parse(json_str));
-                  // Add the colours of the POAG assigned by name and merged_id
-                  poags.options.poagColours["poag" + (Object.keys(
-                      poags.options.poagColours).length
-                      + 1)] = poags.options.names_to_colour['Inferred'];
-                  poags.options.name_to_merged_id[name] = ["poag"
-                  + (Object.keys(poags.options.poagColours).length + 1)];
-                  setup_poags(json_str, true, false, false, node_name);
-                  redraw_poags();
-                  refresh_elements();
-                  if ($("#mutant-btn").attr("aria-pressed") === 'true') {
-                    set_draw_mutants(true);
-                    $('#mutant-input').fadeIn();
-                    view_mutant_library();
-                  } else {
-                    set_draw_mutants(false);
-                    $('#mutant-input').fadeOut();
-                    set_mutant(0);
-                  }
-                }
-              });
-              clearInterval(inter);
-              $('#progress-status').fadeOut();
-              $('#progress').addClass('disable');
-            } else if (data.includes("error")) {
-              clearInterval(inter);
-              $('#progress-status').fadeOut();
-              $('#progress').addClass('disable');
-              $("#warning").attr('style', "display: block;");
-              $("#warning-text").text(data.split("\t")[1]);
-              // window.location.replace(window.location.pathname.split("?")[0] + "error");
-            } else {
-              $("#status").text(data);
-            }
-          }
-        });
-      }, 1000);
-    }
+      try {
+        // Check if there was an error or if the marginal is still runnning
+        if (data[0] === 'e') {
+          // We have an error so return
+          console.log("error" + data)
+        } else if (data === 'running') {
+          // This means we're still running our marginal
+          setTimeout(perform_marginal(node_name), 2000);
+        }
+        graph_array = [];
+        // if mutant library is selected, display mutant library with the selected number of mutants, else just
+        // display the marginal distribution in the nodes
+        graph_array.push(data);
+        // Add the colours of the POAG assigned by name and merged_id
+        poags.options.poagColours["poag" + (Object.keys(
+            poags.options.poagColours).length
+            + 1)] = poags.options.names_to_colour['Inferred'];
+        poags.options.name_to_merged_id[name] = ["poag"
+        + (Object.keys(poags.options.poagColours).length + 1)];
+        setup_poags(data, true, false, false, node_name);
+        redraw_poags();
+        refresh_elements();
+        if ($("#mutant-btn").attr("aria-pressed") === 'true') {
+          set_draw_mutants(true);
+          $('#mutant-input').fadeIn();
+          view_mutant_library();
+        } else {
+          set_draw_mutants(false);
+          $('#mutant-input').fadeOut();
+          set_mutant(0);
+        }
+        $('#progress-status').fadeOut();
+        $('#progress').addClass('disable');
+      } catch {
+        // If some sort of error occurs we want to remove the processing
+        // ToDo: Add in what the error was to a message.
+        $('#progress-status').fadeOut();
+        $('#progress').addClass('disable');
+      }
+    },
   });
 };
 

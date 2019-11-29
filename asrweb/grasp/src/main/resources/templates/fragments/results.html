@@ -43,6 +43,24 @@
       </div>
     </div>
   </div>
+  <div id="error-modal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Errors</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="error-modal-text">
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Modal -->
   <a id="results-nav"></a>
   <div class="content-section-b">
@@ -64,9 +82,23 @@
              style="height: 10em; padding-top: 4em; background: none; background-color: transparent;">
           <h2 class="col-xs-12 text-secondary">
             <small>please wait...</small>
-            <span id="status">0%</span></h2>
+            <span id="status">0%</span>
+
+          </h2>
+          <div class="col-md-4">
+            Approx. times:
+            1 -  100 seqs: 1 min,
+            100 - 200 seqs: 10 min,
+            200 - 500 seqs: 1 hour,
+            500 sequences or more? We recommend doing something else for a while.
+            For less than 10,000 sequences this should complete within a day.
+
+          </div>
+
           <a th:href="@{/(cancel='t')}" type="button" class="btn btn-warning">Cancel</a>
-        </div>
+        </div >
+
+
       </div>
     </div>
     <div id="results" class="container-fluid">

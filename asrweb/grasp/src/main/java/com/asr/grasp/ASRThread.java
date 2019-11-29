@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 public class ASRThread implements Runnable {
 
     private ASRObject asr = null;
-    private String status = null;
+    private String status = "running";
     private Logger logger = null;
     private String inference;
     private String node;

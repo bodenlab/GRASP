@@ -291,7 +291,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     public ModelAndView resetPasswordConfirmation(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) {
         model.addAttribute("user", loggedInUser);
-        return new ModelAndView("reset_password_confirmation");
+        return new ModelAndView("set_password");
     }
 
 
@@ -310,7 +310,7 @@ public class GraspApplication extends SpringBootServletInitializer {
             BindingResult bindingResult, Model model, HttpServletRequest request) {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
-        user.setId(loggedInUser.getId());
+        user.setUsername(loggedInUser.getUsername());
         loggedInUser = user;
         String err = userController.setPassword(user);
         ModelAndView mav = new ModelAndView("set_password");
@@ -361,15 +361,15 @@ public class GraspApplication extends SpringBootServletInitializer {
         mav.addObject("user", loggedInUser);
         mav.addObject("email", null);
         // Check they didn't set a null username
-        if (user.getUsername().equals(null)) {
-            mav.addObject("warning", "Username can't be null.");
+        if (user.getUsername().equals(null) || user.getUsername().length() < 2) {
+            mav.addObject("warning", "Username can't be null or is too short.");
         }
         String err = userController.sendForgotPasswordEmail(user);
         if (err != null) {
             mav.addObject("warning", err);
             return mav;
         }
-        return new ModelAndView("set_password");
+        return new ModelAndView("reset_password_confirmation");
     }
 
     /**

@@ -72,9 +72,13 @@ public class UserController {
         if (user.getPassword().length() < 8 || user.getPassword().length() > 32) {
             return "user.password.size";
         }
+        // Otherwise we set the userid
+        getId(user);
         String err = usersModel.resetPassword(user.getId(), user.getPassword());
         user.setPasswordMatch(null);
         user.setPassword(null);
+        user.setId(Defines.UNINIT);
+
         return err;
     }
 
@@ -136,16 +140,27 @@ public class UserController {
      * @param user
      */
     public String sendForgotPasswordEmail(UserObject user) throws AddressException {
+        // First we need to set the users ID
+        getId(user);
         user.setConfirmationToken(usersModel.generateId().toString());
         String err = usersModel.resetPassword(user.getId(), user.getConfirmationToken());
         if (err != null) {
             return err;
         }
-        EmailObject email = new EmailObject(user.getUsername(), getEmail(user), Defines.FORGOT_PASSWORD);
-        email.setContent("http://grasp.scmb.uq.edu.au/reset-password-confirmation", user.getConfirmationToken());
-        emailController.sendEmail(email);
-        user.setConfirmationToken(null);
-        return null;
+        try {
+            EmailObject email = new EmailObject(user.getUsername(), getEmail(user),
+                    Defines.FORGOT_PASSWORD);
+            email.setContent("http://grasp.scmb.uq.edu.au/reset-password-confirmation",
+                    user.getConfirmationToken());
+            emailController.sendEmail(email);
+            user.setConfirmationToken(null);
+            // Reset the ID to be undefined (it will get reset when they log back in)
+            user.setId(Defines.UNINIT);
+            return null;
+        } catch (Exception e) {
+            // This means the email failed we want to notify the user
+            return "Sending email failed. Please contact the administrators or make sure your email is correct.";
+        }
     }
 
 

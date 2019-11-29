@@ -151,7 +151,7 @@ public class InferenceModel extends BaseModel {
      * @return
      */
     public String getInferenceForLabel(int reconId, String nodeLabel, Integer infMethod) {
-        String query = "SELECT inference FROM web.inferences WHERE r_id=? AND node_label=? AND ;";
+        String query = "SELECT inference FROM web.inferences WHERE r_id=? AND node_label=? AND i_type=?;";
         Connection con = null;
         String result = null;
         try {
@@ -161,6 +161,7 @@ public class InferenceModel extends BaseModel {
             statement = con.prepareStatement(query);
             statement.setInt(1, reconId);
             statement.setString(2, nodeLabel);
+            statement.setInt(3, infMethod);
             // Run the query and return a HashMap with nodeLabels as keys and String as values
             ResultSet results = statement.executeQuery();
             con.close();

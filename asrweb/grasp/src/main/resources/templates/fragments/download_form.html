@@ -19,45 +19,45 @@
                                 </div>
                             </fieldset>
                         </div>
-                        <div class="col-md-4">
-                            <fieldset>
-                                <legend>
-                                    Ancestral Graphs - <strong>Temporarily Disabled</strong>
-                                </legend>
-                                <div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">
-                                    <button id="check-pog-msa" name="check-pog-msa" class="btn btn-default" disabled="true" type="button">X</button>
-                                    <label for="check-pog-msa">
-                                        Sequence alignment POAG (*.dot)
-                                    </label>
-                                </div>
-                                <div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">
-                                    <button id="check-pog-marg" class="btn btn-default" name="check-pog-marg" disabled="true" type="button">X</button>
-                                    <label for="check-pog-marg">
-                                        Marginal reconstruction POG of <span class="node-label">Root</span> (*.dot)
-                                    </label>
-                                </div>
-                                <div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
-                                    <button id="check-pog-joint" class="btn btn-default" name="check-pog-joint" disabled="true" type="button">X</button>
-                                    <label for="check-pog-joint">
-                                        Joint reconstruction POG of added ancestors (*.dot)
-                                    </label>
-                                </div>
-                                <div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">
-                                    <button id="check-pog-joint-single" class="btn btn-default" name="check-pog-joint-single" disabled="true" type="button">X</button>
-                                    <label for="check-pog-joint-single">
-                                        Joint reconstruction POG of <span class="node-label">Root</span> (*.dot)
-                                    </label>
-                                </div>
-                            </fieldset>
-                        </div>
-                        <div class="col-md-4">
+                        <!--<div class="col-md-4">-->
+                            <!--<fieldset>-->
+                                <!--<legend>-->
+                                    <!--Ancestral Graphs - <strong>Temporarily Disabled</strong>-->
+                                <!--</legend>-->
+                                <!--<div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Sequence alignment as a partial order graph.">-->
+                                    <!--<button id="check-pog-msa" name="check-pog-msa" class="btn btn-default" disabled="true" type="button">X</button>-->
+                                    <!--<label for="check-pog-msa">-->
+                                        <!--Sequence alignment POAG (*.dot)-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                                <!--<div class="checkbox disabled margopt" data-toggle="popover" data-placement="top" data-content="Reconstructed ancestor (using marginal reconstruction) as a partial order graph.">-->
+                                    <!--<button id="check-pog-marg" class="btn btn-default" name="check-pog-marg" disabled="true" type="button">X</button>-->
+                                    <!--<label for="check-pog-marg">-->
+                                        <!--Marginal reconstruction POG of <span class="node-label">Root</span> (*.dot)-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                                <!--<div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">-->
+                                    <!--<button id="check-pog-joint" class="btn btn-default" name="check-pog-joint" disabled="true" type="button">X</button>-->
+                                    <!--<label for="check-pog-joint">-->
+                                        <!--Joint reconstruction POG of added ancestors (*.dot)-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                                <!--<div class="checkbox disabled dlopt" data-toggle="popover" data-placement="bottom" data-content="All reconstructed ancestors (using joint reconstruction) as partial order graphs.">-->
+                                    <!--<button id="check-pog-joint-single" class="btn btn-default" name="check-pog-joint-single" disabled="true" type="button">X</button>-->
+                                    <!--<label for="check-pog-joint-single">-->
+                                        <!--Joint reconstruction POG of <span class="node-label">Root</span> (*.dot)-->
+                                    <!--</label>-->
+                                <!--</div>-->
+                            <!--</fieldset>-->
+                        <!--</div>-->
+                        <div class="col-md-8">
                             <fieldset>
                                 <legend>
                                     Sequence Information
                                 </legend>
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the inferred ancestral sequence graph.">
-                                    <button id="check-marg-dist" name="check-marg-dist" class="btn btn-default disabled" type="button">X</button>
-                                    <label for="check-marg-dist">
+                                    <button id="download-marg-dist" name="check-marg-dist" class="btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
+                                    <label for="download-marg-dist">
                                         Distribution of characters in <span class="node-label disabled margopt">Root</span> marginal (.tsv)
                                     </label>
                                 </div>

@@ -157,9 +157,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             return new ModelAndView("register");
         }
 
-
-
-
         // Send the confirmation email
         userController.sendRegistrationEmail(user);
         if (err != null) {
@@ -167,11 +164,7 @@ public class GraspApplication extends SpringBootServletInitializer {
             return new ModelAndView("register");
         }
 
-
-
         loggedInUser = user;
-
-
 
         return new ModelAndView("confirm_registration");
     }
@@ -288,14 +281,11 @@ public class GraspApplication extends SpringBootServletInitializer {
         return new ModelAndView("set_password");
     }
 
-
-
     @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.GET)
     public ModelAndView resetPasswordConfirmation(Model model, HttpServletRequest request) {
         model.addAttribute("user", loggedInUser);
         return new ModelAndView("reset_password_confirmation");
     }
-
 
     @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.POST)
     public ModelAndView resetPasswordConfirmation(@Valid @ModelAttribute("user") UserObject user,
@@ -303,7 +293,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         model.addAttribute("user", loggedInUser);
         return new ModelAndView("reset_password_confirmation");
     }
-
 
 
     /**
@@ -427,11 +416,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // Ensure we don't think any jobs are still running.
         runningMarginal = false;
-
-        if (asr.performedRecon()) {
-            return returnASR(model);
-        }
-
         return showForm(model);
 
     }
@@ -452,11 +436,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         return new ModelAndView("index");
     }
-
-
-
-
-
 
     /***
      * Removes a users access to a reconstruction so it no longer shows on their page.
@@ -863,25 +842,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 
     /**
-     * Show status of reconstruction while asynchronously performing analysis
-     *
-     * @return status of reconstruction
-     */
-    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"request"})
-    public @ResponseBody
-    String showStatus(@RequestParam("request") String request, Model model) throws Exception {
-
-
-        String status = recon.getStatus();
-        if (runningMarginal) {
-            return getStatusFromAsr(status, marginalAsr);
-        }
-        return getStatusFromAsr(status, asr);
-
-    }
-
-
-    /**
      * Gets the taxonomic ids from the User side.
      * Returns
      * @param jsonString
@@ -906,6 +866,48 @@ public class GraspApplication extends SpringBootServletInitializer {
         return taxaController.getTaxaInfoFromProtIds(seqController.getSeqLabelAsNamedMap(currRecon.getId())).toString();
     }
 
+    /**
+     * Gets a marginal reconstruction to add to the recon graph.
+     *
+     * Returns a JSON string representation of the consensus sequence
+     * @param jsonString
+     * @return
+     */
+    @RequestMapping(value = "/getmarginalrecon" , method = RequestMethod.POST)
+    public @ResponseBody String getMarginalRecon(@RequestBody String jsonString) {
+
+        JSONObject dataJson = new JSONObject(jsonString);
+        marginalAsr.setInferenceType("marginal");
+
+        if (dataJson.getString("nodeLabel").equals(null)) {
+            return "err: You need to have a label.";
+        }
+        String nodeLabel = dataJson.getString("nodeLabel");
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, Defines.MARGINAL);
+
+
+        if (reconstructedAnsc == null && runningMarginal != true) {
+            runningMarginal = true;
+            loadReconToASR();
+            // Set the node label we want to infer.
+            marginalAsr.setNodeLabel(nodeLabel);
+            // Run the thread
+            recon = new ASRThread(marginalAsr, "marginal", nodeLabel, false, logger, loggedInUser,
+                    reconController);
+            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, Defines.MARGINAL);
+            return marginalAsr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
+
+        } else if (reconstructedAnsc == null && runningMarginal) {
+            // Let the user know that the marginal reconstruction is still running.]
+            System.out.println("Running marginal");
+            return "running";
+
+        } else {
+            runningMarginal = false;
+            // Return the reconstructed ancestors
+            return marginalAsr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
+        }
+    }
 
     /**
      * Gets a joint reconstruction to add to the recon graph.
@@ -926,6 +928,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (dataJson.getString("nodeLabel").equals(null)) {
             return "You need to have a label.";
         }
+
         String nodeLabel = dataJson.getString("nodeLabel");
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
 
@@ -1015,8 +1018,6 @@ public class GraspApplication extends SpringBootServletInitializer {
             return returnVal.put("value", "exists").toString();
 
         }
-
-
 
         loggedInUser.setEmail(email);
         saveCurrReconStartThread();
@@ -1155,28 +1156,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         return mav;
     }
 
-
-    @RequestMapping(value = "/", method = RequestMethod.POST, params = {"getrecongraph"})
-    public @ResponseBody
-    String returnASRGraph(@RequestParam("getrecongraph") String getrecongraph, Model model,
-            HttpServletRequest request) {
-
-        String graphs;
-        String err;
-        if (runningMarginal) {
-            runningMarginal = false;
-            // int reconId, String label, ASRPOG asrInstance, boolean gappy
-            // Set to be gappy
-            JSONObject marginalGraphs = seqController.insertMarginalSeqIntoDb(currRecon.getId(), marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL), loggedInUser.getId(), Defines.MARGINAL,true);
-
-            return  marginalAsr.catGraphJSONBuilder(marginalAsr.getMSAGraphJSON(), marginalGraphs);
-            // Saves this Marginal reconstruction to the DB so the user can access it later.
-        } else {
-            // add msa and inferred ancestral graph
-            graphs = asr.catGraphJSONBuilder(asr.getMSAGraphJSON(), asr.getAncestralGraphJSON(asr.getWorkingNodeLabel()));
-        }
-        return graphs;
-    }
 
 
     /**
@@ -1335,42 +1314,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
     }
 
-    /**
-     * Perform marginal reconstruction of specified tree node.
-     *
-     * @param infer inference type (Expects marginal)
-     * @param node node label
-     * @param model com model
-     * @return graphs in JSON format
-     */
-    @RequestMapping(value = "/", method = RequestMethod.POST, params = {"infer", "node",
-            "addgraph"})
-    public ModelAndView performReconstruction(@RequestParam("infer") String infer,
-            @RequestParam("node") String node, @RequestParam("addgraph") Boolean addGraph,
-            Model model, HttpServletRequest request) {
-
-        ModelAndView mav = new ModelAndView("processing");
-
-        // run reconstruction
-        // ToDo: look and run the recon for marginal otherwise just get the joint from the database
-        if (!infer.equals("joint")) {
-            /**
-             * Here is where we need to load the whole reconstruction i.e. all the seqs etc
-             *
-             */
-            runningMarginal = true;
-            loadReconToASR();
-            // Set the node label we want to infer.
-            marginalAsr.setNodeLabel(node);
-            // Run the thread
-            recon = new ASRThread(marginalAsr, infer, node, addGraph, logger, loggedInUser,
-                    reconController);
-        }
-        mav.addObject("username", loggedInUser.getUsername());
-        mav.addObject("email", loggedInUser.getEmail());
-
-        return mav;
-    }
 
     /**
      * ---------------------------------------------------------------------------------------------

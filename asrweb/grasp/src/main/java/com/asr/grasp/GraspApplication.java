@@ -356,7 +356,6 @@ public class GraspApplication extends SpringBootServletInitializer {
         // ToDo: Check the obsolete recons
         //reconController.checkObsolete();
         loggedInUser = user;
-        // ToDo
         String err = userController.sendForgotPasswordEmail(user);
         ModelAndView mav = new ModelAndView("forgot_password");
         if (err != null) {
@@ -374,7 +373,12 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/forgot-password", method = RequestMethod.GET)
     public ModelAndView sendPasswordLink(Model model, HttpServletRequest request) {
-        return new ModelAndView("forgot_password");
+        loggedInUser = new UserObject();
+        ModelAndView mav =  new ModelAndView("forgot_password");
+        // ToDo
+        mav.addObject("user", loggedInUser);
+        mav.addObject("email", null);
+        return mav;
     }
 
 
@@ -840,6 +844,22 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
     }
 
+    /**
+     * Show status of reconstruction while asynchronously performing analysis
+     *
+     * @return status of reconstruction
+     */
+    @RequestMapping(value = "/", method = RequestMethod.GET, params = {"request"})
+    public @ResponseBody
+    String showStatus(@RequestParam("request") String request, Model model) throws Exception {
+
+
+        String status = recon.getStatus();
+        if (runningMarginal) {
+            return getStatusFromAsr(status, marginalAsr);
+        }
+        return getStatusFromAsr(status, asr);
+    }
 
     /**
      * Gets the taxonomic ids from the User side.
@@ -884,9 +904,30 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         String nodeLabel = dataJson.getString("nodeLabel");
         String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, Defines.MARGINAL);
+        if (reconstructedAnsc != null) {
+            runningMarginal = false;
+            // Return the reconstructed ancestors
+            return marginalAsr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
+        }
+        if (runningMarginal) {
+            // Check if the reconstruction is complete
+            if (recon != null) {
+                String status = recon.getStatus();
+                if (status.equals("done")) {
+                    runningMarginal = false;
+                    // We want to save this to the DB
+                    JSONObject marginalGraphs = seqController.insertMarginalSeqIntoDb(currRecon.getId(),
+                            marginalAsr.getWorkingNodeLabel(), marginalAsr.getASRPOG(Defines.MARGINAL),
+                            loggedInUser.getId(), Defines.MARGINAL, true);
+                    return marginalAsr
+                            .catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), marginalGraphs);
+                }
+            } else {
+                return "running";
+            }
+        }
 
-
-        if (reconstructedAnsc == null && runningMarginal != true) {
+        if (reconstructedAnsc == null && !runningMarginal) {
             runningMarginal = true;
             loadReconToASR();
             // Set the node label we want to infer.
@@ -894,19 +935,17 @@ public class GraspApplication extends SpringBootServletInitializer {
             // Run the thread
             recon = new ASRThread(marginalAsr, "marginal", nodeLabel, false, logger, loggedInUser,
                     reconController);
-            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, Defines.MARGINAL);
-            return marginalAsr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
+            // Warn the user that the reconstruction is still running
+            System.out.println("Running new marginal");
+            return "running";
 
         } else if (reconstructedAnsc == null && runningMarginal) {
             // Let the user know that the marginal reconstruction is still running.]
             System.out.println("Running marginal");
             return "running";
 
-        } else {
-            runningMarginal = false;
-            // Return the reconstructed ancestors
-            return marginalAsr.catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
         }
+        return "err: Should not reach here. Contact devs.";
     }
 
     /**
@@ -1257,8 +1296,7 @@ public class GraspApplication extends SpringBootServletInitializer {
                     return mav;
                 }
             }
-            // Set the loggedin users email temp
-//            loggedInUser.setEmail(asr.getEmail());
+
             saveCurrReconStartThread();
             ModelAndView mav = accountView.get(loggedInUser, userController);
             mav.addObject("type", "saving");

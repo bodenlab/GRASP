@@ -1,7 +1,13 @@
 /*
 ** Perform marginal reconstruction of the selected tree node
 */
+var currentNodeName = 'N0';
 var perform_marginal = function (node_name) {
+  if (node_name !== undefined) {
+    currentNodeName = node_name;
+  } else if (node_name === undefined) {
+    node_name = currentNodeName;
+  }
   $("#status").text("");
   $('#progress-status').fadeIn();
   $('#progress').removeClass('disable');
@@ -12,7 +18,12 @@ var perform_marginal = function (node_name) {
     type: 'POST',
     dataType: 'json',
     contentType: "application/json",
+    timeout: 2000,
     data: JSON.stringify({'infer': inferType, 'nodeLabel': selectedNode, 'addgraph': false}),
+    error: function() {
+      // Call again to see if the call has been updated
+      setTimeout(perform_marginal, 2000);
+    },
     success: function (data) {
       try {
         // Check if there was an error or if the marginal is still runnning
@@ -21,7 +32,7 @@ var perform_marginal = function (node_name) {
           console.log("error" + data)
         } else if (data === 'running') {
           // This means we're still running our marginal
-          setTimeout(perform_marginal(node_name), 2000);
+          setTimeout(perform_marginal, 2000);
         }
         graph_array = [];
         // if mutant library is selected, display mutant library with the selected number of mutants, else just

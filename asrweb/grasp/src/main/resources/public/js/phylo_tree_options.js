@@ -2,6 +2,9 @@
 ** Perform marginal reconstruction of the selected tree node
 */
 var currentNodeName = 'N0';
+$('#error-modal').on('shown.bs.modal', function () {
+  $('#error-modal').trigger('focus')
+});
 var perform_marginal = function (node_name) {
   if (node_name !== undefined) {
     currentNodeName = node_name;
@@ -20,15 +23,29 @@ var perform_marginal = function (node_name) {
     contentType: "application/json",
     timeout: 2000,
     data: JSON.stringify({'infer': inferType, 'nodeLabel': selectedNode, 'addgraph': false}),
-    error: function() {
-      // Call again to see if the call has been updated
-      setTimeout(perform_marginal, 2000);
-    },
+    error: function(data) {
+        // Check if it is actually an error or if the recon is running
+        if (data.responseText === 'running') {
+          // This means we're still running our marginal
+          setTimeout(perform_marginal, 2000);
+        } else {
+          $('#progress-status').fadeOut();
+          $('#progress').addClass('disable');
+          document.getElementById(
+              "error-modal-text").innerHTML = data.responseText;
+          $('#error-modal').modal('show');
+        }
+      },
     success: function (data) {
       try {
         // Check if there was an error or if the marginal is still runnning
         if (data[0] === 'e') {
           // We have an error so return
+          // Show the error
+          document.getElementById("error-modal-text").innerHTML = data;
+          $('#error-modal').on('shown.bs.modal', function () {
+            $('#error-modal').trigger('focus')
+          });
           console.log("error" + data)
         } else if (data === 'running') {
           // This means we're still running our marginal
@@ -86,7 +103,23 @@ var displayJointGraph = function (node_name, node_fill, reset_graph_call = false
     dataType: 'json',
     contentType: "application/json",
     data: JSON.stringify({joint: true, nodeLabel: node_name, addgraph: reset_graph_call}),
+    error: function(data) {
+      $('#progress-status').fadeOut();
+      $('#progress').addClass('disable');
+      document.getElementById("error-modal-text").innerHTML = data.responseText;
+      $('#error-modal').modal('show');
+    },
     success: function (data) {
+      if (data[0] === 'e') {
+        // We have an error so return
+        // Show the error
+        document.getElementById("error-modal-text").innerHTML = data;
+        $('#error-modal').on('shown.bs.modal', function () {
+          $('#error-modal').trigger('focus')
+        });
+        console.log("error" + data)
+        return;
+      }
       drawMutants = false;
       if (reset_graph_call) {
         graph_array = [];

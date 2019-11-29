@@ -95,11 +95,13 @@ let downloadMarginalTsv = function () {
     let headerDict = {};
     // Create a dictionary of the header information so that if we are missing
     // amino acids we can fill it in with 0
+    let tsvFileStr = "node-id\t";
     for (let h in headerLine) {
-        headerDict[h] = headerLine[h];
+        headerDict[headerLine[h]] = h;
+        tsvFileStr += headerLine[h] + '\t'
     }
+    tsvFileStr += '\n'
     // Check if we have a marginal ancestor in our history
-    let tsvFileStr = "";
       for (let p in poags.single.names) {
         let poag_name = poags.single.names[p];
         let nodes = poags.single.nodes[poag_name];
@@ -107,18 +109,24 @@ let downloadMarginalTsv = function () {
           // Now we want to find out if we have an inferred marginal or joint
           if (poags.single.raw.inferred.metadata.type === 'marginal') {
             for (let n in nodes) {
+              tsvFileStr += n + '\t';
+              let tsvLst = [];
                 for (let h in headerLine) {
-                    // i.e. it's not in our current node graph
-                    if (nodes[n][G_GRAPH][h] === undefined) {
-                        tsvFileStr += '0' + '\t'
-                    } else {
-                       tsvFileStr += nodes[n][G_GRAPH][h] + '\t'
-                    }
+                    tsvLst.push('0');
                 }
-                tsvFileStr += '\n'
+                for (let h in nodes[n][G_GRAPH]) {
+                    // Set the correct position to have the values
+                    tsvLst[headerDict[nodes[n][G_GRAPH][h][0]]] = nodes[n][G_GRAPH][h][1]
+                }
+                tsvFileStr += tsvLst.join('\t') + '\n'
             }
             // Now we want it to automatically download
-            window.location.href = "data:text/tab-separated-values," + encodeURIComponent(tsvFileStr);
+            let link = document.createElement("a");
+            let utc = new Date().toJSON().slice(0,10).replace(/-/g,'-');
+            // ToDo: Add in the recon name it would be nicer.
+            link.download =  poag_name + '_' + utc + '.tsv';
+            link.href = "data:text/tab-separated-values," + encodeURIComponent(tsvFileStr);
+            link.click();
           } else {
               // i.e. the current is a joint.
             console.log("Error no marginal recon.");

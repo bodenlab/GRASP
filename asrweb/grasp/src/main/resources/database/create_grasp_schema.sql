@@ -165,6 +165,7 @@ CREATE TABLE IF NOT EXISTS web.inferences
     references web.reconstructions,
   node_label varchar not null,
   inference varchar not null,
+  i_type integer,
   updated_at timestamp with time zone default timezone('AEST'::text, now())
 )
 ;

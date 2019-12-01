@@ -143,11 +143,6 @@ public class UserController {
         // First we need to set the users ID
         getId(user);
         user.setConfirmationToken(usersModel.generateId().toString());
-        System.out.println(user.getConfirmationToken());
-        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
-        // ToDO: REMOVE THIS ARIANE
-        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
-
         String err = usersModel.resetPassword(user.getId(), user.getConfirmationToken());
         if (err != null) {
             return err;
@@ -178,11 +173,6 @@ public class UserController {
         EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.REGISTRATION);
         email.setContent("http://grasp.scmb.uq.edu.au/confirm-registration", user.getConfirmationToken());
         String emailSent = emailController.sendEmail(email);
-        System.out.println(user.getConfirmationToken());
-        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
-        // ToDO: REMOVE THIS ARIANE
-        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
-
         user.setConfirmationToken(null);
         // Check if we were actually able to send the registration email.
         // If we weren't we need to not add the user

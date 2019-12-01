@@ -29,6 +29,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -242,6 +243,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         // CHeck that err wasn't try
         if (errSave != null) {
             mav.addObject("warning", errSave);
+
         } else {
             mav.addObject("warning", null);
         }
@@ -283,6 +285,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // If they were able to have their token confirmed lets chekc theur passwords met the reqs.
         String err = userController.setPassword(user);
+        user.setPassword(null);
         if (err != null) {
             user.setPassword(null);
             mav.addObject("error", "error: Your password didn't pass our "
@@ -316,13 +319,17 @@ public class GraspApplication extends SpringBootServletInitializer {
         ModelAndView mav = new ModelAndView("reset_password_confirmation");
         if (confirmed != null) {
             mav.addObject("warning", confirmed);
+            mav.addObject("error", "error: Your confirmation token was"
+                    + " incorrect. Please try again. If this issue persists please contact us.");
             return mav;
         }
-        // Otherwise lets try and add the user
+        // If they were able to have their token confirmed lets chekc theur passwords met the reqs.
         String err = userController.setPassword(user);
-        // Remove the user's password
         user.setPassword(null);
         if (err != null) {
+            user.setPassword(null);
+            mav.addObject("error", "error: Your password didn't pass our "
+                    + "standards, please set a stronger one (or less than 32 characters): " + err);
             mav.addObject("warning", err);
             return mav;
         }
@@ -982,7 +989,14 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Check if this is a default reconstruction
         if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
-            return seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
+            String reconstructedAnsc =  seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
+            if (reconstructedAnsc != null) {
+                return asr
+                        .catGraphJSONBuilder(new JSONObject(currRecon.getMsa()),
+                                new JSONObject(reconstructedAnsc));
+            } else {
+                return "err: Sorry the joint hasn't been created for that node. Please let one of our team know. Thank you!";
+            }
         }
         // First check if the reconstruction has been saved - if not they can't run a marginal
         if (currRecon.getId() == Defines.UNINIT) {

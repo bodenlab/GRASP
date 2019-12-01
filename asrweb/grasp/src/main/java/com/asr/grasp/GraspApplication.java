@@ -274,11 +274,19 @@ public class GraspApplication extends SpringBootServletInitializer {
             mav.addObject("warning", confirmed);
             return mav;
         }
+        // If they were able to have their token confirmed lets chekc theur passwords met the reqs.
+        String err = userController.setPassword(user);
+        if (err != null) {
+            mav.addObject("warning", err);
+            return mav;
+        }
+        // Otherwise we
         loggedInUser = user;
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
 
-        return new ModelAndView("set_password");
+        // ToDo: Autologin
+        return new ModelAndView("login");
     }
 
     @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.GET)
@@ -290,55 +298,29 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.POST)
     public ModelAndView resetPasswordConfirmation(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) {
+
         model.addAttribute("user", loggedInUser);
-        return new ModelAndView("set_password");
-    }
-
-
-    /**
-     * Allows the user to set their password if they are already logged in or have provided
-     * a correct login token.
-     *
-     * @param user
-     * @param bindingResult
-     * @param model
-     * @param request
-     * @return
-     */
-    @RequestMapping(value = "/set-password", method = RequestMethod.POST)
-    public ModelAndView setPassword(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
-        // ToDo: Check the obsolete recons
-        //reconController.checkObsolete();
-        user.setUsername(loggedInUser.getUsername());
-        loggedInUser = user;
+        // First check they have the correct token
+        String confirmed = userController.confirmRegistration(user);
+        ModelAndView mav = new ModelAndView("reset_password_confirmation");
+        if (confirmed != null) {
+            mav.addObject("warning", confirmed);
+            return mav;
+        }
+        // Otherwise lets try and add the user
         String err = userController.setPassword(user);
-        ModelAndView mav = new ModelAndView("set_password");
+
         if (err != null) {
             mav.addObject("warning", err);
             return mav;
         }
+        // The user was able to be logged in so lets make them log in again toDo: Default login.
         loggedInUser = user;
 
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
         // ToDo
         return new ModelAndView("login");
-    }
-
-
-    /**
-     * @return
-     */
-    @RequestMapping(value = "/set-password", method = RequestMethod.GET)
-    public ModelAndView setPassword(Model model, HttpServletRequest request) {
-        // ToDo: Check the obsolete recons
-        //reconController.checkObsolete();
-        loggedInUser = new UserObject();
-        // ToDo
-        model.addAttribute("user", loggedInUser);
-        model.addAttribute("email", null);
-        return new ModelAndView("set_password");
     }
 
     /**

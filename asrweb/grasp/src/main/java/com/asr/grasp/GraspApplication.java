@@ -151,17 +151,22 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Register the user
         String err = userController.register(user, userController.getAConfirmationToken());
+        ModelAndView mav = new ModelAndView("register");
+
         if (err != null) {
             bindingResult.rejectValue("username", "user.username.duplicate");
-
-            return new ModelAndView("register");
+            mav.addObject("error", err);
+            return mav;
         }
 
         // Send the confirmation email
-        userController.sendRegistrationEmail(user);
+        err = userController.sendRegistrationEmail(user);
         if (err != null) {
-            // ToDo: Probably should add an error here
-            return new ModelAndView("register");
+            // Here we need to delete the user we just added as their email was obviously incorrect
+            // Otherwise we're going to get users that aren't actually added.
+            // ToDo: Remove the user? i.e. set the user to be OK?
+            mav.addObject("error", err);
+            return mav;
         }
 
         loggedInUser = user;
@@ -272,15 +277,21 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (confirmed != null) {
             mav.addObject("warning", confirmed);
+            mav.addObject("error", "error: Your confirmation token was"
+                    + " incorrect. Please try again. If this issue persists please contact us.");
             return mav;
         }
         // If they were able to have their token confirmed lets chekc theur passwords met the reqs.
         String err = userController.setPassword(user);
         if (err != null) {
+            user.setPassword(null);
+            mav.addObject("error", "error: Your password didn't pass our "
+                    + "standards, please set a stronger one (or less than 32 characters): " + err);
             mav.addObject("warning", err);
             return mav;
         }
-        // Otherwise we
+        // Otherwise we set the users password to be null
+        user.setPassword(null);
         loggedInUser = user;
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
@@ -309,17 +320,16 @@ public class GraspApplication extends SpringBootServletInitializer {
         }
         // Otherwise lets try and add the user
         String err = userController.setPassword(user);
-
+        // Remove the user's password
+        user.setPassword(null);
         if (err != null) {
             mav.addObject("warning", err);
             return mav;
         }
         // The user was able to be logged in so lets make them log in again toDo: Default login.
-        loggedInUser = user;
-
+        loggedInUser = new UserObject();
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
-        // ToDo
         return new ModelAndView("login");
     }
 
@@ -335,8 +345,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/forgot-password", method = RequestMethod.POST)
     public ModelAndView sendPasswordLink(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) throws AddressException {
-        // ToDo: Check the obsolete recons
-        //reconController.checkObsolete();
+
         loggedInUser = user;
         ModelAndView mav =  new ModelAndView("forgot_password");
         // ToDo
@@ -345,10 +354,14 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Check they didn't set a null username
         if (user.getUsername().equals(null) || user.getUsername().length() < 2) {
             mav.addObject("warning", "Username can't be null or is too short.");
+            mav.addObject("error", "Username can't be null or is too short.");
+            return mav;
+
         }
+
         String err = userController.sendForgotPasswordEmail(user);
         if (err != null) {
-            mav.addObject("warning", err);
+            mav.addObject("error", "error: Unable to send email: " + err);
             return mav;
         }
         return new ModelAndView("reset_password_confirmation");
@@ -883,7 +896,11 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/getmarginalrecon" , method = RequestMethod.POST)
     public @ResponseBody String getMarginalRecon(@RequestBody String jsonString) {
-
+        // Check if this is a default reconstruction
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
+            return "err: Sorry since this is a default reconstruction we don't have the marginals "
+                    + "recorded. Please login and create a reconstruction and try this feature then.";
+        }
         // First check if the reconstruction has been saved - if not they can't run a marginal
         if (currRecon.getId() == Defines.UNINIT) {
             return "err: You need to save your reconstruction first";

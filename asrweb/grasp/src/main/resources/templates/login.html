@@ -36,6 +36,8 @@
       <div class="form-group row">
         <p class="small">Forgot your password? Reset it here: <a href="/forgot-password">Reset password</a></p>
       </div>
+      <small class="form-text text-danger"
+             th:text="${error}">Error</small>
       <div class="form-group row">
         <p class="small">Not a user? <a href="/register">Register</a></p>
       </div>

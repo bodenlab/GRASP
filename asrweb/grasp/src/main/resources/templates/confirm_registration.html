@@ -51,9 +51,12 @@
         <small class="form-text text-danger" th:each="error : ${#fields.errors('passwordMatch')}"
                th:text="${error}">Validation error</small>
       </div>
+      <small class="form-text text-danger"
+             th:text="${error}">Error</small>
       <div class="form-group row">
         <button type="submit" class="btn btn-primary col-sm-4">Submit</button>
       </div>
+
       <div class="form-group row">
         <p class="small">Not a user? <a href="/register">Register</a></p>
       </div>

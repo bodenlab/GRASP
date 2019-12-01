@@ -130,6 +130,15 @@ let downloadMarginalTsv = function () {
           } else {
               // i.e. the current is a joint.
             console.log("Error no marginal recon.");
+            document.getElementById("error-modal-text").innerHTML = "Error: "
+                + "You didn't have a marginal reconstruction selected. "
+                + "Please choose 'View marginal reconstruction ' from one of "
+                + " the nodes in the tree. When this is in your viewer below you"
+                + " can then download the TSV of the marginal distribution for "
+                + "that  reconstructed node.";
+            $('#error-modal').on('shown.bs.modal', function () {
+              $('#error-modal').trigger('focus')
+            });
           }
         }
 

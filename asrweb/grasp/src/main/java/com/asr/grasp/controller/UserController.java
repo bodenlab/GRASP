@@ -143,6 +143,11 @@ public class UserController {
         // First we need to set the users ID
         getId(user);
         user.setConfirmationToken(usersModel.generateId().toString());
+        System.out.println(user.getConfirmationToken());
+        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
+        // ToDO: REMOVE THIS ARIANE
+        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
+
         String err = usersModel.resetPassword(user.getId(), user.getConfirmationToken());
         if (err != null) {
             return err;
@@ -152,11 +157,11 @@ public class UserController {
                     Defines.FORGOT_PASSWORD);
             email.setContent("http://grasp.scmb.uq.edu.au/reset-password-confirmation",
                     user.getConfirmationToken());
-            emailController.sendEmail(email);
+            String emailSent = emailController.sendEmail(email);
             user.setConfirmationToken(null);
             // Reset the ID to be undefined (it will get reset when they log back in)
             user.setId(Defines.UNINIT);
-            return null;
+            return emailSent;
         } catch (Exception e) {
             // This means the email failed we want to notify the user
             return "Sending email failed. Please contact the administrators or make sure your email is correct.";
@@ -169,14 +174,19 @@ public class UserController {
      *
      * @param user
      */
-    public void sendRegistrationEmail(UserObject user) throws AddressException {
+    public String sendRegistrationEmail(UserObject user) throws AddressException {
         EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.REGISTRATION);
         email.setContent("http://grasp.scmb.uq.edu.au/confirm-registration", user.getConfirmationToken());
-        emailController.sendEmail(email);
-        user.setConfirmationToken(null);
+        String emailSent = emailController.sendEmail(email);
+        System.out.println(user.getConfirmationToken());
+        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
+        // ToDO: REMOVE THIS ARIANE
+        // ToDo: '''''''''''''''''''''''''''''''''''''''''''''
 
-        // We remove the password
-//        user.setEmail(null);
+        user.setConfirmationToken(null);
+        // Check if we were actually able to send the registration email.
+        // If we weren't we need to not add the user
+        return emailSent;
     }
 
     /**
@@ -185,11 +195,11 @@ public class UserController {
     public String confirmRegistration(UserObject user) {
         // Register the user
         String err = usersModel.loginUser(user.getUsername(), user.getConfirmationToken());
-        // We remove the password
-        user.setPassword(null);
-        user.setConfirmationToken(null);
 
         if (err != null) {
+            // We remove the password and confirmation token
+            user.setPassword(null);
+            user.setConfirmationToken(null);
             return err;
         }
 

@@ -31,6 +31,9 @@ public class SaveController implements Runnable {
     EmailController emailController;
     UserController userController;
     TreeController treeController;
+    String errorMessage = null; // An internal variable used to store any of the errors encounterd.
+    // Access this error message when we are finished and return the value to the user if this was
+    // the case.
 
     private ReconstructionObject currRecon;
     private UserObject user;
@@ -198,7 +201,11 @@ public class SaveController implements Runnable {
             // Now we want to send an email notifying the user that their reconstruction is complete
             EmailObject email = new EmailObject(user.getUsername(), user.getEmail(), Defines.RECONSTRUCTION);
             email.setContent(currRecon.getLabel());
-            emailController.sendEmail(email);
+            String emailErr = emailController.sendEmail(email);
+            // ToDo: ------------ Gabe you may want to send yourself an email here since sending
+            // ToDo: ------------ an email to the person failed.
+            System.out.println("Email sending err.");
+            errorMessage = "error: Failed to send email. " + emailErr;
             isSaving = false;
         } catch (Exception e) {
             try {
@@ -206,26 +213,21 @@ public class SaveController implements Runnable {
                 EmailObject email = new EmailObject(user.getUsername(), user.getEmail(),
                         Defines.RECONSTRUCTION);
                 email.setContentError(currRecon.getLabel(), e.getMessage() + " " + e.getLocalizedMessage());
-                emailController.sendEmail(email);
+                String emailErr = emailController.sendEmail(email);
+                errorMessage = "error: Failed to send email. " + emailErr;
+
             } catch (Exception e2) {
                 System.out.println("Couldn't send the error email: " + e2.getStackTrace());
             }
+            // ToDo: ------------ Here we probably want to use fail to send an email or
+            // ------------------ set it as some inner variable that we can access once the thread is
+            // done.
             System.out.println("Couldn't run the saving thread: " + e.getStackTrace());
             isSaving = false;
+            errorMessage = "error: in the saving thread: " + e.getStackTrace() + e.getMessage();
+
         }
-
-        long endTime = System.currentTimeMillis();
-
-        long timeElapsed = ((endTime - startTime)/1000);
-        try {
-            Files.write(Paths.get(loggingDir + "/time_full_saving_log_17052019.csv"), (currRecon.getLabel() + "," + timeElapsed + "," + asr.getNumberSequences() + "," + asr.getNumberAlnCols() + "," + asr.getNumberBases() + "," + asr.getNumberDeletedNodes() + "," + asr.getNumberThreads() + "\n").getBytes(), StandardOpenOption.APPEND);
-
-        } catch (IOException e) {
-            System.out.println("Unable to print to stats file: time_full_saving_log_17052019.csv" + loggingDir);
-            //exception handling left as an exercise for the reader
-        }
-
-                // Set asr & all other variables to null so that GC knows to clean this up.
+        // Set asr & all other variables to null so that GC knows to clean this up.
         asr = null;
         reconController = null;
         seqController = null;

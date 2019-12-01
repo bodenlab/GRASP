@@ -24,7 +24,7 @@
                 are saving it), or to let you know when we do maintenance on the server.
                 </p>
                 <p>
-                    Note your username will be wh you use to login so make it something unique and easy to remember.
+                    Note your username will be what you use to login so make it something unique and easy to remember.
                 </p>
             </div>
             <div class="form-group row">
@@ -39,7 +39,8 @@
                 <small class="form-text text-danger" th:each="error: ${#fields.errors('username')}"
                        th:text="${error}">Validation error</small>
             </div>
-
+            <small class="form-text text-danger"
+                   th:text="${error}">Error</small>
             <div class="form-group row">
                 <button type="submit" class="btn btn-primary col-sm-4">Register</button>
             </div>

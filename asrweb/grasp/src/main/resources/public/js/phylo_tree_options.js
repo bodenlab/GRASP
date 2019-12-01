@@ -147,7 +147,7 @@ var displayJointGraph = function (node_name, node_fill, reset_graph_call = false
         setup_poags(dataToProcess, true, false, false, node_name);
         redraw_poags();
       } else {
-        poags = process_poags_joint(data, poags, false, false, false, node_name);
+        poags = process_poags_joint(data.bottom, poags, false, false, false, node_name);
         //var new_graph = fuse_multipleGraphs(graph_array);
         //setup_poags(new_graph, false, false, true, 'Merged');
       }

@@ -31,8 +31,32 @@
                th:text="${error}">Validation error</small>
       </div>
       <div class="form-group row">
+        <h2>Please set your password</h2>
+        <p>
+          Thank you for registering. Please take a moment to choose a
+          strong password - preferably one you don't use else where. Passwords must be between 8-32 characters
+          and contain a number and a letter.
+          (This page will keep on appearing if you have an insufficient password).
+        </p>
+      </div>
+      <div class="form-group row">
+        <label for="password">Password</label>
+        <input class="form-control" type="password" id="password" placeholder="Password" th:field="*{password}"/>
+        <small class="form-text text-danger" th:each="error : ${#fields.errors('password')}"
+               th:text="${error}">Validation error</small>
+      </div>
+      <div class="form-group row">
+        <label for="retypepassword">Retype Password</label>
+        <input class="form-control" type="password" id="retypepassword" placeholder="Password" th:field="*{passwordMatch}"/>
+        <small class="form-text text-danger" th:each="error : ${#fields.errors('passwordMatch')}"
+               th:text="${error}">Validation error</small>
+      </div>
+      <small class="form-text text-danger"
+             th:text="${error}">Error</small>
+      <div class="form-group row">
         <button type="submit" class="btn btn-primary col-sm-4">Submit</button>
       </div>
+
       <div class="form-group row">
         <p class="small">Not a user? <a href="/register">Register</a></p>
       </div>

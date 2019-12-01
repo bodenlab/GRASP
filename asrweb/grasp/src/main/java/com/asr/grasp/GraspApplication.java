@@ -29,6 +29,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -151,17 +152,22 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         // Register the user
         String err = userController.register(user, userController.getAConfirmationToken());
+        ModelAndView mav = new ModelAndView("register");
+
         if (err != null) {
             bindingResult.rejectValue("username", "user.username.duplicate");
-
-            return new ModelAndView("register");
+            mav.addObject("error", err);
+            return mav;
         }
 
         // Send the confirmation email
-        userController.sendRegistrationEmail(user);
+        err = userController.sendRegistrationEmail(user);
         if (err != null) {
-            // ToDo: Probably should add an error here
-            return new ModelAndView("register");
+            // Here we need to delete the user we just added as their email was obviously incorrect
+            // Otherwise we're going to get users that aren't actually added.
+            // ToDo: Remove the user? i.e. set the user to be OK?
+            mav.addObject("error", err);
+            return mav;
         }
 
         loggedInUser = user;
@@ -237,6 +243,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         // CHeck that err wasn't try
         if (errSave != null) {
             mav.addObject("warning", errSave);
+
         } else {
             mav.addObject("warning", null);
         }
@@ -272,13 +279,28 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (confirmed != null) {
             mav.addObject("warning", confirmed);
+            mav.addObject("error", "error: Your confirmation token was"
+                    + " incorrect. Please try again. If this issue persists please contact us.");
             return mav;
         }
+        // If they were able to have their token confirmed lets chekc theur passwords met the reqs.
+        String err = userController.setPassword(user);
+        user.setPassword(null);
+        if (err != null) {
+            user.setPassword(null);
+            mav.addObject("error", "error: Your password didn't pass our "
+                    + "standards, please set a stronger one (or less than 32 characters): " + err);
+            mav.addObject("warning", err);
+            return mav;
+        }
+        // Otherwise we set the users password to be null
+        user.setPassword(null);
         loggedInUser = user;
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
 
-        return new ModelAndView("set_password");
+        // ToDo: Autologin
+        return new ModelAndView("login");
     }
 
     @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.GET)
@@ -290,55 +312,32 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/reset-password-confirmation", method = RequestMethod.POST)
     public ModelAndView resetPasswordConfirmation(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) {
+
         model.addAttribute("user", loggedInUser);
-        return new ModelAndView("set_password");
-    }
-
-
-    /**
-     * Allows the user to set their password if they are already logged in or have provided
-     * a correct login token.
-     *
-     * @param user
-     * @param bindingResult
-     * @param model
-     * @param request
-     * @return
-     */
-    @RequestMapping(value = "/set-password", method = RequestMethod.POST)
-    public ModelAndView setPassword(@Valid @ModelAttribute("user") UserObject user,
-            BindingResult bindingResult, Model model, HttpServletRequest request) {
-        // ToDo: Check the obsolete recons
-        //reconController.checkObsolete();
-        user.setUsername(loggedInUser.getUsername());
-        loggedInUser = user;
+        // First check they have the correct token
+        String confirmed = userController.confirmRegistration(user);
+        ModelAndView mav = new ModelAndView("reset_password_confirmation");
+        if (confirmed != null) {
+            mav.addObject("warning", confirmed);
+            mav.addObject("error", "error: Your confirmation token was"
+                    + " incorrect. Please try again. If this issue persists please contact us.");
+            return mav;
+        }
+        // If they were able to have their token confirmed lets chekc theur passwords met the reqs.
         String err = userController.setPassword(user);
-        ModelAndView mav = new ModelAndView("set_password");
+        user.setPassword(null);
         if (err != null) {
+            user.setPassword(null);
+            mav.addObject("error", "error: Your password didn't pass our "
+                    + "standards, please set a stronger one (or less than 32 characters): " + err);
             mav.addObject("warning", err);
             return mav;
         }
-        loggedInUser = user;
-
-        model.addAttribute("user", loggedInUser);
-        model.addAttribute("email", null);
-        // ToDo
-        return new ModelAndView("login");
-    }
-
-
-    /**
-     * @return
-     */
-    @RequestMapping(value = "/set-password", method = RequestMethod.GET)
-    public ModelAndView setPassword(Model model, HttpServletRequest request) {
-        // ToDo: Check the obsolete recons
-        //reconController.checkObsolete();
+        // The user was able to be logged in so lets make them log in again toDo: Default login.
         loggedInUser = new UserObject();
-        // ToDo
         model.addAttribute("user", loggedInUser);
         model.addAttribute("email", null);
-        return new ModelAndView("set_password");
+        return new ModelAndView("login");
     }
 
     /**
@@ -353,8 +352,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     @RequestMapping(value = "/forgot-password", method = RequestMethod.POST)
     public ModelAndView sendPasswordLink(@Valid @ModelAttribute("user") UserObject user,
             BindingResult bindingResult, Model model, HttpServletRequest request) throws AddressException {
-        // ToDo: Check the obsolete recons
-        //reconController.checkObsolete();
+
         loggedInUser = user;
         ModelAndView mav =  new ModelAndView("forgot_password");
         // ToDo
@@ -363,10 +361,14 @@ public class GraspApplication extends SpringBootServletInitializer {
         // Check they didn't set a null username
         if (user.getUsername().equals(null) || user.getUsername().length() < 2) {
             mav.addObject("warning", "Username can't be null or is too short.");
+            mav.addObject("error", "Username can't be null or is too short.");
+            return mav;
+
         }
+
         String err = userController.sendForgotPasswordEmail(user);
         if (err != null) {
-            mav.addObject("warning", err);
+            mav.addObject("error", "error: Unable to send email: " + err);
             return mav;
         }
         return new ModelAndView("reset_password_confirmation");
@@ -540,7 +542,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
 
     private ModelAndView loadRecon() {
-
 
         // Otherwise we want to set this for the user.
         userController.setCurrRecon(currRecon, loggedInUser);
@@ -902,7 +903,11 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/getmarginalrecon" , method = RequestMethod.POST)
     public @ResponseBody String getMarginalRecon(@RequestBody String jsonString) {
-
+        // Check if this is a default reconstruction
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
+            return "err: Sorry since this is a default reconstruction we don't have the marginals "
+                    + "recorded. Please login and create a reconstruction and try this feature then.";
+        }
         // First check if the reconstruction has been saved - if not they can't run a marginal
         if (currRecon.getId() == Defines.UNINIT) {
             return "err: You need to save your reconstruction first";
@@ -969,13 +974,12 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/getrecon" , method = RequestMethod.POST)
     public @ResponseBody String getRecon(@RequestBody String jsonString) {
-        // First check if the reconstruction has been saved - if not they can't run a marginal
-        if (currRecon.getId() == Defines.UNINIT) {
-            return "err: You need to save your reconstruction first";
-        }
-        JSONObject dataJson = new JSONObject(jsonString);
+        // Check if this is the default reconstruction
         // Check if we have anything to save
         int reconMethod = Defines.JOINT;
+        JSONObject dataJson = new JSONObject(jsonString);
+        String nodeLabel = dataJson.getString("nodeLabel");
+
         if ((Boolean)dataJson.get("joint") != true) {
             reconMethod = Defines.MARGINAL;
         }
@@ -983,28 +987,26 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
 
-        String nodeLabel = dataJson.getString("nodeLabel");
-        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
-
-        if (reconstructedAnsc == null) {
-            // This means we weren't able to find it in the DB so we need to run the recon as usual
-            // If this recon has an ID i.e. the user has saved it before then save this recon.
-            if (currRecon.getId() != Defines.UNINIT) {
-                seqController.insertSeqIntoDb(currRecon.getId(), nodeLabel, asr.getASRPOG(reconMethod), loggedInUser.getId(), reconMethod, true);
-
+        // Check if this is a default reconstruction
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
+            String reconstructedAnsc =  seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
+            if (reconstructedAnsc != null) {
+                return asr
+                        .catGraphJSONBuilder(new JSONObject(currRecon.getMsa()),
+                                new JSONObject(reconstructedAnsc));
+            } else {
+                return "err: Sorry the joint hasn't been created for that node. Please let one of our team know. Thank you!";
             }
-            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
-
-            return reconstructedAnsc;
         }
-
-        // Here we want to update the one in the database so that we don't have to re-do this do for
-        //return c.getAsJson().toString();
-
-        // Add to the reconstructed ancestors for saving
-        reconstructedNodes.add(new JSONObject(reconstructedAnsc));
-
-        return reconstructedAnsc;
+        // First check if the reconstruction has been saved - if not they can't run a marginal
+        if (currRecon.getId() == Defines.UNINIT) {
+            return "err: You need to save your reconstruction first";
+        }
+        // Ensure that the reconstruction type is set to joint
+        asr.setInferenceType("joint");
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
+        return asr
+                .catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
     }
 
     /**

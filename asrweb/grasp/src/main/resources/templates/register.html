@@ -39,7 +39,8 @@
                 <small class="form-text text-danger" th:each="error: ${#fields.errors('username')}"
                        th:text="${error}">Validation error</small>
             </div>
-
+            <small class="form-text text-danger"
+                   th:text="${error}">Error</small>
             <div class="form-group row">
                 <button type="submit" class="btn btn-primary col-sm-4">Register</button>
             </div>

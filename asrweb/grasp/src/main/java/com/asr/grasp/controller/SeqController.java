@@ -58,32 +58,6 @@ public class SeqController {
     private  ConsensusController consensusController;
 
     /**
-     * Helper function that prints the memory usage to a file
-     */
-    private long[] printStats(FileWriter fr, String label, double time, long prevTotal, long prevFree) {
-        Runtime rt = Runtime.getRuntime();
-        long total = rt.totalMemory();
-        long free = rt.freeMemory();
-        long used = total - free;
-        if (prevTotal != 0) {
-            try {
-                fr.write(label + ",consensus," + time +
-                        "," + total +
-                        "," + used +
-                        "," + free + "\n");
-                System.out.println(label + " saved");
-            } catch (Exception e) {
-                System.out.println(label + "," + time +
-                        "," + total +
-                        "," + used +
-                        "," + free + "\n");
-            }
-        }
-        long[] vals = {total, free};
-        return vals;
-    }
-
-    /**
      * Helper function to allow us to insert an updated inference into the database.
      * @param reconId
      * @param label
@@ -93,20 +67,6 @@ public class SeqController {
         boolean updated = infModel.updateInference(reconId, label, ancsStr, infType);
         // Check whether this was updated sucessfully.
     }
-
-
-//    /**
-//     * Update the sequence in the database.
-//     *
-//     * @param reconId
-//     * @param label
-//     * @param seq
-//     * @param gappy
-//     */
-//    public void updateDBSequence(int reconId, String label, String seq, boolean gappy) {
-//        boolean updated = seqModel.updateConsensusSeq(reconId, label, seq, gappy, Defines.JOINT);
-//        // Do something here and choose whether this has been updated correctly.
-//    }
 
     /**
      * Inserts all the joint reconstructions into the database.
@@ -119,17 +79,7 @@ public class SeqController {
      */
     public List<String> insertSpecificJointsToDB(int reconId, ASRPOG asrInstance, boolean gappy, ArrayList<String> toSave, int userId, String reconLabel) {
         List<String> insertedLabels = new ArrayList<>();
-        BufferedWriter bw = null;
-        try {
-            bw = new BufferedWriter(
-                    new FileWriter(loggingDir + reconLabel + "_" + reconId
-                            + "_rid_stats_saving_consensus.csv", false));
-            bw.write("Label,Time (ms), Num Children\n");
-        } catch (Exception e) {
-            System.out.println("Unable to open logging file:" + loggingDir + reconLabel + "_" + reconId
-                    + "_rid_stats_saving_consensus.csv" );
 
-        }
         for (String label : toSave) {
             long startTime = System.currentTimeMillis();
             System.out.println("Running " + label);
@@ -157,18 +107,10 @@ public class SeqController {
             // Also want to update the Joint sequence
             inserted = seqModel.insertIntoDb(reconId, label, supportedSeq, Defines.JOINT,
                     gappy);
-            long endTime = System.currentTimeMillis();
-            long duration = (endTime - startTime);
-            if (bw != null) {
-                try {
-                    bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
-                } catch (Exception e) {
-                    System.out.println("Unable to write to logging file.");
-                }
-            }
+
         }
         System.out.println("\n Finished Inserting Joint recons.");
-//            bw.close();
+
         return insertedLabels;
     }
 
@@ -185,18 +127,6 @@ public class SeqController {
         List<String> insertedLabels = new ArrayList<>();
         List<String> labels = asrInstance.getAncestralSeqLabels();
         TreeObject tree = consensusController.getEdgeMapping(reconId, userId, asrInstance.getPogAlignment());
-        BufferedWriter bw = null;
-
-        try {
-            bw = new BufferedWriter(
-                    new FileWriter(loggingDir +  "ALL_" + reconId
-                            + "_rid_stats_saving_consensus.csv", false));
-            bw.write("Label,Time (ms), Num Children\n");
-        } catch (Exception e) {
-            System.out.println("Unable to open logging file:" + loggingDir  + "ALL_" + reconId
-                    + "_rid_stats_saving_consensus.csv" );
-
-        }
         TreeNodeObject node;
 
         for (String label: labels) {
@@ -219,25 +149,6 @@ public class SeqController {
             if (!inserted) {
                 return null;
             }
-             /*
-                 Old METHOD: UNCOMMENT ONCE UPDATED:
-
-                boolean inserted = infModel.insertIntoDb(reconId, label, ancsStr);
-                if (! inserted) {
-                    return null;
-                }
-                inserted = seqModel.insertIntoDb(reconId, label, ancsJson.getConsensusSeq(), Defines.JOINT, gappy);
-            */
-            long endTime = System.currentTimeMillis();
-            long duration = (endTime - startTime);
-            if (bw != null) {
-                try {
-                    bw.write(label + "," + duration + "," + node.getNumSeqsUnderNode() + "\n");
-                } catch (Exception e) {
-                    System.out.println("Unable to write to logging file.");
-                }
-            }
-
         }
         System.out.println("***********************************************");
         System.out.println("\n Finished Inserting Joint recons: ALL HAVE BEEN INSERTED.");

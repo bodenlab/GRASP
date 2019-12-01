@@ -91,15 +91,20 @@ public class EmailController {
      *
      * @param email
      */
-    public void sendEmail(EmailObject email) throws AddressException {
+    public String sendEmail(EmailObject email) throws AddressException {
 
         MimeMessagePreparator preparator = getMessagePreparator(email);
         mailSender = getMailSender();
         try {
             mailSender.send(preparator);
             System.out.println("Message Sent");
+            return null;
         } catch (MailException ex) {
-            System.err.println(ex.getMessage());
+            // This way the user has an informative email sent to them.
+            return "error: Unable to send email to username: " + email.getUsername() +
+                    " and email: " + email.getEmail() + " . Please check your email. "
+                    + "If this problem persists please let us know as maybe our email server "
+                    + "is down. Thank you!";
         }
     }
 

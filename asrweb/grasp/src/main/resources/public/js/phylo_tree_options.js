@@ -21,11 +21,13 @@ var perform_marginal = function (node_name) {
     type: 'POST',
     dataType: 'json',
     contentType: "application/json",
-    timeout: 2000,
+    timeout: 10000,
     data: JSON.stringify({'infer': inferType, 'nodeLabel': selectedNode, 'addgraph': false}),
     error: function(data) {
         // Check if it is actually an error or if the recon is running
-        if (data.responseText === 'running') {
+        // If we get an undefined it means that the thread started for running the marginal
+        // reconstruction.
+        if (data.responseText === 'running' || data.responseText === undefined) {
           // This means we're still running our marginal
           setTimeout(perform_marginal, 2000);
         } else {
@@ -141,7 +143,7 @@ var displayJointGraph = function (node_name, node_fill, reset_graph_call = false
 
         let dataToProcess = {};
         dataToProcess.top = poags.single.raw.msa;
-        dataToProcess.bottom = data;
+        dataToProcess.bottom = data.bottom;
         setup_poags(dataToProcess, true, false, false, node_name);
         redraw_poags();
       } else {

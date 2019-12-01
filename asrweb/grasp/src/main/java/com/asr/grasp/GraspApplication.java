@@ -541,7 +541,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
     private ModelAndView loadRecon() {
 
-
         // Otherwise we want to set this for the user.
         userController.setCurrRecon(currRecon, loggedInUser);
 
@@ -969,13 +968,12 @@ public class GraspApplication extends SpringBootServletInitializer {
      */
     @RequestMapping(value = "/getrecon" , method = RequestMethod.POST)
     public @ResponseBody String getRecon(@RequestBody String jsonString) {
-        // First check if the reconstruction has been saved - if not they can't run a marginal
-        if (currRecon.getId() == Defines.UNINIT) {
-            return "err: You need to save your reconstruction first";
-        }
-        JSONObject dataJson = new JSONObject(jsonString);
+        // Check if this is the default reconstruction
         // Check if we have anything to save
         int reconMethod = Defines.JOINT;
+        JSONObject dataJson = new JSONObject(jsonString);
+        String nodeLabel = dataJson.getString("nodeLabel");
+
         if ((Boolean)dataJson.get("joint") != true) {
             reconMethod = Defines.MARGINAL;
         }
@@ -983,28 +981,19 @@ public class GraspApplication extends SpringBootServletInitializer {
             return "You need to have a label.";
         }
 
-        String nodeLabel = dataJson.getString("nodeLabel");
-        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
-
-        if (reconstructedAnsc == null) {
-            // This means we weren't able to find it in the DB so we need to run the recon as usual
-            // If this recon has an ID i.e. the user has saved it before then save this recon.
-            if (currRecon.getId() != Defines.UNINIT) {
-                seqController.insertSeqIntoDb(currRecon.getId(), nodeLabel, asr.getASRPOG(reconMethod), loggedInUser.getId(), reconMethod, true);
-
-            }
-            reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
-
-            return reconstructedAnsc;
+        // Check if this is a default reconstruction
+        if (Defines.EXAMPLE_RECONSTRUCTIONS.contains(asr.getData())) {
+            return seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
         }
-
-        // Here we want to update the one in the database so that we don't have to re-do this do for
-        //return c.getAsJson().toString();
-
-        // Add to the reconstructed ancestors for saving
-        reconstructedNodes.add(new JSONObject(reconstructedAnsc));
-
-        return reconstructedAnsc;
+        // First check if the reconstruction has been saved - if not they can't run a marginal
+        if (currRecon.getId() == Defines.UNINIT) {
+            return "err: You need to save your reconstruction first";
+        }
+        // Ensure that the reconstruction type is set to joint
+        asr.setInferenceType("joint");
+        String reconstructedAnsc = seqController.getInfAsJson(currRecon.getId(), nodeLabel, reconMethod);
+        return asr
+                .catGraphJSONBuilder(new JSONObject(currRecon.getMsa()), new JSONObject(reconstructedAnsc));
     }
 
     /**

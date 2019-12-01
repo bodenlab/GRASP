@@ -289,7 +289,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (err != null) {
             user.setPassword(null);
             mav.addObject("error", "error: Your password didn't pass our "
-                    + "standards, please set a stronger one (or less than 32 characters): " + err);
+                    + "standards, please set a stronger one (your password must have characters and "
+                    + "letters and be between 8 and 32 characters): " + err);
             mav.addObject("warning", err);
             return mav;
         }
@@ -329,8 +330,8 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (err != null) {
             user.setPassword(null);
             mav.addObject("error", "error: Your password didn't pass our "
-                    + "standards, please set a stronger one (or less than 32 characters): " + err);
-            mav.addObject("warning", err);
+                    + "standards, please set a stronger one (your password must have characters and "
+                    + "letters and be between 8 and 32 characters): " + err);
             return mav;
         }
         // The user was able to be logged in so lets make them log in again toDo: Default login.

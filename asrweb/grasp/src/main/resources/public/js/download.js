@@ -105,11 +105,13 @@ let downloadMarginalTsv = function () {
       for (let p in poags.single.names) {
         let poag_name = poags.single.names[p];
         let nodes = poags.single.nodes[poag_name];
-        if (p !== 'MSA') {
+        if (poag_name !== 'MSA') {
           // Now we want to find out if we have an inferred marginal or joint
           if (poags.single.raw.inferred.metadata.type === 'marginal') {
             for (let n in nodes) {
-              tsvFileStr += n + '\t';
+              // Here we add 1 onto the ID as that's what we do in the visualisation
+              // To keep it consistent we do it here too.
+              tsvFileStr += (nodes[n][G_ID] + 1) + '\t';
               let tsvLst = [];
                 for (let h in headerLine) {
                     tsvLst.push('0');

@@ -322,10 +322,14 @@
                         username = /*[[${user.username}]]*/
 
                     $(document).ready(function () {
+                        // Default value is to save a reconstruction if user is logged in, otherwise not to save
 
-                        // Default value is not to save a reconstruction
-
-                        $('#save').val(false)
+                        if ($("#usernameCheck").val() != "") {
+                            $('input#save_true').prop( "checked", true );
+                        }
+                        else {
+                            $('input#save_false').prop( "checked", true );
+                        }
 
 
 

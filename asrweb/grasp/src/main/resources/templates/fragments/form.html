@@ -322,10 +322,15 @@
                         username = /*[[${user.username}]]*/
 
                     $(document).ready(function () {
+
+                        // Default save value is initially set to false
+                        $('#save').val(false);
+
                         // Default value is to save a reconstruction if user is logged in, otherwise not to save
 
                         if ($("#usernameCheck").val() != "") {
                             $('input#save_true').prop( "checked", true );
+
                         }
                         else {
                             $('input#save_false').prop( "checked", true );
@@ -335,7 +340,7 @@
 
                         $('input#save_true').change(function () {
                             if ($('input#save_true').is(':checked')) {
-                                $('#save').val(true)
+                                $('#save').val(true);
                                 $('.email-check').show();
                                 if ($("#usernameCheck").val() == "") {
 

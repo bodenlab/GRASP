@@ -156,7 +156,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (err != null) {
             bindingResult.rejectValue("username", "user.username.duplicate");
-            mav.addObject("error", err);
             return mav;
         }
 
@@ -166,7 +165,10 @@ public class GraspApplication extends SpringBootServletInitializer {
             // Here we need to delete the user we just added as their email was obviously incorrect
             // Otherwise we're going to get users that aren't actually added.
             // ToDo: Remove the user? i.e. set the user to be OK?
-            mav.addObject("error", err);
+
+            userController.deleteUser(user);
+            bindingResult.rejectValue("email", "user.email.error");
+
             return mav;
         }
 

@@ -513,7 +513,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
-     * Shares the reconsrtruction with another user by their username.
+     * Shares the reconstruction with another user by their username.
      *
      * ToDo: Need to look at what the shareObject was
      */

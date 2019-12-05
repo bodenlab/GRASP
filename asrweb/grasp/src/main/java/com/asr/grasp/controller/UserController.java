@@ -220,6 +220,19 @@ public class UserController {
         return null;
     }
 
+    /**
+     * Deletes the user.
+     */
+
+    public void deleteUser(UserObject user){
+
+        // We request the User ID from the unique username rather than use the ID directly, because if there is a
+        // failure in the registration process we won't have access to the generated ID yet
+
+        usersModel.deleteUser(usersModel.getUserId(user.getUsername()));
+    }
+
+
 
     /**
      * If we don't already have the reconstructions in memory, we need to get

@@ -15,7 +15,7 @@ let saveRecon = function(email) {
           saved = true;
         // CHeck if we have an error message
         if (data.value === "login") {
-          window.alert("You need to login to perform this action. When you login the saving will automatically start ");
+          window.alert("You need to login to save a reconstruction. Now that you have hit save, you can login to your account and your saving will automatically start.");
         } else if (data.value  === "isSaving") {
             window.alert("You can only save one reconstruction at a time, please wait until the previous one has finished.");
         } else if (data.value === 'exists') {

@@ -176,8 +176,6 @@ public class UsersModel extends BaseModel {
     }
 
     /**
-     * ToDo: We don't have the capabilities of deleting a user - probably
-     * should add this.
      *
      * @param userId
      * @return

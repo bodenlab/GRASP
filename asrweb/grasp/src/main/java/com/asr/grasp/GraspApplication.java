@@ -156,7 +156,6 @@ public class GraspApplication extends SpringBootServletInitializer {
 
         if (err != null) {
             bindingResult.rejectValue("username", "user.username.duplicate");
-            mav.addObject("error", err);
             return mav;
         }
 
@@ -166,7 +165,10 @@ public class GraspApplication extends SpringBootServletInitializer {
             // Here we need to delete the user we just added as their email was obviously incorrect
             // Otherwise we're going to get users that aren't actually added.
             // ToDo: Remove the user? i.e. set the user to be OK?
-            mav.addObject("error", err);
+
+            userController.deleteUser(user);
+            bindingResult.rejectValue("email", "user.email.error");
+
             return mav;
         }
 
@@ -289,8 +291,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (err != null) {
             user.setPassword(null);
             mav.addObject("error", "error: Your password didn't pass our "
-                    + "standards, please set a stronger one (your password must have characters and "
-                    + "letters and be between 8 and 32 characters): " + err);
+                    + "standards, please set a stronger one (your password must be between 8 and 32 characters): " + err);
             mav.addObject("warning", err);
             return mav;
         }
@@ -330,8 +331,7 @@ public class GraspApplication extends SpringBootServletInitializer {
         if (err != null) {
             user.setPassword(null);
             mav.addObject("error", "error: Your password didn't pass our "
-                    + "standards, please set a stronger one (your password must have characters and "
-                    + "letters and be between 8 and 32 characters): " + err);
+                    + "standards, please set a stronger one (your password must be between 8 and 32 characters): " + err);
             return mav;
         }
         // The user was able to be logged in so lets make them log in again toDo: Default login.
@@ -513,7 +513,7 @@ public class GraspApplication extends SpringBootServletInitializer {
     }
 
     /**
-     * Shares the reconsrtruction with another user by their username.
+     * Shares the reconstruction with another user by their username.
      *
      * ToDo: Need to look at what the shareObject was
      */

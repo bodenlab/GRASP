@@ -29,14 +29,15 @@
                                         <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 (139) <span
-                                                id="cyp2u1-selected"
-                                                class="disable ex-glyph-selected glyphicon glyphicon-ok"
-                                                aria-hidden="true"></span></a></li>
                                         <li><a id="tawfik" onclick="update_test('tawfik')">Afriat-Jurnou et al. (29)
                                             <span id="tawfik-selected"
                                                   class="disable ex-glyph-selected glyphicon glyphicon-ok"
                                                   aria-hidden="true"></span></a></li>
+                                        <li><a id="cyp2u1" onclick="update_test('cyp2u1')">CYP2U1 (595) <span
+                                                id="cyp2u1-selected"
+                                                class="disable ex-glyph-selected glyphicon glyphicon-ok"
+                                                aria-hidden="true"></span></a></li>
+
                                         <li><a id="hudson" onclick="update_test('hudson')">Hudson et al. (234) <span
                                                 id="hudson-selected"
                                                 class="disable ex-glyph-selected glyphicon glyphicon-ok"
@@ -323,15 +324,26 @@
 
                     $(document).ready(function () {
 
-                        // Default value is not to save a reconstruction
+                        // Default save value is initially set to false
+                        $('#save').val(false);
 
-                        $('#save').val(false)
+                        // Default value is to save a reconstruction if user is logged in, otherwise not to save
+
+                        if ($("#usernameCheck").val() != "") {
+                            $('input#save_true').prop( "checked", true );
+                            $('#save').val(true);
+
+
+                        }
+                        else {
+                            $('input#save_false').prop( "checked", true );
+                        }
 
 
 
                         $('input#save_true').change(function () {
                             if ($('input#save_true').is(':checked')) {
-                                $('#save').val(true)
+                                $('#save').val(true);
                                 $('.email-check').show();
                                 if ($("#usernameCheck").val() == "") {
 

@@ -83,49 +83,49 @@ public class SeqControllerTest extends BaseTest {
         userModel.deleteUser(userController.getId(user));
     }
 
-    @Test
-    public void testSaveAllJoints () {
-        /**
-         * Tests saving all the joint consensus sequences.
-         */
-        setUpEnv();
-        ASRObject asr = setAsr("tawfik");
-        UserObject user = createAndRegisterUser("testuser", "testpassword");
-
-        // Create a reconstruction from an ASR object
-        ReconstructionObject recon = reconController.createFromASR(asr);
-
-        // Set the user to own the reconstruction
-        recon.setOwnerId(userController.getId(user));
-
-        // Test we can save the recon to the database
-        String err = reconController.save(user, recon);
-
-        assertThat(err, is(equalTo(null)));
-
-        ASRPOG joint = asr.getASRPOG(Defines.JOINT);
-
-        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
-
-        // Check saving it to the DB
-        System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId()));
-
-        // Check these were saved in the DB
-        HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
-
-        System.out.println(seqMap.get("N22_68"));
-        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
-        //"SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
-        System.out.println(seqMap.get("N22_68"));
-        // old
-        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFS------"));
-        //assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
-        //"ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
-        System.out.println(seqMap.get("N4_98"));
-        // Delete the user to clean up the database will automatically delete
-        // any reconstructions associated with the user and any consensus sequences.
-        userModel.deleteUser(userController.getId(user));
-    }
+//    @Test
+//    public void testSaveAllJoints () {
+//        /**
+//         * Tests saving all the joint consensus sequences.
+//         */
+//        setUpEnv();
+//        ASRObject asr = setAsr("tawfik");
+//        UserObject user = createAndRegisterUser("testuser", "testpassword");
+//
+//        // Create a reconstruction from an ASR object
+//        ReconstructionObject recon = reconController.createFromASR(asr);
+//
+//        // Set the user to own the reconstruction
+//        recon.setOwnerId(userController.getId(user));
+//
+//        // Test we can save the recon to the database
+//        String err = reconController.save(user, recon);
+//
+//        assertThat(err, is(equalTo(null)));
+//
+//        ASRPOG joint = asr.getASRPOG(Defines.JOINT);
+//
+//        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
+//
+//        // Check saving it to the DB
+//        System.out.println(seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId()));
+//
+//        // Check these were saved in the DB
+//        HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
+//
+//        System.out.println(seqMap.get("N22_68"));
+//        assertThat(seqMap.get("N22_68"), equalTo("SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
+//        //"SQVQTVTG-PIDVEQLGKTLVHEHVFVLGE-----------EFRQNYQAEWD----------------EEERIADAVEKLTELKSLGIDTIVDPTVIGLGRYIPRIQRIAEQV-DLNIVVATGIYTYNEVPFQFHYSGPGL----LFDGPEPMVEMFVKDIEDGIAGTGVRAGFL-KCAIEEQGLTPGVERVMRAVAQAHVRTGAPITVHTHAHSESGLEAQRVLA-EEGADLTKVVIGHSG-DSTDLDYLCELADAGSYLGMDRF-----GLDV---------LLPFEERVDTVAELCRRGYADRMVLAHDASCFID---WFPPEARAAAVPNWNYRHISEDVLPALRERGVTEEQIQTMLVDNPRRYFGS-----"));
+//        System.out.println(seqMap.get("N22_68"));
+//        // old
+//        assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFS------"));
+//        //assertThat(seqMap.get("N4_98"), equalTo("ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
+//        //"ARIMTVLG-PISAEELGHTLMHEHLFIDLS-----------GFKKDLDTALD-------------------ELDLACEEVKHLKARGGRTIVEVTCRGMGRDPQFLREVARET-GLNVVAATGFYQEAYHPPYVAER-----------SVEELAELLIRDIEEGIDGTDVKAGIIAEIGTSKGKITPDEEKVFRAAALAHKRTGLPISTHTSLG-TMGLEQLDLLE-EHGVDPARVVIGHMD-LTDDLDNHLALADRGAYVAFDTI-----GKDS---------YPPDEERVRLITALIERGLADRVMLSMDVTRRSH----------LKANGGYGYSYLFDHFIPALRAAGVSEAELEQMLVDNPRRFFSAGGQAP"));
+//        System.out.println(seqMap.get("N4_98"));
+//        // Delete the user to clean up the database will automatically delete
+//        // any reconstructions associated with the user and any consensus sequences.
+//        userModel.deleteUser(userController.getId(user));
+//    }
 
 
 
@@ -155,7 +155,7 @@ public class SeqControllerTest extends BaseTest {
         HashMap<String, String> seqs = seqController.getAllSeqs(recon.getId(), Defines.ALL);
 
         // Confirm we have matches
-        assertThat(seqs.size(), equalTo(27));
+        assertThat(seqs.size(), equalTo(28));
 
         // Test deleting them
         seqController.deleteAllSeqsForRecon(recon.getId());
@@ -169,57 +169,57 @@ public class SeqControllerTest extends BaseTest {
     }
 
 
-    @Test
-    public void motifSearching () {
-        /**
-         * Tests saving all the joint consensus sequences.
-         */
-        setUpEnv();
-        ASRObject asr = setAsr("tawfik");
-        UserObject user = createAndRegisterUser("testuser", "testpassword");
-
-        // Create a reconstruction from an ASR object
-        ReconstructionObject recon = reconController.createFromASR(asr);
-
-        // Set the user to own the reconstruction
-        recon.setOwnerId(userController.getId(user));
-
-        // Test we can save the recon to the database
-        String err = reconController.save(user, recon);
-
-        assertThat(err, is(equalTo(null)));
-
-        ASRPOG joint = asr.getASRPOG(Defines.JOINT);
-
-        // Check saving it to the DB
-        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
-
-        seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId());
-
-        // Check these were saved in the DB
-        HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
-
-        String motif1 = "%YPPD%";
-
-        String motif2 = "%GFLR%";
-
-        ArrayList<String> motif1Match = seqController.findAllWithMotif(recon.getId(), motif1);
-
-        assertThat(motif1Match.contains("N4_98"), equalTo(true));
-        assertThat(motif1Match.contains("N13_97"), equalTo(false));
-
-        ArrayList<String> motif2Match = seqController.findAllWithMotif(recon.getId(), motif2);
-
-        assertThat(motif1Match.size(), equalTo(2));
-
-        assertThat(motif2Match.size(), equalTo(7));
-
-        assertThat(motif2Match.contains("N4_98"), equalTo(false));
-        assertThat(motif2Match.contains("N13_97"), equalTo(true));
-
-        userModel.deleteUser(userController.getId(user));
-
-    }
+//    @Test
+//    public void motifSearching () {
+//        /**
+//         * Tests saving all the joint consensus sequences.
+//         */
+//        setUpEnv();
+//        ASRObject asr = setAsr("tawfik");
+//        UserObject user = createAndRegisterUser("testuser", "testpassword");
+//
+//        // Create a reconstruction from an ASR object
+//        ReconstructionObject recon = reconController.createFromASR(asr);
+//
+//        // Set the user to own the reconstruction
+//        recon.setOwnerId(userController.getId(user));
+//
+//        // Test we can save the recon to the database
+//        String err = reconController.save(user, recon);
+//
+//        assertThat(err, is(equalTo(null)));
+//
+//        ASRPOG joint = asr.getASRPOG(Defines.JOINT);
+//
+//        // Check saving it to the DB
+//        seqController.insertAllExtantsToDb(recon.getId(), asr.getSequencesAsNamedMap(), true);
+//
+//        seqController.insertAllJointsToDb(recon.getId(), joint, true, user.getId());
+//
+//        // Check these were saved in the DB
+//        HashMap<String, String> seqMap = seqController.getAllSeqs(recon.getId(), Defines.JOINT);
+//
+//        String motif1 = "%YPPD%";
+//
+//        String motif2 = "%GFLR%";
+//
+//        ArrayList<String> motif1Match = seqController.findAllWithMotif(recon.getId(), motif1);
+//
+//        assertThat(motif1Match.contains("N4_98"), equalTo(true));
+//        assertThat(motif1Match.contains("N13_97"), equalTo(false));
+//
+//        ArrayList<String> motif2Match = seqController.findAllWithMotif(recon.getId(), motif2);
+//
+//        assertThat(motif1Match.size(), equalTo(2));
+//
+//        assertThat(motif2Match.size(), equalTo(7));
+//
+//        assertThat(motif2Match.contains("N4_98"), equalTo(false));
+//        assertThat(motif2Match.contains("N13_97"), equalTo(true));
+//
+//        userModel.deleteUser(userController.getId(user));
+//
+//    }
 
     @Test
     public void testEdgeCounts () {

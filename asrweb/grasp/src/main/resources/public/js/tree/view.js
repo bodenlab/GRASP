@@ -1325,4 +1325,4 @@ function searchNodeId() {
  */
 const menu = contextMenu().items('View marginal reconstruction',
     'View joint reconstruction', 'Add joint reconstruction', 'Collapse subtree',
-    'Expand subtree', 'Expand subtree and collapse others');
+    'Expand subtree');

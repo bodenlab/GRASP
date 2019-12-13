@@ -1,12 +1,33 @@
-.Rproj.user
-.Rhistory
-.RData
-asrweb/asr/
-asrweb/asr/.idea
-asrweb/asr/.gradle
-asrweb/asr/.DS_Store
-asrweb/asr/target
-asrweb/.DS_Store
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*grasp-repo*
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
 .idea
-*.DS_Store*
-*maven*
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+### Specific user configs ###
+*-override.properties
+*TestPropertiesOverride.java
+
+*maven-metadata.xml*
+
+*.DS_Store

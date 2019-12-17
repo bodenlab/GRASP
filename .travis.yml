@@ -1,8 +1,13 @@
 language: java
 
-install:
-./mvnw test
+services:
+- postgresql
 
+before_script:
+- psql --version
+- psql -f ./src/main/resources/database/create_grasp_schema.sql
+
+#./run-test
 # After success, send the coverage report to Coveralls
 after_success:
-  - coveralls
+- coveralls

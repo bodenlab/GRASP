@@ -56,28 +56,6 @@ public class UserControllerTest extends BaseTest {
         return user;
     }
 
-//    @Test
-//    public void testRegister() {
-//        /**
-//         * Tests that adding a new user via the parameters give us the
-//         * expected resposes.
-//         */
-//        setUpEnv();
-//
-//        UserObject user = createUser("testuser", "testpassword");
-//
-//        // Register User
-//        String err = userController.register(user);
-//
-//        // check we have no errors
-//        assertThat(err, is(equalTo(null)));
-//
-//        // check the ID has been set
-//        assertThat(user.getId(), not(equalTo(Defines.UNINIT)));
-//
-//        // Delete the user to clean up the database
-//        userModel.deleteUser(userController.getId(user));
-//    }
 
 
     @Test

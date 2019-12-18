@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/bodenlab/GRASP.svg?branch=master)](https://travis-ci.com/bodenlab/GRASP)
+[![Build Status](https://travis-ci.com/bodenlab/GRASP.svg?branch=tests)](https://travis-ci.com/bodenlab/GRASP)
 [![Coverage Status](https://coveralls.io/repos/github/gabefoley/popchoose/badge.svg?branch=master)](https://coveralls.io/github/gabefoley/popchoose?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/bodenlab/GRASP/badge.svg)](https://snyk.io/test/github/bodenlab/GRASP)
 [![Dependencies](https://badgen.net/dependabot/dependabot/dependabot-core/?icon=dependabot)](https://dependabot.com/)

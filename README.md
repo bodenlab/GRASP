@@ -2,7 +2,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/gabefoley/popchoose/badge.svg?branch=master)](https://coveralls.io/github/gabefoley/popchoose?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/bodenlab/GRASP/badge.svg)](https://snyk.io/test/github/bodenlab/GRASP)
 [![Dependencies](https://badgen.net/dependabot/dependabot/dependabot-core/?icon=dependabot)](https://dependabot.com/)
-[![License](https://badgen.net/github/license/gabefoley/popchoose)](https://github.com/gabefoley/popchoose/blob/master/LICENSE)
+[![License](https://badgen.net/github/license/bodenlab/GRASP)](https://github.com/bodenlab/GRASP/blob/master/LICENSE)
 [![Uptime Robot status](https://img.shields.io/uptimerobot/ratio/m784016796-898fd6b81f5906d641c5f5d4?label=uptime%20%28last%2030%20days%29)](https://stats.uptimerobot.com/GYNrxi1n1Z)
 # GRASP
 

@@ -3,6 +3,10 @@ language: java
 services:
 - postgresql
 
+branches:
+  only:
+    /^test/
+
 before_script:
   - psql --version
   - psql -f ./src/main/resources/database/create_grasp_schema.sql

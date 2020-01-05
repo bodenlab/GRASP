@@ -1,6 +1,5 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
-*grasp-repo*
 
 ### STS ###
 .apt_generated
@@ -26,7 +25,6 @@ nbdist/
 
 ### Specific user configs ###
 *-override.properties
-*TestPropertiesOverride.java
 
 *maven-metadata.xml*
 

@@ -1,8 +1,21 @@
 language: java
 
-install:
-./mvnw test
+services:
+- postgresql
 
+branches:
+  only:
+    /^test/
+
+before_script:
+  - psql --version
+  - psql -f ./src/main/resources/database/create_grasp_schema.sql
+
+#./run-test
 # After success, send the coverage report to Coveralls
+# I'm including the specific jacoco plugin to use and install because this was the only way I could get it to work?
+
 after_success:
-  - coveralls
+  # - mvn clean test jacoco:report coveralls:report
+  - mvn clean test org.jacoco:jacoco-maven-plugin:0.7.9:prepare-agent install org.jacoco:jacoco-maven-plugin:0.7.9:report org.eluder.coveralls:coveralls-maven-plugin::report
+

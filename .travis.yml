@@ -13,4 +13,4 @@ before_script:
 
 after_success:
   # - mvn clean test jacoco:report coveralls:report
-  - mvn clean test org.jacoco:jacoco-maven-plugin:0.7.9:prepare-agent install org.jacoco:jacoco-maven-plugin:0.7.9:report coveralls:report
+  - mvn clean test org.jacoco:jacoco-maven-plugin:0.7.9:prepare-agent install org.jacoco:jacoco-maven-plugin:0.7.9:report org.eluder.coveralls:coveralls-maven-plugin::report

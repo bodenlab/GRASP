@@ -9,12 +9,12 @@
                         <div class="col-md-4">
                             <fieldset>
                                 <legend>
-                                    Phylogenetic Tree
+                                    Phylogenetic tree
                                 </legend>
                                 <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Phylogenetic tree annotated with ancestral labels.">
                                     <button id="download-tree" name="check-recon-tree" class="dlopt  btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
                                     <label for="download-tree">
-                                        Phylogenetic tree (.nwk)
+                                        Tree with ancestor labels (.nwk)
                                     </label>
                                 </div>
                             </fieldset>
@@ -54,46 +54,44 @@
                         <div class="col-md-8">
                             <fieldset>
                                 <legend>
-                                    Sequence Information
+                                    Sequence data (per preferred path in POG)
                                 </legend>
-                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Marginal amino acid distribution of each node in the inferred ancestral sequence graph.">
+                                <div class="checkbox" data-toggle="popover" data-placement="top" data-content="Download marginal reconstruction for specified ancestor as a series of probability distributions. Formatted as a tab-separated value file (TSV).">
                                     <button id="download-marg-dist" name="check-marg-dist" class="btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
                                     <label for="download-marg-dist">
-                                        Distribution of characters in <span class="node-label disabled margopt">Root</span> marginal (.tsv)
+                                        Marginal: Distributions of characters of <span class="node-label disabled margopt"><em>current</em></span> ancestor (.tsv)
                                     </label>
                                 </div>
-                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Consensus sequence of inferred ancestor (using marginal reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                <div class="checkbox" data-toggle="popover" data-placement="bottom" data-content="Download marginal reconstruction for a specified ancestor as a sequence of characters (most probable character for each position). Formatted as FASTA.">
                                     <button id="download-marginal" class="btn btn-default" name="download-marginal" type="button" onclick="downloadData(this.id)">Download</button>
                                     <label for="download-marginal">
-                                        Consensus sequence of reconstructed (if any) marginal Nodes (.fasta)
+                                        Marginal: Most probable characters of <span class="node-label disabled margopt"><em>current</em></span> ancestor (.fasta)
                                     </label>
-                                </div>
-
-                                <div id="check-joint">
-                                    <div  class="checkbox" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of all inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
-                                        <button id="download-joint" name="check-seq-joint" class=" btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
-                                        <label>
-                                            Consensus sequences of Joint Reconstructions (.fasta) <strong>Warning: you may encounter issues with large reconstructions.</strong> Use the download option below for large (>3000 sequence reconstructions).
-                                        </label>
-                                    </div>
                                 </div>
 
                                 <div id="check-select-joint">
                                     <div class="checkbox" data-toggle="popover" data-placement="bottom">
                                     <input id="download-select-joint-list" type="text" class="form-input col-xs-12 no-padding " style="height: 2.1em;"
-                                           placeholder="Node id (s)..." name="download-select-joint-list-value"/>
+                                           placeholder="Labels, e.g. N0, N1, ..." name="download-select-joint-list-value"/>
                                         <label>
-                                            Type in the node identifier(s) using a comma separated list.
+                                            Ancestor label(s) separated by comma
                                         </label>
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="checkbox" data-toggle="popover" data-placement="bottom"  data-content="Consensus sequence of a selection of inferred ancestors (using joint reconstruction) (.fasta). Consensus sequence is the collection of nodes in the inferred sequence graph that is in path of edges traversed by the majority of extant sequences.">
+                                    <div class="checkbox" data-toggle="popover" data-placement="bottom"  data-content="Download joint reconstruction for nominated ancestors as sequences determined by following the preferred path of each ancestor POG. Formatted as FASTA.">
                                         <button id="download-select-joint" name="check-select-seq-joint" class=" btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
                                         <label>
-                                            Consensus sequences of a list of nodes for the Joint Reconstructions (.fasta)
+                                            Joint: Selected ancestors (.fasta)
                                         </label>
-
+                                    </div>
+                                </div>
+                                <div id="check-joint">
+                                    <div  class="checkbox" data-toggle="popover" data-placement="bottom"  data-content="Download joint reconstruction for all ancestors as sequences determined by following the preferred path of each ancestor POG. Formatted as FASTA.">
+                                        <button id="download-joint" name="check-seq-joint" class=" btn btn-default" type="button" onclick="downloadData(this.id)">Download</button>
+                                        <label>
+                                            Joint: <em>All</em> ancestors (.fasta) (for less than 1000 ancestors)
+                                        </label>
                                     </div>
                                 </div>
                             </fieldset>

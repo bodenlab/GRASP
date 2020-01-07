@@ -251,10 +251,10 @@ var reset_poag_stack = function () {
 var view_consensus = function () {
     var button_text = document.getElementById('consensus-button').innerHTML.split(" | ")[1];
     if (button_text == "ON") {
-        document.getElementById('consensus-button').innerHTML = "View consensus | OFF";
+        document.getElementById('consensus-button').innerHTML = "View preferred | OFF";
         poags.options.display.draw_consensus = false;
     } else {
-        document.getElementById('consensus-button').innerHTML = "View consensus | ON";
+        document.getElementById('consensus-button').innerHTML = "View preferred | ON";
         poags.options.display.draw_consensus = true;
     }
     redraw_poags();

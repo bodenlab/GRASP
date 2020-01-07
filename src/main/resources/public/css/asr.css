@@ -133,7 +133,7 @@ h6 {
 }
 
 #home-img-div {
-    background: url(../images/home_page.png);
+    background: url(../images/home_page.jpg);
     background-size: contain;
     background-repeat: no-repeat;
     width: 100%;
@@ -142,7 +142,7 @@ h6 {
 }
 
 #phylo-tree-img-div {
-    background: url(../images/phylo_tree.png);
+    background: url(../images/phylo_tree.jpg);
     background-size: contain;
     background-repeat: no-repeat;
     width: 100%;
@@ -151,21 +151,21 @@ h6 {
 }
 
 #phylo-tree-right-click-img-div {
-    background: url(../images/phylo_tree_right_click.png);
+    background: url(../images/phylo_tree_right_click.jpg);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 80%;
+    width: 100%;
     height: 0;
-    padding-top: 55%;
+    padding-top: 40%;
 }
 
 #dark-light-edges-img-div {
-    background: url(../images/dark_light_edges.png);
+    background: url(../images/dark_light_edges.jpg);
     background-size: contain;
     background-repeat: no-repeat;
-    width: 50%;
+    width: 30%;
     height: 0;
-    padding-top: 20%;
+    padding-top: 15%;
 }
 #dark-edge-img-div {
     background: url(../images/dark_edge.png);
@@ -204,7 +204,25 @@ h6 {
 }
 
 #graph-view-img-div {
-    background: url(../images/graph_view.png);
+    background: url(../images/graph_view.jpg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 40%;
+}
+
+#msa-pie-chart-img-div {
+    background: url(../images/msa_pie_chart.jpg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 0;
+    padding-top: 20%;
+}
+
+#merged-graph-img-div {
+    background: url(../images/merged_graph.jpg);
     background-size: contain;
     background-repeat: no-repeat;
     width: 100%;
@@ -212,8 +230,8 @@ h6 {
     padding-top: 55%;
 }
 
-#msa-pie-chart-img-div {
-    background: url(../images/msa_pie_chart.png);
+#graph-view-marginal-img-div {
+    background: url(../images/graph_view_marginal.jpg);
     background-size: contain;
     background-repeat: no-repeat;
     width: 100%;
@@ -221,31 +239,13 @@ h6 {
     padding-top: 30%;
 }
 
-#merged-graph-img-div {
-    background: url(../images/merged_graph.png);
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 100%;
-    height: 0;
-    padding-top: 90%;
-}
-
-#graph-view-marginal-img-div {
-    background: url(../images/graph_view_marginal.png);
-    background-size: contain;
-    background-repeat: no-repeat;
-    width: 100%;
-    height: 0;
-    padding-top: 55%;
-}
-
 #download-pane-img-div {
-    background: url(../images/download_pane.png);
+    background: url(../images/download_pane.jpg);
     background-size: contain;
     background-repeat: no-repeat;
     width: 100%;
     height: 0;
-    padding-top: 55%;
+    padding-top: 30%;
 }
 
 .guide-nav {

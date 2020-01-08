@@ -11,7 +11,13 @@
 ## Description
 GRASP is a tool for performing ancestral sequence reconstruction.
 
-See http://grasp.scmb.uq.edu.au. GRASP depends heavily on bnkit (https://github.com/bodenlab/bnkit) for performing phylogenetic inference.
+It is available at http://grasp.scmb.uq.edu.au. GRASP depends heavily on bnkit (https://github.com/bodenlab/bnkit) for performing phylogenetic inference.
+
+GRASP is part of the [GRASP-suite](https://bodenlab.github.io/GRASP-suite) of tools for curating, performing, and analysing ancestral sequence reconstruction.
+
+The GRASP paper is available as a [pre-print from bioRxiv](https://www.biorxiv.org/content/10.1101/2019.12.30.891457v1).
+
+Tutorials and material to support GRASP are available at [GRASP-resources](https://github.com/bodenlab/GRASP-resources)
 
 ## Development
 Get in contact with someone at the Boden lab, see http://bioinf.scmb.uq.edu.au or http://grasp.scmb.uq.edu.au.

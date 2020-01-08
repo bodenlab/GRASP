@@ -11,14 +11,27 @@
                     <h3 id="feature-log">GRASP is alive</h3>
                     <p>GRASP has a web site for code, associated tools, data sets, and support information - see <a href="https://bodenlab.github.io/GRASP-suite">GRASP-suite</a>.
                         This site is updated to reflect changes to the service and resources around it.
-                        If you use GRASP in your work please cite the paper listed <a href="#refs-grasp">here</a>.
+                        You can peruse and submit issues for the web service <a href="https://github.com/bodenlab/GRASP/issues">GRASP/issues</a> and the command-line tool <a href="https://github.com/bodenlab/bnkit/issues">bnkit/issues</a>.
+                        If you use GRASP in your work please cite the paper listed <a href="#refs-grasp">below</a>.
                     </p>
 
                     <h3 id="getting-started-nav">Getting started</h3>
 
-                    <p>GRASP infers ancestral proteins from homologous protein sequences. It efficiently determines character states, and the most supported insertions and deletions; GRASP presents all this as partial-order graphs using a visual interface, connected to a phylogenetic tree, with which the user can interact.</p>
+                    <p>GRASP infers ancestral proteins from homologous protein sequences--a process known as ancestral sequence reconstruction.
+                        (It does <em>not</em> work with DNA at the moment, though we expect to introduce this in the future.)
+                        GRASP efficiently determines ancestral character states, and the most supported insertions and deletions.
+                        GRASP presents all this as partial-order graphs using a visual interface, connected to a phylogenetic tree, with which the user can interact.</p>
+                    <p>Many features are only available as a result of <em>saving</em> an ancestor reconstruction. To enable this, you need to be signed in as a user.
+                        We strongly recommend that you do this as the workflow will then be un-interrupted.
+                        Use the 'Login' menu to start the registration process.
+                        Note that the web service will log you out automatically if you are idle for a longer period of time.
+                    In that case, login again, and your saved reconstructions will be available from the menu item marked with your user name.
+                    </p>
+                    <p>Passwords are stored in an encrypted form, but our strong advise is to use a unique password as the http protocol is subject to some security risks.
+                    </p>
                     <h3 id="input-nav">Input data</h3>
-                    <p>GRASP requires only two input files and one parameter to run successfully. On GRASP's landing page, the two files you will require are a set of (aligned) sequences and the corresponding phylogenetic tree.</p>
+                    <p>GRASP requires only two input files and one parameter to run successfully.
+                        On GRASP's landing page, you will require two files: a set of (aligned) sequences and the corresponding phylogenetic tree.</p>
                     <p>GRASP accepts the following file formats.</p>
                     <table class="table">
                         <thead><tr>
@@ -33,18 +46,18 @@
                         </tr>
                         </tbody>
                     </table>
-                    <p>To try GRASP out, on the landing page you are presented with the option of running test data (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>).
+                    <p>To try GRASP out, on the landing page you are presented with the option of using example data (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>).
                         This will automatically load an alignment file and tree file; you can then run the reconstruction allowing you to explore the results provided by GRASP.
-                        As we proceed through this tutorial, we will refer to the results of running the test data labelled 'Afriat-Jurnou et al. (29)'.
+                        We will use results from running the test data labelled 'Afriat-Jurnou et al. (29)' and 'CYP2U1 (595)' for the figures below.
                         Data sets are taken from publications listed at the bottom of this page</p>
                     <h3 id="help-nav">Help</h3>
-                    <p>If, at any stage, you require specific information about what you are seeing presented on the GRASP home or results page,
-                        you can hit the help button to switch on help boxes (see <a href="#home-img">(8)</a> in <a href="#home-img">Figure 1</a>).</p>
+                    <p>If, at any stage, you require 'on-screen tips' about what you are seeing presented on the GRASP home or results page,
+                        you can hit the help button to switch on help texts (see <a href="#home-img">(8)</a> in <a href="#home-img">Figure 1</a>).</p>
                     <h3 id="job-name-nav">Job name</h3>
-                    <p>To allow you to keep track of your results, on the GRASP landing page you are able to provide a name for your job  (see <a href="#home-img">(2)</a> in <a href="#home-img">Figure 1</a>). This name will be used as an identifier in any saved output data.</p>
+                    <p>To allow you to keep track of your results, on the GRASP landing page you must provide a unique name for your job (see <a href="#home-img">(2)</a> in <a href="#home-img">Figure 1</a>). This name will be used as an identifier in any saved output data.</p>
                     <h3 id="align-seq-nav">Sequence alignment</h3>
                     <p>Once you have a name, you can 'Select sequence alignment file...' (see <a href="#home-img">(3)</a> in <a href="#home-img">Figure 1</a>). Accepted alignment formats are noted in the table above.</p>
-                    <p>You may want to use any of the multiple sequence alignment tools/services listed below:</p>
+                    <p>You may want to use any of the multiple sequence alignment tools/services in the non-exhaustive list below to create your alignment file.</p>
                     <ul>
                         <li><a href="http://probcons.stanford.edu">ProbCons</a></li>
                         <li><a href="http://tcoffee.crg.cat">T-Coffee</a></li>
@@ -54,8 +67,8 @@
                         <li><a href="http://www.clustal.org/omega/">Clustal Omega</a></li>
                     </ul>
                     <h3 id="phylo-tree-nav">Phylogenetic tree</h3>
-                    <p>A phylogenetic tree must be provided for standard reconstruction using 'Select phylogenetic tree file...' (see <a href="#home-img">(4)</a> in <a href="#home-img">Figure 1</a>). Accepted tree formats are noted above.</p>
-                    <p>Some of the alignment tools listed above can provide phylogenetic trees. Alternatively, some tools/services/packages for generating trees are listed below:</p>
+                    <p>A phylogenetic tree must be provided using 'Select phylogenetic tree file...' (see <a href="#home-img">(4)</a> in <a href="#home-img">Figure 1</a>). Accepted tree formats are noted above.</p>
+                    <p>Some of the alignment tools listed above can provide phylogenetic trees. Alternatively, some tools/services/packages for creating trees from your alignment are listed below.</p>
                     <ul>
                         <li><a href="http://www.microbesonline.org/fasttree/">FastTree</a></li>
                         <li><a href="http://evolution.genetics.washington.edu/phylip.html">PHYLIP</a></li>
@@ -64,11 +77,22 @@
                         <li><a href="http://mrbayes.sourceforge.net">MrBayes</a></li>
                     </ul>
                     <h3 id="evol-model-nav">Evolutionary model</h3>
-                    <p>GRASP can perform reconstruction based on a variety of evolutionary models that can be selected from the drop down menu 'Select other evolutionary model...' (see <a href="#home-img">(5)</a> in <a href="#home-img">Figure 1</a>). By default, JTT is used.</p>
+                    <p>GRASP can perform reconstruction based on a variety of evolutionary models that can be selected from the drop down menu 'Select other evolutionary model...'
+                        (see <a href="#home-img">(5)</a> in <a href="#home-img">Figure 1</a>). By default, JTT (Jones-Taylor-Thornton) is used, which is commonly used for the analysis of amino acid sequences.</p>
                     <h3 id="recon-type-nav">Reconstruction type</h3>
-                    <p>GRASP can perform both <a href="#technical-info">joint</a> and <a href="#technical-info">marginal</a> reconstructions. GRASP will initially run a joint reconstruction (see <a href="#home-img">(6)</a> in <a href="#home-img">Figure 1</a>) as we have made marginal reconstruction available to be run on specific nodes in the results section of GRASP.</p>
-                    <h3 id="perform-recon-nav">Perform reconstruction</h3>
+                    <p>GRASP can perform both <a href="#technical-info">joint</a> and <a href="#technical-info">marginal</a> reconstructions. GRASP will initially run a joint reconstruction (see <a href="#home-img">(6)</a> in <a href="#home-img">Figure 1</a>);
+                        we have made marginal reconstruction available to be run on specific nodes in the results section of GRASP.</p>
+                    <h3 id="perform-recon-nav">Perform (and save) reconstruction</h3>
                     <p>Once test data has been selected or user data provided, the reconstruction can be started (see <a href="#home-img">(7)</a> in <a href="#home-img">Figure 1</a>).</p>
+                    <p>We strongly recommend that you save your reconstruction before running it.
+                        This means that you have to be signed in as a user, and that immediately after starting the reconstruction you will be forwarded directly to your collection of saved reconstructions.
+                       You will need to wait for an email to notify you if the reconstruction was successful. If successful, you will be able to refresh you list and select it from there. If you received an error, please see below for possible causes and remedies.
+                    </p>
+                    <p>If you opted not to save your reconstruction, the screen will be blocked and you will need to wait until the reconstruction finishes.
+                        Any errors will be displayed. If the reconstruction is successful, you will be forwarded to the results page (see below).
+                        Many functions will not be available until you login and subsequently save the reconstruction. </p>
+                    <p>Any saved reconstructions, can be re-loaded without completely re-running it. You can also share your reconstruction with other users--as long as you have their user names.</p>
+
                 </div>
 
                 <a id="home-img"></a>
@@ -77,8 +101,6 @@
                 </div>
                 <figcaption class="figure-caption">Figure 1. The GRASP landing page with a form for (1) trying an example data set, (2) naming your data set, (3) selecting what aligned sequences to upload,
                     (4) selecting what phylogenetic tree to upload, (5) selecting evolutionary model, (6) opting to save or not, and (7) starting the analysis. </figcaption>
-
-
 
                 <h3 id="errors-nav">Errors</h3>
                 <p>The following is a list of error messages that can be generated by GRASP and suggestions as to how to proceed if you encounter them.</p>
@@ -184,33 +206,34 @@
 
                 <p>You should also be aware that the server only keeps the results for a limited time. You may notice that if you leave the results page open for a long time without interaction, it may stop responding.</p>
 
-
-
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell"><div class="text_cell_render border-box-sizing rendered_html"><hr></hr></div></div>
                 </div>
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2 id="results-nav">GRASP Results</h2>
-                            <p>The figures included in this section were generated by running the test data labelled 'Afriat-Jurnou et al. (29)' available on GRASP (see <a href="#home-img">(1)</a> in <a href="#home-img">Figure 1</a>).</p>
+                            <h2 id="results-nav">GRASP outputs</h2>
                             <h3 id="results-phylo-nav">Phylogenetic tree</h3>
                             <p><a id='phylogenetic_tree'></a></p>
                             <p>The results page shows an interactive version of the phylogenetic tree that was provided for reconstruction.
-                                GRASP will number internal phylogenetic node labels from the root node (N0, N1, ...) using the principle of 'depth first'.
-                                Yuo can see the label by hovering over the node, or as a pop-up box by clicking it.
-                                By default, extant labels are displayed and the user is given the option to also display or hide node labels and branch lengths (see <a href="#phylo-tree-img">(2)</a> in <a href="#phylo-tree-img">Figure 2</a>).
-                                It is possible to upload annotations for extant labels (see <a href="#phylo-tree-img">(1)</a> in <a href="#phylo-tree-img">Figure 2</a>).
-                                If extant labels follow a standard format, it is also possible to download taxonomic information from NCBI and UniProt (see <a href="#phylo-tree-img">(2)</a> in <a href="#phylo-tree-img">Figure 2</a>).
-                                If available user provided annotations and taxonomic information will be collated and summaries can be shown for internal nodes (more information below).
+                                By default, labels of extant sequences are displayed and the user is given the option to also display or hide labels and branch lengths (see <a href="#phylo-tree-img">(2)</a> in <a href="#phylo-tree-img">Figure 2</a>).
+                                It is possible to search for nodes given search pattern (see <a href="#phylo-tree-img">(3)</a> in <a href="#phylo-tree-img">Figure 2</a>).
+                                If extant labels follow a standard format, it is possible to download taxonomic information from NCBI and UniProt by the press of a button (see <a href="#phylo-tree-img">(2)</a> in <a href="#phylo-tree-img">Figure 2</a>).
                             </p>
-                            <p>
-                                It is possible to search for nodes following a given search pattern (see <a href="#phylo-tree-img">(3)</a> in <a href="#phylo-tree-img">Figure 2</a>). Examples of sequence motif searching are provided in the GRASP tutorial and the syntax is described below.
+                            <p>GRASP will number ancestors (i.e. phylogenetic branch points) internally from the root (N0, N1, ...) using the principle of 'depth first'. N0 is always going to be the root of the tree.
+                                You can see an ancestor label by hovering over the node, or in a pop-up box by clicking it.
+                                If available, taxonomic information will be collated and summaries for ancestor nodes are shown when clicked at (more information below).
+                            </p>
+                            <p>It is possible to upload annotations for extant labels (see <a href="#phylo-tree-img">(1)</a> in <a href="#phylo-tree-img">Figure 2</a>)
+                                that can subsequently be searched for (more information below).
+                            </p>
+                            <p>It is possible to search for sequence motifs in the ancestor sequences (see <a href="#phylo-tree-img">(3)</a> in <a href="#phylo-tree-img">Figure 2</a>); the syntax is described below.
                             </p>
                             <p>For big trees you may want to reduce the number of nodes shown. Use the buttons at (4) to adjust how many nodes are collapsed and the size of text labels.</p>
                             <p>Each node is coloured by evolutionary distance according to the legend on the left hand side (see <a href="#phylo-tree-img">(6)</a> in <a href="#phylo-tree-img">Figure 2</a>).
-                                One node will always appear pink and be noted in the header above the tree. This is the node that is having its reconstruction displayed in the graph below the phylogenetic tree and is known as the <strong>primary node</strong>.
-                                By default, node N0 (the root node) is the <em>primary node</em> and will appear pink and be listed in the header.</p>
+                                One node will always appear pink and be noted in the header above the tree.
+                                This is the node that is having its reconstruction displayed in the graph below the phylogenetic tree and is known as the <strong>primary node</strong>.
+                                By default, N0 (the root node) is the <em>primary node</em>, will appear pink and be listed in the header.</p>
                             <a id="phylo-tree-img"></a>
                             <div class="col-xs-12">
                                 <div class="img" id="phylo-tree-img-div"></div>
@@ -220,7 +243,9 @@
                                 (2) toggle what is shown in the tree,
                                 (3) search options,
                                 (4) adjust the size of the tree and how much of it is displayed, and
-                                (5) search and perform functions for a specified node. </figcaption>
+                                (5) search and perform functions for a specified node.
+                                This particular tree is contained in the 'Afriat-Jurnou et al. (29)' example available on GRASP.
+                            </figcaption>
                             <p>By hovering over nodes in the phylogenetic tree, the name will be revealed. By right clicking an ancestral node in the tree you will bring up a number of
                                 operations which can be performed on the ancestor. Note that some operations may take time to complete.
                                 (Unless previously run for the specified ancestor, marginal reconstruction will usually take as long as the initial reconstruction.)</p>
@@ -273,10 +298,61 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3 id="motif-searching-nav">Motif searching</h3>
-                            <p> You are able to search for ancestors with specified motifs in saved joint reconstructions; note that searching is done only in <em>preferred</em> sequences, and not in optional paths (see more below). </p>
+                            <h4 id="user-annotation-nav">Annotation: User-provided labels</h4>
+                            <p>GRASP can assign tabulated series of values to both extants and ancestors by their labels (see <a href="#phylo-tree-img">(1)</a> in <a href="#phylo-tree-img">Figure 2</a>).
+                                For example, a user can use this to assign functional annotation indexed by a column header, say 'Substrate', to a certain protein, say 'N123' or 'P12345'.
+                                This would be uploaded in the form of a tab-separated value (TSV) file, e.g.</p>
+                            <pre><code>
+        ID          Name         Substrate    Activity
+        N123        Fav_ancestor Luciferase   High(100)
+        P12345      My-enzyme    Luciferase   Moderate(10)
+        P54321      No-enzyme    None         None(0)
+                            </code></pre>
+                            <p>Upload this file, and use the same popup menu to enter which column you want to search in, say 'Substrate', and the term that needs to be matched for a node to be highlighted, say 'Luciferase'.
+                            </p>
 
-                            <p><h4>Example search patterns:</h4>
+                            <h4 id="taxonomy-annotation-nav">Tree vis options: Taxonomy</h4>
+                            <p> GRASP can automatically retrieve taxonomic information from the NCBI and UniProt databases by clicking on the <em>Annotate taxonomy</em> button, and append this information to the extant nodes of the phylogenetic tree.
+                                Ancestor nodes in the tree are assigned the highest shared taxonomic rank of the sequences beneath them.
+                                Once nodes are annotated, the highest shared rank will be visible at <em>collapsed</em> nodes.
+                                Clicking on an ancestor node will report the highest shared taxonomic rank; the info box will present a histogram of the distribution within the
+                                taxonomic rank immediately below the highest shared rank</p>
+                            <p>For example, in Figure 4, the four sequences contained under the ancestral node N1 all belong the the Phylum Ascomycota, but differ in their taxonomic Class. </p>
+                            <div class="col-xs-8 col-xs-offset-2">
+                                <div class="col-xs-12">
+                                    <div class="img" id="taxonomic-annotation-img-div"></div>
+                                </div>
+                                <figcaption class="figure-caption">Figure 4. The summary available after annotating nodes with their taxonomic rank. </figcaption>
+                            </div>
+                            <div class="clearfix"></div>
+                            <p>In order to annotate taxonomy from the NCBI and UniProt databases, GRASP expects the sequence IDs in your FASTA file to be in either the NCBI or UniProt ID format -</p>
+                            <p><code>>PRD21445.1 Cyp2u1 [Nephila clavipes]</code></p>
+                            <p>or</p>
+                            <p><code>>tr|A0A2P6K539|A0A2P6K539_NEPCL Cyp2u1 OS=Nephila clavipes OX=6915 GN=NCL1_51699 PE=4 SV=1</code></p>
+                            <p>By default, GRASP will expect the ID to be separated by a whitespace from any additional information.</p>
+                            <p>However, it will accept IDs which are completely stripped of additional information - </p>
+                            <p><code>>PRD21445.1</code></p>
+                            <p>or</p>
+                            <p><code>>tr|A0A2P6K539|A0A2P6K539_NEPCL</code></p>
+                            <p>Or IDs that have all whitespace removed (in order to force annotations to appear on phylogenetic trees) <em>if</em> the additional information is separated from the ID by a pipe symbol (|) -</p>
+                            <p><code>>PRD21445.1|Cyp2u1_Nephila_clavipes</code></p>
+                            <p>or</p>
+                            <p><code>>tr|A0A2P6K539|A0A2P6K539_NEPCL|Cyp2u1_OS=Nephila_clavipes</code></p>
+                            <p>Note that this means that headers where additional information is not separated by either a whitespace or a pipe symbol will not be able to have their taxonomy annotated - i.e. the following will <em>not</em> work -</p>
+                            <p><code>>PRD21445.1_Cyp2u1_Nephila_clavipes</code></p>
+                            <p>or</p>
+                            <p><code>>tr|A0A2P6K539|A0A2P6K539_NEPCL_Cyp2u1_OS=Nephila_clavipes</code></p>
+                            <p>All of the existing constraints about sequence names matching between alignment and phylogenetic tree must still be adhered to.</p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="cell border-box-sizing text_cell rendered">
+                    <div class="inner_cell">
+                        <div class="text_cell_render border-box-sizing rendered_html">
+                            <h4 id="motif-searching-nav">Tree search options: Sequence motif</h4>
+                            <p> You are able to search for ancestors with specified sequence motifs in saved joint reconstructions; note that searching is done only in <em>preferred</em> sequences, and not in optional paths (see more below). </p>
+                            <p><h5>Example search patterns:</h5>
                             <ul>
                                 <li>
                                 <code> %A%</code>: Highlight sequences with an <code> A </code> in any position, you can also use just an <code> A </code> however the <code>%</code> signs are recommended.
@@ -287,13 +363,12 @@
                             <li>
                                 <code> %AM(P|R)%</code>:  Highlight sequences with an <code> A </code> followed by an <code> M </code>, followed by either a <code> P </code> or an <code> R </code>.
                             </li>
-
                             <li>
                                 <code> %A_M%</code>:  Highlight sequences with an <code> A </code> followed by any other character (e.g. a gap, <code> K </code>, <code> P </code> etc) followed by an <code> M </code>.
                             </li>
                             </ul>
                             </p>
-                            <p><h4>Syntax guide:</h4>
+                            <p><h5>Syntax guide:</h5>
                             <ul>
                                 <li>
                                     <code> _ </code>: Wildcard character.
@@ -304,86 +379,18 @@
                                 <li>
                                     <code> *</code>: repetition of preceding amino acid 0 or more times.
                                 </li>
-
                                 <li>
                                     <code> {n}</code>: repetition of the preceding amino acid <code>n</code> times.
                                 </li>
-
                                 <li>
                                     <code> {m, n}</code>: repetition of the preceding amino acid more than <code>m</code> times and less than <code>n</code> times.
                                 </li>
                             </ul>
                             </p>
-                            <p>
-                                <em>Note 1:</em> Since the gap patterns from the original alignment are preserved, unless you specify gaps or use (<code>-*</code>) between your search elements, only those sequences without gaps between the search terms will be highlighted.
+                            <p><em>Note 1:</em> Since the gap patterns from the original alignment are preserved, unless you specify gaps or use (<code>-*</code>) between your search elements, only those sequences without gaps between the search terms will be highlighted.
                             </p>
-                            <p>
-                                <em>Note 2:</em> The searching looks for a match <em>anywhere</em> in the sequence, this means that even though two sequences are highlighted, they might not have the motif in the same position! So it is recommended you confirm your findings by downloading the joint reconstructions and checking the alignment.
+                            <p><em>Note 2:</em> The searching looks for a match <em>anywhere</em> in the sequence, this means that even though two sequences are highlighted, they might not have the motif in the same position! So it is recommended you confirm your findings by downloading the joint reconstructions and checking the alignment.
                             </p>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="cell border-box-sizing text_cell rendered">
-                    <div class="inner_cell">
-                        <div class="text_cell_render border-box-sizing rendered_html">
-                            <h3 id="taxonomy-annotation-nav">Taxonomy annotation</h3>
-                            <p> GRASP can automatically retrieve taxonomic information from the NCBI and UniProt databases and append this information to the nodes of the phylogenetic tree. Nodes in the tree are assigned the highest shared taxonomic rank of the sequences beneath them. Once nodes
-                                are annotated by clicking on the <em>Annotate taxonomy</em> button, the highest shared rank will be visible at collapsed nodes. Clicking on a node will report the highest shared taxonomic rank as well as presenting a histogram of the distribution within the
-                                taxonomic rank immediately below the highest shared rank</p>
-
-                            <p>For example, in Figure 4, the four sequences contained under the ancestral node N1 all belong the the Phylum Ascomycota, but differ in their taxonomic Class. </p>
-
-                            <div class="col-xs-8 col-xs-offset-2">
-                                <div class="col-xs-12">
-                                    <div class="img" id="taxonomic-annotation-img-div"></div>
-                                </div>
-                                <figcaption class="figure-caption">Figure 4. The summary available after annotating nodes with their taxonomic rank. </figcaption>
-                            </div>
-                            <div class="clearfix"></div>
-
-
-                            <p>In order to annotate taxonomy from the NCBI and UniProt databases, GRASP expects the sequence IDs in your FASTA file to be in either the NCBI or UniProt ID format -</p>
-
-                            <p><strong>>PRD21445.1 Cyp2u1 [Nephila clavipes]</strong></p>
-
-                            <p>or</p>
-
-                            <p><strong>>tr|A0A2P6K539|A0A2P6K539_NEPCL Cyp2u1 OS=Nephila clavipes OX=6915 GN=NCL1_51699 PE=4 SV=1</strong></p>
-
-                            <p>By default, GRASP will expect the ID to be separated by a whitespace from any additional information.</p>
-
-                            <p>However, it will accept IDs which are completely stripped of additional information - </p>
-
-                            <p><strong>>PRD21445.1</strong></p>
-
-                            <p>or</p>
-
-                            <p><strong>>tr|A0A2P6K539|A0A2P6K539_NEPCL</strong></p>
-
-                            <p>Or IDs that have all whitespace removed (in order to force annotations to appear on phylogenetic trees) <em>if</em> the additional information is separated from the ID by a pipe symbol (|) -</p>
-
-                            <p><strong>>PRD21445.1|Cyp2u1_Nephila_clavipes</strong></p>
-
-                            <p>or</p>
-
-                            <p><strong>>tr|A0A2P6K539|A0A2P6K539_NEPCL|Cyp2u1_OS=Nephila_clavipes</strong></p>
-
-
-                            <p>Note that this means that headers where additional information is not separated by either a whitespace or a pipe symbol will not be able to have their taxonomy annotated - i.e. the following will <em>not</em> work -</p>
-
-
-                            <p><strong>>PRD21445.1_Cyp2u1_Nephila_clavipes</strong></p>
-
-                            <p>or</p>
-
-                            <p><strong>>tr|A0A2P6K539|A0A2P6K539_NEPCL_Cyp2u1_OS=Nephila_clavipes</strong></p>
-
-
-                            <p>All of the existing constraints about sequence names matching between alignment and phylogenetic tree must still be adhered to.</p>
-
-
-
                         </div>
                     </div>
                 </div>
@@ -619,23 +626,21 @@
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2 id="advanced-nav">Advanced Concepts</h2>
-                            <a href="/ml">Inference in GRASP</a>
+                            <a href="/ml"><h3 id="advanced-nav">Inference in GRASP</h3></a>
                         </div>
                     </div>
                 </div>
                 <div class="cell border-box-sizing text_cell rendered">
                     <div class="inner_cell">
                         <div class="text_cell_render border-box-sizing rendered_html">
-                            <h2 id="refs-grasp">Reference to GRASP</h2>
+                            <h2 id="refs-all">References</h2>
+                            <h3 id="refs-grasp">Reference to GRASP and example data sets</h3>
                                 <p>Foley G, et al. Identifying and engineering ancient variants of enzymes using Graphical Representation of Ancestral Sequence Predictions (GRASP).
                                     <em>bioRxiv</em> 2019. <a href="https://doi.org/10.1101/2019.12.30.891457">DOI:10.1101/2019.12.30.891457</a></p>
-                            <h2 id="refs-nav">References</h2>
+                            <h3 id="refs-nav">More example data sets</h3>
                             <ol>
                                 <li>Afriat-Jurnou L, Jackson CJ and Tawfik DS. Reconstructing a Missing Link in the Evolution of a Recently Diverged Phosphotriesterase by Active-Site Loop Remodeling.
                                     <em>Biochemistry</em> 2012, 51, 6047-6055. <a href="http://dx.doi.org/10.1021/bi300694t">DOI:10.1021/bi300694t</a></li>
-                                <li>Clifton BE and Jackson CJ. Ancestral protein reconstruction yields insights into adaptive evolution of binding specificity in solute-binding proteins.
-                                    <em>Cell Chem Biol</em>, 23(2): 236-245. <a href="http://dx.doi.org/10.1016/j.chembiol.2015.12.010">DOI:10.1016/j.chembiol.2015.12.010</a></li>
                                 <li>Hudson WH, Kossmann BR, de Vera IM, Chuo SW, Weikum ER, Eick GN, Thornton JW, Ivanov IN, Kojetin DJ, and Ortlund EA.
                                     Distal substitutions drive divergent DNA specificity among paralogous transcription factors through subdivision of conformational space.
                                     <em>Proc Natl Acad Sci USA</em>, 113(2): 326-331. <a href="http://dx.doi.org/10.1073/pnas.1518960113">DOI:10.1073/pnas.1518960113</a></li>

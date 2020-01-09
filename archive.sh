@@ -1,6 +1,6 @@
-
+#!/usr/bin/env bash
 # Add any branches you don't want to archive into the protect array
-# Note - this won't delete local repositories
+# Note - this won't delete repositories that are only local and not pushed to the remote repository
 protect=(master dhad-run)
 
 

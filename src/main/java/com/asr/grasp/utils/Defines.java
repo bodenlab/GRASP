@@ -108,7 +108,7 @@ public class Defines {
     public static final int S_NAME = 0;
     public static final int S_SCORE = 1;
 
-    public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList("tawfik_06122019", "hudson_06122019", "clifton_06122019", "cyp2u1_06122019");
+    public static final List EXAMPLE_RECONSTRUCTIONS = Arrays.asList("tawfik_06122019", "hudson_06122019", "dhad_20200109", "cyp2u1_06122019");
 
 
     /**

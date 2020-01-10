@@ -90,8 +90,8 @@
                     </p>
                     <p>If you opted not to save your reconstruction, the screen will be blocked and you will need to wait until the reconstruction finishes.
                         Any errors will be displayed. If the reconstruction is successful, you will be forwarded to the results page (see below).
-                        Many functions will not be available until you login and subsequently save the reconstruction. </p>
-                    <p>Any saved reconstructions, can be re-loaded without completely re-running it. You can also share your reconstruction with other users--as long as you have their user names.</p>
+                        You can now save the reconstruction (click the floppy disk top left), which will prompt you to login (and saving starts). Many functions will not be available until you do.</p>
+                    <p>Any saved reconstruction, can be re-loaded without completely re-running it. You can also share your reconstruction with other users--as long as you have their user names.</p>
 
                 </div>
 
@@ -301,23 +301,21 @@
                             <h4 id="user-annotation-nav">Annotation: User-provided labels</h4>
                             <p>GRASP can assign tabulated series of values to both extants and ancestors by their labels (see <a href="#phylo-tree-img">(1)</a> in <a href="#phylo-tree-img">Figure 2</a>).
                                 For example, a user can use this to assign functional annotation indexed by a column header, say 'Substrate', to a certain protein, say 'N123' or 'P12345'.
-                                This would be uploaded in the form of a tab-separated value (TSV) file, e.g.</p>
+                                This would be uploaded in the form of a tab-separated values (TSV), e.g.</p>
                             <pre><code>
         ID          Name         Substrate    Activity
         N123        Fav_ancestor Luciferase   High(100)
         P12345      My-enzyme    Luciferase   Moderate(10)
         P54321      No-enzyme    None         None(0)
                             </code></pre>
-                            <p>Upload this file, and use the same popup menu to enter which column you want to search in, say 'Substrate', and the term that needs to be matched for a node to be highlighted, say 'Luciferase'.
+                            <p>Upload this content (paste or type into the input window), and use the same popup menu to enter which column you want to search in, say 'Substrate', and the term that needs to be matched for a node to be highlighted, say 'Luciferase'.
                             </p>
 
                             <h4 id="taxonomy-annotation-nav">Tree vis options: Taxonomy</h4>
                             <p> GRASP can automatically retrieve taxonomic information from the NCBI and UniProt databases by clicking on the <em>Annotate taxonomy</em> button, and append this information to the extant nodes of the phylogenetic tree.
-                                Ancestor nodes in the tree are assigned the highest shared taxonomic rank of the sequences beneath them.
-                                Once nodes are annotated, the highest shared rank will be visible at <em>collapsed</em> nodes.
-                                Clicking on an ancestor node will report the highest shared taxonomic rank; the info box will present a histogram of the distribution within the
-                                taxonomic rank immediately below the highest shared rank</p>
-                            <p>For example, in Figure 4, the four sequences contained under the ancestral node N1 all belong the the Phylum Ascomycota, but differ in their taxonomic Class. </p>
+                                (The first time this is done, information needs to be downloaded so please be patient.)
+                                Clicking on an ancestor node will display a summary and histograms for each taxonomic rank, with numbers of extants that fall under each label.</p>
+                            <p>For example, in Figure 4, we used the example data set 'Foley et al. DHAD (1612)', clicked annotate taxonomy, and clicked on ancestor 'N1087', which has about 400 extants. </p>
                             <div class="col-xs-8 col-xs-offset-2">
                                 <div class="col-xs-12">
                                     <div class="img" id="taxonomic-annotation-img-div"></div>

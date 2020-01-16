@@ -20,7 +20,7 @@ The GRASP web service incorporates a user guide that we recommend when you start
 Use any standard web browser and enter the URL http://grasp.scmb.uq.edu.au. We recommend that you sign up for an account; with an account you will be able to use a lot of features that otherwise are unavailable.
 
 ## What else?
-There is a [command-line version]() to run reconstructions on your local hardware. This version does not have all the features; for instance there is no interactive mode and currently no way of transferring your reconstruction to the web service.
+There is a [command-line version](https://bodenlab.github.io/GRASP-suite/project/graspcmd/) to run reconstructions on your local hardware. This version does not have all the features; for instance there is no interactive mode and currently no way of transferring your reconstruction to the web service.
 
 ## Resources
 

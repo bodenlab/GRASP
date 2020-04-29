@@ -9,9 +9,9 @@ public class TestPropertiesOverride {
      * the override file.
      */
 
-//    public static final String testFilePath =  "/Users/gabefoley/Dropbox/Code/bodenlab/grasp_CLEAN/asrweb/grasp/src/main/resources/data/test/";
+    public static final String testFilePath =  "/Users/gabefoley/Dropbox/Code/bodenlab/grasp_CLEAN/asrweb/grasp/src/main/resources/data/test/";
 
-    public static final String testFilePath = "/home/travis/build/bodenlab/GRASP/src/main/resources/data/test/";
+//    public static final String testFilePath = "/home/travis/build/bodenlab/GRASP/src/main/resources/data/test/";
 
 
 }

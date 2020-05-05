@@ -10,7 +10,7 @@
     <div class="content-section-a container-fluid" th:if="${error}">
         <div class="alert alert-danger alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10">
             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <p th:text="*{errorMessage}"></p></div>
+            <p style="white-space: pre-line;"  th:text="*{errorMessage}"></p></div>
         <div class="alert alert-warning alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10">
             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
             <p> For more detail about how to resolve errors please check the <a href="/guide#errors-nav">error
@@ -20,20 +20,20 @@
 
     <!--The follow alerts section is for temporary alerts that you want to be always visible.-->
 
-    <!--<div th:fragment="alerts">-->
-    <!--<div class="content-section-a container-fluid no-padding">-->
-    <!--<div class="alert alert-warning alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10">-->
-    <!--<p> System maintenence and tree visualisation update will be occurring 23/05/2019-08/06/2019, apologies-->
-    <!--for any interruptions caused.</p></div>-->
+    <div th:fragment="alerts">
+    <div class="content-section-a container-fluid no-padding">
+    <div class="alert alert-warning alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10">
+    <p> GRASP will be down for updates and scheduled maintenance for the final Tuesday of every month, between 8PM and 9PM <a href="http://www.timebie.com/std/aest.php">AEST</a>. We apologise for any inconvenience.</p></div>
     <!--<div class="alert alert-danger alert-dismissable row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10">-->
     <!--<p>On 01/07/2019 the database will be refreshed and any old reconstructions will be archived. Please-->
     <!--download any necessary data before this time.</p></div>-->
 
     <!--<div class="alert alert-success row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-sm-10 col-md-10 col-lg-10">-->
     <!--<p> Success </p></div>-->
-    <!--</div>-->
+    </div>
 
-    <!--</div>-->
+    </div>
 </div>
 </body>
 </html>
+

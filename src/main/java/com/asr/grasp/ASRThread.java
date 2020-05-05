@@ -56,9 +56,22 @@ public class ASRThread implements Runnable {
             logger.log(Level.WARNING, "Reconstruction was interrupted by user");
         } catch (Exception e) {
             String message = e.getMessage();
+
             if (message != null)
                 logger.log(Level.SEVERE, "ERR, error: " + message);
-            status = "error\t"+message;
+
+            String[] splitMessage = message.split("(\\r|\\n|\\r\\n)+");
+
+
+            StringBuilder formatted = new StringBuilder();
+
+            for (String line :splitMessage) {
+                formatted.append(line);
+                formatted.append("<br>");
+
+            }
+
+            status ="error\t" + formatted;
         }
 
     }

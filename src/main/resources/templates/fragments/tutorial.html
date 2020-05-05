@@ -8,11 +8,17 @@
             <div class="row">
                 <div class="col-xs-12">
 
-                    <h3 id="feature-log">GRASP is alive</h3>
+                    <h3 id="feature-log">Learning more about GRASP</h3>
                     <p>GRASP has a web site for code, associated tools, data sets, and support information - see <a href="https://bodenlab.github.io/GRASP-suite">GRASP-suite</a>.
-                        This site is updated to reflect changes to the service and resources around it.
-                        You can peruse and submit issues for the web service <a href="https://github.com/bodenlab/GRASP/issues">GRASP/issues</a> and the command-line tool <a href="https://github.com/bodenlab/bnkit/issues">bnkit/issues</a>.
-                        If you use GRASP in your work please cite the paper listed <a href="#refs-grasp">below</a>.
+                        This site is updated to reflect changes to the service and resources around it.</p>
+
+                        <p>
+                    You can peruse and submit issues for the web service <a href="https://github.com/bodenlab/GRASP/issues">GRASP/issues</a> and the command-line tool <a href="https://github.com/bodenlab/bnkit/issues">bnkit/issues</a>.</p>
+
+                    <p>You can see updates to this website at the <a href="/feature_log">GRASP feature log </a></p>
+
+                        <p>
+                            If you use GRASP in your work please cite the paper listed <a href="#refs-grasp">below</a>.
                     </p>
 
                     <h3 id="getting-started-nav">Getting started</h3>
@@ -76,6 +82,13 @@
                         <li><a href="https://sco.h-its.org/exelixis/web/software/raxml/index.html">RAxML</a></li>
                         <li><a href="http://mrbayes.sourceforge.net">MrBayes</a></li>
                     </ul>
+                    <h3 id="tree-alignment-match-nav">Important note about identifier names</h3>
+                    <p> GRASP requires your alignment to have the same identifier names as your phylogenetic tree. Some programs will change the identifier names of your alignment in order to remove certain characters.</p>
+                    <p> For example, using MAFFT to generate trees will change certain characters into underscores, and RAxML will require you to remove certain characters from identifier names before it can be used.</p>
+                    <p> <a href="http://www.gabefoley.com/seqscrub">SeqScrub</a>, developed by the GRASP team provides an online interface to automatically change characters in sequence or alignment files, to keep a record of these changes, and to update corresponding phylogenetic trees at the same time.</p>
+                    <p> <a href="http://www.gabefoley.com/seqscrub">SeqScrub</a> can also add taxonomic information, and check that your sequences have not been made obsolete by the NCBI or UniProt databases.</p>
+                    <p> If there are inconsistencies in your filenames, GRASP will provide an error message detailing the list of identifier names in both your alignment and phylogenetic tree that do not match.</p>
+
                     <h3 id="evol-model-nav">Evolutionary model</h3>
                     <p>GRASP can perform reconstruction based on a variety of evolutionary models that can be selected from the drop down menu 'Select other evolutionary model...'
                         (see <a href="#home-img">(5)</a> in <a href="#home-img">Figure 1</a>). By default, JTT (Jones-Taylor-Thornton) is used, which is commonly used for the analysis of amino acid sequences.</p>
@@ -173,7 +186,7 @@
                             duplicated or sequence names do not match the names of nodes in the phylogenetic tree.
                             You will be notified of names that are unique for each file. GRASP will not guess what
                             sequence that should be placed in the tree, so make sure the names agree in the two
-                            files. Some alignment programs willnamend the names, which means you may need to edit
+                            files. Some alignment programs will amend the names, which means you may need to edit
                             them manually.
                         </td>
                     </tr>

@@ -10,6 +10,8 @@ GRASP is a tool for performing ancestral sequence reconstruction.
 
 GRASP is part of the [GRASP-suite](https://bodenlab.github.io/GRASP-suite) of tools for curating, performing, and analysing ancestral sequence reconstruction.
 
+This is the repository for the web service / GUI version of GRASP.
+
 ## What does GRASP do?
 The GRASP web service was developed to facilitate the steps of performing a reconstruction of ancestor sequences (represented by partial-order graphs) and the exploration, archival and sharing of the output. The service consists of three major parts: an inference engine bnkit written in Java, a web service backend written in Java using the Spring framework and Postgres, and web client functionality written in Javascript. The latter two are contained in the open source project GRASP. GRASP depends on the open source project [bnkit](https://github.com/bodenlab/bnkit) for performing phylogenetic inference.
 
@@ -24,6 +26,12 @@ There is a [command-line version](https://bodenlab.github.io/GRASP-suite/project
 ## Resources
 
 A paper that describes GRASP and its evaluation in detail is available as a [pre-print from bioRxiv](https://www.biorxiv.org/content/10.1101/2019.12.30.891457v1).
+
+[bnkit - the code for performing inference within GRASP](https://github.com/bodenlab/bnkit)
+
+[GRASP-suite - information about ancestral sequence reconstruction and a link to download the command line version of GRASP](https://bodenlab.github.io/GRASP-suite/)
+
+[GRASP-resources - Supplementary material for the GRASP paper and Jupyter Notebooks for performing sequence curation](https://github.com/bodenlab/GRASP-resources)
 
 Tutorials and material to support GRASP are available at [GRASP-resources](https://github.com/bodenlab/GRASP-resources)
 

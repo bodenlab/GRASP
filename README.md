@@ -23,6 +23,27 @@ Use any standard web browser and enter the URL http://grasp.scmb.uq.edu.au. We r
 ## What else?
 There is a [command-line version](https://bodenlab.github.io/GRASP-suite/project/graspcmd/) to run reconstructions on your local hardware. This version does not have all the features; for instance there is no interactive mode and currently no way of transferring your reconstruction to the web service.
 
+
+## Docker
+
+GRASP is available through Docker Hub at `gabefoley/grasp`
+
+Once you have docker installed you can
+
+
+```console
+docker run -it -v {full path to where your data is located}:/data gabefoley/grasp grasp -aln /data/{name of your alignment file}.aln -nwk /data/{name of your newick file}.nwk -out /data
+```
+
+for example, for me the command looks like (I have test_6.aln and test_6.nwk sitting in a /data folder):
+
+```console
+docker run -it -v /Users/coolusername/Documents/code/grasp/data:/data grasp-docker grasp -aln /data/test_6.aln -nwk /data/test_6.nwk -out /data
+```
+
+This should give you a file, GRASP_ancestors.fasta appearing in folder: `/Users/coolusername/Documents/code/grasp/data.`
+
+
 ## Resources
 
 A paper that describes GRASP and its evaluation in detail is available as a [pre-print from bioRxiv](https://www.biorxiv.org/content/10.1101/2019.12.30.891457v1).

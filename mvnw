@@ -137,6 +137,11 @@ if [ -z "$JAVA_HOME" ]; then
   fi
 fi
 
+echo "Your JAVA_HOME is set to the following";
+echo $JAVA_HOME;
+echo "If this is not what you expect, you might need to manually set your JAVA_HOME"
+
+
 if [ -z "$JAVACMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
